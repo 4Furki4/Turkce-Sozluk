@@ -3,6 +3,7 @@ import "@/app/globals.css";
 import { TRPCReactProvider } from "@/src/trpc/react";
 import { GeistSans } from "geist/font/sans";
 import Providers from "@/src/components/customs/provider";
+import IOSPWAMeta from "@/src/components/ios-pwa-meta";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { Toaster } from "@/src/components/customs/sonner";
@@ -191,8 +192,7 @@ export default async function RootLayout({
   return (
     <html suppressHydrationWarning lang={locale} className="dark">
       <head>
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/icons/manifest-icon-192.maskable.png" />
+        <IOSPWAMeta />
       </head>
       <body className={`${GeistSans.className} relative`}>
         <TRPCReactProvider>
