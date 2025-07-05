@@ -32,7 +32,7 @@
       "social": "Sosyal"
     },
     "links": {
-      "offlineDictionary": "Çevrimdışı Sözlük",
+      "offlineDictionary": "Çevrim Dışı Sözlük",
       "wordList": "Kelime Listesi",
       "announcements": "Duyurular",
       "seeFeedback": "Geri Bildirimler",
@@ -1117,7 +1117,7 @@
     "imagesUploaded": "Resimler başarıyla yüklendi",
     "imagesUploadFailed": "Resimler yüklenemedi",
     "imageTooLarge": "Resim boyutu çok büyük (azami boyut: {size}MB).",
-    "imageTooLargeDescription": "Resim boyutunu azaltmak için çevrimiçi sıkıştırma araçlarını kullanabilirsiniz: ",
+    "imageTooLargeDescription": "Resim boyutunu azaltmak için çevrim içi sıkıştırma araçlarını kullanabilirsiniz: ",
     "removeImage": "Resmi kaldır",
     "contributionTabs": "Katkı Türü",
     "relatedWords": "İlgili Kelimeler",
@@ -1285,22 +1285,22 @@
     "description": "Ağ bağlantınız yok. Lütfen bağlantınızı kontrol edin."
   },
   "OfflineDictionary": {
-    "title": "Çevrimdışı Sözlük",
+    "title": "Çevrim dışı Sözlük",
     "description": "İnternet bağlantınız olmasa bile kelime aramak için sözlüğü cihazınıza indirin. Bu, hareket halindeyken öğrenmek için idealdir.",
     "status": {
       "checking": "Durum kontrol ediliyor",
-      "checking_desc": "Çevrimdışı sözlüğünüzün durumu kontrol ediliyor.",
+      "checking_desc": "Çevrim dışı sözlüğünüzün durumu kontrol ediliyor.",
       "up_to_date_title": "Güncel",
-      "up_to_date_desc": "Çevrimdışı sözlüğünüz güncel.",
+      "up_to_date_desc": "Çevrim dışı sözlüğünüz güncel.",
       "update_available_title": "Güncelleme Mevcut",
       "update_available_desc": "Sözlüğün yeni bir sürümü mevcut. Yerel sürüm: {local}, Sunucu sürümü: {remote}.",
       "not_downloaded_title": "İndirilmedi",
-      "not_downloaded_desc": "Çevrimdışı sözlük henüz indirilmedi.",
+      "not_downloaded_desc": "Çevrim dışı sözlük henüz indirilmedi.",
       "downloading": "Veri indiriliyor",
       "downloading_title": "İndiriliyor...",
-      "downloading_desc": "Çevrimdışı sözlüğünüz indiriliyor.",
+      "downloading_desc": "Çevrim dışı sözlüğünüz indiriliyor.",
       "deleting_title": "Siliniyor...",
-      "deleting_desc": "Çevrimdışı sözlüğünüz siliniyor.",
+      "deleting_desc": "Çevrim dışı sözlüğünüz siliniyor.",
       "deleting": "Veri siliniyor",
       "error_title": "Bir Hata Oluştu"
     },
