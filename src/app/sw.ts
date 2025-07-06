@@ -117,10 +117,10 @@ const serwist = new Serwist({
             },
         ],
     },
-    precacheOptions: {
-        navigateFallback: "/",
-        navigateFallbackDenylist: [/^\/api/],
-    }
+    // precacheOptions: {
+    //     navigateFallback: "/",
+    //     navigateFallbackDenylist: [/^\/api/],
+    // }
 });
 
 
