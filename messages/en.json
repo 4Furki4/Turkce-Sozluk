@@ -1348,6 +1348,15 @@
       "metadata_fetch_failed": "Could not fetch version information from the server.",
       "no_metadata": "Could not start download. Version information is missing.",
       "r2_url_missing": "Configuration error: The data source URL is not set."
+    },
+    "download_info": {
+      "title": "Download Information",
+      "files_count": "Files to download",
+      "files": "files",
+      "estimated_size": "Estimated size",
+      "calculating": "Calculating...",
+      "unknown": "Unknown",
+      "large_download_warning": "This is a large download. Make sure you have a stable internet connection and sufficient storage space."
     }
   }
 }

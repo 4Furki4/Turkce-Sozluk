@@ -225,7 +225,7 @@ export default async function RootLayout({
                       ContributeIntl={t("Contribute")}
                       FeedbackIntl={t("Feedback")}
                     />
-                    <main className="relative w-full flex-grow flex">
+                    <main className="relative w-full flex-grow flex min-h-[calc(100vh-var(--navbar-height))]">
                       {/* ✨ Moved BackgroundGradient here */}
                       <BackgroundGradient />
                       {children}

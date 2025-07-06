@@ -1314,6 +1314,15 @@
       "metadata_fetch_failed": "Sunucudan sürüm bilgisi alınamadı.",
       "no_metadata": "İndirme başlatılamadı. Sürüm bilgisi eksik.",
       "r2_url_missing": "Yapılandırma hatası: Veri kaynağı URL'si ayarlanmamış."
+    },
+    "download_info": {
+      "title": "İndirme Bilgileri",
+      "files_count": "İndirilecek dosya sayısı",
+      "files": "dosya",
+      "estimated_size": "Tahmini boyut",
+      "calculating": "Hesaplanıyor...",
+      "unknown": "Bilinmiyor",
+      "large_download_warning": "Bu büyük bir indirme işlemi. Kararlı bir internet bağlantınız ve yeterli depolama alanınız olduğundan emin olun."
     }
   }
 }

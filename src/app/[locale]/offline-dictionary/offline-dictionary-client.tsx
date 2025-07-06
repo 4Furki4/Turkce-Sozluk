@@ -27,11 +27,33 @@ type Status =
 type Metadata = {
     version: number;
     files: string[];
+    totalSize?: number;
+    fileSizes?: { [filename: string]: number };
 };
 
 // The base URL for your dictionary data is now read from environment variables.
 const DATA_BASE_URL = process.env.NEXT_PUBLIC_R2_CUSTOM_URL;
 const FOLDER_NAME = "turkce-sozluk/offline-data";
+
+// Utility function to format file sizes
+const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+// Function to fetch file size from HEAD request
+const getFileSize = async (url: string): Promise<number> => {
+    try {
+        const response = await fetch(url, { method: 'HEAD' });
+        const contentLength = response.headers.get('content-length');
+        return contentLength ? parseInt(contentLength, 10) : 0;
+    } catch {
+        return 0;
+    }
+};
 
 export default function OfflineDictionaryClient() {
     const t = useTranslations("OfflineDictionary");
@@ -41,6 +63,29 @@ export default function OfflineDictionaryClient() {
     const [metadata, setMetadata] = useState<Metadata | null>(null);
     const [progress, setProgress] = useState(0);
     const [error, setError] = useState<string | null>(null);
+    const [totalDownloadSize, setTotalDownloadSize] = useState<number | null>(null);
+    const [isCalculatingSize, setIsCalculatingSize] = useState(false);
+
+    const calculateDownloadSize = useCallback(async (files: string[]) => {
+        if (!DATA_BASE_URL) return;
+
+        setIsCalculatingSize(true);
+        try {
+            let totalSize = 0;
+            const sizePromises = files.map(async (file) => {
+                const fileUrl = `${DATA_BASE_URL}/${FOLDER_NAME}/${file}`;
+                return await getFileSize(fileUrl);
+            });
+
+            const sizes = await Promise.all(sizePromises);
+            totalSize = sizes.reduce((sum, size) => sum + size, 0);
+            setTotalDownloadSize(totalSize);
+        } catch (error) {
+            console.error('Error calculating download size:', error);
+        } finally {
+            setIsCalculatingSize(false);
+        }
+    }, []);
 
     const checkStatus = useCallback(async () => {
         setStatus("checking");
@@ -64,6 +109,14 @@ export default function OfflineDictionaryClient() {
             const localV = await getLocalVersion();
             setLocalVersionState(localV);
 
+            // Calculate total download size if metadata includes file sizes
+            if (remoteMeta.totalSize) {
+                setTotalDownloadSize(remoteMeta.totalSize);
+            } else {
+                // Calculate file sizes if not included in metadata
+                await calculateDownloadSize(remoteMeta.files);
+            }
+
             if (!localV) {
                 setStatus("not-downloaded");
             } else if (localV === remoteMeta.version) {
@@ -76,7 +129,7 @@ export default function OfflineDictionaryClient() {
             setError(err instanceof Error ? err.message : String(err));
             setStatus("error");
         }
-    }, [t]);
+    }, [t, calculateDownloadSize]);
 
     useEffect(() => {
         checkStatus();
@@ -177,6 +230,44 @@ export default function OfflineDictionaryClient() {
                 <div>
                     {renderStatus()}
                 </div>
+
+                {/* File Size Information */}
+                {(status === "not-downloaded" || status === "update-available") && (
+                    <div className="p-4 bg-background-50 rounded-lg border ">
+                        <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                            <Download className="h-4 w-4" />
+                            {t("download_info.title")}
+                        </h3>
+                        <div className="space-y-2 text-sm">
+                            {metadata && (
+                                <div className="flex justify-between">
+                                    <span>{t("download_info.files_count")}:</span>
+                                    <span className="font-medium">{metadata.files.length} {t("download_info.files")}</span>
+                                </div>
+                            )}
+                            <div className="flex justify-between">
+                                <span>{t("download_info.estimated_size")}:</span>
+                                <span className="font-medium">
+                                    {isCalculatingSize ? (
+                                        <span className="flex items-center gap-1">
+                                            <RefreshCw className="h-3 w-3 animate-spin" />
+                                            {t("download_info.calculating")}
+                                        </span>
+                                    ) : totalDownloadSize ? (
+                                        formatFileSize(totalDownloadSize)
+                                    ) : (
+                                        t("download_info.unknown")
+                                    )}
+                                </span>
+                            </div>
+                            {totalDownloadSize && totalDownloadSize > 50 * 1024 * 1024 && (
+                                <div className="mt-2 p-2 bg-warning-50 border border-warning-200 text-warning-800 text-xs">
+                                    ⚠️ {t("download_info.large_download_warning")}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </CardBody>
             <CardFooter className="flex flex-col sm:grid-cols-2  justify-between items-center gap-2">
                 {(status === "not-downloaded" || status === "update-available") && (
