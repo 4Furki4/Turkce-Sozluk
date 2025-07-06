@@ -4,7 +4,7 @@ import { Divider } from "@heroui/divider";
 import { Chip } from "@heroui/chip";
 import { WordSearchResult } from "@/types";
 import SaveWord from "./save-word";
-import { Button, useDisclosure, Popover, PopoverTrigger, PopoverContent, Tabs, Tab, Badge } from "@heroui/react";
+import { Button, useDisclosure, Popover, PopoverTrigger, PopoverContent, Tabs, Tab } from "@heroui/react";
 import { Link as NextUILink } from "@heroui/react"
 import { Session } from "next-auth";
 import { signIn } from "next-auth/react";
@@ -19,6 +19,7 @@ import clsx from "clsx";
 import WordCardRequestModal from "./modals/word-card-request-modal";
 import { useSnapshot } from "valtio";
 import { preferencesState } from "@/src/store/preferences";
+import CustomCard from "./heroui/custom-card";
 
 type WordCardProps = {
   word_data: WordSearchResult["word_data"] & { source?: "online" | "offline" };
@@ -53,16 +54,11 @@ export default function WordCard({ word_data, locale, session }: WordCardProps) 
     });
   };
   return (
-    <Card
+    <CustomCard
       ref={cardRef}
       as={"article"}
-      aria-label="word card"
+      aria-label={t("Words")}
       role="article"
-      isBlurred={isBlurEnabled}
-      className="border border-border rounded-sm p-2 w-full"
-      classNames={{
-        base: ["bg-background/10 p-2"]
-      }}
     >
       <CardHeader className="w-full flex flex-col items-start">
         <div className="flex w-full items-center gap-4">
@@ -262,7 +258,9 @@ export default function WordCard({ word_data, locale, session }: WordCardProps) 
                 <div className="p-2">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     {word_data.relatedWords.map((related_word) => (
-                      <Card isBlurred={isBlurEnabled} className="border border-border" key={related_word.related_word_id}>
+                      <Card key={related_word.related_word_id} classNames={{
+                        base: "bg-background/10",
+                      }}>
                         <CardBody className="flex flex-row items-center justify-between">
                           <NextUILink
                             underline="hover"
@@ -293,7 +291,9 @@ export default function WordCard({ word_data, locale, session }: WordCardProps) 
                 <div className="p-2">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     {word_data.relatedPhrases.map((related_phrase) => (
-                      <Card key={related_phrase.related_phrase_id} isBlurred={isBlurEnabled} className="border border-border">
+                      <Card classNames={{
+                        base: "bg-background/10",
+                      }} key={related_phrase.related_phrase_id}>
                         <CardBody>
                           <NextUILink
                             underline="hover"
@@ -351,6 +351,6 @@ export default function WordCard({ word_data, locale, session }: WordCardProps) 
       <div data-screenshot-watermark className="w-full text-center text-xs text-muted-foreground pt-2">
         turkce-sozluk.com
       </div>
-    </Card>
+    </CustomCard>
   );
 }

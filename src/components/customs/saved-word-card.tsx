@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
-import { Button, Modal, ModalContent, useDisclosure } from "@heroui/react";
+import { Button, CardBody, CardFooter, CardHeader, ModalContent, useDisclosure } from "@heroui/react";
 import Loading from "@/app/[locale]/(search)/search/_loading";
 import { useTranslations } from "next-intl";
 import { api } from "@/src/trpc/react";
@@ -12,8 +11,8 @@ import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
 import { Link as NextIntlLink } from "@/src/i18n/routing";
 import { Link } from "@heroui/react";
-import { useSnapshot } from "valtio";
-import { preferencesState } from "@/src/store/preferences";
+import CustomCard from "./heroui/custom-card";
+import { CustomModal } from "./heroui/custom-modal";
 interface SavedWordCardProps {
   wordData: {
     word_id: number;
@@ -35,13 +34,10 @@ export default function SavedWordCard({ wordData, onUnsave, session, locale }: S
     { name: wordData.word_name, skipLogging: true },
     { enabled: isOpen }
   );
-  const { isBlurEnabled } = useSnapshot(preferencesState);
   const fullData = details?.[0];
 
   return (
-    <Card className="border border-border rounded-sm p-2 w-full" classNames={{
-      base: "bg-background/10",
-    }} isBlurred={isBlurEnabled}>
+    <CustomCard>
       <CardHeader className="flex items-center gap-2">
         <h3 className="text-lg font-medium">
           <Link color="primary" underline="hover" as={NextIntlLink} href={`/search/${wordData.word_name}`}>
@@ -72,9 +68,7 @@ export default function SavedWordCard({ wordData, onUnsave, session, locale }: S
         </Button>
       </CardFooter>
 
-      <Modal classNames={{
-        base: "bg-background/10",
-      }} isOpen={isOpen} onOpenChange={onOpenChange} size="3xl" backdrop="opaque" scrollBehavior="inside">
+      <CustomModal isOpen={isOpen} onOpenChange={onOpenChange} size="3xl" backdrop="opaque" scrollBehavior="inside">
         <ModalContent>
           {loadingDetails ? (
             <Loading />
@@ -82,7 +76,7 @@ export default function SavedWordCard({ wordData, onUnsave, session, locale }: S
             <WordCard word_data={fullData.word_data} session={session} locale={locale} />
           ) : null}
         </ModalContent>
-      </Modal>
-    </Card>
+      </CustomModal>
+    </CustomCard>
   );
 }
