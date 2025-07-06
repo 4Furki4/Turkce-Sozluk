@@ -130,18 +130,18 @@ export default function Navbar({
                 "dark:data-[hover=true]:bg-primary/30",
               ]
             }}>
-            <DropdownItem key="contribute-word" startContent={<HeartHandshake aria-label={ContributeWordIntl} className="w-4 h-4" />}>
-              <NextIntlLink href="/contribute-word" className="flex items-center gap-2">
+            <DropdownItem key="contribute-word" startContent={<HeartHandshake aria-label={ContributeWordIntl} className="w-4 h-4" />} className="py-0 pr-0">
+              <NextIntlLink href="/contribute-word" className="flex items-center gap-2 py-1.5">
                 {ContributeWordIntl}
               </NextIntlLink>
             </DropdownItem>
-            <DropdownItem key="pronunciation-voting" startContent={<Mic aria-label={PronunciationsIntl} className="w-4 h-4" />}>
-              <NextIntlLink href="/pronunciation-voting" className="flex items-center gap-2">
+            <DropdownItem key="pronunciation-voting" startContent={<Mic aria-label={PronunciationsIntl} className="w-4 h-4" />} className="py-0 pr-0">
+              <NextIntlLink href="/pronunciation-voting" className="flex items-center gap-2 py-1.5">
                 {PronunciationsIntl}
               </NextIntlLink>
             </DropdownItem>
-            <DropdownItem key={'feedback'} startContent={<HandHeart aria-label={FeedbackIntl} className="w-4 h-4" />}>
-              <NextIntlLink href="/feedback" className="flex items-center gap-2">
+            <DropdownItem key={'feedback'} startContent={<HandHeart aria-label={FeedbackIntl} className="w-4 h-4" />} className="py-0 pr-0">
+              <NextIntlLink href="/feedback" className="flex items-center gap-2 py-1.5">
                 {FeedbackIntl}
               </NextIntlLink>
             </DropdownItem>
@@ -268,25 +268,25 @@ export default function Navbar({
                 }}
               >
                 <DropdownSection showDivider>
-                  <DropdownItem key={"profile"} className="rounded-sm" startContent={<UserIcon className="h-6 w-6" />}>
-                    <Link color="foreground" as={NextIntlLink} className="w-full" href={`/profile/${session.user.id}`}>
+                  <DropdownItem key={"profile"} className="rounded-sm py-0 pr-0" startContent={<UserIcon className="h-6 w-6" />}>
+                    <Link color="foreground" as={NextIntlLink} className="w-full py-1.5" href={`/profile/${session.user.id}`}>
                       {ProfileIntl}
                     </Link>
                   </DropdownItem>
                 </DropdownSection>
                 <DropdownSection showDivider>
-                  <DropdownItem key={"saved-words"} startContent={<StarIcon className="h-6 w-6" />} className="text-center rounded-sm">
-                    <Link color="foreground" as={NextIntlLink} className="w-full min-h-full" href="/saved-words">
+                  <DropdownItem key={"saved-words"} startContent={<StarIcon className="h-6 w-6" />} className="text-center rounded-sm py-0 pr-0">
+                    <Link color="foreground" as={NextIntlLink} className="w-full py-1.5" href="/saved-words">
                       {SavedWordsIntl}
                     </Link>
                   </DropdownItem>
-                  <DropdownItem key={"requests"} startContent={<GitPullRequestArrow className="h-6 w-6" />} className="text-center rounded-sm">
-                    <Link color="foreground" as={NextIntlLink} className="w-full" href="/my-requests">
+                  <DropdownItem key={"requests"} startContent={<GitPullRequestArrow className="h-6 w-6" />} className="text-center rounded-sm py-0 pr-0">
+                    <Link color="foreground" as={NextIntlLink} className="w-full py-1.5" href="/my-requests">
                       {MyRequestsIntl}
                     </Link>
                   </DropdownItem>
-                  <DropdownItem startContent={<HistoryIcon className="h-6 w-6" />} key={"search-history"} className="text-center rounded-sm">
-                    <Link color="foreground" as={NextIntlLink} className="w-full" href="/search-history">
+                  <DropdownItem startContent={<HistoryIcon className="h-6 w-6" />} key={"search-history"} className="text-center rounded-sm py-0 pr-0">
+                    <Link color="foreground" as={NextIntlLink} className="w-full py-1.5" href="/search-history">
                       {SearchHistoryIntl}
                     </Link>
                   </DropdownItem>
