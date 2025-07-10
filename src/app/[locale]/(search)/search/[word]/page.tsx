@@ -146,7 +146,7 @@ export default async function SearchResultPage(
 
     // 1. Fetch data on the server for SEO and initial load.
     try {
-        void api.word.getWord.prefetch({ name: decodedWordName, });
+        void api.word.getWord.prefetch({ name: decodedWordName, skipLogging: true });
     } catch (error) {
         console.error("Failed to prefetch word data:", error);
         return <WordResultClient session={session} wordName={decodedWordName} />
