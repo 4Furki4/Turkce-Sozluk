@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Controller, Control, FieldErrors } from "react-hook-form";
-import { Button, SelectItem, Select, Tooltip } from "@heroui/react";
+import { Button, SelectItem, Tooltip } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { Plus, Trash2, FileClock } from "lucide-react";
 

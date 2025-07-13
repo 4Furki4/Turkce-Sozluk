@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import {
-  Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
@@ -14,7 +13,7 @@ import { api } from "@/src/trpc/react";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { toast } from "sonner";
 import { Link as NextIntlLink } from "@/src/i18n/routing";
-import { Plus, ExternalLink, HeartHandshake } from "lucide-react";
+import { ExternalLink, HeartHandshake } from "lucide-react";
 import { CustomModal } from "../heroui/custom-modal";
 
 interface SimpleWordRequestModalProps {

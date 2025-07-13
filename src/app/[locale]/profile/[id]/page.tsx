@@ -1,5 +1,5 @@
 import { auth } from '@/src/server/auth/auth';
-import { api, HydrateClient } from '@/src/trpc/server';
+import { api } from '@/src/trpc/server';
 import React from 'react';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import ProfilePageWrapper from '@/src/_pages/profile/profile-page-wrapper';

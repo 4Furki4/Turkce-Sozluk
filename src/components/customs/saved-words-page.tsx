@@ -6,7 +6,6 @@ import SavedWordCard from "./saved-word-card";
 import SavedWordCardSkeleton from "./saved-word-card-skeleton";
 import { Session } from "next-auth";
 import { api } from "@/src/trpc/react";
-import { Pagination } from "@heroui/pagination";
 import { CustomPagination } from "./heroui/custom-pagination";
 
 interface SavedWordsPageProps {

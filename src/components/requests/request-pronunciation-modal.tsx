@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState, useEffect } from "react";
+import { FC } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/src/trpc/react";
 import {

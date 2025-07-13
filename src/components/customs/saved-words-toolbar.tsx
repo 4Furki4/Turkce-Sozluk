@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
 import { ArrowDownAZ, ArrowDownZA } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { preferencesState } from "@/src/store/preferences";

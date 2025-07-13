@@ -10,7 +10,6 @@ import { PronunciationCard } from "@/src/components/requests/pronunciation-card"
 import { NewPronunciationRequestModal } from "@/src/components/requests/new-pronunciation-request-modal";
 import { Mic } from "lucide-react";
 import { useDisclosure } from "@heroui/react";
-import { Link } from "@/src/i18n/routing";
 import { Pagination } from "@/src/components/shared/pagination";
 import { PronunciationCardSkeleton } from "@/src/components/requests/pronunciation-card-skeleton";
 import { keepPreviousData } from "@tanstack/react-query";
