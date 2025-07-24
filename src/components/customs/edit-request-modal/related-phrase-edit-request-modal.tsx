@@ -154,7 +154,7 @@ const RelatedPhraseEditRequestModal: React.FC<RelatedPhraseEditRequestModalProps
                 {t_general('Requests.buttons.cancel')}
               </Button>
               <Button color="primary" type="submit" isLoading={isPending}>
-                {t_general('Requests.SubmitRequest')}
+                {t_general('Requests.submitRequest')}
               </Button>
             </ModalFooter>
           </form>

@@ -259,7 +259,7 @@ export default function WordEditRequest({
 
                 <div className="flex justify-end space-x-2">
                   <Button color="secondary" variant="flat" type="submit" isLoading={isPending}>
-                    {t("Requests.SubmitRequest")}
+                    {t("Requests.submitRequest")}
                   </Button>
                 </div>
               </form>

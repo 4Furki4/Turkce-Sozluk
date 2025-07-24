@@ -55,6 +55,7 @@ const RelatedWordCreateRequestModal: React.FC<RelatedWordCreateRequestModalProps
 }) => {
   const { isBlurEnabled } = useSnapshot(preferencesState);
   const t = useTranslations('Requests');
+  const tErrors = useTranslations("Errors")
   const tActions = useTranslations('Actions');
   const tRelationTypes = useTranslations('RelationTypes');
   const tForm = useTranslations('Form'); // For common form labels/errors
@@ -96,7 +97,7 @@ const RelatedWordCreateRequestModal: React.FC<RelatedWordCreateRequestModalProps
 
   const createRequestMutation = api.request.requestCreateRelatedWord.useMutation({
     onSuccess: () => {
-      toast.success(t('RequestSubmittedSuccessfully'));
+      toast.success(t('EditRequestSubmittedSuccessfully'));
       reset();
       setInputValue('');
       onClose();
@@ -108,7 +109,7 @@ const RelatedWordCreateRequestModal: React.FC<RelatedWordCreateRequestModalProps
 
   const onSubmit = async (data: CreateRelatedWordFormValues) => {
     if (!executeRecaptcha) {
-      toast.error(t('Errors.captchaError'));
+      toast.error(tErrors('captchaError'));
       return;
     }
     try {
@@ -120,7 +121,7 @@ const RelatedWordCreateRequestModal: React.FC<RelatedWordCreateRequestModalProps
       });
     } catch (error) {
       console.error('reCAPTCHA execution failed:', error);
-      toast.error(t('Errors.captchaError'));
+      toast.error(tErrors('captchaError'));
     }
   };
 
