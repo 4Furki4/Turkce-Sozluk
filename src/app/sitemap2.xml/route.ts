@@ -23,11 +23,7 @@ export async function GET() {
     const rows = await db.select({ name: words.name }).from(words).offset(25000).limit(25000).execute();
     for (const { name } of rows) {
         const encoded = encodeURIComponent(name);
-        // Turkish word page (default)
-        xml += `<url><loc>${baseUrl}/arama/${encoded}</loc><changefreq>daily</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="tr" href="${baseUrl}/arama/${encoded}" /><xhtml:link rel="alternate" hreflang="en" href="${baseUrl}/en/search/${encoded}" /><xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}/arama/${encoded}" /></url>\n`;
-
-        // English word page
-        xml += `<url><loc>${baseUrl}/en/search/${encoded}</loc><changefreq>daily</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="tr" href="${baseUrl}/arama/${encoded}" /><xhtml:link rel="alternate" hreflang="en" href="${baseUrl}/en/search/${encoded}" /><xhtml:link rel="alternate" hreflang="x-default" href="${baseUrl}/arama/${encoded}" /></url>\n`;
+        xml += `<url><loc>${baseUrl}/arama/${encoded}</loc><changefreq>daily</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="en" href="${baseUrl}/en/search/${encoded}" /></url>\n`;
     }
 
     xml += '</urlset>';
