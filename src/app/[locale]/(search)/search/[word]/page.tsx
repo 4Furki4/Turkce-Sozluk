@@ -22,6 +22,9 @@ export async function generateMetadata({
     }
 
 
+    // --- Define the canonical base URL ---
+    const siteUrl = 'https://turkce-sozluk.com';
+
     const { word_data } = result
     const relatedWords = word_data?.relatedWords?.map((word) => word.related_word_name) || [];
     const relatedPhrases = word_data?.relatedPhrases?.map((phrase) => phrase.related_phrase) || [];
@@ -44,6 +47,9 @@ export async function generateMetadata({
         : ['türkçe sözlük', `${word_data.word_name} anlamı`, `${word_data.word_name} ne demek`, 'kelime anlamları'];
 
     const keywords = [word_data.word_name, ...baseKeywords, ...relatedWords, ...relatedPhrases];
+    // --- THE FIX: Generate correct, absolute URLs for all tags ---
+    const turkishPath = `/tr/arama/${wordName}`;
+    const englishPath = `/en/search/${wordName}`;
     return {
         title,
         description,
@@ -59,10 +65,10 @@ export async function generateMetadata({
             // Twitter will also use the opengraph-image by default
         },
         alternates: {
-            canonical: `/arama/${wordName}`,
+            canonical: locale === 'tr' ? `${siteUrl}${turkishPath}` : `${siteUrl}${englishPath}`,
             languages: {
-                'en': `/en/search/${wordName}`,
-                'tr': `/tr/arama/${wordName}`,
+                'en-US': `${siteUrl}${englishPath}`,
+                'tr-TR': `${siteUrl}${turkishPath}`,
             },
         },
     };
