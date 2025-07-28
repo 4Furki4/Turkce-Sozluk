@@ -34,7 +34,6 @@ export async function generateMetadata({
         };
     }
 
-
     const { word_data } = result
     const relatedWords = word_data?.relatedWords?.map((word) => word.related_word_name) || [];
     const relatedPhrases = word_data?.relatedPhrases?.map((phrase) => phrase.related_phrase) || [];
