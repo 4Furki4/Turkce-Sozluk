@@ -871,6 +871,7 @@
   "DbFieldLabels": {
     "reason": "Gerekçe",
     "name": "Ad",
+    "wordName": "Kelime Adı",
     "phonetic": "Fonetik",
     "prefix": "Önek",
     "root": "Kök",
@@ -889,7 +890,8 @@
     "imageUrl": "Resim URL",
     "relatedWord": "İlgili Kelime",
     "relationType": "İlişki Türü",
-    "relatedPhrase": "İlgili Deyim"
+    "relatedPhrase": "İlgili Deyim",
+    "phrase": "Deyim"
   },
   "RequestActions": {
     "create": "Oluştur",
@@ -1170,11 +1172,13 @@
     },
     "RelatedWord": {
       "deletedRelatedWord": "Silinen İlgili Kelime ID",
-      "title": "Yeni İlgili Kelime"
+      "title": "Yeni İlgili Kelime",
+      "newRelatedWord": "Yeni İlgili Kelime"
     },
     "RelatedPhrase": {
       "deletedRelatedPhrase": "Silinen İlgili Deyim ID",
-      "title": "Yeni İlgili Deyim"
+      "title": "Yeni İlgili Deyim",
+      "newRelatedPhrase": "Yeni İlgili Deyim"
     },
     "Author": {
       "title": "Yeni Yazar",

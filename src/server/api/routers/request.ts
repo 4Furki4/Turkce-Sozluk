@@ -443,7 +443,7 @@ export const requestRouter = createTRPCRouter({
                 action: "create",
                 newData: {
                     relatedWordId: relatedWordId,
-                    newRelationType: relationType
+                    relationType: relationType
                 },
                 status: "pending",
                 reason: reason,
@@ -534,7 +534,7 @@ export const requestRouter = createTRPCRouter({
                 });
             }
 
-            const dataToStore: { phraseId: number; description?: string } = {
+            const dataToStore: { phraseId: number; description?: string; } = {
                 phraseId: phraseId,
             };
             if (description) {

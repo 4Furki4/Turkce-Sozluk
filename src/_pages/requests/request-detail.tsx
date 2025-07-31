@@ -258,6 +258,7 @@ export default function RequestDetail({ requestId }: RequestDetailProps) {
             action={request.action}
             newData={newData}
             oldData={entityData}
+            entityId={request.entityId ?? undefined}
           />
         </CardBody>
 
