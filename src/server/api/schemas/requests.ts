@@ -87,9 +87,21 @@ export const DeleteRelatedWordRequestSchema = z.object({
   relatedWordId: z.number(),
 });
 
+// Create Related Word Request
+export const CreateRelatedWordRequestSchema = z.object({
+  relatedWordId: z.number(),
+  relationType: z.string(),
+});
+
 // Delete Related Phrase Request
 export const DeleteRelatedPhraseRequestSchema = z.object({
   relatedPhraseId: z.number(),
+});
+
+// Create Related Phrase Request
+export const CreateRelatedPhraseRequestSchema = z.object({
+  phraseId: z.number(),
+  description: z.string().optional(),
 });
 
 // Create Author Request

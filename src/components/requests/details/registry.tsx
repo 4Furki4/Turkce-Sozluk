@@ -10,7 +10,9 @@ import { UpdateMeaning } from "./meaning/update";
 import { DeleteMeaning } from "./meaning/delete";
 import { UpdateRelatedWord } from "./related-word/update";
 import { DeleteRelatedWord } from "./related-word/delete";
+import { CreateRelatedWord } from "./related-word/create";
 import { DeleteRelatedPhrase } from "./related-phrase/delete";
+import { CreateRelatedPhrase } from "./related-phrase/create";
 import { CreateMeaningAttribute } from "./meaning-attribute/create";
 import { CreateAuthor } from "./author/create";
 import CreatePronunciation from "./pronunciation/create";
@@ -18,6 +20,7 @@ import CreatePronunciation from "./pronunciation/create";
 export type RequestDetailComponentProps = {
   newData?: any;
   oldData?: any;
+  entityId?: number;
 };
 
 type ComponentRegistry = {
@@ -40,10 +43,12 @@ const registry: ComponentRegistry = {
     delete: DeleteMeaning,
   },
   related_words: {
+    create: CreateRelatedWord,
     update: UpdateRelatedWord,
     delete: DeleteRelatedWord,
   },
   related_phrases: {
+    create: CreateRelatedPhrase,
     delete: DeleteRelatedPhrase,
   },
   meaning_attributes: {

@@ -910,6 +910,7 @@
   "DbFieldLabels": {
     "reason": "Reason",
     "name": "Name",
+    "wordName": "Word Name",
     "phonetic": "Phonetic",
     "prefix": "Prefix",
     "root": "Root",
@@ -927,7 +928,8 @@
     "imageUrl": "Image URL",
     "relatedWord": "Related Word",
     "relationType": "Relation Type",
-    "relatedPhrase": "Related Phrase"
+    "relatedPhrase": "Related Phrase",
+    "phrase": "Phrase"
   },
   "RequestActions": {
     "create": "Create",
@@ -1204,11 +1206,13 @@
     },
     "RelatedWord": {
       "deletedRelatedWord": "Deleted Related Word ID",
-      "title": "New Related Word"
+      "title": "New Related Word",
+      "newRelatedWord": "New Related Word"
     },
     "RelatedPhrase": {
       "deletedRelatedPhrase": "Deleted Related Phrase ID",
-      "title": "New Related Phrase"
+      "title": "New Related Phrase",
+      "newRelatedPhrase": "New Related Phrase"
     },
     "Author": {
       "title": "New Author",
