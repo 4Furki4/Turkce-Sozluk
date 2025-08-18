@@ -139,7 +139,10 @@ export const requestRouter = createTRPCRouter({
                 newData: requests.newData,
                 requestDate: requests.requestDate,
                 status: requests.status,
-                reason: requests.reason
+                reason: requests.reason,
+                resolvedAt: requests.resolvedAt,
+                resolvedBy: requests.resolvedBy,
+                moderationReason: requests.moderationReason,
             })
                 .from(requests)
                 .where(whereClause)
@@ -1122,8 +1125,9 @@ export const requestRouter = createTRPCRouter({
         .input(z.object({
             requestId: z.number()
         }))
-        .mutation(async ({ input, ctx: { db } }) => {
+        .mutation(async ({ input, ctx }) => {
             const { requestId } = input;
+            const { db, session } = ctx;
 
             return await db.transaction(async (tx) => {
                 // Get the request
@@ -1159,7 +1163,12 @@ export const requestRouter = createTRPCRouter({
 
                 // Update the request status to approved
                 await tx.update(requests)
-                    .set({ status: "approved" })
+                    .set({
+                        status: "approved",
+                        resolvedAt: new Date(),
+                        resolvedBy: session?.user.id ?? null,
+                        moderationReason: null,
+                    })
                     .where(eq(requests.id, requestId));
 
                 return { success: true };
@@ -1172,14 +1181,20 @@ export const requestRouter = createTRPCRouter({
             requestId: z.number(),
             reason: z.string().optional()
         }))
-        .mutation(async ({ input, ctx: { db } }) => {
+        .mutation(async ({ input, ctx }) => {
             const { requestId, reason } = input;
+            const { db, session } = ctx;
 
-            // Update the request status to rejected
+            // Update the request status to rejected with resolution metadata
             await db.update(requests)
                 .set({
                     status: "rejected",
-                    reason: reason ? `Rejected: ${reason}` : undefined
+                    // Keep legacy reason behavior for backward compatibility in UIs
+                    reason: reason ? `Rejected: ${reason}` : undefined,
+                    // New resolution metadata
+                    resolvedAt: new Date(),
+                    resolvedBy: session?.user.id ?? null,
+                    moderationReason: reason ?? null,
                 })
                 .where(eq(requests.id, requestId));
 
