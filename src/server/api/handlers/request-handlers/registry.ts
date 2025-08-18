@@ -4,8 +4,11 @@ import { RequestHandler } from "./types";
 import { CreateWordAttributeHandler, UpdateWordAttributeHandler } from "./word-attribute-handlers";
 import { CreateWordHandler, UpdateWordHandler } from "./word-handler";
 import { UpdateMeaningHandler, DeleteMeaningHandler } from "./meaning-handler";
-import { UpdateRelatedWordHandler, DeleteRelatedWordHandler } from "./related-words-handler";
-import { DeleteRelatedPhraseHandler } from "./related-phrase-handler";
+import { CreateRelatedWordHandler, UpdateRelatedWordHandler, DeleteRelatedWordHandler } from "./related-words-handler";
+import { CreateRelatedPhraseHandler, UpdateRelatedPhraseHandler, DeleteRelatedPhraseHandler } from "./related-phrase-handler";
+import { CreateMeaningAttributeHandler } from "./meaning-attribute-handlers";
+import { CreateAuthorHandler } from "./author-handlers";
+import { CreatePronunciationHandler } from "./pronunciation-handler";
 // Import other handlers
 
 type HandlerRegistry = {
@@ -28,11 +31,23 @@ const registry: HandlerRegistry = {
         delete: new DeleteMeaningHandler(),
     },
     related_words: {
+        create: new CreateRelatedWordHandler(),
         update: new UpdateRelatedWordHandler(),
         delete: new DeleteRelatedWordHandler(),
     },
     related_phrases: {
+        create: new CreateRelatedPhraseHandler(),
+        update: new UpdateRelatedPhraseHandler(),
         delete: new DeleteRelatedPhraseHandler(),
+    },
+    meaning_attributes: {
+        create: new CreateMeaningAttributeHandler(),
+    },
+    authors: {
+        create: new CreateAuthorHandler(),
+    },
+    pronunciations: {
+        create: new CreatePronunciationHandler(),
     },
     // Add other entity types and actions...
 };
