@@ -47,11 +47,19 @@ export const requests = pgTable("requests", {
   requestDate: timestamp("request_date").defaultNow().notNull(),
   status: statusEnum("status").default("pending").notNull(),
   reason: text("reason"),
+  // Resolution metadata (populated when approved/rejected)
+  resolvedAt: timestamp("resolved_at"),
+  resolvedBy: text("resolved_by").references(() => users.id),
+  moderationReason: text("moderation_reason"),
 });
 
 export const requestsRelations = relations(requests, ({ one, many }) => ({
   user: one(users, {
     fields: [requests.userId],
+    references: [users.id],
+  }),
+  resolver: one(users, {
+    fields: [requests.resolvedBy],
     references: [users.id],
   }),
   word: one(words, {
@@ -96,6 +104,9 @@ export type SelectRequest = {
   requestDate: Date;
   status: Status;
   reason: string | null;
+  resolvedAt: Date | null;
+  resolvedBy: string | null;
+  moderationReason: string | null;
 };
 
 export type InsertRequest = {
@@ -106,4 +117,7 @@ export type InsertRequest = {
   newData: any;
   requestDate: Date;
   status: Status;
+  resolvedAt?: Date | null;
+  resolvedBy?: string | null;
+  moderationReason?: string | null;
 };

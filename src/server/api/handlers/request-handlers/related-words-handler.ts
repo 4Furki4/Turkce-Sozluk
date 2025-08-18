@@ -6,8 +6,45 @@ import { TRPCError } from "@trpc/server";
 
 interface RelatedWordData {
   relatedWordId?: number;
+  relationType?: string;
   newRelationType?: string;
   // Add other fields from related_words table if they can be part of the request's newData
+}
+
+export class CreateRelatedWordHandler implements RequestHandler<void> {
+  async handle({ tx, request }: RequestHandlerContext): Promise<void> {
+    const wordId = request.entityId;
+    if (wordId === null || wordId === undefined) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Word ID (entityId) is missing in the request for related word creation.",
+      });
+    }
+
+    const { relatedWordId, relationType } = (request.newData as RelatedWordData);
+    if (relatedWordId === undefined || relationType === undefined) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Missing relatedWordId or relationType in newData for related word creation.",
+      });
+    }
+
+    // Ensure not duplicating an existing relation
+    const existing = await tx
+      .select()
+      .from(relatedWords)
+      .where(and(eq(relatedWords.wordId, wordId), eq(relatedWords.relatedWordId, relatedWordId)));
+    if (existing.length > 0) {
+      throw new TRPCError({ code: "CONFLICT", message: "This related word entry already exists." });
+    }
+
+    await tx.insert(relatedWords).values({
+      wordId,
+      relatedWordId,
+      relationType,
+      userId: request.userId,
+    });
+  }
 }
 
 export class UpdateRelatedWordHandler implements RequestHandler<void> {

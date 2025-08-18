@@ -31,6 +31,11 @@
     ".next/types/**/*.ts",
     "tailwind.config.ts"
   ],
-  "exclude": ["node_modules", "app/sw.ts"]
+  "exclude": [
+    "node_modules",
+    "app/sw.ts",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/__tests__/**"
+  ]
 }
-
