@@ -244,6 +244,30 @@ export default function RequestDetail({ requestId }: RequestDetailProps) {
         </CardHeader>
 
         <CardBody className="px-6 py-5">
+          {/* Resolution Metadata */}
+          {!isPending && (
+            <div className="mb-8 rounded-lg border border-default p-4">
+              <h3 className="mb-2 text-sm uppercase text-default-500">{t("details.resolution")}</h3>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div>
+                  <div className="text-xs text-default-500">{t("details.resolvedAtLabel")}</div>
+                  <div className="text-sm text-foreground">
+                    {request.resolvedAt
+                      ? formatDistanceToNow(new Date(request.resolvedAt), { addSuffix: true })
+                      : t("details.unknownDate")}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-default-500">{t("details.resolvedByLabel")}</div>
+                  <div className="text-sm text-foreground">{request.resolvedBy ?? "—"}</div>
+                </div>
+                <div className="sm:col-span-3">
+                  <div className="text-xs text-default-500">{t("details.moderationReason")}</div>
+                  <p className="text-sm text-foreground whitespace-pre-wrap">{request.moderationReason || t("details.noReason")}</p>
+                </div>
+              </div>
+            </div>
+          )}
           {/* Request Reason */}
           {request.reason && (
             <div className="mb-8 rounded-lg border border-default p-4">

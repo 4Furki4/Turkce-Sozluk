@@ -5,6 +5,7 @@ import {
   Card,
   CardBody,
   Button,
+  Tooltip,
 } from "@heroui/react";
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
@@ -19,6 +20,7 @@ import { preferencesState } from "@/src/store/preferences";
 import { CustomTable } from "@/src/components/customs/heroui/custom-table";
 import { CustomPagination } from "@/src/components/customs/heroui/custom-pagination";
 import { CustomSelect, OptionsMap } from "@/src/components/customs/heroui/custom-select";
+import { Info } from "lucide-react";
 
 export default function RequestsList() {
   const t = useTranslations("Requests");
@@ -146,9 +148,36 @@ export default function RequestsList() {
         );
       case "status":
         return (
-          <Chip color={statusColors[request.status]} variant="flat">
-            {statusLabels[request.status] || request.status}
-          </Chip>
+          <div className="flex items-center gap-2">
+            <Chip color={statusColors[request.status]} variant="flat">
+              {statusLabels[request.status] || request.status}
+            </Chip>
+            {request.status !== "pending" && (
+              <Tooltip
+                content={
+                  <div className="text-xs">
+                    <div>
+                      <span className="font-medium">{t("details.resolvedAtLabel")}:</span>
+                      <span className="ml-1">
+                        {request.resolvedAt
+                          ? formatDistanceToNow(new Date(request.resolvedAt), {
+                              addSuffix: true,
+                              locale: locale === 'tr' ? tr : undefined,
+                            })
+                          : t("details.unknownDate")}
+                      </span>
+                    </div>
+                    <div className="mt-1">
+                      <span className="font-medium">{t("details.moderationReason")}:</span>
+                      <span className="ml-1">{request.moderationReason || t("details.noReason")}</span>
+                    </div>
+                  </div>
+                }
+              >
+                <Info className="h-4 w-4 text-default-500" />
+              </Tooltip>
+            )}
+          </div>
         );
       case "date":
         return request.requestDate
@@ -216,6 +245,8 @@ export default function RequestsList() {
     action: request.action,
     status: request.status,
     requestDate: request.requestDate,
+    resolvedAt: request.resolvedAt,
+    moderationReason: request.moderationReason,
   }));
 
   return (
