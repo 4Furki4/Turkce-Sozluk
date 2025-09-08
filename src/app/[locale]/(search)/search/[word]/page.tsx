@@ -3,6 +3,7 @@ import { api, HydrateClient } from '@/src/trpc/server';
 import { Metadata } from 'next';
 import { auth } from '@/src/server/auth/auth';
 import WordResultClient from './word-result-client';
+import { getWordCanonicalUrl, getWordHreflangUrls } from '@/src/lib/seo-utils';
 
 // This is the updated metadata generation function
 export async function generateMetadata({
@@ -15,9 +16,21 @@ export async function generateMetadata({
     const [result] = await api.word.getWord({ name: wordName, skipLogging: true });
 
     if (!result) {
+        const notFoundTitle = locale === 'en'
+            ? `"${wordName}" not found in Turkish Dictionary`
+            : `"${wordName}" kelimesi bulunamadı`;
+
+        const notFoundDescription = locale === 'en'
+            ? `The Turkish word "${wordName}" was not found in our dictionary. You can contribute by suggesting this word to our community-driven dictionary.`
+            : `"${wordName}" kelimesi sözlüğümüzde bulunamadı. Bu kelimeyi toplulukla gelişen sözlüğümüze önermeniz için katkıda bulunabilirsiniz.`;
+
         return {
-            title: "Kelime Bulunamadı",
-            description: "Aradığınız kelime sözlükte bulunamadı.",
+            title: notFoundTitle,
+            description: notFoundDescription,
+            robots: {
+                index: false,
+                follow: false,
+            },
         };
     }
 
@@ -44,6 +57,28 @@ export async function generateMetadata({
         : ['türkçe sözlük', `${word_data.word_name} anlamı`, `${word_data.word_name} ne demek`, 'kelime anlamları'];
 
     const keywords = [word_data.word_name, ...baseKeywords, ...relatedWords, ...relatedPhrases];
+
+    // Generate JSON-LD structured data for better SEO
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "DefinedTerm",
+        "name": word_data.word_name,
+        "description": firstMeaning,
+        "inLanguage": "tr",
+        "url": getWordCanonicalUrl(wordName, locale),
+        "isPartOf": {
+            "@type": "Dictionary",
+            "name": isEnglish ? "Turkish Dictionary" : "Türkçe Sözlük",
+            "description": isEnglish
+                ? "Community-driven, modern, and open-source Turkish Dictionary"
+                : "Toplulukla gelişen, çağdaş ve açık kaynak Türkçe Sözlük",
+            "url": isEnglish ? "https://turkce-sozluk.com/en" : "https://turkce-sozluk.com",
+            "inLanguage": ["tr", "en"]
+        },
+        "alternateName": relatedWords.slice(0, 5), // Limit to avoid bloating
+        "additionalType": "https://schema.org/LexicalEntry"
+    };
+
     return {
         title,
         description,
@@ -51,18 +86,32 @@ export async function generateMetadata({
         openGraph: {
             title: title,
             description: description,
+            type: 'article',
+            locale: locale === 'en' ? 'en_US' : 'tr_TR',
             // Next.js will automatically find the opengraph-image.tsx in this directory
         },
         twitter: {
             title: title,
             description: description,
+            card: 'summary_large_image',
             // Twitter will also use the opengraph-image by default
         },
         alternates: {
-            canonical: `/arama/${wordName}`,
-            languages: {
-                'en': `/en/search/${wordName}`,
-                'tr': `/tr/arama/${wordName}`,
+            canonical: getWordCanonicalUrl(wordName, locale),
+            languages: getWordHreflangUrls(wordName),
+        },
+        other: {
+            'application/ld+json': JSON.stringify(jsonLd),
+        },
+        robots: {
+            index: true,
+            follow: true,
+            googleBot: {
+                index: true,
+                follow: true,
+                'max-video-preview': -1,
+                'max-image-preview': 'large',
+                'max-snippet': -1,
             },
         },
     };

@@ -1,20 +1,11 @@
 import { db } from "@/db";
 import { words } from "@/db/schema/words";
+import { getBaseUrl } from '@/src/lib/seo-utils';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-    // Dynamic URL logic consistent with other sitemaps
-    let baseUrl;
-    if (process.env.VERCEL_ENV === 'production') {
-        baseUrl = 'https://turkce-sozluk.com'; // canonical production URL
-    } else if (process.env.VERCEL_URL) {
-        baseUrl = `https://${process.env.VERCEL_URL}`; // Preview URLs
-    } else if (process.env.NEXT_PUBLIC_APP_URL) {
-        baseUrl = process.env.NEXT_PUBLIC_APP_URL;
-    } else {
-        baseUrl = 'http://localhost:3000'; // Local development fallback
-    }
+    const baseUrl = getBaseUrl();
 
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n';

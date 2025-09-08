@@ -35,6 +35,7 @@ export const env = createEnv({
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
     NEXT_PUBLIC_RECAPTCHA_SITE_KEY: z.string().min(1),
+    NEXT_PUBLIC_APP_URL: z.string().url().optional(),
   },
 
   /**
@@ -56,6 +57,7 @@ export const env = createEnv({
     DATABASE_SSL_CA: process.env.DATABASE_SSL_CA,
     RECAPTCHA_SECRET_KEY: process.env.RECAPTCHA_SECRET_KEY,
     NEXT_PUBLIC_RECAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

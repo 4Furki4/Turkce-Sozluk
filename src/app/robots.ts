@@ -1,8 +1,8 @@
 import { MetadataRoute } from "next";
+import { getBaseUrl } from '@/src/lib/seo-utils';
 
 export default function robots(): MetadataRoute.Robots {
-  // Base URL - update this with your production URL
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "turkish-dictionary-chi.vercel.app";
+  const baseUrl = getBaseUrl();
 
   return {
     rules: [{
@@ -15,6 +15,10 @@ export default function robots(): MetadataRoute.Robots {
         "/panel/*",
         "/complete-profile",
         "/profil-tamamla",
+        "/api/",
+        "/api/*",
+        "/_next/",
+        "/_next/*",
       ],
     },
     {
@@ -22,6 +26,6 @@ export default function robots(): MetadataRoute.Robots {
       disallow: "/",
     }
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: [`${baseUrl}/sitemap-index.xml`],
   };
 }
