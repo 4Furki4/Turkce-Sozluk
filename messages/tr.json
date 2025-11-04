@@ -89,6 +89,7 @@
     "RequestEdit": "Düzenleme Talep Et",
     "RelatedWords": "İlgili Kelimeler",
     "RelatedPhrases": "İlgili Atasözleri ve Deyimler",
+    "Pronunciations": "Telaffuzlar",
     "NavigationWord": "Yönlendirilen Kelime",
     "Root": "Köken",
     "WordAttribute": "Kelime Özelliği",
@@ -1329,5 +1330,17 @@
       "unknown": "Bilinmiyor",
       "large_download_warning": "Bu büyük bir indirme işlemi. Kararlı bir internet bağlantınız ve yeterli depolama alanınız olduğundan emin olun."
     }
+  },
+  "Pronunciations": {
+    "loading": "Telaffuzlar yükleniyor...",
+    "noPronunciations": "Henüz telaffuz bulunmuyor.",
+    "userDetails": "Kullanıcı detayları",
+    "contributedBy": "Katkı sağlanan telaffuz",
+    "votes": "oy",
+    "audioNotSupported": "Tarayıcınız ses öğesini desteklemiyor.",
+    "loginToVote": "Oy vermek için giriş yapın",
+    "loginToVoteMessage": "Telaffuzlara oy vermek için giriş yapın",
+    "voteError": "Telaffuza oy verme başarısız",
+    "audioPlayError": "Ses çalınamadı"
   }
 }
