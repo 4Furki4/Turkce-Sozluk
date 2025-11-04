@@ -1,84 +1,110 @@
 // src/app/sitemap-static.xml/route.ts
 
+import { routing } from '@/src/i18n/routing';
 import { getBaseUrl } from '@/src/lib/seo-utils';
 import { MetadataRoute } from 'next';
 
-// This is the same sitemap generation code you wrote before
+// Helper function to check if a value is a valid pathname object
+function isValidPathname(value: any): value is { en: string; tr: string } {
+    return typeof value === 'object' && value !== null &&
+        typeof value.en === 'string' && typeof value.tr === 'string';
+}
+
 function getStaticSitemap(): MetadataRoute.Sitemap {
     const baseUrl = getBaseUrl();
     const lastModified = new Date().toISOString();
+    const pathnames = routing.pathnames;
 
-    const createLocaleEntries = (path: string, priority: number = 0.8, changeFrequency: 'daily' | 'monthly' | 'yearly' = 'monthly') => {
+    const createLocaleEntries = (path: { en: string; tr: string; }, priority: number = 0.8, changeFrequency: 'daily' | 'monthly' | 'yearly' = 'monthly') => {
+
+        // Handle homepage case: if path is '/', use an empty string
+        const trPath = path.tr === '/' ? '' : path.tr;
+        const enPath = path.en === '/' ? '' : path.en;
+
         return [
             {
-                url: `${baseUrl}${path}`, // Turkish (default)
+                url: `${baseUrl}${trPath}`, // Turkish (default)
                 lastModified,
                 changeFrequency,
                 priority,
                 alternates: {
                     languages: {
-                        en: `${baseUrl}/en${path}`,
-                        tr: `${baseUrl}${path}`,
-                        'x-default': `${baseUrl}${path}`,
+                        en: `${baseUrl}/en${enPath}`,
+                        tr: `${baseUrl}${trPath}`,
+                        'x-default': `${baseUrl}${trPath}`,
                     },
                 },
             },
             {
-                url: `${baseUrl}/en${path}`, // English
+                url: `${baseUrl}/en${enPath}`, // English
                 lastModified,
                 changeFrequency,
                 priority,
                 alternates: {
                     languages: {
-                        en: `${baseUrl}/en${path}`,
-                        tr: `${baseUrl}${path}`,
-                        'x-default': `${baseUrl}${path}`,
+                        en: `${baseUrl}/en${enPath}`,
+                        tr: `${baseUrl}${trPath}`,
+                        'x-default': `${baseUrl}${trPath}`,
                     },
                 },
             },
         ];
     };
-    const staticPages = [
-        { path: '/', priority: 1.0, freq: 'daily' as const },
-        { path: '/announcements', priority: 0.7, freq: 'weekly' as const },
-        { path: '/contribute-word', priority: 0.5, freq: 'monthly' as const },
-        { path: '/feedback', priority: 0.5, freq: 'monthly' as const },
-        { path: '/my-requests', priority: 0.5, freq: 'monthly' as const },
-        { path: '/offline-dictionary', priority: 0.6, freq: 'monthly' as const },
-        { path: '/privacy-policy', priority: 0.3, freq: 'yearly' as const },
-        { path: '/pronunciation-voting', priority: 0.5, freq: 'weekly' as const },
-        { path: '/saved-words', priority: 0.5, freq: 'monthly' as const },
-        { path: '/search-history', priority: 0.5, freq: 'monthly' as const },
-        { path: '/signin', priority: 0.4, freq: 'monthly' as const },
-        { path: '/terms-of-service', priority: 0.3, freq: 'yearly' as const },
-        { path: '/word-list', priority: 0.6, freq: 'daily' as const },
+
+    // --- THIS IS THE FIX ---
+    // 1. Manually add the homepage with top priority
+    const sitemapEntries: MetadataRoute.Sitemap = [
+        ...createLocaleEntries({ en: '/', tr: '/' }, 1.0, 'daily')
     ];
 
-    // Create entries for all static pages in both locales
-    const sitemapEntries = staticPages.flatMap(page =>
-        createLocaleEntries(page.path, page.priority, page.freq as 'daily' | 'monthly' | 'yearly')
-    );
+    // 2. Loop through all other pages
+    Object.entries(pathnames)
+        .filter(([key, _]) => {
+            const isDynamic = key.includes('[') || key.includes(']');
+            const isDashboard = key.startsWith('/panel') || key.startsWith('/dashboard');
+            // Exclude the homepage key, since we just added it
+            const isHome = key === '/';
+
+            return !isDynamic && !isDashboard && !isHome;
+        })
+        .forEach(([key, pathname]) => {
+            if (isValidPathname(pathname)) {
+
+                let priority = 0.8;
+                let freq: 'daily' | 'monthly' | 'yearly' = 'monthly';
+
+                if (key.includes('policy') || key.includes('service')) {
+                    priority = 0.3;
+                    freq = 'yearly';
+                }
+
+                sitemapEntries.push(...createLocaleEntries(pathname, priority, freq));
+            } else {
+                console.warn(`Sitemap: Skipping invalid pathname for key '${key}':`, pathname);
+            }
+        });
+
     return sitemapEntries;
 }
 
-// We just wrap it in a GET handler
+// GET handler remains the same
 export async function GET() {
-    const baseUrl = getBaseUrl();
     const sitemapEntries = getStaticSitemap();
 
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n';
 
     for (const entry of sitemapEntries) {
-        xml += `<url><loc>${entry.url}</loc><lastmod>${entry.lastModified}</lastmod><changefreq>${entry.changeFrequency}</changefreq><priority>${entry.priority}</priority>\n`;
+        if (!entry.url.includes('undefined')) {
+            xml += `<url><loc>${entry.url}</loc><lastmod>${entry.lastModified}</lastmod><changefreq>${entry.changeFrequency}</changefreq><priority>${entry.priority}</priority>\n`;
 
-        // Add alternates if they exist
-        if (entry.alternates?.languages) {
-            for (const [lang, href] of Object.entries(entry.alternates.languages)) {
-                xml += `<xhtml:link rel="alternate" hreflang="${lang}" href="${href}" />\n`;
+            if (entry.alternates?.languages) {
+                for (const [lang, href] of Object.entries(entry.alternates.languages)) {
+                    xml += `<xhtml:link rel="alternate" hreflang="${lang}" href="${href}" />\n`;
+                }
             }
+            xml += `</url>\n`;
         }
-        xml += `</url>\n`;
     }
 
     xml += '</urlset>';
