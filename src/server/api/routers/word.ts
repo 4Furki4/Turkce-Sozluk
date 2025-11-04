@@ -6,6 +6,9 @@ import {
 } from "../trpc";
 import { eq, sql, inArray } from "drizzle-orm";
 import { words } from "@/db/schema/words";
+import { pronunciations } from "@/db/schema/pronunciations";
+import { pronunciationVotes } from "@/db/schema/pronunciation_votes";
+import { users } from "@/db/schema/users";
 import type { WordSearchResult, DashboardWordList } from "@/types";
 import DOMPurify from "isomorphic-dompurify";
 import { purifyObject } from "@/src/lib/utils";
@@ -217,6 +220,21 @@ export const wordRouter = createTRPCRouter({
                 FROM related_phrases rel
                 JOIN words rp ON rel.related_phrase_id = rp.id
                 WHERE rel.phrase_id = w.id), '[]'::json
+              ),
+              'pronunciations', COALESCE(
+                (SELECT json_agg(json_build_object(
+                  'id', p.id,
+                  'audioUrl', p."audio_url",
+                  'user', json_build_object(
+                    'id', u.id,
+                    'name', u.name,
+                    'image', u.image
+                  ),
+                  'voteCount', 0
+                ))
+                FROM pronunciations p
+                JOIN users u ON p."user_id" = u.id
+                WHERE p.word_id = w.id), '[]'::json
               )
           ) AS word_data
         FROM base_word w
@@ -310,6 +328,52 @@ export const wordRouter = createTRPCRouter({
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'An unexpected error occurred while fetching the word.',
+          cause: error,
+        });
+      }
+    }),
+
+  /**
+   * Get pronunciations for a specific word with voting information
+   */
+  getPronunciationsForWord: publicProcedure
+    .input(
+      z.object({
+        wordId: z.number(),
+      })
+    )
+    .query(async ({ input, ctx: { db, session } }) => {
+      try {
+        const pronunciationsWithVotes = await db
+          .select({
+            id: pronunciations.id,
+            audioUrl: pronunciations.audioUrl,
+            user: {
+              id: users.id,
+              name: users.name,
+              image: users.image,
+            },
+            voteCount: sql<number>`COALESCE(SUM(${pronunciationVotes.voteType}), 0)`.as("voteCount"),
+            hasVoted: session?.user
+              ? sql<boolean>`EXISTS(SELECT 1 FROM ${pronunciationVotes} WHERE ${pronunciationVotes.pronunciationId} = ${pronunciations.id} AND ${pronunciationVotes.userId} = ${session.user.id})`.as("hasVoted")
+              : sql<boolean>`false`.as("hasVoted"),
+            userVote: session?.user
+              ? sql<number>`(SELECT vote_type FROM ${pronunciationVotes} WHERE ${pronunciationVotes.pronunciationId} = ${pronunciations.id} AND ${pronunciationVotes.userId} = ${session.user.id})`.as("userVote")
+              : sql<number>`0`.as("userVote"),
+          })
+          .from(pronunciations)
+          .leftJoin(users, eq(pronunciations.userId, users.id))
+          .leftJoin(pronunciationVotes, eq(pronunciations.id, pronunciationVotes.pronunciationId))
+          .where(eq(pronunciations.wordId, input.wordId))
+          .groupBy(pronunciations.id, users.id)
+          .orderBy(sql`COALESCE(SUM(${pronunciationVotes.voteType}), 0) DESC`);
+
+        return pronunciationsWithVotes;
+      } catch (error) {
+        console.error(`Error in getPronunciationsForWord for wordId: ${input.wordId}`, error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'An unexpected error occurred while fetching pronunciations.',
           cause: error,
         });
       }

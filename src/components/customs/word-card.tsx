@@ -20,6 +20,7 @@ import WordCardRequestModal from "./modals/word-card-request-modal";
 import { useSnapshot } from "valtio";
 import { preferencesState } from "@/src/store/preferences";
 import CustomCard from "./heroui/custom-card";
+import PronunciationAccordion from "./pronunciation-accordion";
 
 type WordCardProps = {
   word_data: WordSearchResult["word_data"] & { source?: "online" | "offline" };
@@ -312,6 +313,12 @@ export default function WordCard({ word_data, locale, session }: WordCardProps) 
                   <p>{t("NoRelatedPhrasesFound") || "No related phrases found"}</p>
                 </div>
               )}
+            </Tab>
+            <Tab value={"pronunciations"} title={t("Pronunciations")}>
+              <PronunciationAccordion
+                wordId={word_data.word_id}
+                session={session}
+              />
             </Tab>
           </Tabs>
         </>
