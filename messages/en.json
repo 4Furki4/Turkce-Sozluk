@@ -89,6 +89,7 @@
     "RequestEdit": "Request Edit",
     "RelatedWords": "Related Words",
     "RelatedPhrases": "Related Phrases",
+    "Pronunciations": "Pronunciations",
     "NavigationWord": "Navigation Word",
     "Root": "Root",
     "urlCopied": "URL Copied",
@@ -1363,5 +1364,17 @@
       "unknown": "Unknown",
       "large_download_warning": "This is a large download. Make sure you have a stable internet connection and sufficient storage space."
     }
+  },
+  "Pronunciations": {
+    "loading": "Loading pronunciations...",
+    "noPronunciations": "No pronunciations available yet.",
+    "userDetails": "User details",
+    "contributedBy": "Contributed pronunciation",
+    "votes": "votes",
+    "audioNotSupported": "Your browser does not support the audio element.",
+    "loginToVote": "Please login to vote",
+    "loginToVoteMessage": "Login to vote on pronunciations",
+    "voteError": "Failed to vote on pronunciation",
+    "audioPlayError": "Failed to play audio"
   }
 }

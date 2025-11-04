@@ -1,6 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "@/src/server/api/trpc";
 import { z } from "zod";
 import { request_votes } from "@/db/schema/request_votes";
+import { pronunciationVotes } from "@/db/schema/pronunciation_votes";
 import { and, eq } from "drizzle-orm";
 
 export const voteRouter = createTRPCRouter({
@@ -37,6 +38,44 @@ export const voteRouter = createTRPCRouter({
           request_id: requestId,
           user_id: userId,
           vote_type: voteValue,
+        });
+        return { newVoteState: voteValue };
+      }
+    }),
+
+  togglePronunciationVote: protectedProcedure
+    .input(z.object({
+      pronunciationId: z.number(),
+      voteType: z.enum(['up', 'down']),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { pronunciationId, voteType } = input;
+      const userId = ctx.session.user.id;
+      const voteValue = voteType === 'up' ? 1 : -1;
+
+      const existingVote = await ctx.db.query.pronunciationVotes.findFirst({
+        where: and(
+          eq(pronunciationVotes.pronunciationId, pronunciationId),
+          eq(pronunciationVotes.userId, userId)
+        ),
+      });
+
+      if (existingVote) {
+        if (existingVote.voteType === voteValue) {
+          // User is toggling off their existing vote
+          await ctx.db.delete(pronunciationVotes).where(eq(pronunciationVotes.id, existingVote.id));
+          return { newVoteState: null };
+        } else {
+          // User is changing their vote
+          await ctx.db.update(pronunciationVotes).set({ voteType: voteValue }).where(eq(pronunciationVotes.id, existingVote.id));
+          return { newVoteState: voteValue };
+        }
+      } else {
+        // New vote
+        await ctx.db.insert(pronunciationVotes).values({
+          pronunciationId,
+          userId,
+          voteType: voteValue,
         });
         return { newVoteState: voteValue };
       }

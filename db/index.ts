@@ -21,6 +21,8 @@ import { announcementTranslations } from "./schema/announcement_translations";
 import { feedbacks } from "./schema/feedbacks";
 import { feedbackVotes } from "./schema/feedback_votes";
 import { request_votes } from "./schema/request_votes";
+import { pronunciationVotes } from "./schema/pronunciation_votes";
+import { pronunciations } from "./schema/pronunciations";
 
 export const schema = {
   users,
@@ -37,6 +39,8 @@ export const schema = {
   partOfSpeechs,
   requests,
   request_votes,
+  pronunciations,
+  pronunciationVotes,
   announcements,
   announcementTranslations,
   feedbacks,
