@@ -36,20 +36,22 @@ export const PronunciationCard: FC<PronunciationCardProps> = ({ wordId, session 
     const { data: pronunciations, isLoading } = api.word.getPronunciationsForWord.useQuery({
         wordId
     });
+    console.log("pronunciation.voteCount", pronunciations)
 
     const utils = api.useUtils();
     const { mutate: toggleVote } = api.vote.togglePronunciationVote.useMutation({
         onMutate: async ({ pronunciationId, voteType }) => {
             await utils.word.getPronunciationsForWord.cancel();
             const previousData = utils.word.getPronunciationsForWord.getData({ wordId });
-
+            console.log('previousData', previousData)
             utils.word.getPronunciationsForWord.setData({ wordId }, (oldData) => {
                 if (!oldData) return oldData;
                 return oldData.map((pronunciation) => {
                     if (pronunciation.id === pronunciationId) {
+                        let newVoteCount = Number(pronunciation.voteCount);
+
                         const currentVote = pronunciation.userVote;
                         const voteValue = voteType === 'up' ? 1 : -1;
-                        let newVoteCount = pronunciation.voteCount;
 
                         if (currentVote === voteValue) { // Toggling off
                             newVoteCount -= voteValue;
