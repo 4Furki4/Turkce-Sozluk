@@ -49,10 +49,9 @@ export const PronunciationCard: FC<PronunciationCardProps> = ({ request, user, w
                     ...oldData,
                     requests: oldData.requests.map((item) => {
                         if (item.request.id === requestId) {
+                            let newVoteCount = Number(item.voteCount);
                             const currentVote = item.userVote;
                             const voteValue = voteType === 'up' ? 1 : -1;
-                            let newVoteCount = item.voteCount;
-
                             if (currentVote === voteValue) { // Toggling off
                                 newVoteCount -= voteValue;
                             } else if (currentVote === -voteValue) { // Changing vote
