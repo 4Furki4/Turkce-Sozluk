@@ -563,7 +563,7 @@
     "MeaningAttributeRequestedSuccessfully": "Anlam özelliği isteği başarıyla gönderildi! Onaylanana kadar sadece size görünür olacaktır.",
     "AuthorRequestedSuccessfully": "Yazar isteği başarıyla gönderildi! Onaylanana kadar sadece size görünür olacaktır.",
     "ErrorSubmittingRequest": "İstek gönderilirken hata oluştu. Lütfen tekrar deneyin.",
-    "submitRequest": "İsteği Gönder",
+    "SubmitRequest": "İsteği Gönder",
     "CancelRequest": "İsteği İptal Et",
     "requestDetails": "İstek Detayları",
     "backToAllRequests": "Tüm İsteklere Dön",
