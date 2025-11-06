@@ -88,6 +88,9 @@ function getStaticSitemap(): MetadataRoute.Sitemap {
 }
 
 // GET handler remains the same
+
+export const dynamic = 'force-static';
+
 export async function GET() {
     const sitemapEntries = getStaticSitemap();
 

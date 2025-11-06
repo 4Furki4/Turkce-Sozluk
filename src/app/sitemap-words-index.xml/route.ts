@@ -6,7 +6,7 @@ import { getBaseUrl } from '@/src/lib/seo-utils';
 import { count } from 'drizzle-orm';
 
 const PAGE_SIZE = 5000;
-
+export const dynamic = 'force-static';
 export async function GET() {
     const baseUrl = getBaseUrl();
     const lastmod = new Date().toISOString();
