@@ -10,7 +10,6 @@ import SuperJSON from "superjson";
 
 import { type AppRouter } from "../server/api/root";
 import { createQueryClient } from "./query-client";
-import { env } from "../env.mjs";
 
 let clientQueryClientSingleton: QueryClient | undefined = undefined;
 const getQueryClient = () => {
@@ -46,7 +45,7 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
       links: [
         loggerLink({
           enabled: (op) =>
-            env.NODE_ENV === "development" &&
+            process.env.NODE_ENV === "development" &&
             (op.direction === "down" && op.result instanceof Error),
         }),
         unstable_httpBatchStreamLink({
