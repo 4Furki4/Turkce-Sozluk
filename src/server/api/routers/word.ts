@@ -141,7 +141,13 @@ export const wordRouter = createTRPCRouter({
         WITH base_word AS (
           SELECT w.id, w.name, w.phonetic, w.prefix, w.suffix
           FROM words w
-          WHERE w.name ILIKE ${purifiedName}
+          WHERE w.name ILIKE ${purifiedName} -- 1. Find all possible matches (case-insensitive)
+          ORDER BY
+            CASE
+              WHEN w.name = ${purifiedName} THEN 1 -- 2. Prioritize exact case-sensitive match
+              ELSE 2 -- 3. Fallback to case-insensitive match
+            END
+          LIMIT 1 -- 4. Select only the single best match
         )
         SELECT json_build_object(
               'word_id', w.id,
