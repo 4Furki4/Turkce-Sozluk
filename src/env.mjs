@@ -23,7 +23,7 @@ export const env = createEnv({
     DATABASE_USERNAME: z.string(),
     DATABASE_PASSWORD: z.string(),
     DATABASE_DATABASE: z.string(),
-    DATABASE_SSL_CA: z.string(),
+    // DATABASE_SSL_CA: z.string(),
     RECAPTCHA_SECRET_KEY: z.string().min(1),
   },
 
@@ -54,7 +54,7 @@ export const env = createEnv({
     DATABASE_USERNAME: process.env.DATABASE_USERNAME,
     DATABASE_PASSWORD: process.env.DATABASE_PASSWORD,
     DATABASE_DATABASE: process.env.DATABASE_DATABASE,
-    DATABASE_SSL_CA: process.env.DATABASE_SSL_CA,
+    // DATABASE_SSL_CA: process.env.DATABASE_SSL_CA,
     RECAPTCHA_SECRET_KEY: process.env.RECAPTCHA_SECRET_KEY,
     NEXT_PUBLIC_RECAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
