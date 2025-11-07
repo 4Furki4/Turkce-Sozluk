@@ -9,7 +9,7 @@ export const searchRouter = createTRPCRouter({
     .input(z.object({ name: z.string() }))
     .query(async ({ ctx, input }) => {
       const word = await ctx.db.query.words.findFirst({
-        where: or(eq(words.name, input.name), eq(words.name, input.name.toLowerCase())),
+        where: ilike(words.name, input.name),
         columns: {
           id: true,
         },

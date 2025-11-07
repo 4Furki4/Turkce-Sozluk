@@ -141,7 +141,7 @@ export const wordRouter = createTRPCRouter({
         WITH base_word AS (
           SELECT w.id, w.name, w.phonetic, w.prefix, w.suffix
           FROM words w
-          WHERE w.name = ${purifiedName}
+          WHERE w.name ILIKE ${purifiedName}
         )
         SELECT json_build_object(
               'word_id', w.id,
@@ -237,7 +237,7 @@ export const wordRouter = createTRPCRouter({
                 WHERE p.word_id = w.id), '[]'::json
               )
           ) AS word_data
-        FROM base_word w
+        FROM base_word w 
       `);
 
       // Filter any null or undefined results
