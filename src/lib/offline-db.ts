@@ -3,7 +3,7 @@ import { decode } from "@msgpack/msgpack";
 import { WordSearchResult } from "@/types";
 
 const DB_NAME = "turkish-dictionary-offline";
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 const WORDS_STORE = "words";
 const METADATA_STORE = "metadata";
 const WORD_NAME_INDEX = "word_name_index";
@@ -11,12 +11,22 @@ const WORD_NAME_INDEX = "word_name_index";
 const AUTOCOMPLETE_STORE = "autocompleteWords";
 const AUTOCOMPLETE_NAME_INDEX = "autocomplete_name_index"; // This will be on the new lowercase `key`
 const AUTOCOMPLETE_VERSION_KEY = "autocompleteVersion";
+const POPULAR_TRENDS_STORE = "popularTrends";
 
 export type WordData = WordSearchResult["word_data"];
 
 interface AutocompleteWord {
     key: string; // "ankara"
     displayName: string; // "Ankara"
+}
+interface PopularWord {
+    id: number;
+    name: string;
+}
+interface CachedPopularData {
+    key: string; // "popular-allTime", "trending-7days", etc.
+    data: PopularWord[];
+    timestamp: number;
 }
 
 interface OfflineDB extends DBSchema {
@@ -33,6 +43,10 @@ interface OfflineDB extends DBSchema {
         key: string; // This will be the lowercase name ("ankara")
         value: AutocompleteWord;
         indexes: { [AUTOCOMPLETE_NAME_INDEX]: string }; // Index will be on the 'key'
+    };
+    [POPULAR_TRENDS_STORE]: {
+        key: string;
+        value: CachedPopularData;
     };
 }
 
@@ -72,6 +86,12 @@ const getDb = (): Promise<IDBPDatabase<OfflineDB>> => {
                     const store = db.createObjectStore(AUTOCOMPLETE_STORE, { keyPath: "key" });
                     // The index is also on the lowercase 'key'
                     store.createIndex(AUTOCOMPLETE_NAME_INDEX, "key", { unique: true });
+                }
+                if (oldVersion < 5) {
+                    if (!db.objectStoreNames.contains(POPULAR_TRENDS_STORE)) {
+                        // Create the new store, keyPath is the 'key'
+                        db.createObjectStore(POPULAR_TRENDS_STORE, { keyPath: "key" });
+                    }
                 }
             },
         });
@@ -201,3 +221,29 @@ export async function searchAutocompleteOffline(
     // Return the 'displayName' which has the original casing
     return results.map((word) => word.displayName);
 }
+
+/**
+ * Gets cached popular/trending data from IndexedDB.
+ */
+export const getCachedPopularData = async (
+    key: string
+): Promise<CachedPopularData | undefined> => {
+    const db = await getDb();
+    return db.get(POPULAR_TRENDS_STORE, key);
+};
+
+/**
+ * Sets cached popular/trending data in IndexedDB.
+ */
+export const setCachedPopularData = async (
+    key: string,
+    data: PopularWord[]
+): Promise<void> => {
+    const db = await getDb();
+    const cacheEntry: CachedPopularData = {
+        key,
+        data,
+        timestamp: Date.now(),
+    };
+    await db.put(POPULAR_TRENDS_STORE, cacheEntry);
+};

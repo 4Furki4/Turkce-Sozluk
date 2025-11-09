@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+
 import { useSession } from "next-auth/react";
 import { useWordSearch } from "@/src/hooks/useWordSearch";
 import Loading from "../_loading";
 import WordNotFoundCard from "@/src/components/customs/word-not-found-card";
 import WordCardWrapper from "@/src/components/customs/word-card-wrapper";
 import { useLocale } from "next-intl";
+import { usePathname, useRouter } from "@/src/i18n/routing";
 
 export default function SearchPageClient() {
     const pathname = usePathname();
@@ -20,7 +21,7 @@ export default function SearchPageClient() {
         // Extract word from pathname like /en/search/deneme -> deneme
         const pathSegments = pathname.split('/');
         const searchIndex = pathSegments.indexOf('search');
-        
+
         if (searchIndex !== -1 && pathSegments[searchIndex + 1]) {
             const extractedWord = decodeURIComponent(pathSegments[searchIndex + 1]);
             console.log(`[SearchPageClient] Extracted word from path: ${extractedWord}`);
@@ -53,12 +54,10 @@ export default function SearchPageClient() {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <WordCardWrapper 
-                data={[wordSearchResult]} 
-                session={session} 
-                locale={locale as "en" | "tr"}
-            />
-        </div>
+        <WordCardWrapper
+            data={[wordSearchResult]}
+            session={session}
+            locale={locale as "en" | "tr"}
+        />
     );
 }
