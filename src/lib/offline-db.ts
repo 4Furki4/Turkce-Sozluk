@@ -3,9 +3,7 @@ import { decode } from "@msgpack/msgpack";
 import { WordSearchResult } from "@/types";
 
 const DB_NAME = "turkish-dictionary-offline";
-// 1. --- BUMP DB VERSION ---
-// This forces the `upgrade` callback to run.
-const DB_VERSION = 4; // (Was 3)
+const DB_VERSION = 4;
 const WORDS_STORE = "words";
 const METADATA_STORE = "metadata";
 const WORD_NAME_INDEX = "word_name_index";
@@ -16,9 +14,6 @@ const AUTOCOMPLETE_VERSION_KEY = "autocompleteVersion";
 
 export type WordData = WordSearchResult["word_data"];
 
-// 2. --- UPDATE AUTOCOMPLETE TYPE ---
-// We will store the original name for display,
-// and a lowercase `key` for searching.
 interface AutocompleteWord {
     key: string; // "ankara"
     displayName: string; // "Ankara"
@@ -69,8 +64,6 @@ const getDb = (): Promise<IDBPDatabase<OfflineDB>> => {
                     }
                 }
 
-                // 3. --- ADD v4 UPGRADE LOGIC ---
-                // This rebuilds the autocomplete store with the new schema
                 if (oldVersion < 4) {
                     if (db.objectStoreNames.contains(AUTOCOMPLETE_STORE)) {
                         db.deleteObjectStore(AUTOCOMPLETE_STORE);
@@ -86,7 +79,6 @@ const getDb = (): Promise<IDBPDatabase<OfflineDB>> => {
     return dbPromise;
 };
 
-// --- (getLocalVersion, setLocalVersion, clearOfflineData are unchanged) ---
 export const getLocalVersion = async (): Promise<number | null> => {
     const db = await getDb();
     return db.get(METADATA_STORE, "version");
@@ -102,7 +94,6 @@ export const clearOfflineData = async (): Promise<void> => {
     await db.clear(WORDS_STORE);
 };
 
-// --- (processWordFile is unchanged) ---
 export const processWordFile = async (fileUrl: string): Promise<void> => {
     const response = await fetch(fileUrl);
     if (!response.ok) {
@@ -134,7 +125,6 @@ export const processWordFile = async (fileUrl: string): Promise<void> => {
     await tx.done;
 };
 
-// --- (getWordByNameOffline is unchanged) ---
 export const getWordByNameOffline = async (
     wordName: string
 ): Promise<WordData | undefined> => {
@@ -142,13 +132,11 @@ export const getWordByNameOffline = async (
     return db.getFromIndex(WORDS_STORE, WORD_NAME_INDEX, wordName);
 };
 
-// --- (getLocalAutocompleteVersion is unchanged) ---
 export async function getLocalAutocompleteVersion(): Promise<string | undefined> {
     const db = await getDb();
     return db.get(METADATA_STORE, AUTOCOMPLETE_VERSION_KEY);
 }
 
-// --- 4. UPDATE `updateLocalAutocompleteList` ---
 export async function updateLocalAutocompleteList(
     words: string[],
     newVersion: string,
@@ -192,7 +180,6 @@ export async function updateLocalAutocompleteList(
     console.log(`[OfflineDB] Updated autocomplete list to version ${newVersion} with ${uniqueWords.size} words.`);
 }
 
-// --- 5. UPDATE `searchAutocompleteOffline` ---
 export async function searchAutocompleteOffline(
     query: string,
 ): Promise<string[]> {

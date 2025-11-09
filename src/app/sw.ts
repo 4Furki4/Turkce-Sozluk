@@ -69,10 +69,6 @@ const serwist = new Serwist({
     skipWaiting: true,
     clientsClaim: true,
     navigationPreload: true,
-
-    // --- 2. THIS IS THE MAIN FIX ---
-    // We replace `runtimeCaching: defaultCache` with our own array.
-    // We put our custom rule FIRST, then spread the `defaultCache`.
     runtimeCaching: [
         {
             // This rule intercepts navigation requests to ANY Turkish search path.
@@ -83,11 +79,9 @@ const serwist = new Serwist({
         },
         ...defaultCache, // Include all the default caching rules
     ],
-    // --- END MAIN FIX ---
 
     fallbacks: {
         entries: [
-            // Fallback 1: English (This one works perfectly, leave it)
             {
                 url: "/en/search",
                 matcher({ request }) {
@@ -109,16 +103,6 @@ const serwist = new Serwist({
                     return false;
                 },
             },
-            // --- 3. REMOVE FLAWED TURKISH FALLBACK ---
-            // This entry is now redundant because our `runtimeCaching`
-            // rule above will always catch the request first.
-            // We remove it to avoid conflicts.
-            //
-            // {
-            //   url: "/tr/arama",
-            //   matcher({ request }) { ... },
-            // },
-            // --- END REMOVAL ---
             {
                 url: "/~offline",
                 matcher({ request }) {
