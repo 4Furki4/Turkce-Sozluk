@@ -1,7 +1,7 @@
 "use client";
-import { useTranslations } from "next-intl";
-import { Edit3, HeartHandshake, KeyboardIcon, Search as SearchIcon, Stars } from "lucide-react";
-import { useRouter } from "@/src/i18n/routing";
+import { useLocale, useTranslations } from "next-intl";
+import { Download, Edit3, HeartHandshake, KeyboardIcon, Search as SearchIcon, Stars } from "lucide-react";
+import { Link, useRouter } from "@/src/i18n/routing";
 import { Input } from "@heroui/input";
 import { useEffect, useState } from "react";
 import { Button, Card, CardBody, CardHeader, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@heroui/react";
@@ -22,6 +22,7 @@ export default function Hero({ children }: {
   children: React.ReactNode;
 }) {
   const t = useTranslations("Home");
+  const locale = useLocale()
   const router = useRouter();
   const [wordInput, setWordInput] = useState<string>("");
   const [inputError, setInputError] = useState<string>("");
@@ -242,9 +243,16 @@ export default function Hero({ children }: {
 
           {/* Features Section */}
           <div className="grid md:grid-cols-3 gap-6 mt-16">
-            <FeatureCard title={t("hero.feature1.title")} description={t("hero.feature1.description")} icon={<HeartHandshake className="w-6 h-6 text-primary" />} />
-            <FeatureCard title={t("hero.feature2.title")} description={t("hero.feature2.description")} icon={<Edit3 className="w-6 h-6 text-warning" />} />
-            <FeatureCard title={t("hero.feature3.title")} description={t("hero.feature3.description")} icon={<Stars className="w-6 h-6 text-yellow-400" />} />
+            <Link href="/offline-dictionary" className="">
+              <FeatureCard
+                locale={locale}
+                title={t("hero.offlineFeature.title")}
+                description={t("hero.offlineFeature.description")}
+                icon={<Download className="w-6 h-6 text-green-500" />}
+              />
+            </Link>
+            <FeatureCard locale={locale} title={t("hero.feature1.title")} description={t("hero.feature1.description")} icon={<HeartHandshake className="w-6 h-6 text-primary" />} />
+            <FeatureCard locale={locale} title={t("hero.feature2.title")} description={t("hero.feature2.description")} icon={<Edit3 className="w-6 h-6 text-warning" />} />
           </div>
 
           {/* Popular Searches */}
@@ -258,8 +266,9 @@ export default function Hero({ children }: {
   );
 }
 
-function FeatureCard({ title, description, icon }: { title: string, description: string, icon: React.ReactNode }) {
+function FeatureCard({ title, description, icon, locale }: { title: string, description: string, icon: React.ReactNode, locale: string }) {
   const { isBlurEnabled } = useSnapshot(preferencesState);
+
   return (
     <Card isBlurred={isBlurEnabled} className={cn("bg-background/50 p-6 rounded-lg border border-border/50", isBlurEnabled && "backdrop-blur-xl feature-card-shine")}>
       <CardHeader className="flex flex-col gap-2">
@@ -269,7 +278,7 @@ function FeatureCard({ title, description, icon }: { title: string, description:
         </h2>
       </CardHeader>
       <CardBody>
-        <p className="mt-4 text-base text-muted-foreground">
+        <p className="mt-4 text-base text-muted-foreground break-normal hyphens-auto" lang={locale}>
           {description}
         </p>
       </CardBody>

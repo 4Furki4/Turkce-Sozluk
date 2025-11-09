@@ -64,16 +64,20 @@
       "searchError": "Please enter a word to search",
       "turkishLetters": "Turkish letters",
       "feature1": {
-        "title": "Contribute New Words",
-        "description": "Add new Turkish words and their meanings to help grow our dictionary."
+        "title": "Contribute",
+        "description": "You can contribute to the dictionary by suggesting new words, meanings, and features, and by adding pronunciations."
       },
       "feature2": {
-        "title": "Edit and Improve",
-        "description": "Help improve existing entries by suggesting edits and corrections."
+        "title": "Suggest Changes",
+        "description": "You can make suggestions to improve word meanings and features, and to correct errors in the dictionary."
       },
       "feature3": {
-        "title": "Save for Later",
-        "description": "Save and share the words you find interesting or don't know before."
+        "title": "Save and Share",
+        "description": "You can save and share words that you've newly learned, never heard before, or just love."
+      },
+      "offlineFeature": {
+        "title": "Blazing Fast & Offline",
+        "description": "Download the offline dictionary to use it without an internet connection and get even faster results when you are online."
       }
     }
   },
