@@ -16,7 +16,7 @@ export default function WordResultClient({ session, wordName }: WordResultClient
     const locale = useLocale();
     // The initial data from the server is passed directly to our hook.
     // TanStack Query will use this data immediately without refetching on the client.
-    const { data, isLoading, isError } = useWordSearch(wordName);
+    const { data, isLoading, isFetching, isError, isOnline } = useWordSearch(wordName);
 
     // The loading skeleton will only be shown on subsequent client-side navigation.
     if (isLoading) {
@@ -33,5 +33,5 @@ export default function WordResultClient({ session, wordName }: WordResultClient
 
     const formattedData = [{ word_data: data }];
 
-    return <WordCardWrapper locale={locale as "en" | "tr"} data={formattedData as any} session={session} />;
+    return <WordCardWrapper locale={locale as "en" | "tr"} data={formattedData as any} session={session} isWordFetching={isFetching} isOnline={isOnline} />;
 }

@@ -61,7 +61,7 @@
     "idb": "^8.0.3",
     "isomorphic-dompurify": "^2.25.0",
     "jsonwebtoken": "^9.0.2",
-    "lucide-react": "^0.515.0",
+    "lucide-react": "^0.553.0",
     "next": "^15.4.4",
     "next-auth": "^5.0.0-beta.27",
     "next-intl": "^4.1.0",

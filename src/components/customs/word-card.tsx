@@ -10,15 +10,13 @@ import { Session } from "next-auth";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/src/i18n/routing";
-import { Camera, Share2, Volume2, WifiOff } from "lucide-react";
+import { Camera, Share2, Volume2, WifiOff, WifiSync } from "lucide-react";
 import Image from "next/image";
 import { useRef, } from "react";
 import { captureElementScreenshot } from "../../utils/screenshot";
 import { copyPageUrl } from "../../utils/clipboard";
 import clsx from "clsx";
 import WordCardRequestModal from "./modals/word-card-request-modal";
-import { useSnapshot } from "valtio";
-import { preferencesState } from "@/src/store/preferences";
 import CustomCard from "./heroui/custom-card";
 import PronunciationCard from "./pronunciation-card";
 
@@ -26,9 +24,11 @@ type WordCardProps = {
   word_data: WordSearchResult["word_data"] & { source?: "online" | "offline" };
   locale: "en" | "tr";
   session: Session | null;
+  isWordFetching?: boolean
+  isOnline?: boolean
 };
 
-export default function WordCard({ word_data, locale, session }: WordCardProps) {
+export default function WordCard({ word_data, locale, session, isWordFetching, isOnline }: WordCardProps) {
 
   const { isOpen, onOpenChange, onClose } = useDisclosure()
   const t = useTranslations("WordCard");
@@ -47,7 +47,6 @@ export default function WordCard({ word_data, locale, session }: WordCardProps) 
       });
     }
   };
-  const { isBlurEnabled } = useSnapshot(preferencesState);
   // Handler for the share button to copy the current page URL
   const handleSharePress = () => {
     copyPageUrl({
@@ -66,8 +65,13 @@ export default function WordCard({ word_data, locale, session }: WordCardProps) 
           <Button className="bg-transparent mr-auto" isIconOnly isDisabled> {/* TODO: add voice to word */}
             <Volume2 className="w-5 h-5 sm:w-6 sm:h-6" />
           </Button>
-          {isOffline && (
+          {isWordFetching ? (
+            <WifiSync className="text-green-400 w-5 h-5 sm:w-6 sm:h-6 animate-pulse" />
+          ) : !isOnline ? (
             <WifiOff className="text-amber-500 w-5 h-5 sm:w-6 sm:h-6" />
+          ) : (
+            // Optional: Show a "synced" checkmark when not fetching and online
+            null
           )}
           <SaveWord word_data={word_data} isSavedWord={!session ? false : undefined} />
           <Button disableRipple isIconOnly className="bg-transparent" onPress={(e) => {
