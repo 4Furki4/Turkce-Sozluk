@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react'; // <-- Import hooks
 import { useTranslations } from 'next-intl';
 import { api } from '@/src/trpc/react';
 import { Chip } from '@heroui/react';
@@ -9,6 +9,8 @@ import { TrendingUp } from 'lucide-react';
 import { useSnapshot } from 'valtio';
 import { preferencesState } from '@/src/store/preferences';
 import { cn } from '@/lib/utils';
+// 1. --- IMPORT IDB HELPERS ---
+import { getCachedPopularData, setCachedPopularData } from '@/src/lib/offline-db';
 
 interface TrendingWord {
     id: number;
@@ -19,13 +21,77 @@ interface TrendingSearchesProps {
     period: '7days' | '30days';
 }
 
+// Define the cache max age
+const cacheMaxAge = 24 * 60 * 60 * 1000; // 24 hours (in ms)
+
 export default function TrendingSearches({ period = '7days' }: TrendingSearchesProps) {
     const t = useTranslations('Components.TrendingSearches');
     const { isBlurEnabled } = useSnapshot(preferencesState);
-    const [trendingWords] = api.word.getPopularWords.useSuspenseQuery({
-        limit: 10,
-        period: period === '7days' ? 'last7Days' : 'last30Days'
-    });
+
+    // 2. --- STATE FOR DISPLAYED DATA ---
+    const [displayedWords, setDisplayedWords] = useState<TrendingWord[]>([]);
+
+    // 3. --- DYNAMIC KEYS ---
+    // Key for IndexedDB cache
+    const cacheKey = `trending-${period}`;
+    // Key for the tRPC query
+    const queryPeriod = period === '7days' ? 'last7Days' : 'last30Days';
+
+    // 4. --- LOAD FROM CACHE ON MOUNT ---
+    // This effect runs once to populate the initial state from IndexedDB.
+    useEffect(() => {
+        let isMounted = true;
+        getCachedPopularData(cacheKey).then((cached) => {
+            if (isMounted && cached) {
+                setDisplayedWords(cached.data);
+            }
+        });
+        return () => { isMounted = false; };
+    }, [cacheKey]); // Dependency: re-run if the period (and thus key) changes
+
+    // 5. --- USE `useQuery` (v5 syntax) ---
+    const {
+        data: freshData,
+        error,
+        isError,
+        isLoading
+    } = api.word.getPopularWords.useQuery(
+        {
+            limit: 10,
+            period: queryPeriod // Use the correct period for the query
+        },
+        {
+            staleTime: cacheMaxAge,
+            gcTime: cacheMaxAge,
+        }
+    );
+
+    // 6. --- EFFECT FOR HANDLING SUCCESSFUL NETWORK DATA ---
+    useEffect(() => {
+        if (freshData) {
+            setDisplayedWords(freshData); // Update UI
+
+            // Save fresh data to IDB
+            setCachedPopularData(cacheKey, freshData).catch(err => {
+                console.error(`Failed to save ${cacheKey} to IndexedDB`, err);
+            });
+        }
+    }, [freshData, cacheKey]); // Dependency: run when fresh data or the key changes
+
+    // 7. --- EFFECT FOR HANDLING NETWORK ERRORS ---
+    useEffect(() => {
+        if (isError && error) {
+            console.error(`Failed to fetch ${cacheKey}. Will rely on cache (if any).`, error);
+        }
+    }, [isError, error, cacheKey]);
+
+    // 8. --- UPDATE RENDER LOGIC ---
+    if (displayedWords.length === 0) {
+        if (isLoading) {
+            // You could return a skeleton loader here
+        }
+        return null;
+    }
 
     return (
         <div className="mt-6">
@@ -36,7 +102,7 @@ export default function TrendingSearches({ period = '7days' }: TrendingSearchesP
                 </h3>
             </div>
             <div className="flex flex-wrap gap-2">
-                {trendingWords.map((word: TrendingWord) => (
+                {displayedWords.map((word: TrendingWord) => ( // <-- Use `displayedWords`
                     <Link
                         href={{
                             pathname: "/search/[word]",
