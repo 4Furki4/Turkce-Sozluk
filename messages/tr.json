@@ -65,15 +65,19 @@
       "searchError": "Lütfen aramak için bir kelime girin",
       "feature1": {
         "title": "Katkıda Bulunun",
-        "description": "Yeni kelimeler, anlamlar ve özellikler önererek sözlüğe katkıda bulunabilirsiniz"
+        "description": "Yeni kelimeler, anlamlar ve özellikler önererek ve telaffuzlar ekleyerek sözlüğe katkıda bulunabilirsiniz"
       },
       "feature2": {
         "title": "Değişiklik Önerin",
-        "description": "Kelimelerin anlam ve özellikleri için öneride bulunabilirsiniz."
+        "description": "Kelimelerin anlam ve özelliklerini geliştirmek ve sözlükteki yanlışları düzeltmek için öneride bulunabilirsiniz"
       },
       "feature3": {
         "title": "Kaydedin ve Paylaşın",
         "description": "Yeni öğrendiğiniz, önceden duymadığınız veya sevdiğiniz kelimeleri kaydedebilir ve paylaşabilirsiniz."
+      },
+      "offlineFeature": {
+        "title": "Işık Hızında & Çevrim dışı",
+        "description": "Çevrim dışı sözlüğü indirerek internetiniz yokken de sözlüğü kullanın ve internetiniz varken daha hızlı sonuçlara ulaşın"
       }
     }
   },
