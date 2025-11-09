@@ -24,6 +24,7 @@ import { useSnapshot } from "valtio";
 import { preferencesState, toggleBlur } from "@/src/store/preferences";
 import { cn } from "@/lib/utils";
 import CustomDropdown from "./heroui/custom-dropdown";
+import { useOnlineStatus } from "@/src/hooks/use-online-status";
 type NavbarProps = {
   session: Session | null;
   setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -60,6 +61,7 @@ export default function Navbar({
   const isAuthPage = ["/signup", "/signin", "/forgot-password"].includes(
     pathName
   );
+  const isOnline = useOnlineStatus()
   const snap = useSnapshot(preferencesState);
   return (
     <NextuiNavbar
@@ -147,47 +149,51 @@ export default function Navbar({
             </DropdownItem>
           </DropdownMenu>
         </CustomDropdown>
-        <NavbarItem>
-          {locale === "en" ? (
-            <NextIntlLink
-              className="w-full block"
-              // @ts-ignore
-              href={{
-                pathname: pathName,
-                query: searchParams.toString(),
-                params: {
-                  word: params.word as any,
-                  id: params.id as any,
-                  slug: params.slug as any,
-                },
-              }}
-              locale="tr"
-            >
-              <span className="flex items-center gap-2">
-                <Languages aria-label="languages icon" className="w-5 h-5 xs:w-6 xs:h-6" /> TR
-              </span>
-            </NextIntlLink>
-          ) : (
-            <NextIntlLink
-              className="w-full block"
-              // @ts-ignore
-              href={{
-                pathname: pathName,
-                query: searchParams.toString(),
-                params: {
-                  word: params.word as any,
-                  id: params.id as any,
-                  slug: params.slug as any,
-                },
-              }}
-              locale="en"
-            >
-              <span className="flex items-center gap-2">
-                <Languages aria-label={ariaLanguages} className="w-5 h-5 xs:w-6 xs:h-6" /> EN
-              </span>
-            </NextIntlLink>
-          )}
-        </NavbarItem>
+        <>
+          {isOnline ? <NavbarItem>
+            {locale === "en" ? (
+              <NextIntlLink
+                className="w-full block"
+                // @ts-ignore
+                href={{
+                  pathname: pathName,
+                  query: searchParams.toString(),
+                  params: {
+                    word: params.word as any,
+                    id: params.id as any,
+                    slug: params.slug as any,
+                  },
+                }}
+                locale="tr"
+              >
+                <span className="flex items-center gap-2">
+                  <Languages aria-label="languages icon" className="w-5 h-5 xs:w-6 xs:h-6" /> TR
+                </span>
+              </NextIntlLink>
+            ) : (
+              <NextIntlLink
+                className="w-full block"
+                // @ts-ignore
+                href={{
+                  pathname: pathName,
+                  query: searchParams.toString(),
+                  params: {
+                    word: params.word as any,
+                    id: params.id as any,
+                    slug: params.slug as any,
+                  },
+                }}
+                locale="en"
+              >
+                <span className="flex items-center gap-2">
+                  <Languages aria-label={ariaLanguages} className="w-5 h-5 xs:w-6 xs:h-6" /> EN
+                </span>
+              </NextIntlLink>
+            )}
+          </NavbarItem>
+            : null
+          }
+        </>
         <NavbarItem>
           {/* theme button */}
           <Button className="hidden xs:inline-flex" aria-label={ariaSwitchTheme} variant="light" isIconOnly onPress={() => setTheme(theme === "dark" ? "light" : "dark")}>

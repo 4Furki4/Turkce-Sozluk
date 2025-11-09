@@ -1,4 +1,4 @@
-import { defaultCache, } from "@serwist/next/worker";
+import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
 import { Serwist } from "serwist";
 
@@ -18,24 +18,76 @@ console.log(`[SW] Service Worker ${SW_VERSION} starting...`);
 
 declare const self: ServiceWorkerGlobalScope;
 
-// This is the crucial part.
-// We create a NavigationRoute that will handle all navigation requests.
-// If a navigation request fails (e.g., when offline), it will not
-// immediately fall back to the offline page. Instead, it will try to
-// serve the cached index page (`/app-shell`).
+// --- 1. NEW CUSTOM HANDLER ---
+// This handler checks if the user is offline. If they are,
+// it redirects any request for a Turkish search page
+// to the equivalent English search page, which we know works offline.
+const offlineTrRedirectHandler = async ({ request }: { request: Request }) => {
+    // Check if we are online.
+    if (navigator.onLine) {
+        // We are online. Let the request proceed as normal.
+        // It will be handled by the default cache or network.
+        try {
+            return await fetch(request);
+        } catch (e) {
+            // If network fails (even if "online"), fall through to fallbacks
+            return new Response("", { status: 500 });
+        }
+    }
 
-// Register the navigation route. This should be one of the first routes
-// you register to ensure it correctly handles navigation.
+    // We are OFFLINE.
+    // Construct the new URL.
+    const url = new URL(request.url);
+    // Get the word from the path, e.g., "ahlak" from "/tr/arama/ahlak"
+    const word = url.pathname.split("/").pop();
+
+    // Handle base path /tr/arama as well, redirect to /en/search
+    if (!word) {
+        const newUrl = "/en/search";
+        console.warn(
+            `[SW] Offline TR base path. Redirecting ${url.pathname} to ${newUrl}`,
+        );
+        return Response.redirect(newUrl, 302);
+    }
+
+    const newUrl = `/en/search/${word}`;
+
+    console.warn(
+        `[SW] Offline /tr request. Redirecting ${url.pathname} to ${newUrl}`,
+    );
+
+    // Return a Redirect Response.
+    // The browser will follow this and make a new request
+    // for /en/search/ahlak, which Fallback 1 will
+    // handle correctly.
+    return Response.redirect(newUrl, 302);
+};
+// --- END NEW HANDLER ---
 
 const serwist = new Serwist({
     precacheEntries: self.__SW_MANIFEST,
     skipWaiting: true,
     clientsClaim: true,
     navigationPreload: true,
-    runtimeCaching: defaultCache,
+
+    // --- 2. THIS IS THE MAIN FIX ---
+    // We replace `runtimeCaching: defaultCache` with our own array.
+    // We put our custom rule FIRST, then spread the `defaultCache`.
+    runtimeCaching: [
+        {
+            // This rule intercepts navigation requests to ANY Turkish search path.
+            matcher: ({ request, url }) =>
+                request.destination === "document" &&
+                url.pathname.startsWith("/tr/arama"),
+            handler: offlineTrRedirectHandler, // Use our new custom handler
+        },
+        ...defaultCache, // Include all the default caching rules
+    ],
+    // --- END MAIN FIX ---
+
     fallbacks: {
         entries: [
-            // Handle dynamic search routes by serving the base search page
+            // Fallback 1: English (This one works perfectly, leave it)
             {
                 url: "/en/search",
                 matcher({ request }) {
@@ -57,27 +109,16 @@ const serwist = new Serwist({
                     return false;
                 },
             },
-            {
-                url: "/tr/search",
-                matcher({ request }) {
-                    if (request.destination !== "document") {
-                        return false;
-                    }
-
-                    const url = new URL(request.url);
-                    const pathname = url.pathname;
-
-                    console.log(`[SW] Checking Turkish search fallback for: ${pathname}`);
-
-                    // Match Turkish search pages with dynamic routes
-                    if (pathname.match(/^\/tr\/search\/.+/)) {
-                        console.log(`[SW] Serving /tr/search for: ${pathname}`);
-                        return true;
-                    }
-
-                    return false;
-                },
-            },
+            // --- 3. REMOVE FLAWED TURKISH FALLBACK ---
+            // This entry is now redundant because our `runtimeCaching`
+            // rule above will always catch the request first.
+            // We remove it to avoid conflicts.
+            //
+            // {
+            //   url: "/tr/arama",
+            //   matcher({ request }) { ... },
+            // },
+            // --- END REMOVAL ---
             {
                 url: "/~offline",
                 matcher({ request }) {
@@ -93,19 +134,24 @@ const serwist = new Serwist({
                     console.log(`[SW] Checking offline fallback for: ${pathname}`);
 
                     // Don't redirect search pages (they're handled above)
-                    if (pathname.match(/^\/(en|tr)\/search/)) {
-                        console.log(`[SW] Search page handled by other fallback: ${pathname}`);
+                    if (
+                        pathname.includes("/tr/arama") ||
+                        pathname.includes("/en/search")
+                    ) {
+                        console.log(
+                            `[SW] Search page handled by other fallback: ${pathname}`,
+                        );
                         return false;
                     }
 
                     // Allow offline dictionary page to load
-                    if (pathname.includes('/offline-dictionary')) {
+                    if (pathname.includes("/offline-dictionary")) {
                         console.log(`[SW] Allowing offline dictionary: ${pathname}`);
                         return false;
                     }
 
                     // Allow home page and locale pages to load (they're precached)
-                    if (pathname === '/' || pathname === '/en' || pathname === '/tr') {
+                    if (pathname === "/" || pathname === "/en" || pathname === "/tr") {
                         console.log(`[SW] Allowing home/locale page: ${pathname}`);
                         return false;
                     }
@@ -123,7 +169,6 @@ const serwist = new Serwist({
     // }
 });
 
-
 self.addEventListener("push", (event) => {
     const data = JSON.parse(event.data?.text() ?? '{ title: "" }');
     event.waitUntil(
@@ -137,18 +182,20 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
     event.notification.close();
     event.waitUntil(
-        self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
-            if (clientList.length > 0) {
-                let client = clientList[0];
-                for (let i = 0; i < clientList.length; i++) {
-                    if (clientList[i].focused) {
-                        client = clientList[i];
+        self.clients
+            .matchAll({ type: "window", includeUncontrolled: true })
+            .then((clientList) => {
+                if (clientList.length > 0) {
+                    let client = clientList[0];
+                    for (let i = 0; i < clientList.length; i++) {
+                        if (clientList[i].focused) {
+                            client = clientList[i];
+                        }
                     }
+                    return client.focus();
                 }
-                return client.focus();
-            }
-            return self.clients.openWindow("/");
-        }),
+                return self.clients.openWindow("/");
+            }),
     );
 });
 

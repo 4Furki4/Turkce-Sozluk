@@ -41,15 +41,15 @@ module.exports = async (phase) => {
                 { url: "/~offline", revision },
                 // Precache the main entry points to avoid the redirect issue
                 { url: "/", revision },
-                { url: "/tr", revision },
                 { url: "/en", revision },
                 // Precache search pages for offline functionality
                 { url: "/en/search", revision },
-                { url: "/tr/search", revision },
+                { url: "/tr/arama", revision },
                 // Precache offline dictionary page
                 { url: "/en/offline-dictionary", revision },
                 { url: "/tr/offline-dictionary", revision },
             ],
+
         });
         return withSerwist(nextIntlConfig);
     }
