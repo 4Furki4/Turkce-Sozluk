@@ -5,7 +5,8 @@ import { useRouter } from "@/src/i18n/routing";
 import { Input } from "@heroui/input";
 import { useEffect, useState } from "react";
 import { Button, Card, CardBody, CardHeader, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@heroui/react";
-import { api } from "@/src/trpc/react";
+// --- 1. REMOVE tRPC IMPORT ---
+// import { api } from "@/src/trpc/react";
 import { useDebounce } from "@uidotdev/usehooks";
 import PopularSearches from "./customs/hero/popular-searches";
 import TrendingSearchesContainer from "./customs/hero/trending-searches-container";
@@ -13,6 +14,9 @@ import { useSnapshot } from "valtio";
 import { preferencesState } from "../store/preferences";
 import { cn } from "@/lib/utils";
 import { TurkishKeyboard } from "./customs/utils/TurkishKeyboard";
+
+// --- 2. ADD OFFLINE DB IMPORT ---
+import { searchAutocompleteOffline } from "@/src/lib/offline-db";
 
 export default function Hero({ children }: {
   children: React.ReactNode;
@@ -26,13 +30,30 @@ export default function Hero({ children }: {
 
   const debouncedInput = useDebounce(wordInput, 300);
 
-  const { data: recommendations, isLoading } = api.word.getRecommendations.useQuery(
-    { query: debouncedInput, limit: 5 },
-    {
-      enabled: debouncedInput.length > 0,
-      refetchOnWindowFocus: false
+  // --- 3. REPLACE TRPC QUERY WITH OFFLINE SEARCH ---
+  const [recommendations, setRecommendations] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    // This effect now uses the local DB
+    if (debouncedInput.length < 2) {
+      setRecommendations([]);
+      setShowRecommendations(false);
+      return;
     }
-  );
+
+    const fetchSuggestions = async () => {
+      setIsLoading(true);
+      // Call our new super-fast offline function
+      const results = await searchAutocompleteOffline(debouncedInput);
+      setRecommendations(results);
+      setShowRecommendations(results.length > 0);
+      setIsLoading(false);
+    };
+
+    fetchSuggestions();
+  }, [debouncedInput]);
+  // --- END OF REPLACEMENT ---
 
   useEffect(() => {
     setSelectedIndex(-1);
@@ -55,7 +76,8 @@ export default function Hero({ children }: {
       case "Enter":
         e.preventDefault();
         if (selectedIndex >= 0) {
-          handleRecommendationClick(recommendations[selectedIndex].name);
+          // --- 4. UPDATE KEYDOWN HANDLER ---
+          handleRecommendationClick(recommendations[selectedIndex]); // Use string directly
         } else {
           handleSearch(e as unknown as React.FormEvent);
         }
@@ -188,22 +210,23 @@ export default function Hero({ children }: {
                     ))}
                   </div>
                 )}
+                {/* --- 5. UPDATE RENDER LOGIC --- */}
                 {showRecommendations && recommendations && recommendations.length > 0 && (
                   <div className="absolute z-10 w-full mt-1 bg-background/90 backdrop-blur-xs border border-primary/20 rounded-md shadow-lg text-left border-b-0">
                     <ul role="listbox">
-                      {recommendations.map((rec, index) => (
+                      {recommendations.map((wordName, index) => (
                         <li
-                          key={rec.word_id}
+                          key={wordName} // Use the name as the key
                           role="option"
                           aria-selected={index === selectedIndex}
                           className={`px-4 py-2 cursor-pointer transition-colors border-b border-primary/20 ${index === selectedIndex
                             ? "bg-primary/30"
                             : "hover:bg-primary/10"
                             }`}
-                          onClick={() => handleRecommendationClick(rec.name)}
+                          onClick={() => handleRecommendationClick(wordName)} // Pass the name
                           onMouseEnter={() => setSelectedIndex(index)}
                         >
-                          {rec.name}
+                          {wordName} {/* Render the name */}
                         </li>
                       ))}
                     </ul>

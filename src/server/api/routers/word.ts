@@ -4,7 +4,7 @@ import {
   createTRPCRouter,
   publicProcedure,
 } from "../trpc";
-import { eq, sql, inArray } from "drizzle-orm";
+import { eq, sql, inArray, max } from "drizzle-orm";
 import { words } from "@/db/schema/words";
 import { pronunciations } from "@/db/schema/pronunciations";
 import { pronunciationVotes } from "@/db/schema/pronunciation_votes";
@@ -540,4 +540,26 @@ export const wordRouter = createTRPCRouter({
         });
       }
     }),
+  /**
+ * Returns a version string for the word list.
+ * We use the most recent 'updated_at' timestamp as the version.
+ */
+  getAutocompleteListVersion: publicProcedure.query(async ({ ctx }) => {
+    const result = await ctx.db
+      .select({
+        latest: max(words.updated_at),
+      })
+      .from(words);
+    return result[0]?.latest ?? "0";
+  }),
+
+  /**
+   * Returns all word names for the autocomplete list.
+   */
+  getAllWordNames: publicProcedure.query(async ({ ctx }) => {
+    const results = await ctx.db.query.words.findMany({
+      columns: { name: true },
+    });
+    return results.map((word) => word.name);
+  }),
 });

@@ -3,94 +3,106 @@ import { decode } from "@msgpack/msgpack";
 import { WordSearchResult } from "@/types";
 
 const DB_NAME = "turkish-dictionary-offline";
-// Increment the database version to trigger a schema upgrade.
-const DB_VERSION = 2;
+// 1. --- BUMP DB VERSION ---
+// This forces the `upgrade` callback to run.
+const DB_VERSION = 4; // (Was 3)
 const WORDS_STORE = "words";
 const METADATA_STORE = "metadata";
 const WORD_NAME_INDEX = "word_name_index";
 
-// Define the structure of your Word data
-// This should match the structure from your `prepare-offline-data.ts` script
+const AUTOCOMPLETE_STORE = "autocompleteWords";
+const AUTOCOMPLETE_NAME_INDEX = "autocomplete_name_index"; // This will be on the new lowercase `key`
+const AUTOCOMPLETE_VERSION_KEY = "autocompleteVersion";
+
 export type WordData = WordSearchResult["word_data"];
-// Define the database schema using the DBSchema interface from 'idb'
+
+// 2. --- UPDATE AUTOCOMPLETE TYPE ---
+// We will store the original name for display,
+// and a lowercase `key` for searching.
+interface AutocompleteWord {
+    key: string; // "ankara"
+    displayName: string; // "Ankara"
+}
+
 interface OfflineDB extends DBSchema {
     [WORDS_STORE]: {
-        key: number; // The key is now the word_id (number)
+        key: number;
         value: WordData;
-        indexes: { [WORD_NAME_INDEX]: string }; // We have an index on word_name (string)
+        indexes: { [WORD_NAME_INDEX]: string };
     };
     [METADATA_STORE]: {
         key: string;
         value: any;
     };
+    [AUTOCOMPLETE_STORE]: {
+        key: string; // This will be the lowercase name ("ankara")
+        value: AutocompleteWord;
+        indexes: { [AUTOCOMPLETE_NAME_INDEX]: string }; // Index will be on the 'key'
+    };
 }
 
 let dbPromise: Promise<IDBPDatabase<OfflineDB>> | null = null;
 
-// Function to initialize and open the database
 const getDb = (): Promise<IDBPDatabase<OfflineDB>> => {
     if (!dbPromise) {
         dbPromise = openDB<OfflineDB>(DB_NAME, DB_VERSION, {
             upgrade(db, oldVersion, newVersion, transaction) {
                 console.log(`Upgrading database from version ${oldVersion} to ${newVersion}...`);
 
-                // If the words store already exists from a previous (potentially broken) version,
-                // delete it to ensure we start with a clean slate.
-                if (db.objectStoreNames.contains(WORDS_STORE)) {
-                    console.log(`Deleting old '${WORDS_STORE}' object store.`);
-                    db.deleteObjectStore(WORDS_STORE);
+                if (oldVersion < 2) {
+                    if (db.objectStoreNames.contains(WORDS_STORE)) {
+                        db.deleteObjectStore(WORDS_STORE);
+                    }
+                    const store = db.createObjectStore(WORDS_STORE, { keyPath: "word_id" });
+                    store.createIndex(WORD_NAME_INDEX, "word_name", { unique: false });
+
+                    if (db.objectStoreNames.contains(METADATA_STORE)) {
+                        db.deleteObjectStore(METADATA_STORE);
+                    }
+                    db.createObjectStore(METADATA_STORE);
                 }
 
-                // Create the new, correct object store and its index.
-                console.log(`Creating new '${WORDS_STORE}' object store with index.`);
-                const store = db.createObjectStore(WORDS_STORE, { keyPath: "word_id" });
-                store.createIndex(WORD_NAME_INDEX, "word_name", { unique: false });
-
-                // Do the same for the metadata store to be safe.
-                if (db.objectStoreNames.contains(METADATA_STORE)) {
-                    db.deleteObjectStore(METADATA_STORE);
+                if (oldVersion < 3) {
+                    if (!db.objectStoreNames.contains(AUTOCOMPLETE_STORE)) {
+                        const store = db.createObjectStore(AUTOCOMPLETE_STORE, { keyPath: "name" });
+                        store.createIndex(AUTOCOMPLETE_NAME_INDEX, "name", { unique: true });
+                    }
                 }
-                db.createObjectStore(METADATA_STORE);
+
+                // 3. --- ADD v4 UPGRADE LOGIC ---
+                // This rebuilds the autocomplete store with the new schema
+                if (oldVersion < 4) {
+                    if (db.objectStoreNames.contains(AUTOCOMPLETE_STORE)) {
+                        db.deleteObjectStore(AUTOCOMPLETE_STORE);
+                    }
+                    // Create the new store, keyPath is the lowercase 'key'
+                    const store = db.createObjectStore(AUTOCOMPLETE_STORE, { keyPath: "key" });
+                    // The index is also on the lowercase 'key'
+                    store.createIndex(AUTOCOMPLETE_NAME_INDEX, "key", { unique: true });
+                }
             },
         });
     }
     return dbPromise;
 };
 
-// --- Database Interaction Functions ---
-
-/**
- * Gets the currently stored version of the offline dictionary.
- * @returns The version number (timestamp) or null if not found.
- */
+// --- (getLocalVersion, setLocalVersion, clearOfflineData are unchanged) ---
 export const getLocalVersion = async (): Promise<number | null> => {
     const db = await getDb();
     return db.get(METADATA_STORE, "version");
 };
 
-/**
- * Updates the stored version of the offline dictionary.
- * @param version The new version number to store.
- */
 export const setLocalVersion = async (version: number): Promise<void> => {
     const db = await getDb();
     await db.put(METADATA_STORE, version, "version");
 };
 
-/**
- * Clears all word data and metadata from the database.
- */
 export const clearOfflineData = async (): Promise<void> => {
     const db = await getDb();
     await db.clear(WORDS_STORE);
-    await db.clear(METADATA_STORE);
-    console.log("Offline data cleared.");
 };
 
-/**
- * Processes a downloaded MessagePack file and stores its contents in the database.
- * @param fileUrl The URL of the .msgpack file to fetch and process.
- */
+// --- (processWordFile is unchanged) ---
 export const processWordFile = async (fileUrl: string): Promise<void> => {
     const response = await fetch(fileUrl);
     if (!response.ok) {
@@ -104,8 +116,6 @@ export const processWordFile = async (fileUrl: string): Promise<void> => {
 
     for (const word of words) {
         try {
-            // Robust check: ensure the object has a valid key (word_id)
-            // and a valid property for indexing (word_name).
             if (!word || typeof word.word_id !== 'number' || typeof word.word_name !== 'string' || word.word_name.length === 0) {
                 console.warn("Skipping invalid word object lacking a valid 'word_id' or 'word_name':", word);
                 continue;
@@ -124,16 +134,83 @@ export const processWordFile = async (fileUrl: string): Promise<void> => {
     await tx.done;
 };
 
-
-/**
- * Finds a single word by its name from the offline database using the index.
- * @param wordName The name of the word to search for.
- * @returns The word data or undefined if not found.
- */
+// --- (getWordByNameOffline is unchanged) ---
 export const getWordByNameOffline = async (
     wordName: string
 ): Promise<WordData | undefined> => {
     const db = await getDb();
-    // Use the index to perform the lookup
     return db.getFromIndex(WORDS_STORE, WORD_NAME_INDEX, wordName);
 };
+
+// --- (getLocalAutocompleteVersion is unchanged) ---
+export async function getLocalAutocompleteVersion(): Promise<string | undefined> {
+    const db = await getDb();
+    return db.get(METADATA_STORE, AUTOCOMPLETE_VERSION_KEY);
+}
+
+// --- 4. UPDATE `updateLocalAutocompleteList` ---
+export async function updateLocalAutocompleteList(
+    words: string[],
+    newVersion: string,
+) {
+    const db = await getDb();
+
+    const tx = db.transaction(
+        [AUTOCOMPLETE_STORE, METADATA_STORE],
+        "readwrite",
+    );
+
+    const autocompleteStore = tx.objectStore(AUTOCOMPLETE_STORE);
+    const metadataStore = tx.objectStore(METADATA_STORE);
+
+    await autocompleteStore.clear();
+
+    // Create the new object with lowercase key
+    const wordsToStore: AutocompleteWord[] = words.map(displayName => ({
+        key: displayName.toLowerCase(),
+        displayName: displayName,
+    }));
+
+    // Use a Set to handle duplicate lowercase keys (e.g., "Kale" and "kale")
+    // We'll prefer the capitalized version if a duplicate exists.
+    const uniqueWords = new Map<string, AutocompleteWord>();
+    for (const word of wordsToStore) {
+        if (!uniqueWords.has(word.key) || word.displayName.charAt(0) === word.displayName.charAt(0).toUpperCase()) {
+            uniqueWords.set(word.key, word);
+        }
+    }
+
+    // Add all new words
+    await Promise.all(
+        Array.from(uniqueWords.values()).map((wordObject) =>
+            autocompleteStore.put(wordObject)
+        ),
+    );
+
+    await metadataStore.put(newVersion, AUTOCOMPLETE_VERSION_KEY);
+    await tx.done;
+    console.log(`[OfflineDB] Updated autocomplete list to version ${newVersion} with ${uniqueWords.size} words.`);
+}
+
+// --- 5. UPDATE `searchAutocompleteOffline` ---
+export async function searchAutocompleteOffline(
+    query: string,
+): Promise<string[]> {
+    if (query.length < 2) return [];
+
+    const db = await getDb();
+
+    // Always search using the lowercase query
+    const lowerCaseQuery = query.toLowerCase();
+
+    const lowerBound = lowerCaseQuery;
+    const upperBound = lowerCaseQuery + "\uffff";
+    const range = IDBKeyRange.bound(lowerBound, upperBound);
+
+    // Query the index (which is on the lowercase 'key')
+    const results = await db
+        .getAllFromIndex(AUTOCOMPLETE_STORE, AUTOCOMPLETE_NAME_INDEX, range, 10);
+
+    // Return the 'displayName' which has the original casing
+    return results.map((word) => word.displayName);
+}
