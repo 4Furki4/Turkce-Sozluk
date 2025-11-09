@@ -1,6 +1,5 @@
-"use client"
+"use client";
 import { useQuery, onlineManager } from "@tanstack/react-query";
-
 import { getWordByNameOffline, type WordData } from "@/src/lib/offline-db";
 import { useState, useEffect } from "react";
 import { api } from "@/src/trpc/react";
@@ -8,122 +7,111 @@ import { api } from "@/src/trpc/react";
 // Define a unified result type for our hook
 type UseWordSearchResult = {
     data: (WordData & { source: "online" | "offline" }) | undefined;
-    isLoading: boolean;
-    isError: boolean;
+    isLoading: boolean;    // For the initial page skeleton
+    isFetching: boolean;   // For the background "revalidate" spinner
+    isError: boolean;      // For the "not found" state
+    isOnline: boolean;     // For the "wifi off" icon
     error: Error | null;
 };
 
 export function useWordSearch(wordName: string): UseWordSearchResult {
     // State to track the network connection status
     const [isOnline, setIsOnline] = useState(() => {
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
             return navigator.onLine && onlineManager.isOnline();
         }
         return true; // Default to online on server
     });
-    
+
     const trpcClient = api.useUtils().client;
-    
+
     // Listen for online/offline events
     useEffect(() => {
         const updateOnlineStatus = () => {
             const online = navigator.onLine && onlineManager.isOnline();
             setIsOnline(online);
-            console.log("Network status changed:", online ? "online" : "offline");
         };
-        
-        window.addEventListener('online', updateOnlineStatus);
-        window.addEventListener('offline', updateOnlineStatus);
-        
-        // Also listen to onlineManager changes
+
+        window.addEventListener("online", updateOnlineStatus);
+        window.addEventListener("offline", updateOnlineStatus);
         const unsubscribe = onlineManager.subscribe(updateOnlineStatus);
-        
+
         return () => {
-            window.removeEventListener('online', updateOnlineStatus);
-            window.removeEventListener('offline', updateOnlineStatus);
+            window.removeEventListener("online", updateOnlineStatus);
+            window.removeEventListener("offline", updateOnlineStatus);
             unsubscribe();
         };
     }, []);
-    // useEffect(() => {
-    //     // Set initial status and listen for changes
-    //     setIsOnline(typeof navigator !== "undefined" && navigator.onLine);
-    //     const handleOnline = () => setIsOnline(true);
-    //     const handleOffline = () => setIsOnline(false);
 
-    //     window.addEventListener("online", handleOnline);
-    //     window.addEventListener("offline", handleOffline);
-
-    //     return () => {
-    //         window.removeEventListener("online", handleOnline);
-    //         window.removeEventListener("offline", handleOffline);
-    //     };
-    // }, []);
-
-    const { data, isLoading, isError, error } = useQuery({
-        // The query key includes the word and online status, so it refetches if the connection changes
-        queryKey: ["word", wordName, isOnline],
+    // --- 1. OFFLINE QUERY ---
+    const { data: offlineData, isLoading: isOfflineLoading } = useQuery({
+        queryKey: ["word-offline", wordName],
         queryFn: async () => {
-            console.log(`Searching for word: "${wordName}", isOnline: ${isOnline}`);
-            
-            // --- Online First Strategy ---
-            if (isOnline) {
-                try {
-                    // 1. Try fetching from the live tRPC API
-                    const onlineResult = await trpcClient.word.getWord.query({ name: wordName });
-                    console.log("Online result:", onlineResult);
-                    
-                    // The API returns an array like [{ word_data: {...} }]
-                    if (onlineResult && onlineResult.length > 0 && onlineResult[0]?.word_data) {
-                        // Return the data with its source marked as 'online'
-                        return { ...onlineResult[0].word_data, source: "online" as const };
-                    }
-                } catch (e) {
-                    console.warn("Online fetch failed, falling back to offline.", e);
-                    // Check if it's a network error (connection issue)
-                    const isNetworkError = e instanceof Error && (
-                        e.message.includes('fetch') ||
-                        e.message.includes('network') ||
-                        e.message.includes('Failed to fetch') ||
-                        e.name === 'TypeError'
-                    );
-                    
-                    if (isNetworkError) {
-                        console.log("Network error detected, switching to offline mode");
-                        setIsOnline(false);
-                    }
-                    // Continue to offline fallback
-                }
-            }
-
-            // --- Offline Fallback ---
-            console.log("Attempting offline search...");
+            if (!wordName) return undefined;
             try {
-                const offlineData = await getWordByNameOffline(wordName);
-                if (offlineData) {
-                    console.log("Found offline data:", offlineData);
-                    return { ...offlineData, source: "offline" as const };
-                }
-            } catch (offlineError) {
-                console.error("Offline search failed:", offlineError);
+                console.log(`Checking offline DB for: "${wordName}"`);
+                const data = await getWordByNameOffline(wordName);
+                return data ? { ...data, source: "offline" as const } : undefined;
+            } catch (e) {
+                console.error("Offline search failed:", e);
+                return undefined; // Don't throw, just return nothing
             }
-
-            // 3. If the word is not found in either source, throw an error.
-            const errorMessage = isOnline 
-                ? `The word "${wordName}" was not found online or offline.`
-                : `The word "${wordName}" was not found in offline storage. Please download more words when online.`;
-            throw new Error(errorMessage);
         },
-        // Only run the query if a wordName is provided
         enabled: !!wordName,
-        // Sensible defaults for stale time and retries
+        staleTime: Infinity,
+        gcTime: 1000 * 60 * 5,
+    });
+
+    // --- 2. ONLINE QUERY ---
+    const onlineQuery = useQuery({
+        queryKey: ["word-online", wordName],
+        queryFn: async () => {
+            if (!wordName) return undefined;
+            try {
+                console.log(`Fetching online for: "${wordName}"`);
+                const onlineResult = await trpcClient.word.getWord.query({
+                    name: wordName,
+                });
+
+                if (onlineResult && onlineResult.length > 0 && onlineResult[0]?.word_data) {
+                    return { ...onlineResult[0].word_data, source: "online" as const };
+                }
+                // If API returns empty, it's a 404
+                throw new Error(`Word "${wordName}" not found online.`);
+            } catch (e) {
+                console.warn("Online fetch failed.", e);
+                throw e; // Propagate the error so isError becomes true
+            }
+        },
+        enabled: isOnline && !!wordName,
         staleTime: 1000 * 60 * 5, // 5 minutes
         retry: 1,
     });
 
+    // --- 3. COMBINE RESULTS ---
+
+    // Prioritize "fresh" online data, fall back to "stale" offline data.
+    const data = onlineQuery.data ?? offlineData;
+
+    // We are "loading" ONLY if we have NO data to show yet,
+    // and the relevant query is still running.
+    const isLoading =
+        !data && (isOnline ? onlineQuery.isLoading : isOfflineLoading);
+
+    // We are in an "error" state ONLY if the online query failed
+    // AND we also have no offline data to show as a fallback.
+    const isError = onlineQuery.isError && !data;
+
+    // We are "fetching" if we are online AND the online query is running,
+    // (This includes the background revalidation)
+    const isFetching = isOnline && onlineQuery.isFetching;
+
     return {
         data,
-        isLoading,
-        isError,
-        error: error as Error | null,
+        isLoading,    // Use this for the main page skeleton
+        isFetching,   // Use this for the small loading icon
+        isError,      // Use this for "Not Found"
+        isOnline,     // Use this to decide between loading icon and wifi-off icon
+        error: onlineQuery.error as Error | null,
     };
 }
