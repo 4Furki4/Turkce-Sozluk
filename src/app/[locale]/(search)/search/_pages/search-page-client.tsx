@@ -8,7 +8,7 @@ import Loading from "../_loading";
 import WordNotFoundCard from "@/src/components/customs/word-not-found-card";
 import WordCardWrapper from "@/src/components/customs/word-card-wrapper";
 import { useLocale } from "next-intl";
-import { usePathname, useRouter } from "@/src/i18n/routing";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function SearchPageClient() {
     const pathname = usePathname();
