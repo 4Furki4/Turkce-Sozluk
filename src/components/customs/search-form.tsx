@@ -42,7 +42,7 @@ export default function SearchForm({
                 }
                 setWordInput("");
                 setInputError("")
-                const decodedInput = decodeURI(formattedInput);
+                const decodedInput = encodeURI(formattedInput);
                 router.push({
                     pathname: "/search/[word]",
                     params: { word: decodedInput },

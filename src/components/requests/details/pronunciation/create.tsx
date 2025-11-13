@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { RequestDetailComponentProps } from "../registry";
 import { api } from "@/src/trpc/react";
-import { Spinner } from "@heroui/react";
+import { Alert, Spinner } from "@heroui/react";
 
 
 export const CreatePronunciation: FC<RequestDetailComponentProps> = ({ newData, oldData, entityId }) => {
@@ -27,12 +27,19 @@ export const CreatePronunciation: FC<RequestDetailComponentProps> = ({ newData, 
             {(wordData || oldData) && (
                 <div>
                     <p className="text-sm text-gray-500">{t("Pronunciation.relatedWord")}</p>
-                    <Link
-                        href={`/search/${wordData?.name || oldData?.name}`}
-                        className="text-primary hover:underline font-medium text-lg"
-                    >
-                        {wordData?.name || oldData?.name || 'Unknown Word'}
-                    </Link>
+                    {wordData?.name ? (
+                        <Link
+                            href={`/search/${encodeURIComponent(wordData?.name ?? '') || encodeURIComponent(oldData?.name)}`}
+                            className="text-primary hover:underline font-medium text-lg"
+                        >
+                            {wordData?.name || oldData?.name || 'Unknown Word'}
+                        </Link>
+                    ) : (
+                        <div className="flex items-center justify-center w-full">
+                            <Alert description={'Unknown Word'} title={'Error'} />
+                        </div>
+                    )}
+
                 </div>
             )}
 

@@ -144,7 +144,7 @@ export const PronunciationCard: FC<PronunciationCardProps> = ({ request, user, w
                 <Link href={{
                     pathname: '/search/[word]',
                     params: {
-                        word: word?.name || ''
+                        word: encodeURIComponent(word?.name || '')
                     }
                 }} className="font-bold text-lg text-primary hover:underline max-w-max">
                     {word?.name}
