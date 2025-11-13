@@ -124,7 +124,7 @@ export default function WordList() {
         switch (columnKey) {
             case "name":
                 return (
-                    <NextUILink target="_blank" color="primary" underline="hover" as={Link} href={`/search/${item.name}`}>
+                    <NextUILink target="_blank" color="primary" underline="hover" as={Link} href={`/search/${encodeURIComponent(item.name)}`}>
                         {cellValue}
                     </NextUILink>
                 );

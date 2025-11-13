@@ -55,7 +55,7 @@ export default function Announcement({
                 <p className="text-gray-400 mb-4">{announcement.excerpt}</p>
 
                 <div className="flex justify-end">
-                    <Link href={{ pathname: "/announcements/[slug]", params: { slug: announcement.slug } }}>
+                    <Link href={{ pathname: "/announcements/[slug]", params: { slug: encodeURIComponent(announcement.slug) } }}>
                         <Button color="primary">
                             {t("readMore")}
                         </Button>

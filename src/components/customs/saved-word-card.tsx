@@ -40,7 +40,7 @@ export default function SavedWordCard({ wordData, onUnsave, session, locale }: S
     <CustomCard>
       <CardHeader className="flex items-center gap-2">
         <h3 className="text-lg font-medium">
-          <Link color="primary" underline="hover" as={NextIntlLink} href={`/search/${wordData.word_name}`}>
+          <Link color="primary" underline="hover" as={NextIntlLink} href={`/search/${encodeURIComponent(wordData.word_name)}`}>
             {wordData.word_name}
           </Link>
         </h3>

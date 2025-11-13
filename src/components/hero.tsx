@@ -102,7 +102,7 @@ export default function Hero({ children }: {
     setInputError("");
     router.push({
       pathname: "/search/[word]",
-      params: { word: input },
+      params: { word: encodeURIComponent(input) },
     });
   };
 
@@ -111,7 +111,7 @@ export default function Hero({ children }: {
     setShowRecommendations(false);
     router.push({
       pathname: "/search/[word]",
-      params: { word: word },
+      params: { word: encodeURIComponent(word) },
     });
   };
 
