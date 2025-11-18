@@ -239,6 +239,13 @@
       "when": 1757378414836,
       "tag": "0033_great_doomsday",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1763471891760,
+      "tag": "0034_shiny_exodus",
+      "breakpoints": true
     }
   ]
 }

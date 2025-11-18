@@ -78,6 +78,13 @@
       "offlineFeature": {
         "title": "Işık Hızında & Çevrim dışı",
         "description": "Çevrim dışı sözlüğü indirerek internetiniz yokken de sözlüğü kullanın ve internetiniz varken daha hızlı sonuçlara ulaşın"
+      },
+      "WordOfTheDay": {
+        "title": "Günün Kelimesi",
+        "noMeaningFound": "Anlam bulunamadı.",
+        "details": "Detaylar",
+        "addToYourSite": "Sitene Ekle",
+        "embedComingSoon": "Sitene ekle özelliği çok yakında!"
       }
     }
   },

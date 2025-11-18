@@ -15,6 +15,7 @@ import { purifyObject } from "@/src/lib/utils";
 import { searchLogs, type NewSearchLog } from "@/db/schema/search_logs";
 import { userSearchHistory, type InsertUserSearchHistory } from "@/db/schema/user_search_history";
 import { generateAccentVariations } from "@/src/lib/search-utils";
+import { dailyWords } from "@/db/schema/daily-words";
 
 export const wordRouter = createTRPCRouter({
   searchWordsSimple: publicProcedure
@@ -561,5 +562,38 @@ export const wordRouter = createTRPCRouter({
       columns: { name: true },
     });
     return results.map((word) => word.name);
+  }),
+  getWordOfTheDay: publicProcedure.query(async ({ ctx }) => {
+    const today = new Date().toISOString().split('T')[0];
+
+    // 1. Try to find today's word
+    let daily = await ctx.db.query.dailyWords.findFirst({
+      where: eq(dailyWords.date, today),
+      with: {
+        word: {
+          with: {
+            meanings: {
+              limit: 1, // We only need the primary meaning for the card
+            }
+          }
+        }
+      }
+    });
+
+    // 2. Fallback: If Cron failed or hasn't run yet, show the most recent one
+    if (!daily) {
+      daily = await ctx.db.query.dailyWords.findFirst({
+        orderBy: (table, { desc }) => [desc(table.date)],
+        with: {
+          word: {
+            with: {
+              meanings: { limit: 1 }
+            }
+          }
+        }
+      });
+    }
+
+    return daily;
   }),
 });

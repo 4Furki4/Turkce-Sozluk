@@ -8,6 +8,7 @@
     "start": "next start",
     "serve": "next build && next start",
     "offline-data:generate": "bun src/scripts/prepare-offline-data.ts",
+    "seed:daily": "bun src/scripts/seed-daily.ts",
     "seed:tdk": "bun src/scripts/seed-tdk.ts",
     "seed:prod": "NODE_ENV=production bun src/scripts/seed-tdk.ts",
     "lint": "next lint",

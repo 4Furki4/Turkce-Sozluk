@@ -5,8 +5,6 @@ import { Link, useRouter } from "@/src/i18n/routing";
 import { Input } from "@heroui/input";
 import { useEffect, useState } from "react";
 import { Button, Card, CardBody, CardHeader, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@heroui/react";
-// --- 1. REMOVE tRPC IMPORT ---
-// import { api } from "@/src/trpc/react";
 import { useDebounce } from "@uidotdev/usehooks";
 import PopularSearches from "./customs/hero/popular-searches";
 import TrendingSearchesContainer from "./customs/hero/trending-searches-container";
@@ -15,8 +13,8 @@ import { preferencesState } from "../store/preferences";
 import { cn } from "@/lib/utils";
 import { TurkishKeyboard } from "./customs/utils/TurkishKeyboard";
 
-// --- 2. ADD OFFLINE DB IMPORT ---
 import { searchAutocompleteOffline } from "@/src/lib/offline-db";
+import { WordOfTheDayCard } from "./customs/word-of-the-day";
 
 export default function Hero({ children }: {
   children: React.ReactNode;
@@ -31,12 +29,10 @@ export default function Hero({ children }: {
 
   const debouncedInput = useDebounce(wordInput, 300);
 
-  // --- 3. REPLACE TRPC QUERY WITH OFFLINE SEARCH ---
   const [recommendations, setRecommendations] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // This effect now uses the local DB
     if (debouncedInput.length < 2) {
       setRecommendations([]);
       setShowRecommendations(false);
@@ -45,7 +41,6 @@ export default function Hero({ children }: {
 
     const fetchSuggestions = async () => {
       setIsLoading(true);
-      // Call our new super-fast offline function
       const results = await searchAutocompleteOffline(debouncedInput);
       setRecommendations(results);
       setShowRecommendations(results.length > 0);
@@ -54,7 +49,6 @@ export default function Hero({ children }: {
 
     fetchSuggestions();
   }, [debouncedInput]);
-  // --- END OF REPLACEMENT ---
 
   useEffect(() => {
     setSelectedIndex(-1);
@@ -254,7 +248,7 @@ export default function Hero({ children }: {
             <FeatureCard locale={locale} title={t("hero.feature1.title")} description={t("hero.feature1.description")} icon={<HeartHandshake className="w-6 h-6 text-primary" />} />
             <FeatureCard locale={locale} title={t("hero.feature2.title")} description={t("hero.feature2.description")} icon={<Edit3 className="w-6 h-6 text-warning" />} />
           </div>
-
+          <WordOfTheDayCard />
           {/* Popular Searches */}
           <PopularSearches />
 

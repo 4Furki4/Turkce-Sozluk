@@ -78,6 +78,13 @@
       "offlineFeature": {
         "title": "Blazing Fast & Offline",
         "description": "Download the offline dictionary to use it without an internet connection and get even faster results when you are online."
+      },
+      "WordOfTheDay": {
+        "title": "Word of the Day",
+        "noMeaningFound": "No meaning found.",
+        "details": "Details",
+        "addToYourSite": "Add to Your Site",
+        "embedComingSoon": "Embed code functionality coming soon!"
       }
     }
   },
