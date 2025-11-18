@@ -52,7 +52,7 @@ interface UserProfilePageClientProps {
 
 export function UserProfilePageClient({ profileData, session, locale }: UserProfilePageClientProps) {
     const t = useTranslations('ProfilePage');
-    const tEntity = useTranslations('EntityTypes');
+    const tEntity = useTranslations('Requests.entityTypes');
     const tAction = useTranslations('RequestActions');
     const tStatus = useTranslations('RequestStatuses');
     const { isBlurEnabled } = useSnapshot(preferencesState);
