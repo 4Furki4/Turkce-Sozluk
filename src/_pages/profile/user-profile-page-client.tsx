@@ -134,7 +134,7 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                             <ul className="space-y-3">
                                 {savedWordsToRender.map((savedWord) => (
                                     <li key={savedWord.wordId} className="p-3 bg-background rounded-md shadow-sm border">
-                                        <HeroUILink as={NextIntlLink} href={`/${locale}/search/${savedWord.wordName}`}>{savedWord.wordName}</HeroUILink>
+                                        <HeroUILink as={NextIntlLink} href={`/search/${savedWord.wordName}`}>{savedWord.wordName}</HeroUILink>
                                         {/* <p className="font-medium">{savedWord.wordName || t('unknownWord')}</p> */}
                                         {savedWord.firstMeaning && <p className="text-sm text-muted-foreground truncate">{savedWord.firstMeaning}</p>}
                                         <p className="text-xs text-muted-foreground">
