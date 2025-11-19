@@ -39,7 +39,6 @@ type EntityData = Record<string, any>;
 
 export default function AdminRequestDetail({ requestId }: AdminRequestDetailProps) {
   const t = useTranslations("Requests");
-  const tDashboard = useTranslations("Dashboard");
   const router = useRouter();
   const [rejectReason, setRejectReason] = useState("");
   const { isOpen: isRejectModalOpen, onOpen: onRejectModalOpen, onClose: onRejectModalClose } = useDisclosure();
@@ -58,6 +57,8 @@ export default function AdminRequestDetail({ requestId }: AdminRequestDetailProp
     meaning_attributes: t("entityTypes.meaning_attributes"),
     related_phrases: t("entityTypes.related_phrases"),
     pronunciations: t("entityTypes.pronunciations"),
+    misspellings: t("entityTypes.misspellings"),
+    galatimeshur: t("entityTypes.galatimeshur"),
   }), [t]);
 
   // Action labels

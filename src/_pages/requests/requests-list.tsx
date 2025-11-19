@@ -37,6 +37,8 @@ export default function RequestsList() {
     word_attributes: t("entityTypes.word_attributes"),
     meaning_attributes: t("entityTypes.meaning_attributes"),
     pronunciations: t("entityTypes.pronunciations"),
+    misspellings: t("entityTypes.misspellings"),
+    galatimeshur: t("entityTypes.galatimeshur"),
   }), [t]);
 
   const actionLabels = useMemo<Record<Actions, string>>(() => ({
@@ -161,9 +163,9 @@ export default function RequestsList() {
                       <span className="ml-1">
                         {request.resolvedAt
                           ? formatDistanceToNow(new Date(request.resolvedAt), {
-                              addSuffix: true,
-                              locale: locale === 'tr' ? tr : undefined,
-                            })
+                            addSuffix: true,
+                            locale: locale === 'tr' ? tr : undefined,
+                          })
                           : t("details.unknownDate")}
                       </span>
                     </div>

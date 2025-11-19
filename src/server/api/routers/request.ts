@@ -108,7 +108,7 @@ export const requestRouter = createTRPCRouter({
                 "words", "meanings", "roots", "related_words",
                 "related_phrases",
                 "part_of_speechs", "examples", "authors",
-                "word_attributes", "meaning_attributes", "pronunciations"
+                "word_attributes", "meaning_attributes", "pronunciations", "misspellings", "galatimeshur"
             ]).optional(),
             action: z.enum(["create", "update", "delete"]).optional(),
             status: z.enum(["pending", "approved", "rejected"]).optional(),
@@ -1011,7 +1011,8 @@ export const requestRouter = createTRPCRouter({
                 "words", "meanings", "roots", "related_words",
                 "related_phrases",
                 "part_of_speechs", "examples", "authors",
-                "word_attributes", "meaning_attributes", "pronunciations"
+                "word_attributes", "meaning_attributes", "pronunciations",
+                "misspellings", "galatimeshur"
             ]).optional(),
             action: z.enum(["create", "update", "delete"]).optional()
         }))

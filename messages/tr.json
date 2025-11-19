@@ -86,6 +86,14 @@
         "addToYourSite": "Sitene Ekle",
         "embedComingSoon": "Sitene ekle özelliği çok yakında!"
       }
+    },
+    "HomeExtras": {
+      "galatiMeshurTitle": "Galat-ı Meşhur",
+      "galatiMeshurSubtitle": "Yaygın Olarak Doğru Bilinen Yanlışlar",
+      "misspellingsTitle": "Sık Yapılan Yanlışlar",
+      "correct": "Doğru",
+      "wrong": "Yanlış",
+      "seeDetails": "Kelimeye Git"
     }
   },
   "WordCard": {
@@ -593,7 +601,9 @@
       "authors": "Yazarlar",
       "word_attributes": "Kelime Özellikleri",
       "meaning_attributes": "Anlam Özellikleri",
-      "pronunciations": "Telaffuzlar"
+      "pronunciations": "Telaffuzlar",
+      "misspellings": "Yanlış Yazımlar",
+      "galatimeshur": "Galatimeşur"
     },
     "actions": {
       "title": "İşlem",

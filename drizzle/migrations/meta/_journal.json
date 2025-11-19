@@ -246,6 +246,13 @@
       "when": 1763471891760,
       "tag": "0034_shiny_exodus",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1763530434018,
+      "tag": "0035_flowery_menace",
+      "breakpoints": true
     }
   ]
 }

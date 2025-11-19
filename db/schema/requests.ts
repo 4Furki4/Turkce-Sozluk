@@ -25,6 +25,8 @@ export const entityTypesEnum = pgEnum("entity_type", [
   "meaning_attributes",
   "related_phrases",
   "pronunciations",
+  "misspellings",
+  "galatimeshur"
 ]);
 
 export const statusEnum = pgEnum("status", ["pending", "approved", "rejected"]);
