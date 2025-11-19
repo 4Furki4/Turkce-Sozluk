@@ -13,6 +13,7 @@ import { useSnapshot } from 'valtio';
 import { preferencesState } from '@/src/store/preferences';
 // 1. --- IMPORT IDB HELPERS ---
 import { getCachedPopularData, setCachedPopularData } from '@/src/lib/offline-db';
+import PopularSearchesSkeleton from './popular-searches-skeleton';
 
 
 interface PopularWord {
@@ -98,7 +99,7 @@ export default function PopularSearches() {
         // You could show a skeleton loader here if `isLoading` is true
         // and `displayedWords` is empty.
         if (isLoading) {
-            // return <PopularSearchesSkeleton />;
+            return <PopularSearchesSkeleton />;
         }
         return null;
     }
