@@ -18,11 +18,18 @@ import { adminAnnouncementsRouter } from "./admin/announcements";
 import { wordRelationsAdminRouter } from "./admin/word-relations";
 import { feedbackAdminRouter } from "./admin/feedback";
 
+import { dailyWordsAdminRouter } from "./admin/daily-words";
+import { galatiMeshurAdminRouter } from "./admin/galatimeshur";
+import { misspellingsAdminRouter } from "./admin/misspellings";
+
 export const adminRouter = createTRPCRouter({
   dynamicParameters: dynamicParametersRouter,
   wordRelations: wordRelationsAdminRouter,
   announcements: adminAnnouncementsRouter,
   feedback: feedbackAdminRouter,
+  dailyWords: dailyWordsAdminRouter,
+  galatiMeshur: galatiMeshurAdminRouter,
+  misspellings: misspellingsAdminRouter,
   deleteWord: adminProcedure
     .input(
       z.object({

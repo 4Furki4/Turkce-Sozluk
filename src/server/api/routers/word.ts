@@ -29,13 +29,19 @@ export const wordRouter = createTRPCRouter({
       if (input.query.trim() === "") {
         return { words: [] };
       }
+      const variations = generateAccentVariations(input.query);
+      const whereClauses = variations.map((term) =>
+        sql`${words.name} ILIKE ${`%${term}%`}`
+      );
+      const whereSql = sql.join(whereClauses, sql` OR `);
+
       const searchResults = await db
         .select({
           id: words.id,
           word: words.name, // Ensure 'name' is aliased to 'word' for consistency if needed, or use 'name'
         })
         .from(words)
-        .where(sql`unaccent(${words.name}) ILIKE unaccent(${`%${input.query}%`})`)
+        .where(whereSql)
         .limit(input.limit)
         .orderBy(words.name);
       return { words: searchResults };
