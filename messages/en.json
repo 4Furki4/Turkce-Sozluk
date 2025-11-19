@@ -86,6 +86,14 @@
         "addToYourSite": "Add to Your Site",
         "embedComingSoon": "Embed code functionality coming soon!"
       }
+    },
+    "HomeExtras": {
+      "galatiMeshurTitle": "Galat-ı Meşhur",
+      "galatiMeshurSubtitle": "Famous Mistakes",
+      "misspellingsTitle": "Common Misspellings",
+      "correct": "Correct",
+      "wrong": "Wrong",
+      "seeDetails": "See Word"
     }
   },
   "WordCard": {
@@ -632,7 +640,9 @@
       "authors": "Authors",
       "word_attributes": "Word Attributes",
       "meaning_attributes": "Meaning Attributes",
-      "pronunciations": "Pronunciations"
+      "pronunciations": "Pronunciations",
+      "misspellings": "Misspellings",
+      "galatimeshur": "Common Misusage(Galatimeshur)"
     },
     "actions": {
       "title": "Action",

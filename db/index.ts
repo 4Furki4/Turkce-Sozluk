@@ -24,6 +24,8 @@ import { request_votes } from "./schema/request_votes";
 import { pronunciationVotes, pronunciationVotesRelations } from "./schema/pronunciation_votes";
 import { pronunciations, pronunciationsRelations } from "./schema/pronunciations";
 import { dailyWords, dailyWordsRelations } from "./schema/daily-words";
+import { misspellings, misspellingsRelations } from "./schema/misspellings";
+import { galatiMeshur, galatiMeshurRelations } from "./schema/galatimeshur";
 
 export const schema = {
   users,
@@ -61,7 +63,11 @@ export const schema = {
   feedbackVotes,
   feedbackVotesRelations,
   dailyWords,
-  dailyWordsRelations
+  dailyWordsRelations,
+  misspellings,
+  misspellingsRelations,
+  galatiMeshur,
+  galatiMeshurRelations
 };
 
 const globalForDb = globalThis as unknown as {

@@ -15,6 +15,8 @@ import { TurkishKeyboard } from "./customs/utils/TurkishKeyboard";
 
 import { searchAutocompleteOffline } from "@/src/lib/offline-db";
 import { WordOfTheDayCard } from "./customs/word-of-the-day";
+import { GalatiMeshurCard } from "./customs/home/galatimeshur-card";
+import { MisspellingsCard } from "./customs/home/misspellings-card";
 
 export default function Hero({ children }: {
   children: React.ReactNode;
@@ -254,6 +256,11 @@ export default function Hero({ children }: {
 
           {/* Trending Searches */}
           <TrendingSearchesContainer />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+            <GalatiMeshurCard />
+            <MisspellingsCard />
+          </div>
         </div>
       </div>
     </div >
