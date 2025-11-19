@@ -12,7 +12,43 @@ export function MisspellingsCard() {
     const { data, isLoading } = api.extras.getMisspellings.useQuery({ limit: 5 });
 
     if (isLoading) {
-        return <Skeleton className="w-full h-64 rounded-xl" />;
+        return (
+            <CustomCard className="h-full border-default-200 dark:border-default-100">
+                <CardHeader className="flex items-center gap-2 pb-2 pt-4 px-4">
+                    <Skeleton className="w-4 h-4 rounded-full" />
+                    <Skeleton className="w-32 h-3 rounded-lg" />
+                </CardHeader>
+
+                <CardBody className="py-2 px-0">
+                    <div className="flex flex-col">
+                        {Array.from({ length: 5 }).map((_, index) => (
+                            <div
+                                key={index}
+                                className={`flex items-center justify-between px-4 py-3 ${index !== 4 ? "border-b border-divider" : ""
+                                    }`}
+                            >
+                                {/* Incorrect Side Skeleton */}
+                                <div className="flex items-center gap-2 w-1/2">
+                                    <Skeleton className="w-3 h-3 rounded-full shrink-0" />
+                                    <Skeleton className="w-24 h-3 rounded-lg" />
+                                </div>
+
+                                {/* Arrow Skeleton */}
+                                <div className="px-2">
+                                    <Skeleton className="w-4 h-3 rounded-lg" />
+                                </div>
+
+                                {/* Correct Side Skeleton */}
+                                <div className="flex items-center gap-2 w-1/2 justify-end">
+                                    <Skeleton className="w-24 h-3 rounded-lg" />
+                                    <Skeleton className="w-3 h-3 rounded-full shrink-0" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </CardBody>
+            </CustomCard>
+        );
     }
 
     if (!data || data.length === 0) return null;
