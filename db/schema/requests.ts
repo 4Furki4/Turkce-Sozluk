@@ -57,10 +57,12 @@ export const requestsRelations = relations(requests, ({ one, many }) => ({
   user: one(users, {
     fields: [requests.userId],
     references: [users.id],
+    relationName: "requestUser"
   }),
   resolver: one(users, {
     fields: [requests.resolvedBy],
     references: [users.id],
+    relationName: "requestResolver"
   }),
   word: one(words, {
     fields: [requests.entityId],

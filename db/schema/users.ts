@@ -34,7 +34,12 @@ export const users = pgTable("users", {
 export const usersRelations = relations(users, ({ many }) => ({
   saved_words: many(savedWords),
   pronounciations: many(pronunciations),
-  requests: many(requests),
+  requests: many(requests, {
+    relationName: "requestUser"
+  }),
+  resolvedRequests: many(requests, {
+    relationName: "requestResolver"
+  }),
   contributionLogs: many(contributionLogs),
 }));
 
