@@ -11,6 +11,7 @@ import { preferencesState } from '@/src/store/preferences';
 import { cn } from '@/lib/utils';
 // 1. --- IMPORT IDB HELPERS ---
 import { getCachedPopularData, setCachedPopularData } from '@/src/lib/offline-db';
+import PopularSearchesSkeleton from './popular-searches-skeleton';
 
 interface TrendingWord {
     id: number;
@@ -88,7 +89,7 @@ export default function TrendingSearches({ period = '7days' }: TrendingSearchesP
     // 8. --- UPDATE RENDER LOGIC ---
     if (displayedWords.length === 0) {
         if (isLoading) {
-            // You could return a skeleton loader here
+            return <PopularSearchesSkeleton />;
         }
         return null;
     }
