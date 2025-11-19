@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 export const EditMeaningSchema = z.object({
     id: z.string().or(z.number()).optional().nullable(),
     meaning: z.string().min(1, "Meaning input cannot be empty!"),
@@ -40,4 +41,23 @@ export const AddWordSchema = z.object({
         imageUrl: z.string().optional()
     }
     ))
+})
+
+export const DailyWordSchema = z.object({
+    id: z.number().optional(),
+    wordId: z.number({ required_error: "Word is required" }),
+    date: z.string({ required_error: "Date is required" }),
+})
+
+export const GalatiMeshurSchema = z.object({
+    id: z.number().optional(),
+    wordId: z.number({ required_error: "Word is required" }),
+    explanation: z.string().min(1, "Explanation is required"),
+    correctUsage: z.string().min(1, "Correct usage is required"),
+})
+
+export const MisspellingSchema = z.object({
+    id: z.number().optional(),
+    correctWordId: z.number({ required_error: "Correct word is required" }),
+    incorrectSpelling: z.string().min(1, "Incorrect spelling is required"),
 })

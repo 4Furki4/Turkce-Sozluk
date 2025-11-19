@@ -143,6 +143,14 @@ export const routing = defineRouting({
       "en": "/dashboard/announcements/[id]/edit",
       "tr": "/dashboard/duyurular/[id]/duzenle",
     },
+    "/dashboard/daily-words": {
+      "en": "/dashboard/daily-words",
+      "tr": "/dashboard/gundelik-kelimeler",
+    },
+    "/dashboard/daily-words/[id]/edit": {
+      "en": "/dashboard/daily-words/[id]/edit",
+      "tr": "/dashboard/gundelik-kelimeler/[id]/duzenle",
+    },
     "/feedback": {
       "en": "/feedback",
       "tr": "/geri-bildirim",
