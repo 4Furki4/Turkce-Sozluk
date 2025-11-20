@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, usePathname } from "@/src/i18n/routing";
 import { Link as NextUILink } from "@heroui/react";
-import { Settings } from "lucide-react";
+import { Settings, Award } from "lucide-react";
 import { useLocale } from 'next-intl';
 
 const getLinks: (locale: string) => { href: string; label: string; icon?: React.ReactNode; }[] = (locale) => [
@@ -13,6 +13,11 @@ const getLinks: (locale: string) => { href: string; label: string; icon?: React.
   {
     href: "/dashboard/user-list",
     label: locale === "en" ? "User List" : "Kullanıcı Listesi",
+  },
+  {
+    href: "/dashboard/badges",
+    label: locale === "en" ? "Badges" : "Rozetler",
+    icon: <Award className="w-5 h-5" />,
   },
   {
     href: "/dashboard/word-relations",

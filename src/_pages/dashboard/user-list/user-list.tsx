@@ -27,6 +27,8 @@ import { Link } from '@/src/i18n/routing';
 import { Link as NextUILink } from "@heroui/react";
 import RoleEditModal from './role-edit-modal';
 import UserDeleteModal from './user-delete-modal';
+import BadgeAssignmentModal from './badge-assignment-modal';
+import { Award } from 'lucide-react';
 const userPerPageOptions = [
     {
         label: "5",
@@ -58,6 +60,7 @@ export default function UserList(
 ) {
     const { isOpen: isDeleteModalOpen, onOpen: onDeleteModalOpen, onOpenChange: onDeleteModalChange } = useDisclosure();
     const { isOpen: isEditModalOpen, onOpen: onEditModalOpen, onOpenChange: onEditModalChange } = useDisclosure();
+    const { isOpen: isBadgeModalOpen, onOpen: onBadgeModalOpen, onOpenChange: onBadgeModalChange } = useDisclosure();
     const [selectedUser, setSelectedUser] = React.useState<{
         userId?: string | null;
         name?: string | null;
@@ -129,6 +132,14 @@ export default function UserList(
                                     });
                                     onEditModalOpen();
                                 }
+                                if (key === "AssignBadge") {
+                                    setSelectedUser({
+                                        userId: item.key,
+                                        name: item.name,
+                                        role: item.role
+                                    });
+                                    onBadgeModalOpen();
+                                }
                             }}
                         >
                             <DropdownSection title={"Actions"}>
@@ -141,6 +152,9 @@ export default function UserList(
                                 </DropdownItem>
                                 <DropdownItem key={'Edit'} startContent={<Edit3 />} color={"warning"}>
                                     Edit Role
+                                </DropdownItem>
+                                <DropdownItem key={'AssignBadge'} startContent={<Award className="w-4 h-4" />} color={"primary"}>
+                                    Assign Badge
                                 </DropdownItem>
                             </DropdownSection>
                         </DropdownMenu>
@@ -212,6 +226,14 @@ export default function UserList(
             }
             {
                 isDeleteModalOpen ? <UserDeleteModal isOpen={isDeleteModalOpen} name={selectedUser.name!} onOpen={onDeleteModalOpen} onOpenChange={onDeleteModalChange} skip={skip} take={usersPerPage} userId={selectedUser.userId!} /> : null
+            }
+            {isBadgeModalOpen ?
+                <BadgeAssignmentModal
+                    isOpen={isBadgeModalOpen}
+                    onOpenChange={onBadgeModalChange}
+                    userId={selectedUser.userId!}
+                    userName={selectedUser.name!}
+                /> : null
             }
         </>
     )

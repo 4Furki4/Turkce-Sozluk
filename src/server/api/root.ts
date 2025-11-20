@@ -48,6 +48,7 @@ import { feedbackRouter } from "./routers/feedback";
 import { voteRouter } from "./routers/vote";
 import { searchRouter } from "./routers/search";
 import { extrasRouter } from "./routers/extras";
+import { badgeRouter } from "./routers/badge";
 
 /**
  * This is the primary router for your server.
@@ -66,6 +67,7 @@ export const appRouter = createTRPCRouter({
   vote: voteRouter,
   search: searchRouter,
   extras: extrasRouter,
+  badge: badgeRouter,
 });
 
 // export type definition of API
