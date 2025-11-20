@@ -113,7 +113,7 @@ export default function TrendingSearches({ period = '7days' }: TrendingSearchesP
                         className="block"
                     >
                         <Chip
-                            className={cn("rounded-sm md:bg-background/80 dark:bg-background/60 px-4 py-2 text-sm font-medium text-foreground md:shadow-sm ring-1 ring-border/50 hover:bg-background dark:hover:bg-background/80 md:transition-colors md:hover:underline", { "md:backdrop-blur-lg": isBlurEnabled })}
+                            className={cn("rounded-sm md:bg-background/80 dark:bg-background/60 px-4 py-2 text-sm font-medium text-foreground md:shadow-sm ring-1 ring-border/50 hover:bg-background dark:hover:bg-background/80 md:transition-colors md:hover:underline",)}
                         >
                             {word.name}
                         </Chip>
