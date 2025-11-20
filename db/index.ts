@@ -26,6 +26,7 @@ import { pronunciations, pronunciationsRelations } from "./schema/pronunciations
 import { dailyWords, dailyWordsRelations } from "./schema/daily-words";
 import { misspellings, misspellingsRelations } from "./schema/misspellings";
 import { galatiMeshur, galatiMeshurRelations } from "./schema/galatimeshur";
+import { badges, badgesRelations, usersToBadges, usersToBadgesRelations } from "./schema/gamification";
 
 export const schema = {
   users,
@@ -67,7 +68,11 @@ export const schema = {
   misspellings,
   misspellingsRelations,
   galatiMeshur,
-  galatiMeshurRelations
+  galatiMeshurRelations,
+  badges,
+  badgesRelations,
+  usersToBadges,
+  usersToBadgesRelations
 };
 
 const globalForDb = globalThis as unknown as {

@@ -17,6 +17,9 @@ import { authors } from "@/db/schema/authors";
 import { CreateWordRequestSchema } from "../schemas/requests";
 import { contributionLogs } from "@/db/schema/contribution_logs";
 import { request_votes } from "@/db/schema/request_votes";
+import { badges, usersToBadges } from "@/db/schema/gamification";
+import { POINT_ECONOMY } from "@/src/lib/gamification-rules";
+import { notInArray } from "drizzle-orm";
 
 export const requestRouter = createTRPCRouter({
     createPronunciationRequest: protectedProcedure
@@ -1155,12 +1158,86 @@ export const requestRouter = createTRPCRouter({
                 // Process the request with the handler
                 await handler.handle({ tx, request });
 
+                // Calculate points to award
+                let pointsToAward = 0;
+                if (request.action === "create") {
+                    switch (request.entityType) {
+                        case "words":
+                            pointsToAward = POINT_ECONOMY.CREATE_WORD;
+                            break;
+                        case "meanings":
+                            pointsToAward = POINT_ECONOMY.CREATE_MEANING;
+                            break;
+                        case "pronunciations":
+                            pointsToAward = POINT_ECONOMY.CREATE_PRONUNCIATION;
+                            break;
+                        case "meaning_attributes":
+                        case "word_attributes":
+                            pointsToAward = POINT_ECONOMY.CREATE_MEANING_ATTRIBUTE;
+                            break;
+                        case "related_words":
+                        case "related_phrases":
+                            pointsToAward = POINT_ECONOMY.CREATE_RELATED_WORD;
+                            break;
+                    }
+                }
+
                 // Award contribution points
-                await tx.insert(contributionLogs).values({
-                    userId: request.userId,
-                    requestId: request.id,
-                    points: 10, // Award 10 points for each approved request
+                if (pointsToAward > 0) {
+                    await tx.insert(contributionLogs).values({
+                        userId: request.userId,
+                        requestId: request.id,
+                        points: pointsToAward,
+                    });
+
+                    // Update user total points
+                    await tx.update(users)
+                        .set({
+                            points: sql`${users.points} + ${pointsToAward}`
+                        })
+                        .where(eq(users.id, request.userId));
+                }
+
+                // Check for badges
+                const user = await tx.query.users.findFirst({
+                    where: eq(users.id, request.userId),
+                    with: {
+                        badges: true
+                    }
                 });
+
+                if (user) {
+                    const ownedBadgeSlugs = user.badges.map(b => b.badgeSlug);
+                    const availableBadges = await tx.query.badges.findMany({
+                        where: ownedBadgeSlugs.length > 0 ? notInArray(badges.slug, ownedBadgeSlugs) : undefined
+                    });
+
+                    const newBadges: string[] = [];
+
+                    // Get counts for specific requirements
+                    // We can optimize this by only fetching if there are badges with these requirements
+                    const wordCount = await tx.select({ count: sql<number>`count(*)` })
+                        .from(requests)
+                        .where(and(
+                            eq(requests.userId, request.userId),
+                            eq(requests.entityType, "words"),
+                            eq(requests.action, "create"),
+                            eq(requests.status, "approved")
+                        ));
+
+                    const pronunciationCount = await tx.select({ count: sql<number>`count(*)` })
+                        .from(requests)
+                        .where(and(
+                            eq(requests.userId, request.userId),
+                            eq(requests.entityType, "pronunciations"),
+                            eq(requests.action, "create"),
+                            eq(requests.status, "approved")
+                        ));
+
+                    // Include the current request in the count if it matches (since we just approved it but maybe the query doesn't reflect it yet if transaction isolation?)
+                    // Actually we updated the status below, so we should move the status update BEFORE this check or manually add 1.
+                    // Let's move status update up.
+                }
 
                 // Update the request status to approved
                 await tx.update(requests)
@@ -1171,6 +1248,62 @@ export const requestRouter = createTRPCRouter({
                         moderationReason: null,
                     })
                     .where(eq(requests.id, requestId));
+
+                // Re-fetch counts after status update to be safe/accurate
+                if (user) {
+                    const ownedBadgeSlugs = user.badges.map(b => b.badgeSlug);
+                    const availableBadges = await tx.query.badges.findMany({
+                        where: ownedBadgeSlugs.length > 0 ? notInArray(badges.slug, ownedBadgeSlugs) : undefined
+                    });
+
+                    const newBadges: typeof badges.$inferSelect[] = [];
+
+                    const wordCountRes = await tx.select({ count: sql<number>`count(*)` })
+                        .from(requests)
+                        .where(and(
+                            eq(requests.userId, request.userId),
+                            eq(requests.entityType, "words"),
+                            eq(requests.action, "create"),
+                            eq(requests.status, "approved")
+                        ));
+                    const totalWords = wordCountRes[0]?.count || 0;
+
+                    const pronunciationCountRes = await tx.select({ count: sql<number>`count(*)` })
+                        .from(requests)
+                        .where(and(
+                            eq(requests.userId, request.userId),
+                            eq(requests.entityType, "pronunciations"),
+                            eq(requests.action, "create"),
+                            eq(requests.status, "approved")
+                        ));
+                    const totalPronunciations = pronunciationCountRes[0]?.count || 0;
+
+                    for (const badge of availableBadges) {
+                        let earned = false;
+                        switch (badge.requirementType) {
+                            case "min_points":
+                                if (user.points >= badge.requirementValue) earned = true;
+                                break;
+                            case "count_word":
+                                if (totalWords >= badge.requirementValue) earned = true;
+                                break;
+                            case "count_pronunciation":
+                                if (totalPronunciations >= badge.requirementValue) earned = true;
+                                break;
+                            // Add other cases as needed
+                        }
+
+                        if (earned) {
+                            await tx.insert(usersToBadges).values({
+                                userId: request.userId,
+                                badgeSlug: badge.slug,
+                            });
+                            newBadges.push(badge);
+                        }
+                    }
+
+                    return { success: true, newBadges };
+                }
 
                 return { success: true };
             });

@@ -12,6 +12,7 @@ import { pronunciations } from "./pronunciations";
 import { savedWords } from "./saved_words";
 import { requests } from "./requests";
 import { contributionLogs } from "./contribution_logs";
+import { usersToBadges } from "./gamification";
 
 export const rolesEnum = pgEnum("role", ["user", "moderator", "admin"]);
 
@@ -28,7 +29,8 @@ export const users = pgTable("users", {
   username: varchar("username", { length: 255 }),
   role: rolesEnum("role").default("user").notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull()
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+  points: integer("points").default(0).notNull(),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -41,6 +43,7 @@ export const usersRelations = relations(users, ({ many }) => ({
     relationName: "requestResolver"
   }),
   contributionLogs: many(contributionLogs),
+  badges: many(usersToBadges),
 }));
 
 export const usersToWordsRelations = relations(savedWords, ({ one }) => ({

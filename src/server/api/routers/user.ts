@@ -12,6 +12,7 @@ import { meanings } from "@/db/schema/meanings";
 import { examples } from "@/db/schema/examples";
 import { requests as requestsTable, type EntityTypes } from "@/db/schema/requests";
 import { contributionLogs } from "@/db/schema/contribution_logs";
+import { badges, usersToBadges } from "@/db/schema/gamification";
 
 export const userRouter = createTRPCRouter({
   /**
@@ -450,7 +451,33 @@ export const userRouter = createTRPCRouter({
         totalSavedWordsCount = savedWordsCountResult[0]?.count ?? 0;
       }
 
-      // 5. Combine and return all data
+      // 5. Fetch Badges
+      const userBadgesRaw = await db
+        .select({
+          slug: badges.slug,
+          nameTr: badges.nameTr,
+          nameEn: badges.nameEn,
+          descriptionTr: badges.descriptionTr,
+          descriptionEn: badges.descriptionEn,
+          icon: badges.icon,
+          awardedAt: usersToBadges.awardedAt,
+        })
+        .from(usersToBadges)
+        .innerJoin(badges, eq(usersToBadges.badgeSlug, badges.slug))
+        .where(eq(usersToBadges.userId, targetUserId));
+
+      const allBadges = await db.select().from(badges);
+
+      const badgesWithStatus = allBadges.map((badge) => {
+        const earnedBadge = userBadgesRaw.find((ub) => ub.slug === badge.slug);
+        return {
+          ...badge,
+          earned: !!earnedBadge,
+          awardedAt: earnedBadge?.awardedAt ?? null,
+        };
+      });
+
+      // 6. Combine and return all data
       return {
         ...userProfile,
         contributionStats: {
@@ -463,6 +490,7 @@ export const userRouter = createTRPCRouter({
         recentContributions,
         savedWords: isOwnProfile ? userSavedWordsData : undefined,
         totalSavedWordsCount: isOwnProfile ? totalSavedWordsCount : undefined,
+        badges: badgesWithStatus,
       };
     }),
   updateProfile: protectedProcedure
