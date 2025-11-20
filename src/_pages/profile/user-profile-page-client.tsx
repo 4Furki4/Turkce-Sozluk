@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { type Session } from 'next-auth';
 import { type RouterOutputs } from '@/src/trpc/shared';
 import { UserProfileHeader } from './UserProfileHeader';
-import { Card, CardHeader, CardBody } from '@heroui/react';
+import { Card, CardHeader, CardBody, Tooltip } from '@heroui/react';
 import { CheckCheck, Clock, X } from 'lucide-react';
 import { useSnapshot } from 'valtio';
 import { preferencesState } from '@/src/store/preferences';
@@ -117,6 +117,43 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                                 <X className="h-5 w-5 text-red-500" />
                             </div>
                         </div>
+                    </div>
+                </CardBody>
+            </Card>
+
+            {/* Badges Section */}
+            <Card isBlurred={isBlurEnabled} className="border border-border rounded-sm p-2 w-full" classNames={{
+                base: "bg-background/10",
+            }}>
+                <CardHeader>
+                    <h3 className="text-lg font-semibold">{t('badgesTitle')}</h3>
+                </CardHeader>
+                <CardBody>
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        {(profileData as any).badges?.map((badge: any) => {
+                            const name = locale === 'tr' ? badge.nameTr : badge.nameEn;
+                            const description = locale === 'tr' ? badge.descriptionTr : badge.descriptionEn;
+
+                            return (
+                                <Tooltip
+                                    key={badge.slug}
+                                    content={badge.earned ? `${name}: ${description}` : `${t('lockedBadge')}: ${description}`}
+                                >
+                                    <div className={`flex flex-col items-center justify-center p-4 rounded-lg border ${badge.earned ? 'bg-primary/10 border-primary/20' : 'bg-muted/50 border-muted grayscale opacity-70'}`}>
+                                        <div className="text-4xl mb-2">{badge.icon}</div>
+                                        <p className="font-semibold text-center text-sm">{name}</p>
+                                        {badge.earned && (
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                                {new Date(badge.awardedAt).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' })}
+                                            </p>
+                                        )}
+                                    </div>
+                                </Tooltip>
+                            );
+                        })}
+                        {(!(profileData as any).badges || (profileData as any).badges.length === 0) && (
+                            <p className="text-muted-foreground col-span-full">{t('noBadges')}</p>
+                        )}
                     </div>
                 </CardBody>
             </Card>
