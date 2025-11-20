@@ -134,7 +134,13 @@ export default function Hero({ children }: {
                       content: "bg-background"
                     }}>
                       <PopoverTrigger>
-                        <Button className="bg-transparent" isIconOnly variant="flat" radius="none">
+                        <Button
+                          className="bg-transparent"
+                          isIconOnly
+                          variant="flat"
+                          radius="none"
+                          aria-label={t("hero.turkishLetters")}
+                        >
                           <Tooltip content={t("hero.turkishLetters")}>
                             <KeyboardIcon className="text-default-400" />
                           </Tooltip>

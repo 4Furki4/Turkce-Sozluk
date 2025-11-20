@@ -161,7 +161,7 @@ export async function generateMetadata({
     // --- Alternates ---
     // Your alternates configuration is perfect for i18n. No changes needed.
     alternates: {
-      canonical: '/',
+      canonical: `/${locale}`,
       languages: {
         'en-US': '/en',
         'tr-TR': '/tr',
