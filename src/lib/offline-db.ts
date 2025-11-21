@@ -103,7 +103,6 @@ export const getLocalVersion = async (): Promise<number | null> => {
     const db = await getDb();
     return db.get(METADATA_STORE, "version");
 };
-
 export const setLocalVersion = async (version: number): Promise<void> => {
     const db = await getDb();
     await db.put(METADATA_STORE, version, "version");
@@ -111,7 +110,10 @@ export const setLocalVersion = async (version: number): Promise<void> => {
 
 export const clearOfflineData = async (): Promise<void> => {
     const db = await getDb();
-    await db.clear(WORDS_STORE);
+    const tx = db.transaction([WORDS_STORE, METADATA_STORE], "readwrite");
+    await tx.objectStore(WORDS_STORE).clear();
+    await tx.objectStore(METADATA_STORE).clear();
+    await tx.done;
 };
 
 export const processWordFile = async (fileUrl: string): Promise<void> => {
