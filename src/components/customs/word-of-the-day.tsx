@@ -67,9 +67,39 @@ export function WordOfTheDayCard() {
                     </p>
                 )}
 
-                <p className="text-lg text-default-600 italic leading-relaxed px-2 line-clamp-3">
-                    &ldquo;{firstMeaning}&rdquo;
-                </p>
+                {word.meanings && word.meanings.length > 0 ? (
+                    <p className="text-lg text-default-600 italic leading-relaxed px-2 line-clamp-3">
+                        &ldquo;{firstMeaning}&rdquo;
+                    </p>
+                ) : (
+                    <div className="flex flex-col gap-2 items-center">
+                        <p className="text-lg text-default-600 italic leading-relaxed px-2 line-clamp-3">
+                            {t("NavigationWord") || "Navigation Word"}
+                        </p>
+                        <div className="flex flex-wrap gap-2 justify-center">
+                            {/* @ts-ignore */}
+                            {word.relatedWordsList && word.relatedWordsList.length > 0 ? (
+                                // @ts-ignore
+                                word.relatedWordsList.map((related) => (
+                                    <Link
+                                        // @ts-ignore
+                                        key={related.relatedWord.id}
+                                        // @ts-ignore
+                                        href={`/arama/${related.relatedWord.name}`}
+                                        className="px-3 py-1 bg-primary/10 hover:bg-primary/20 rounded-md transition-colors text-primary"
+                                    >
+                                        {/* @ts-ignore */}
+                                        {related.relatedWord.name}
+                                    </Link>
+                                ))
+                            ) : (
+                                <p className="text-sm text-default-400">
+                                    {t("NoMeaningsFound") || "Anlam bulunamadı."}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                )}
             </CardBody>
 
             <CardFooter className="flex justify-center gap-3 pt-0 pb-6">

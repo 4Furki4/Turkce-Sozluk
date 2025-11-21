@@ -84,7 +84,9 @@
         "noMeaningFound": "Anlam bulunamadı.",
         "details": "Detaylar",
         "addToYourSite": "Sitene Ekle",
-        "embedComingSoon": "Sitene ekle özelliği çok yakında!"
+        "embedComingSoon": "Sitene ekle özelliği çok yakında!",
+        "NavigationWord": "Yönlendirme Kelimesi",
+        "NoMeaningsFound": "Anlam bulunamadı."
       }
     },
     "HomeExtras": {

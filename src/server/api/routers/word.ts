@@ -572,34 +572,55 @@ export const wordRouter = createTRPCRouter({
   getWordOfTheDay: publicProcedure.query(async ({ ctx }) => {
     const today = new Date().toISOString().split('T')[0];
 
-    // 1. Try to find today's word
-    let daily = await ctx.db.query.dailyWords.findFirst({
-      where: eq(dailyWords.date, today),
-      with: {
-        word: {
-          with: {
-            meanings: {
-              limit: 1, // We only need the primary meaning for the card
-            }
+    // Fetch the latest daily word up to today
+    // @ts-ignore
+    const result = await ctx.db.execute(sql`
+      SELECT dw.date, w.id, w.name, w.phonetic, w.created_at, w.updated_at, w.root_id, w.prefix, w.suffix, w.view_count, w.variant, w.request_type
+      FROM daily_words dw
+      JOIN words w ON dw.word_id = w.id
+      WHERE dw.date <= ${today}
+      ORDER BY dw.date DESC
+      LIMIT 1
+    `);
+
+    const dailyWordData = result[0];
+
+    if (!dailyWordData) return null;
+
+    // 3. Fetch meanings (limit 1)
+    // @ts-ignore
+    const meaningsResult = await ctx.db.execute(sql`
+      SELECT meaning
+      FROM meanings
+      WHERE word_id = ${dailyWordData.id}
+      LIMIT 1
+    `);
+
+    // 4. Fetch related words
+    // @ts-ignore
+    const relatedWordsResult = await ctx.db.execute(sql`
+      SELECT w.id, w.name, rw.relation_type
+      FROM related_words rw
+      JOIN words w ON rw.related_word_id = w.id
+      WHERE rw.word_id = ${dailyWordData.id}
+    `);
+
+    // Construct the response object
+    return {
+      date: dailyWordData.date as string,
+      word: {
+        id: dailyWordData.id as number,
+        name: dailyWordData.name as string,
+        phonetic: dailyWordData.phonetic as string | null,
+        meanings: meaningsResult as unknown as { meaning: string }[],
+        relatedWordsList: relatedWordsResult.map((r: any) => ({
+          relatedWord: {
+            id: r.id as number,
+            name: r.name as string,
+            relationType: r.relation_type as string
           }
-        }
+        }))
       }
-    });
-
-    // 2. Fallback: If Cron failed or hasn't run yet, show the most recent one
-    if (!daily) {
-      daily = await ctx.db.query.dailyWords.findFirst({
-        orderBy: (table, { desc }) => [desc(table.date)],
-        with: {
-          word: {
-            with: {
-              meanings: { limit: 1 }
-            }
-          }
-        }
-      });
-    }
-
-    return daily;
+    };
   }),
 });
