@@ -1,11 +1,11 @@
 {
   "crons": [
     {
-      "path": "/api/cron/update-view-counts",
+      "path": "/api/update-view-counts",
       "schedule": "0 5 * * *"
     },
     {
-      "path": "/api/cron/generate-daily-word",
+      "path": "/api/generate-daily-words",
       "schedule": "0 0 * * *"
     }
   ]
