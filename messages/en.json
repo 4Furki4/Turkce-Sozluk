@@ -84,7 +84,9 @@
         "noMeaningFound": "No meaning found.",
         "details": "Details",
         "addToYourSite": "Add to Your Site",
-        "embedComingSoon": "Embed code functionality coming soon!"
+        "embedComingSoon": "Embed code functionality coming soon!",
+        "NavigationWord": "Navigation Word",
+        "NoMeaningsFound": "No meanings found."
       }
     },
     "HomeExtras": {
