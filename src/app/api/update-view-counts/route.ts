@@ -3,6 +3,7 @@ import { runUpdateViewCounts } from "@/src/lib/cron/update-view-counts";
 import { NextResponse } from "next/server";
 import { env } from "@/src/env.mjs";
 
+export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization');
 
