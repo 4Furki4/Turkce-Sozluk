@@ -149,16 +149,29 @@ export default function OfflineDictionaryClient() {
         try {
             await clearOfflineData();
 
-            const filesToDownload = metadata.files;
-            for (let i = 0; i < filesToDownload.length; i++) {
-                const file = filesToDownload[i];
-                // Process each file from its full R2 URL
-                await processWordFile(`${DATA_BASE_URL}/${FOLDER_NAME}/${file}`);
-                setProgress(((i + 1) / filesToDownload.length) * 100);
-            }
+            const worker = new Worker(new URL('@/src/lib/workers/offline-download.worker.ts', import.meta.url));
 
-            await setLocalVersion(metadata.version);
-            await checkStatus();
+            worker.onmessage = async (event) => {
+                const { type } = event.data;
+                if (type === 'PROGRESS') {
+                    setProgress(event.data.progress);
+                } else if (type === 'COMPLETE') {
+                    await setLocalVersion(metadata.version);
+                    await checkStatus();
+                    worker.terminate();
+                } else if (type === 'ERROR') {
+                    setError(event.data.error);
+                    setStatus("error");
+                    worker.terminate();
+                }
+            };
+
+            worker.postMessage({
+                type: 'START_DOWNLOAD',
+                files: metadata.files,
+                baseUrl: `${DATA_BASE_URL}/${FOLDER_NAME}`
+            });
+
         } catch (err) {
             console.error(err);
             setError(err instanceof Error ? err.message : String(err));

@@ -1,54 +1,21 @@
-import { openDB, DBSchema, IDBPDatabase } from "idb";
+import { openDB, IDBPDatabase } from "idb";
 import { decode } from "@msgpack/msgpack";
-import { WordSearchResult } from "@/types";
-
-const DB_NAME = "turkish-dictionary-offline";
-const DB_VERSION = 5;
-const WORDS_STORE = "words";
-const METADATA_STORE = "metadata";
-const WORD_NAME_INDEX = "word_name_index";
-
-const AUTOCOMPLETE_STORE = "autocompleteWords";
-const AUTOCOMPLETE_NAME_INDEX = "autocomplete_name_index"; // This will be on the new lowercase `key`
-const AUTOCOMPLETE_VERSION_KEY = "autocompleteVersion";
-const POPULAR_TRENDS_STORE = "popularTrends";
-
-export type WordData = WordSearchResult["word_data"];
-
-interface AutocompleteWord {
-    key: string; // "ankara"
-    displayName: string; // "Ankara"
-}
-interface PopularWord {
-    id: number;
-    name: string;
-}
-interface CachedPopularData {
-    key: string; // "popular-allTime", "trending-7days", etc.
-    data: PopularWord[];
-    timestamp: number;
-}
-
-interface OfflineDB extends DBSchema {
-    [WORDS_STORE]: {
-        key: number;
-        value: WordData;
-        indexes: { [WORD_NAME_INDEX]: string };
-    };
-    [METADATA_STORE]: {
-        key: string;
-        value: any;
-    };
-    [AUTOCOMPLETE_STORE]: {
-        key: string; // This will be the lowercase name ("ankara")
-        value: AutocompleteWord;
-        indexes: { [AUTOCOMPLETE_NAME_INDEX]: string }; // Index will be on the 'key'
-    };
-    [POPULAR_TRENDS_STORE]: {
-        key: string;
-        value: CachedPopularData;
-    };
-}
+import {
+    DB_NAME,
+    DB_VERSION,
+    WORDS_STORE,
+    METADATA_STORE,
+    WORD_NAME_INDEX,
+    AUTOCOMPLETE_STORE,
+    AUTOCOMPLETE_NAME_INDEX,
+    AUTOCOMPLETE_VERSION_KEY,
+    POPULAR_TRENDS_STORE,
+    OfflineDB,
+    WordData,
+    AutocompleteWord,
+    CachedPopularData,
+    PopularWord
+} from "./db-config";
 
 let dbPromise: Promise<IDBPDatabase<OfflineDB>> | null = null;
 
@@ -103,6 +70,7 @@ export const getLocalVersion = async (): Promise<number | null> => {
     const db = await getDb();
     return db.get(METADATA_STORE, "version");
 };
+
 export const setLocalVersion = async (version: number): Promise<void> => {
     const db = await getDb();
     await db.put(METADATA_STORE, version, "version");

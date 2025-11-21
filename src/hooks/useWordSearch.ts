@@ -1,8 +1,9 @@
 "use client";
 import { useQuery, onlineManager } from "@tanstack/react-query";
-import { getWordByNameOffline, type WordData } from "@/src/lib/offline-db";
+import { getWordByNameOffline } from "@/src/lib/offline-db";
 import { useState, useEffect } from "react";
 import { api } from "@/src/trpc/react";
+import { WordData } from "../lib/db-config";
 
 // Define a unified result type for our hook
 type UseWordSearchResult = {
