@@ -9,6 +9,8 @@
 
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 import { ZodError } from "zod";
 import { auth } from "../auth/auth";
 import { db } from "@/db";
@@ -55,6 +57,41 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
       },
     };
   },
+});
+
+// Create a new ratelimiter that allows 20 requests per 10 seconds
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(20, "10 s"),
+  analytics: true,
+  prefix: "@upstash/ratelimit",
+});
+
+const rateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
+  if (process.env.NODE_ENV === "development") {
+    return next();
+  }
+
+  let identifier = "anonymous";
+
+  // Use User ID if logged in
+  if (ctx.session?.user?.id) {
+    identifier = ctx.session.user.id;
+  } else {
+    // Use IP for anonymous users
+    identifier = ctx.headers.get("x-forwarded-for") ?? "127.0.0.1";
+  }
+
+  const { success } = await ratelimit.limit(identifier);
+
+  if (!success) {
+    throw new TRPCError({
+      code: "TOO_MANY_REQUESTS",
+      message: "Rate limit exceeded. Please try again later.",
+    });
+  }
+
+  return next();
 });
 
 /**
@@ -108,7 +145,9 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
-export const publicProcedure = t.procedure.use(timingMiddleware);
+export const publicProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(rateLimitMiddleware);
 
 /**
  * Protected (authenticated) procedure
@@ -120,6 +159,7 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  */
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
+  .use(rateLimitMiddleware)
   .use(({ ctx, next }) => {
     if (!ctx.session || !ctx.session.user) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
@@ -142,4 +182,6 @@ const forceAdminMiddleware = t.middleware(async ({ ctx: { session }, next }) => 
     },
   });
 })
-export const adminProcedure = t.procedure.use(forceAdminMiddleware)
+export const adminProcedure = t.procedure
+  .use(rateLimitMiddleware)
+  .use(forceAdminMiddleware);
