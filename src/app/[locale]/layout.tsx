@@ -239,9 +239,9 @@ export default async function RootLayout({
                 </SessionProvider>
               </Providers>
             </CaptchaProvider >
+            <Toaster />
           </NextIntlClientProvider >
         </TRPCReactProvider >
-        <Toaster />
       </body >
     </html >
   );

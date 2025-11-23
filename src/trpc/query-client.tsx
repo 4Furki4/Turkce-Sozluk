@@ -1,8 +1,12 @@
 import {
     defaultShouldDehydrateQuery,
+    MutationCache,
+    QueryCache,
     QueryClient,
 } from "@tanstack/react-query";
 import SuperJSON from "superjson";
+import { toast } from "sonner";
+import { RateLimitToast } from "../components/customs/rate-limit-toast";
 
 export const createQueryClient = () =>
     new QueryClient({
@@ -27,4 +31,20 @@ export const createQueryClient = () =>
                 deserializeData: SuperJSON.deserialize,
             },
         },
+        // Global Error Handler for Mutations (Writes)
+        mutationCache: new MutationCache({
+            onError: (error: any) => {
+                if (error?.data?.code === "TOO_MANY_REQUESTS") {
+                    toast.error(<RateLimitToast />);
+                }
+            },
+        }),
+        // Global Error Handler for Queries (Reads)
+        queryCache: new QueryCache({
+            onError: (error: any) => {
+                if (error?.data?.code === "TOO_MANY_REQUESTS") {
+                    toast.error(<RateLimitToast />);
+                }
+            },
+        }),
     });
