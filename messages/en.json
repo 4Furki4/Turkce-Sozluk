@@ -929,7 +929,8 @@
     "MustBeLoggedIn": "You must be logged in to perform this action.",
     "OriginalRelationTypeMissing": "Original relation type is missing. Cannot submit edit request.",
     "captchaFailed": "reCAPTCHA verification failed. Please try again as you may be a robot.",
-    "captchaError": "Could not get reCAPTCHA token. Please check your connection and try again."
+    "captchaError": "Could not get reCAPTCHA token. Please check your connection and try again.",
+    "TooManyRequests": "You are doing that too fast. Please slow down."
   },
   "DbFieldLabels": {
     "reason": "Reason",
