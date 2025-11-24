@@ -48,10 +48,14 @@ export const feedbackRouter = createTRPCRouter({
      * Toggles a vote on a feedback item for the logged-in user.
      */
     vote: protectedProcedure
-        .input(z.object({ feedbackId: z.number() }))
+        .input(z.object({
+            feedbackId: z.number(),
+            voteType: z.enum(['up', 'down'])
+        }))
         .mutation(async ({ ctx: { db, session }, input }) => {
-            const { feedbackId } = input;
+            const { feedbackId, voteType } = input;
             const { id: userId } = session.user;
+            const voteValue = voteType === 'up' ? 1 : -1;
 
             const existingVote = await db.query.feedbackVotes.findFirst({
                 where: and(
@@ -61,13 +65,28 @@ export const feedbackRouter = createTRPCRouter({
             });
 
             if (existingVote) {
-                await db
-                    .delete(feedbackVotes)
-                    .where(eq(feedbackVotes.id, existingVote.id));
-                return { voted: false };
+                if (existingVote.voteType === voteValue) {
+                    // Toggle off if clicking same vote type
+                    await db
+                        .delete(feedbackVotes)
+                        .where(eq(feedbackVotes.id, existingVote.id));
+                    return { voted: false, voteType: null };
+                } else {
+                    // Change vote type
+                    await db
+                        .update(feedbackVotes)
+                        .set({ voteType: voteValue })
+                        .where(eq(feedbackVotes.id, existingVote.id));
+                    return { voted: true, voteType: voteValue };
+                }
             } else {
-                await db.insert(feedbackVotes).values({ feedbackId, userId });
-                return { voted: true };
+                // New vote
+                await db.insert(feedbackVotes).values({
+                    feedbackId,
+                    userId,
+                    voteType: voteValue
+                });
+                return { voted: true, voteType: voteValue };
             }
         }),
 
@@ -101,13 +120,13 @@ export const feedbackRouter = createTRPCRouter({
             // Build where conditions
             const whereConditions = and(
                 // Apply status filters
-                status && status.length > 0 
+                status && status.length > 0
                     ? or(...status.map(s => eq(feedbacks.status, s)))
-                    : excludeStatuses.length > 0 
+                    : excludeStatuses.length > 0
                         ? notInArray(feedbacks.status, excludeStatuses)
                         : undefined,
                 // Apply type filters
-                type && type.length > 0 
+                type && type.length > 0
                     ? or(...type.map(t => eq(feedbacks.type, t)))
                     : undefined,
                 // Apply search term
@@ -127,14 +146,14 @@ export const feedbackRouter = createTRPCRouter({
             const voteCounts = db
                 .select({
                     feedbackId: feedbackVotes.feedbackId,
-                    count: sql<number>`count(*)`.as("count"),
+                    count: sql<number>`sum(vote_type)`.as("count"),
                 })
                 .from(feedbackVotes)
                 .groupBy(feedbackVotes.feedbackId)
                 .as("vote_counts");
 
             // Determine sort order
-            const orderByClause = sortBy === "votes" 
+            const orderByClause = sortBy === "votes"
                 ? (sortOrder === "desc" ? desc(sql<number>`COALESCE(${voteCounts.count}, 0)`) : asc(sql<number>`COALESCE(${voteCounts.count}, 0)`))
                 : (sortOrder === "desc" ? desc(feedbacks.createdAt) : asc(feedbacks.createdAt));
 
@@ -147,6 +166,9 @@ export const feedbackRouter = createTRPCRouter({
                         image: users.image,
                     },
                     voteCount: sql<number>`COALESCE(${voteCounts.count}, 0)`,
+                    userVote: userId
+                        ? sql<number>`(SELECT vote_type FROM feedback_votes WHERE feedback_votes.feedback_id = feedbacks.id AND feedback_votes.user_id = ${userId})`
+                        : sql<number>`0`,
                     hasVoted: userId
                         ? sql<boolean>`EXISTS (SELECT 1 FROM feedback_votes WHERE feedback_votes.feedback_id = feedbacks.id AND feedback_votes.user_id = ${userId})`
                         : sql<boolean>`false`,

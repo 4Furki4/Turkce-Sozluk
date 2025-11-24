@@ -21,4 +21,5 @@ export default defineConfig({
     verbose: true,
     strict: true,
     out: "./drizzle/migrations",
+    tablesFilter: ["!pg_stat_*"],
 }) satisfies Config;

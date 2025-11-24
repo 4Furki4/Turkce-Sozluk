@@ -13,6 +13,7 @@ export const feedbackVotes = pgTable(
         feedbackId: integer("feedback_id")
             .notNull()
             .references(() => feedbacks.id, { onDelete: "cascade" }),
+        voteType: integer("vote_type").notNull().default(1),
     },
     (table) => {
         return [

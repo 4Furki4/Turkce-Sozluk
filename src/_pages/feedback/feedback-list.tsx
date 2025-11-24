@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Avatar, Button, Card, CardBody, CardFooter, CardHeader, Chip } from "@heroui/react";
 import { formatDate } from "@/src/utils/date";
 import { toast } from "sonner";
-import { type inferRouterOutputs } from "@trpc/server";
+import { type inferRouterOutputs, type inferRouterInputs } from "@trpc/server";
 import { type AppRouter } from "@/src/server/api/root";
 import { Session } from "next-auth";
 import { FeedbackStatus, statusColorMap } from "../dashboard/feedback/feedback-list";
@@ -15,42 +15,64 @@ import { useDebounce } from "@/src/hooks/use-debounce";
 import { feedbackTypeEnum, feedbackStatusEnum } from "@/db/schema/feedbacks";
 import { FeedbackSkeleton } from "./skeleton";
 
+import { ArrowUpIcon, ArrowDownIcon } from "lucide-react";
+
 // Define the type for a single feedback item based on router output
 type RouterOutput = inferRouterOutputs<AppRouter>;
+type RouterInput = inferRouterInputs<AppRouter>;
 type FeedbackItem = RouterOutput["feedback"]["list"]["items"][number];
+type FeedbackListInput = RouterInput["feedback"]["list"];
 type InitialFeedbackData = RouterOutput["feedback"]["list"];
 
 /**
  * Renders a single feedback card with details and voting button.
  */
-function FeedbackCard({ item, session }: { item: FeedbackItem, session: Session | null }) {
+function FeedbackCard({ item, session, queryFilters }: { item: FeedbackItem, session: Session | null, queryFilters: FeedbackListInput }) {
     const t = useTranslations("Feedback");
     const tDashboard = useTranslations("Dashboard.feedback");
     const utils = api.useUtils();
 
     const voteMutation = api.feedback.vote.useMutation({
-        onMutate: async ({ feedbackId }) => {
+        onMutate: async ({ feedbackId, voteType }) => {
             // Optimistic update
             await utils.feedback.list.cancel();
             const previousData = utils.feedback.list.getInfiniteData();
 
-            utils.feedback.list.setInfiniteData({}, (oldData) => {
+            utils.feedback.list.setInfiniteData(queryFilters, (oldData) => {
                 if (!oldData) return previousData;
                 return {
                     ...oldData,
                     pages: oldData.pages.map((page) => ({
                         ...page,
-                        items: page.items.map((feedbackItem) =>
-                            feedbackItem.feedback.id === feedbackId
-                                ? {
-                                    ...feedbackItem,
-                                    hasVoted: !feedbackItem.hasVoted,
-                                    voteCount: feedbackItem.hasVoted
-                                        ? feedbackItem.voteCount - 1
-                                        : feedbackItem.voteCount + 1,
-                                }
-                                : feedbackItem
-                        ),
+                        items: page.items.map((feedbackItem) => {
+                            if (feedbackItem.feedback.id !== feedbackId) return feedbackItem;
+
+                            const currentVote = feedbackItem.userVote;
+                            const voteValue = voteType === 'up' ? 1 : -1;
+                            let newVoteCount = Number(feedbackItem.voteCount);
+                            let newUserVote = 0;
+
+                            if (currentVote === voteValue) {
+                                // Toggling off
+                                newVoteCount -= voteValue;
+                                newUserVote = 0;
+                            } else if (currentVote === -voteValue) {
+                                // Changing vote (e.g. from -1 to +1, diff is +2)
+                                newVoteCount += 2 * voteValue;
+                                newUserVote = voteValue;
+                            } else {
+                                // New vote (from 0 to +1 or -1)
+                                newVoteCount += voteValue;
+                                newUserVote = voteValue;
+                            }
+
+                            return {
+                                ...feedbackItem,
+                                userVote: newUserVote,
+                                hasVoted: newUserVote !== 0,
+                                voteCount: newVoteCount,
+                            };
+                        }),
                     })),
                 };
             });
@@ -59,7 +81,7 @@ function FeedbackCard({ item, session }: { item: FeedbackItem, session: Session 
         },
         onError: (err, newVote, context) => {
             // Revert on error
-            utils.feedback.list.setInfiniteData({}, context?.previousData);
+            utils.feedback.list.setInfiniteData(queryFilters, context?.previousData);
             toast.error(t("voteError"));
         },
         onSettled: () => {
@@ -67,12 +89,12 @@ function FeedbackCard({ item, session }: { item: FeedbackItem, session: Session 
         },
     });
 
-    const handleVote = () => {
+    const handleVote = (voteType: 'up' | 'down') => {
         if (!session) {
             toast.error(t('mustBeLoggedIn'));
             return;
         }
-        voteMutation.mutate({ feedbackId: item.feedback.id });
+        voteMutation.mutate({ feedbackId: item.feedback.id, voteType });
     };
 
     const isUpvoteDisabled = useCallback((feedbackStatus: FeedbackStatus) => {
@@ -119,18 +141,29 @@ function FeedbackCard({ item, session }: { item: FeedbackItem, session: Session 
                 <p className="text-default-600">{item.feedback.description}</p>
             </CardBody>
             <CardFooter className="gap-3">
-                <Button
-                    color={item.hasVoted ? "primary" : "default"}
-                    variant={item.hasVoted ? "solid" : "bordered"}
-                    size="sm"
-                    onPress={handleVote}
-                    isDisabled={!session || isUpvoteDisabled(item.feedback.status)}
-                    isLoading={voteMutation.isPending}
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 15 7-7 7 7" /></svg>
-                    <span>{t("upvote")}</span>
-                    <span className="font-bold">{item.voteCount}</span>
-                </Button>
+                <div className="flex gap-1 items-center">
+                    <Button
+                        isIconOnly
+                        size="sm"
+                        variant={item.userVote === 1 ? "solid" : "light"}
+                        color={item.userVote === 1 ? "primary" : "default"}
+                        onPress={() => handleVote('up')}
+                        isDisabled={!session || isUpvoteDisabled(item.feedback.status)}
+                    >
+                        <ArrowUpIcon className="w-5 h-5" />
+                    </Button>
+                    <p className="font-semibold text-default-400 text-small">{item.voteCount}</p>
+                    <Button
+                        isIconOnly
+                        size="sm"
+                        variant={item.userVote === -1 ? "solid" : "light"}
+                        color={item.userVote === -1 ? "danger" : "default"}
+                        onPress={() => handleVote('down')}
+                        isDisabled={!session || isUpvoteDisabled(item.feedback.status)}
+                    >
+                        <ArrowDownIcon className="w-5 h-5" />
+                    </Button>
+                </div>
             </CardFooter>
         </Card>
     );
@@ -217,7 +250,7 @@ export function FeedbackList({ session }: FeedbackListProps) {
                     </div>
                 ) : (
                     allItems.map((item) => (
-                        <FeedbackCard key={item.feedback.id} item={item} session={session} />
+                        <FeedbackCard key={item.feedback.id} item={item} session={session} queryFilters={queryFilters} />
                     ))
                 )}
 
