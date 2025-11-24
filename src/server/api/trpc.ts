@@ -68,9 +68,9 @@ const ratelimit = new Ratelimit({
 });
 
 const rateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
-  // if (process.env.NODE_ENV === "development") {
-  //   return next();
-  // }
+  if (process.env.NODE_ENV === "development") {
+    return next();
+  }
 
   let identifier = "anonymous";
 
