@@ -99,7 +99,15 @@ export const userRouter = createTRPCRouter({
           ws_a.word_id = w.id
       ),
       'root',
-      JSON_BUILD_OBJECT('root', r.root, 'language', l.language_en)
+      JSON_BUILD_OBJECT('root', r.root, 'language', l.language_en),
+      'meaning',
+      (
+        SELECT m.meaning
+        FROM meanings m
+        WHERE m.word_id = w.id
+        ORDER BY m."order" ASC
+        LIMIT 1
+      )
     ) AS word_data
   FROM
     users u

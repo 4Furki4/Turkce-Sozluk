@@ -128,6 +128,7 @@ type SavedWordsResult = {
       root: string;
       language: string;
     };
+    meaning: string;
   }
 }
 type DashboardWordList = {

@@ -50,7 +50,7 @@ export default function SavedWordsToolbar({ onSearch, onAlphabetSort, onDateSort
   const t = useTranslations("SavedWords.Toolbar");
   const [search, setSearch] = useState("");
   const [sortAlphabet, setSortAlphabet] = useState<AlphabetOrder>("az");
-  const [sortDate, setSortDate] = useState<DateOrder>("dateAsc");
+  const [sortDate, setSortDate] = useState<DateOrder>("dateDesc");
   const { isBlurEnabled } = useSnapshot(preferencesState);
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -60,10 +60,7 @@ export default function SavedWordsToolbar({ onSearch, onAlphabetSort, onDateSort
   }, [search, onSearch]);
 
   return (
-    <div className={cn("grid md:grid-cols-2 lg:grid-cols-4 items-center gap-4 px-4 py-2 bg-background border-2 border-border rounded-sm", {
-      "backdrop-blur-md bg-background/10 backdrop-saturate-150 transition-all duration-300 motion-reduce:transition-none": isBlurEnabled,
-      "bg-background/70 transition-all duration-300": !isBlurEnabled
-    })}>
+    <div className={cn("grid md:grid-cols-2 lg:grid-cols-4 items-center gap-4 px-4 py-2 bg-background/20 border-2 border-border rounded-sm")}>
       <div className="w-full">
         <CustomInput
           value={search}
@@ -102,7 +99,7 @@ export default function SavedWordsToolbar({ onSearch, onAlphabetSort, onDateSort
             return acc;
           }, {} as OptionsMap)}
           placeholder={t("sortPlaceholder")}
-          defaultSelectedKeys={["dateAsc"]}
+          defaultSelectedKeys={["dateDesc"]}
           onChange={(e) => {
             const val = (e.target as HTMLSelectElement).value as DateOrder;
             setSortDate(val);
