@@ -60,6 +60,8 @@
       "title": "Modern Turkish Dictionary",
       "motto": "Enrich your vocabulary, enhance your understanding",
       "searchPlaceholder": "Search for a word...",
+      "searchPlaceholderPhrase": "Search for a phrase...",
+      "searchPlaceholderProverb": "Search for a proverb...",
       "popularSearches": "Popular Searches",
       "searchError": "Please enter a word to search",
       "turkishLetters": "Turkish letters",
