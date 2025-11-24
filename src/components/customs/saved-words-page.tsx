@@ -15,7 +15,7 @@ interface SavedWordsPageProps {
 
 export default function SavedWordsPage({ session, locale }: SavedWordsPageProps) {
   const [sortAlphabet, setSortAlphabet] = useState<AlphabetOrder>("az");
-  const [sortDate, setSortDate] = useState<DateOrder>("dateAsc");
+  const [sortDate, setSortDate] = useState<DateOrder>("dateDesc");
   const [pageNumber, setPageNumber] = useState(1);
   const [perPage, setPerPage] = useState(6);
   const [sortBy, setSortBy] = useState<"alphabet" | "date">("date");
