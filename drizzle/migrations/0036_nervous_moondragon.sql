@@ -1,0 +1,1 @@
+ALTER TABLE "feedback_votes" ADD COLUMN "vote_type" integer DEFAULT 1 NOT NULL;
