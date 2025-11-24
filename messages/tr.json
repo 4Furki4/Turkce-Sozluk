@@ -61,6 +61,8 @@
       "title": "Çağdaş Türkçe Sözlüğü",
       "motto": "Söz hazineni genişlet, zihin hazinen genişlesin.",
       "searchPlaceholder": "Kelime ara...",
+      "searchPlaceholderPhrase": "Deyim ara...",
+      "searchPlaceholderProverb": "Atasözü ara...",
       "popularSearches": "Popüler Aramalar",
       "searchError": "Lütfen aramak için bir kelime girin",
       "feature1": {

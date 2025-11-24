@@ -17,6 +17,7 @@ import { searchAutocompleteOffline } from "@/src/lib/offline-db";
 import { WordOfTheDayCard } from "./customs/word-of-the-day";
 import { GalatiMeshurCard } from "./customs/home/galatimeshur-card";
 import { MisspellingsCard } from "./customs/home/misspellings-card";
+import { useTypewriter } from "../hooks/use-typewriter";
 
 export default function Hero({ children }: {
   children: React.ReactNode;
@@ -33,6 +34,12 @@ export default function Hero({ children }: {
 
   const [recommendations, setRecommendations] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const typeWriterText = useTypewriter([
+    t("hero.searchPlaceholder"),
+    t("hero.searchPlaceholderPhrase"),
+    t("hero.searchPlaceholderProverb")
+  ]);
 
   useEffect(() => {
     if (debouncedInput.length < 2) {
@@ -198,13 +205,13 @@ export default function Hero({ children }: {
                   color="primary"
                   variant="bordered"
                   name="search"
-                  placeholder={t("hero.searchPlaceholder")}
+                  placeholder={typeWriterText}
                   isInvalid={!!inputError}
                   errorMessage={inputError}
                   type="search"
                 />
                 {showRecommendations && isLoading && (
-                  <div className="absolute z-10 w-full mt-1 bg-background/90 backdrop-blur-xs border border-primary/20 rounded-md shadow-lg text-left border-b-0 p-2">
+                  <div className="absolute z-50 w-full mt-1 bg-background/90 backdrop-blur-xs border border-primary/20 rounded-md shadow-lg text-left border-b-0 p-2">
                     {Array.from({ length: 5 }).map((_, idx) => (
                       <div
                         key={idx}
@@ -215,7 +222,7 @@ export default function Hero({ children }: {
                 )}
                 {/* --- 5. UPDATE RENDER LOGIC --- */}
                 {showRecommendations && recommendations && recommendations.length > 0 && (
-                  <div className="absolute z-10 w-full mt-1 bg-background/90 backdrop-blur-xs border border-primary/20 rounded-md shadow-lg text-left border-b-0">
+                  <div className="absolute z-50 w-full mt-1 bg-background/90 backdrop-blur-xs border border-primary/20 rounded-md shadow-lg text-left border-b-0">
                     <ul role="listbox">
                       {recommendations.map((wordName, index) => (
                         <li
