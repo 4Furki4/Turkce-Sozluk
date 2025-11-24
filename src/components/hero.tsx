@@ -3,7 +3,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Download, Edit3, HeartHandshake, KeyboardIcon, Search as SearchIcon, Stars } from "lucide-react";
 import { Link, useRouter } from "@/src/i18n/routing";
 import { Input } from "@heroui/input";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Card, CardBody, CardHeader, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@heroui/react";
 import { useDebounce } from "@uidotdev/usehooks";
 import PopularSearches from "./customs/hero/popular-searches";
@@ -41,7 +41,14 @@ export default function Hero({ children }: {
     t("hero.searchPlaceholderProverb")
   ]);
 
+  const isSelecting = useRef(false);
+
   useEffect(() => {
+    if (isSelecting.current) {
+      isSelecting.current = false;
+      return;
+    }
+
     if (debouncedInput.length < 2) {
       setRecommendations([]);
       setShowRecommendations(false);
@@ -110,6 +117,7 @@ export default function Hero({ children }: {
   };
 
   const handleRecommendationClick = (word: string) => {
+    isSelecting.current = true;
     setWordInput(word);
     setShowRecommendations(false);
     router.push({
