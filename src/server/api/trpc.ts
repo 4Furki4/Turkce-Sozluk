@@ -82,13 +82,22 @@ const rateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
     identifier = ctx.headers.get("x-forwarded-for") ?? "127.0.0.1";
   }
 
-  const { success } = await ratelimit.limit(identifier);
+  try {
+    const { success } = await ratelimit.limit(identifier);
 
-  if (!success) {
-    throw new TRPCError({
-      code: "TOO_MANY_REQUESTS",
-      message: "Rate limit exceeded. Please try again later.",
-    });
+    if (!success) {
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded. Please try again later.",
+      });
+    }
+  } catch (error) {
+    if (error instanceof TRPCError) {
+      throw error;
+    }
+    // Fail open: Log error and allow request to proceed
+    console.error("Rate Limiter Error (Fail Open):", error);
+    return next();
   }
 
   return next();
