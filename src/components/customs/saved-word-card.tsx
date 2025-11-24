@@ -43,12 +43,22 @@ export default function SavedWordCard({ wordData, onUnsave, session, locale }: S
       <CustomCard className="group relative overflow-hidden border border-white/10 bg-gradient-to-br from-white/5 to-white/10 dark:from-black/20 dark:to-black/40 backdrop-blur-md hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-xl hover:border-primary/30">
         <CardHeader className="flex flex-col items-start gap-1 pt-6 px-6 pb-2">
           <div className="flex items-baseline gap-2 w-full">
-            <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70 truncate">
-              <Link color="foreground" className="hover:text-primary transition-colors" as={NextIntlLink} href={`/search/${encodeURIComponent(wordData.word_name)}`}>
+            <h3 className="text-2xl font-bold truncate">
+              <Link underline="hover" className="text-primary hover:text-primary transition-colors max-sm:underline decoration-primary hover:decoration-primary" as={NextIntlLink} href={`/search/${encodeURIComponent(wordData.word_name)}`}>
                 {wordData.word_name}
               </Link>
             </h3>
+            {wordData.root?.root && (
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                {wordData.root.root}
+              </span>
+            )}
           </div>
+          {wordData.root?.language && (
+            <p className="text-xs text-default-400 uppercase tracking-wider font-semibold">
+              {wordData.root.language}
+            </p>
+          )}
         </CardHeader>
 
         <CardBody className="px-6 py-2">
@@ -67,7 +77,7 @@ export default function SavedWordCard({ wordData, onUnsave, session, locale }: S
               locale: locale === 'tr' ? tr : undefined
             })}
           </p>
-          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
             <Button
               isIconOnly
               size="sm"
