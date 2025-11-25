@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 import { api } from "@/src/trpc/react";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import {
     getLocalAutocompleteVersion,
     updateLocalAutocompleteList,
@@ -13,6 +15,7 @@ import {
  * and updates it if necessary.
  */
 export function AutocompleteSync() {
+    const t = useTranslations("OfflineSync");
     // Get the tRPC client
     const trpcClient = api.useUtils().client;
 
@@ -39,6 +42,7 @@ export function AutocompleteSync() {
 
             // 5. Versions are different. Fetch and update.
             console.log("[AutocompleteSync] Stale data. Fetching new list...");
+            toast.info(t("downloading"));
             try {
                 // Use the tRPC client for a one-off call
                 const wordList = await trpcClient.word.getAllWordNames.query();
@@ -49,13 +53,15 @@ export function AutocompleteSync() {
                 console.log(
                     `[AutocompleteSync] Synced ${wordList.length} words.`,
                 );
+                toast.success(t("success"));
             } catch (error) {
                 console.error("[AutocompleteSync] Failed to sync word list:", error);
+                toast.error(t("error"));
             }
         };
 
         syncData();
-    }, [serverVersion, trpcClient]);
+    }, [serverVersion, trpcClient, t]);
 
     return null; // This component renders nothing
 }
