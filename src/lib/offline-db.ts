@@ -217,3 +217,51 @@ export const setCachedPopularData = async (
     };
     await db.put(POPULAR_TRENDS_STORE, cacheEntry);
 };
+
+export const searchByPattern = async (
+    pattern: string,
+    limit: number = 20
+): Promise<WordData[]> => {
+    const db = await getDb();
+
+    // 1. Convert pattern to Regex
+    // Escape special regex characters except underscore
+    const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Replace underscore with dot (match any char)
+    const regexString = `^${escapedPattern.replace(/_/g, '.')}$`;
+    const regex = new RegExp(regexString, 'i'); // Case insensitive
+
+    const results: WordData[] = [];
+    let count = 0;
+
+    // 2. Iterate using a cursor on AUTOCOMPLETE_STORE
+    const tx = db.transaction(AUTOCOMPLETE_STORE, 'readonly');
+    const store = tx.objectStore(AUTOCOMPLETE_STORE);
+
+    // Optimization: If pattern starts with characters, use them as a range
+    let range: IDBKeyRange | null = null;
+    const firstUnderscoreIndex = pattern.indexOf('_');
+    if (firstUnderscoreIndex > 0) {
+        const prefix = pattern.substring(0, firstUnderscoreIndex).toLowerCase();
+        range = IDBKeyRange.bound(prefix, prefix + '\uffff');
+    }
+
+    let cursor = await store.openCursor(range);
+
+    while (cursor && count < limit) {
+        const word = cursor.value as AutocompleteWord;
+
+        // Check against displayName (original casing)
+        if (regex.test(word.displayName)) {
+            results.push({
+                word_id: 0, // Placeholder ID since we are searching autocomplete
+                word_name: word.displayName,
+                // We don't have full data here, but it's enough for suggestions
+            } as unknown as WordData);
+            count++;
+        }
+        cursor = await cursor.continue();
+    }
+
+    return results;
+};

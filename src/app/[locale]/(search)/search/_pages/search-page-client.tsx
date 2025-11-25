@@ -49,13 +49,13 @@ export default function SearchPageClient() {
     console.log(`[SearchPageClient] Rendering word card for: ${wordName}, source: ${data.source}`);
 
     // WordCardWrapper expects WordSearchResult[] format, so we need to wrap the data properly
-    const wordSearchResult = {
-        word_data: data
-    };
+    const wordSearchResult = Array.isArray(data)
+        ? data.map(item => ({ word_data: item }))
+        : [{ word_data: data }];
 
     return (
         <WordCardWrapper
-            data={[wordSearchResult]}
+            data={wordSearchResult}
             session={session}
             locale={locale as "en" | "tr"}
         />
