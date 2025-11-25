@@ -1372,5 +1372,10 @@
     "loginToVoteMessage": "Telaffuzlara oy vermek için giriş yapın",
     "voteError": "Telaffuza oy verme başarısız",
     "audioPlayError": "Ses çalınamadı"
+  },
+  "OfflineSync": {
+    "downloading": "Arama öneri verileri indiriliyor. Öneriler birkaç saniye görünmeyebilir.",
+    "success": "Arama öneri verileri hazır!",
+    "error": "Arama öneri verileri güncellenemedi."
   }
 }

@@ -1406,5 +1406,10 @@
     "loginToVoteMessage": "Login to vote on pronunciations",
     "voteError": "Failed to vote on pronunciation",
     "audioPlayError": "Failed to play audio"
+  },
+  "OfflineSync": {
+    "downloading": "Word suggestions data is being downloaded. Suggestions may not appear for a few seconds.",
+    "success": "Word suggestions data is ready!",
+    "error": "Failed to update word suggestions data."
   }
 }
