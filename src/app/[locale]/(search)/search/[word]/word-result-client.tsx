@@ -28,10 +28,18 @@ export default function WordResultClient({ session, wordName }: WordResultClient
         return <WordNotFoundCard session={session} />;
     }
 
-    // The WordCard expects data in a specific array format.
-    // We wrap our single result to match that expected structure.
+    // Handle both single result (normal search) and multiple results (pattern search)
+    const formattedData = Array.isArray(data)
+        ? data.map(item => ({ word_data: item }))
+        : [{ word_data: data }];
 
-    const formattedData = [{ word_data: data }];
-
-    return <WordCardWrapper locale={locale as "en" | "tr"} data={formattedData as any} session={session} isWordFetching={isFetching} isOnline={isOnline} />;
+    return (
+        <WordCardWrapper
+            locale={locale as "en" | "tr"}
+            data={formattedData as any}
+            session={session}
+            isWordFetching={isFetching}
+            isOnline={isOnline}
+        />
+    );
 }

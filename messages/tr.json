@@ -65,6 +65,7 @@
       "searchPlaceholderProverb": "Atasözü ara...",
       "popularSearches": "Popüler Aramalar",
       "searchError": "Lütfen aramak için bir kelime girin",
+      "patternSearchTooltip": "Desen Arama: Bilinmeyen harfler için '_' kullanın. Örn: 'k_l_m' -> 'kalem'",
       "feature1": {
         "title": "Katkıda Bulunun",
         "description": "Yeni kelimeler, anlamlar ve özellikler önererek ve telaffuzlar ekleyerek sözlüğe katkıda bulunabilirsiniz"

@@ -65,6 +65,7 @@
       "popularSearches": "Popular Searches",
       "searchError": "Please enter a word to search",
       "turkishLetters": "Turkish letters",
+      "patternSearchTooltip": "Pattern Search: Use '_' for unknown letters. Ex: 'k_l_m' -> 'kalem'",
       "feature1": {
         "title": "Contribute",
         "description": "You can contribute to the dictionary by suggesting new words, meanings, and features, and by adding pronunciations."

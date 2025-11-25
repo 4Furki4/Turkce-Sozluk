@@ -1,6 +1,6 @@
 "use client";
 import { useLocale, useTranslations } from "next-intl";
-import { Download, Edit3, HeartHandshake, KeyboardIcon, Search as SearchIcon, Stars } from "lucide-react";
+import { Download, Edit3, HeartHandshake, KeyboardIcon, Search as SearchIcon, Stars, PuzzleIcon } from "lucide-react";
 import { Link, useRouter } from "@/src/i18n/routing";
 import { Input } from "@heroui/input";
 import { useEffect, useRef, useState } from "react";
@@ -13,7 +13,7 @@ import { preferencesState } from "../store/preferences";
 import { cn } from "@/lib/utils";
 import { TurkishKeyboard } from "./customs/utils/TurkishKeyboard";
 
-import { searchAutocompleteOffline } from "@/src/lib/offline-db";
+import { searchAutocompleteOffline, searchByPattern } from "@/src/lib/offline-db";
 import { WordOfTheDayCard } from "./customs/word-of-the-day";
 import { GalatiMeshurCard } from "./customs/home/galatimeshur-card";
 import { MisspellingsCard } from "./customs/home/misspellings-card";
@@ -57,7 +57,15 @@ export default function Hero({ children }: {
 
     const fetchSuggestions = async () => {
       setIsLoading(true);
-      const results = await searchAutocompleteOffline(debouncedInput);
+      let results: string[] = [];
+
+      if (debouncedInput.includes("_")) {
+        const patternResults = await searchByPattern(debouncedInput);
+        results = patternResults.map(w => w.word_name);
+      } else {
+        results = await searchAutocompleteOffline(debouncedInput);
+      }
+
       setRecommendations(results);
       setShowRecommendations(results.length > 0);
       setIsLoading(false);
@@ -145,26 +153,47 @@ export default function Hero({ children }: {
               <div className="relative">
                 <Input
                   endContent={
-                    <Popover placement="bottom-end" classNames={{
-                      content: "bg-background"
-                    }}>
-                      <PopoverTrigger>
-                        <Button
-                          className="bg-transparent"
-                          isIconOnly
-                          variant="flat"
-                          radius="none"
-                          aria-label={t("hero.turkishLetters")}
-                        >
-                          <Tooltip content={t("hero.turkishLetters")}>
-                            <KeyboardIcon className="text-default-400" />
-                          </Tooltip>
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="grid grid-cols-3 gap-1">
-                        <TurkishKeyboard className="bg-background/50 border border-border" onCharClick={(char) => setWordInput((prev) => prev + char)} />
-                      </PopoverContent>
-                    </Popover>
+                    <div className="flex items-center gap-1">
+                      <Popover placement="bottom" classNames={{
+                        content: "bg-background"
+                      }}>
+                        <PopoverTrigger>
+                          <Button
+                            className="bg-transparent"
+                            isIconOnly
+                            variant="flat"
+                            radius="none"
+                          >
+                            <PuzzleIcon className="w-5 h-5 text-default-400 cursor-pointer" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent>
+                          <div className="px-1 py-2 max-w-[250px]">
+                            <div className="text-small">{t("hero.patternSearchTooltip")}</div>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                      <Popover placement="bottom-end" classNames={{
+                        content: "bg-background"
+                      }}>
+                        <PopoverTrigger>
+                          <Button
+                            className="bg-transparent"
+                            isIconOnly
+                            variant="flat"
+                            radius="none"
+                            aria-label={t("hero.turkishLetters")}
+                          >
+                            <Tooltip content={t("hero.turkishLetters")}>
+                              <KeyboardIcon className="text-default-400" />
+                            </Tooltip>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="grid grid-cols-3 gap-1">
+                          <TurkishKeyboard className="bg-background/50 border border-border" onCharClick={(char) => setWordInput((prev) => prev + char)} />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                   }
                   classNames={{
                     inputWrapper: [
