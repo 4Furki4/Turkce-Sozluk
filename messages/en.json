@@ -534,7 +534,13 @@
     "profile_updated": "Profile updated successfully",
     "user_not_found": "User not found",
     "user_not_found_description": "We couldn't find the user you're looking for.",
-    "back_to_home": "Back to Home"
+    "back_to_home": "Back to Home",
+    "cancel_signup": "Cancel Signup",
+    "account_deleted": "Your account has been deleted successfully",
+    "username_min_length": "Username must be at least 3 characters",
+    "name_min_length": "Name must be at least 2 characters",
+    "username_required": "Username is required",
+    "name_required": "Name is required"
   },
   "Metadata": {
     "requests": {

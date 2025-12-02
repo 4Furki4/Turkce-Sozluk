@@ -20,6 +20,7 @@ import { CaptchaProvider } from "@/src/components/customs/captcha-provider";
 import { PreferencesInitializer } from "@/src/components/customs/preferences-initializer";
 import { SessionProvider } from "next-auth/react";
 import { AutocompleteSync } from "@/src/components/customs/complete-sync";
+import ProfileGuard from "@/src/components/customs/profile-guard";
 
 export function generateStaticParams() {
   return [{ locale: "en" }, { locale: "tr" }];
@@ -166,7 +167,7 @@ export default async function RootLayout({
               <Providers>
                 <AutocompleteSync /> {/* Add it right inside Providers */}
                 <SessionProvider session={session}>
-
+                  <ProfileGuard />
                   <div className="flex flex-col min-h-screen">
                     <PreferencesInitializer />
                     <NavbarAndSidebar
