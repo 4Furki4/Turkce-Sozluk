@@ -523,7 +523,13 @@
     "profile_updated": "Profiliniz başarıyla güncellendi",
     "user_not_found": "Kullanıcı bulunamadı",
     "user_not_found_description": "Maattessüf aradığınız kullanıcıyı bulamadık.",
-    "back_to_home": "Ana sayfaya dön"
+    "back_to_home": "Ana sayfaya dön",
+    "cancel_signup": "Kaydı İptal Et",
+    "account_deleted": "Hesabınız başarıyla silindi",
+    "username_min_length": "Kullanıcı adı en az 3 karakter olmalıdır",
+    "name_min_length": "İsim en az 2 karakter olmalıdır",
+    "username_required": "Kullanıcı adı gereklidir",
+    "name_required": "İsim gereklidir"
   },
   "Metadata": {
     "requests": {

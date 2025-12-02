@@ -9,8 +9,6 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   const session = await auth();
   if (session?.user.username && session?.user.name) redirect(`/${locale}/profile/${session?.user?.id}`, RedirectType.replace);
   return (
-    <main>
-      <CompleteProfile session={session} />
-    </main>
+    <CompleteProfile session={session} />
   );
 }
