@@ -475,6 +475,15 @@
       "allLanguages": "Tüm Diller",
       "attribute": "Özellik",
       "allAttributes": "Tüm Özellikler"
+    },
+    "sorting": {
+      "label": "Sıralama",
+      "alphabeticalAsc": "Alfabetik (A-Z)",
+      "alphabeticalDesc": "Alfabetik (Z-A)",
+      "dateDesc": "Eklenme Tarihi (En Yeni)",
+      "dateAsc": "Eklenme Tarihi (En Eski)",
+      "lengthAsc": "Kelime Uzunluğu (Kısa)",
+      "lengthDesc": "Kelime Uzunluğu (Uzun)"
     }
   },
   "SavedWords": {

@@ -58,11 +58,15 @@ export default function WordList() {
     const initialLang = searchParams.get('lang') ? searchParams.get('lang')!.split(',') : [];
     const initialAttr = searchParams.get('attr') ? searchParams.get('attr')!.split(',') : [];
 
+    const initialSortBy = (searchParams.get('sort') as 'alphabetical' | 'date' | 'length') || 'alphabetical';
+    const initialSortOrder = (searchParams.get('order') as 'asc' | 'desc') || 'asc';
     const [pageNumber, setPageNumber] = React.useState<number>(initialPage);
     const [wordsPerPage, setWordsPerPage] = React.useState<number>(initialPerPage);
     const [selectedPos, setSelectedPos] = React.useState<string[]>(initialPos);
     const [selectedLang, setSelectedLang] = React.useState<string[]>(initialLang);
     const [selectedAttr, setSelectedAttr] = React.useState<string[]>(initialAttr);
+    const [sortBy, setSortBy] = React.useState<'alphabetical' | 'date' | 'length'>(initialSortBy);
+    const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>(initialSortOrder);
 
     const { control, watch, setValue } = useForm({
         defaultValues: {
@@ -76,7 +80,7 @@ export default function WordList() {
     // reset to first page when search changes
     useEffect(() => {
         setPageNumber(1);
-    }, [debouncedSearch, selectedPos, selectedLang, selectedAttr]);
+    }, [debouncedSearch, selectedPos, selectedLang, selectedAttr, sortBy, sortOrder]);
 
     // update state on URL param changes (back/forward)
     useEffect(() => {
@@ -88,6 +92,8 @@ export default function WordList() {
         const paramPos = searchParams.get('pos') ? searchParams.get('pos')!.split(',') : [];
         const paramLang = searchParams.get('lang') ? searchParams.get('lang')!.split(',') : [];
         const paramAttr = searchParams.get('attr') ? searchParams.get('attr')!.split(',') : [];
+        const paramSortBy = (searchParams.get('sort') as 'alphabetical' | 'date' | 'length') || 'alphabetical';
+        const paramSortOrder = (searchParams.get('order') as 'asc' | 'desc') || 'asc';
 
         setPageNumber(paramPage);
         setWordsPerPage(paramPer);
@@ -95,6 +101,8 @@ export default function WordList() {
         if (!areArraysEqual(selectedPos, paramPos)) setSelectedPos(paramPos);
         if (!areArraysEqual(selectedLang, paramLang)) setSelectedLang(paramLang);
         if (!areArraysEqual(selectedAttr, paramAttr)) setSelectedAttr(paramAttr);
+        if (sortBy !== paramSortBy) setSortBy(paramSortBy);
+        if (sortOrder !== paramSortOrder) setSortOrder(paramSortOrder);
 
         setValue('search', paramSearch, { shouldDirty: false });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -112,11 +120,13 @@ export default function WordList() {
         if (selectedPos.length > 0) params.set('pos', selectedPos.join(','));
         if (selectedLang.length > 0) params.set('lang', selectedLang.join(','));
         if (selectedAttr.length > 0) params.set('attr', selectedAttr.join(','));
+        if (sortBy !== 'alphabetical') params.set('sort', sortBy);
+        if (sortOrder !== 'asc') params.set('order', sortOrder);
 
         params.set('page', pageNumber.toString());
         params.set('per_page', wordsPerPage.toString());
         router.push(`${pathname}?${params.toString()}`);
-    }, [pageNumber, wordsPerPage, debouncedSearch, selectedPos, selectedLang, selectedAttr, pathname, router]);
+    }, [pageNumber, wordsPerPage, debouncedSearch, selectedPos, selectedLang, selectedAttr, sortBy, sortOrder, pathname, router]);
 
     const { data: wordCount } = api.word.getWordCount.useQuery({
         search: debouncedSearch,
@@ -132,7 +142,9 @@ export default function WordList() {
         search: debouncedSearch,
         partOfSpeechId: selectedPos,
         languageId: selectedLang,
-        attributeId: selectedAttr
+        attributeId: selectedAttr,
+        sortBy,
+        sortOrder
     }, {
         placeholderData: keepPreviousData
     })
@@ -200,6 +212,12 @@ export default function WordList() {
                             onPosChange={setSelectedPos}
                             onLangChange={setSelectedLang}
                             onAttrChange={setSelectedAttr}
+                            sortBy={sortBy}
+                            sortOrder={sortOrder}
+                            onSortChange={(sort, order) => {
+                                setSortBy(sort);
+                                setSortOrder(order);
+                            }}
                         />
                         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                             <Controller name="search" control={control} render={({ field }) => (

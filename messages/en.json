@@ -486,6 +486,15 @@
       "allLanguages": "All Languages",
       "attribute": "Attribute",
       "allAttributes": "All Attributes"
+    },
+    "sorting": {
+      "label": "Sort By",
+      "alphabeticalAsc": "Alphabetical (A-Z)",
+      "alphabeticalDesc": "Alphabetical (Z-A)",
+      "dateDesc": "Date Added (Newest)",
+      "dateAsc": "Date Added (Oldest)",
+      "lengthAsc": "Word Length (Shortest)",
+      "lengthDesc": "Word Length (Longest)"
     }
   },
   "SavedWords": {

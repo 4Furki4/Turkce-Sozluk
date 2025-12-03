@@ -3,6 +3,7 @@
 import React from "react";
 import { api } from "@/src/trpc/react";
 import { CustomMultiSelect, OptionsMap } from "@/src/components/customs/heroui/custom-multi-select";
+import { CustomSelect } from "@/src/components/customs/heroui/custom-select";
 import { useTranslations, useLocale } from "next-intl";
 import { Skeleton } from "@heroui/react";
 
@@ -13,6 +14,9 @@ interface FilterBarProps {
     onPosChange: (keys: string[]) => void;
     onLangChange: (keys: string[]) => void;
     onAttrChange: (keys: string[]) => void;
+    sortBy: 'alphabetical' | 'date' | 'length';
+    sortOrder: 'asc' | 'desc';
+    onSortChange: (sort: 'alphabetical' | 'date' | 'length', order: 'asc' | 'desc') => void;
 }
 
 export function FilterBar({
@@ -21,7 +25,10 @@ export function FilterBar({
     selectedAttr,
     onPosChange,
     onLangChange,
-    onAttrChange
+    onAttrChange,
+    sortBy,
+    sortOrder,
+    onSortChange
 }: FilterBarProps) {
     const t = useTranslations('WordList');
     const locale = useLocale();
@@ -31,9 +38,10 @@ export function FilterBar({
     if (isLoading) {
         return (
             <div className="flex flex-col sm:flex-row gap-4 w-full">
-                <Skeleton className="rounded-lg w-full sm:w-1/3 h-14" />
-                <Skeleton className="rounded-lg w-full sm:w-1/3 h-14" />
-                <Skeleton className="rounded-lg w-full sm:w-1/3 h-14" />
+                <Skeleton className="rounded-lg w-full sm:w-1/3 h-10" />
+                <Skeleton className="rounded-lg w-full sm:w-1/3 h-10" />
+                <Skeleton className="rounded-lg w-full sm:w-1/3 h-10" />
+                <Skeleton className="rounded-lg w-full sm:w-1/3 h-10" />
             </div>
         );
     }
@@ -54,6 +62,15 @@ export function FilterBar({
     filterOptions?.attributes.forEach(attr => {
         attrOptions[attr.id.toString()] = attr.attribute;
     });
+
+    const sortOptions: OptionsMap = {
+        'alphabetical-asc': t('sorting.alphabeticalAsc'),
+        'alphabetical-desc': t('sorting.alphabeticalDesc'),
+        'date-desc': t('sorting.dateDesc'),
+        'date-asc': t('sorting.dateAsc'),
+        'length-asc': t('sorting.lengthAsc'),
+        'length-desc': t('sorting.lengthDesc'),
+    };
 
     return (
         <div className="flex flex-col sm:flex-row gap-4 w-full">
@@ -80,6 +97,18 @@ export function FilterBar({
                 selectedKeys={selectedAttr}
                 onSelectionChange={onAttrChange}
                 onClear={() => onAttrChange([])}
+            />
+            <CustomSelect
+                size="md"
+                placeholder={t('sorting.label')}
+                options={sortOptions}
+                selectedKeys={[`${sortBy}-${sortOrder}`]}
+                onChange={(e) => {
+                    const value = e.target.value;
+                    if (!value) return;
+                    const [sort, order] = value.split('-');
+                    onSortChange(sort as 'alphabetical' | 'date' | 'length', order as 'asc' | 'desc');
+                }}
             />
         </div>
     );
