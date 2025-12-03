@@ -15,7 +15,9 @@ import { purifyObject } from "@/src/lib/utils";
 import { searchLogs, type NewSearchLog } from "@/db/schema/search_logs";
 import { userSearchHistory, type InsertUserSearchHistory } from "@/db/schema/user_search_history";
 import { generateAccentVariations } from "@/src/lib/search-utils";
-import { dailyWords } from "@/db/schema/daily-words";
+import { partOfSpeechs } from "@/db/schema/part_of_speechs";
+import { languages } from "@/db/schema/languages";
+import { wordAttributes } from "@/db/schema/word_attributes";
 
 export const wordRouter = createTRPCRouter({
   searchWordsSimple: publicProcedure
@@ -55,10 +57,53 @@ export const wordRouter = createTRPCRouter({
         take: z.number().optional().default(5),
         skip: z.number().optional().default(0),
         search: z.string().optional(),
+        partOfSpeechId: z.array(z.string()).optional(),
+        languageId: z.array(z.string()).optional(),
+        attributeId: z.array(z.string()).optional(),
       })
     )
     .query(async ({ input, ctx: { db } }) => {
       const purifiedInput = purifyObject(input);
+
+      // Base filters
+      const conditions = [];
+      const joins = [];
+
+      if (purifiedInput.search && purifiedInput.search.trim() !== "") {
+        conditions.push(sql`w.name ILIKE ${`%${purifiedInput.search.trim()}%`}`);
+      }
+
+      if (purifiedInput.partOfSpeechId?.length) {
+        const ids = purifiedInput.partOfSpeechId.map((id: string) => parseInt(id));
+        conditions.push(sql`EXISTS (
+          SELECT 1 FROM meanings m_filter 
+          WHERE m_filter.word_id = w.id 
+          AND m_filter.part_of_speech_id IN ${ids}
+        )`);
+      }
+
+      if (purifiedInput.languageId?.length) {
+        const ids = purifiedInput.languageId.map((id: string) => parseInt(id));
+        conditions.push(sql`EXISTS (
+          SELECT 1 FROM roots r_filter 
+          WHERE r_filter.word_id = w.id 
+          AND r_filter.language_id IN ${ids}
+        )`);
+      }
+
+      if (purifiedInput.attributeId?.length) {
+        const ids = purifiedInput.attributeId.map((id: string) => parseInt(id));
+        conditions.push(sql`EXISTS (
+          SELECT 1 FROM words_attributes wa_filter 
+          WHERE wa_filter.word_id = w.id 
+          AND wa_filter.attribute_id IN ${ids}
+        )`);
+      }
+
+      const whereSql = conditions.length > 0
+        ? sql.join(conditions, sql` AND `)
+        : sql`TRUE`;
+
       let query;
 
       if (purifiedInput.search && purifiedInput.search.trim() !== "") {
@@ -75,7 +120,7 @@ export const wordRouter = createTRPCRouter({
             END AS match_rank,
             LENGTH(w.name) AS name_length
           FROM words w
-          WHERE w.name ILIKE ${`%${searchTerm}%`}
+          WHERE ${whereSql}
         )
         SELECT
             rw.word_id,
@@ -92,12 +137,12 @@ export const wordRouter = createTRPCRouter({
                     meanings
                 ORDER BY
                     word_id,
-                    id -- Assuming this is the desired order for the first meaning
+                    id
             ) m ON rw.word_id = m.word_id
         ORDER BY
             rw.match_rank,
             rw.name_length,
-            rw.name -- Added for deterministic ordering
+            rw.name
         LIMIT ${purifiedInput.take} OFFSET ${purifiedInput.skip};
       `;
       } else {
@@ -119,8 +164,9 @@ export const wordRouter = createTRPCRouter({
                     word_id,
                     id
             ) m ON w.id = m.word_id
+        WHERE ${whereSql}
         ORDER BY
-            w.name -- Default order by name if no search term
+            w.name
         LIMIT ${purifiedInput.take} OFFSET ${purifiedInput.skip};
       `;
       }
@@ -128,6 +174,20 @@ export const wordRouter = createTRPCRouter({
       const wordsWithMeanings = await db.execute(query) as DashboardWordList[];
       return wordsWithMeanings;
     }),
+
+  getFilterOptions: publicProcedure.query(async ({ ctx: { db } }) => {
+    const [pos, langs, attrs] = await Promise.all([
+      db.select().from(partOfSpeechs),
+      db.select().from(languages),
+      db.select().from(wordAttributes),
+    ]);
+
+    return {
+      partOfSpeechs: pos,
+      languages: langs,
+      attributes: attrs,
+    };
+  }),
   /**
    * Get a word by name quering the database
    */
@@ -500,19 +560,56 @@ export const wordRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().optional(),
+        partOfSpeechId: z.array(z.string()).optional(),
+        languageId: z.array(z.string()).optional(),
+        attributeId: z.array(z.string()).optional(),
       })
     )
     .query(async ({ input, ctx: { db } }) => {
       const purifiedInput = purifyObject(input)
-      const searchCondition = purifiedInput.search
-        ? sql`WHERE name ILIKE ${`%${purifiedInput.search}%`}`
+
+      const conditions = [];
+
+      if (purifiedInput.search) {
+        conditions.push(sql`name ILIKE ${`%${purifiedInput.search}%`}`);
+      }
+
+      if (purifiedInput.partOfSpeechId?.length) {
+        const ids = purifiedInput.partOfSpeechId.map((id: string) => parseInt(id));
+        conditions.push(sql`EXISTS (
+          SELECT 1 FROM meanings m_filter 
+          WHERE m_filter.word_id = words.id 
+          AND m_filter.part_of_speech_id IN ${ids}
+        )`);
+      }
+
+      if (purifiedInput.languageId?.length) {
+        const ids = purifiedInput.languageId.map((id: string) => parseInt(id));
+        conditions.push(sql`EXISTS (
+          SELECT 1 FROM roots r_filter 
+          WHERE r_filter.word_id = words.id 
+          AND r_filter.language_id IN ${ids}
+        )`);
+      }
+
+      if (purifiedInput.attributeId?.length) {
+        const ids = purifiedInput.attributeId.map((id: string) => parseInt(id));
+        conditions.push(sql`EXISTS (
+          SELECT 1 FROM words_attributes wa_filter 
+          WHERE wa_filter.word_id = words.id 
+          AND wa_filter.attribute_id IN ${ids}
+        )`);
+      }
+
+      const whereSql = conditions.length > 0
+        ? sql`WHERE ${sql.join(conditions, sql` AND `)}`
         : sql``;
 
       const result = await db.execute(
         sql`
         SELECT COUNT(*) as count
         FROM words
-        ${searchCondition}
+        ${whereSql}
         `
       ) as { count: number }[];
       return Number(result[0].count);

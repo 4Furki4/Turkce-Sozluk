@@ -4,6 +4,7 @@ import React from 'react';
 import { Select, SelectItem, type SelectProps, Selection } from "@heroui/react";
 import { cn } from '@/lib/utils';
 import { tv } from 'tailwind-variants';
+import { X } from 'lucide-react';
 
 // Define the structure for the options we'll pass in.
 export type OptionsMap = Record<string, string> | { key: string; label: string }[];
@@ -14,6 +15,7 @@ export interface CustomMultiSelectProps extends Omit<SelectProps, 'children' | '
     selectedKeys: string[];
     onSelectionChange: (keys: string[]) => void;
     placeholder?: string;
+    onClear?: () => void;
 }
 
 export function CustomMultiSelect({
@@ -21,6 +23,7 @@ export function CustomMultiSelect({
     selectedKeys,
     onSelectionChange,
     placeholder = "Select options",
+    onClear,
     className,
     classNames,
     ...props
@@ -65,6 +68,22 @@ export function CustomMultiSelect({
                 ...classNames,
             }}
             {...props}
+            endContent={
+                selectedKeys.length > 0 && onClear ? (
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            onClear();
+                        }}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        className="p-1 hover:bg-default-100 rounded-full transition-colors cursor-pointer"
+                    >
+                        <X size={14} className="text-default-500" />
+                    </button>
+                ) : undefined
+            }
         >
             {Array.isArray(options) ? options.map(option => (
                 <SelectItem key={option.key}>
