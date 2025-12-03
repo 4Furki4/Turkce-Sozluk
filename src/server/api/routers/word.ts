@@ -60,6 +60,8 @@ export const wordRouter = createTRPCRouter({
         partOfSpeechId: z.array(z.string()).optional(),
         languageId: z.array(z.string()).optional(),
         attributeId: z.array(z.string()).optional(),
+        sortBy: z.enum(['alphabetical', 'date', 'length']).optional().default('alphabetical'),
+        sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
       })
     )
     .query(async ({ input, ctx: { db } }) => {
@@ -104,15 +106,59 @@ export const wordRouter = createTRPCRouter({
         ? sql.join(conditions, sql` AND `)
         : sql`TRUE`;
 
+      // Determine Order By Clause
+      let orderBySql;
+      const sortOrder = purifiedInput.sortOrder === 'desc' ? sql`DESC` : sql`ASC`;
+
+      switch (purifiedInput.sortBy) {
+        case 'date':
+          orderBySql = sql`w.created_at ${sortOrder}, w.name ASC`;
+          break;
+        case 'length':
+          orderBySql = sql`LENGTH(w.name) ${sortOrder}, w.name ASC`;
+          break;
+        case 'alphabetical':
+        default:
+          orderBySql = sql`w.name ${sortOrder}`;
+          break;
+      }
+
       let query;
 
       if (purifiedInput.search && purifiedInput.search.trim() !== "") {
         const searchTerm = purifiedInput.search.trim();
+        // If search is active, we might want to prioritize relevance UNLESS specific sort is requested
+        // However, usually explicit sort overrides relevance. 
+        // But let's keep relevance as primary if default 'alphabetical' is selected? 
+        // Actually, 'alphabetical' usually means A-Z, which is NOT relevance.
+        // If user wants relevance, they usually clear the sort. But here 'alphabetical' is default.
+        // Let's assume if user explicitly changes sort, we use that. 
+        // If default 'alphabetical' and search is active, maybe we should stick to relevance?
+        // But the requirement says "Alphabetical: A-Z / Z-A (already default, but explicit toggle)".
+        // So let's respect the sort param.
+
+        // If we are sorting by something other than relevance, we don't strictly need the CTE for ranking,
+        // but we still need the CTE or similar logic if we want to filter by search term effectively.
+        // The current CTE does filtering AND ranking.
+
+        // If sorting by alphabetical/date/length, we can just use the WHERE clause and ORDER BY.
+        // But wait, the search logic uses `match_rank`.
+
+        // Let's modify the logic:
+        // If search is active AND sortBy is 'alphabetical' AND sortOrder is 'asc' (defaults),
+        // we might want to keep the relevance sorting (match_rank).
+        // BUT, the user might explicitly want A-Z even with search.
+        // Let's stick to the requested sorting options.
+
+        // If we use the CTE, we can order by the CTE columns.
+        // w.created_at is not in the CTE currently. We need to add it.
+
         query = sql`
         WITH RankedWords AS (
           SELECT
             w.id AS word_id,
             w.name AS name,
+            w.created_at AS created_at,
             CASE
               WHEN w.name ILIKE ${searchTerm} THEN 1
               WHEN w.name ILIKE ${`${searchTerm}%`} THEN 2
@@ -140,9 +186,16 @@ export const wordRouter = createTRPCRouter({
                     id
             ) m ON rw.word_id = m.word_id
         ORDER BY
-            rw.match_rank,
-            rw.name_length,
-            rw.name
+            ${purifiedInput.sortBy === 'alphabetical' && purifiedInput.sortOrder === 'asc'
+            ? sql`rw.match_rank, rw.name_length, rw.name` // Default search relevance
+            : (purifiedInput.sortBy === 'date'
+              ? sql`rw.created_at ${sortOrder}, rw.name ASC`
+              : (purifiedInput.sortBy === 'length'
+                ? sql`rw.name_length ${sortOrder}, rw.name ASC`
+                : sql`rw.name ${sortOrder}`
+              )
+            )
+          }
         LIMIT ${purifiedInput.take} OFFSET ${purifiedInput.skip};
       `;
       } else {
@@ -166,7 +219,7 @@ export const wordRouter = createTRPCRouter({
             ) m ON w.id = m.word_id
         WHERE ${whereSql}
         ORDER BY
-            w.name
+            ${orderBySql}
         LIMIT ${purifiedInput.take} OFFSET ${purifiedInput.skip};
       `;
       }
