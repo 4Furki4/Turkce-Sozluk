@@ -15,6 +15,7 @@ import { CustomTable } from "@/src/components/customs/heroui/custom-table";
 import { CustomInput } from "@/src/components/customs/heroui/custom-input";
 import { CustomSelect, OptionsMap } from "@/src/components/customs/heroui/custom-select";
 import { FilterBar } from "./filter-bar";
+import { AlphabetBar } from "./alphabet-bar";
 
 
 const areArraysEqual = (arr1: string[], arr2: string[]) => {
@@ -60,6 +61,8 @@ export default function WordList() {
 
     const initialSortBy = (searchParams.get('sort') as 'alphabetical' | 'date' | 'length') || 'alphabetical';
     const initialSortOrder = (searchParams.get('order') as 'asc' | 'desc') || 'asc';
+    const initialLetter = searchParams.get('letter') || null;
+
     const [pageNumber, setPageNumber] = React.useState<number>(initialPage);
     const [wordsPerPage, setWordsPerPage] = React.useState<number>(initialPerPage);
     const [selectedPos, setSelectedPos] = React.useState<string[]>(initialPos);
@@ -67,6 +70,7 @@ export default function WordList() {
     const [selectedAttr, setSelectedAttr] = React.useState<string[]>(initialAttr);
     const [sortBy, setSortBy] = React.useState<'alphabetical' | 'date' | 'length'>(initialSortBy);
     const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>(initialSortOrder);
+    const [selectedLetter, setSelectedLetter] = React.useState<string | null>(initialLetter);
 
     const { control, watch, setValue } = useForm({
         defaultValues: {
@@ -80,7 +84,7 @@ export default function WordList() {
     // reset to first page when search changes
     useEffect(() => {
         setPageNumber(1);
-    }, [debouncedSearch, selectedPos, selectedLang, selectedAttr, sortBy, sortOrder]);
+    }, [debouncedSearch, selectedPos, selectedLang, selectedAttr, sortBy, sortOrder, selectedLetter]);
 
     // update state on URL param changes (back/forward)
     useEffect(() => {
@@ -94,6 +98,7 @@ export default function WordList() {
         const paramAttr = searchParams.get('attr') ? searchParams.get('attr')!.split(',') : [];
         const paramSortBy = (searchParams.get('sort') as 'alphabetical' | 'date' | 'length') || 'alphabetical';
         const paramSortOrder = (searchParams.get('order') as 'asc' | 'desc') || 'asc';
+        const paramLetter = searchParams.get('letter') || null;
 
         setPageNumber(paramPage);
         setWordsPerPage(paramPer);
@@ -103,6 +108,7 @@ export default function WordList() {
         if (!areArraysEqual(selectedAttr, paramAttr)) setSelectedAttr(paramAttr);
         if (sortBy !== paramSortBy) setSortBy(paramSortBy);
         if (sortOrder !== paramSortOrder) setSortOrder(paramSortOrder);
+        if (selectedLetter !== paramLetter) setSelectedLetter(paramLetter);
 
         setValue('search', paramSearch, { shouldDirty: false });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -122,17 +128,19 @@ export default function WordList() {
         if (selectedAttr.length > 0) params.set('attr', selectedAttr.join(','));
         if (sortBy !== 'alphabetical') params.set('sort', sortBy);
         if (sortOrder !== 'asc') params.set('order', sortOrder);
+        if (selectedLetter) params.set('letter', selectedLetter);
 
         params.set('page', pageNumber.toString());
         params.set('per_page', wordsPerPage.toString());
         router.push(`${pathname}?${params.toString()}`);
-    }, [pageNumber, wordsPerPage, debouncedSearch, selectedPos, selectedLang, selectedAttr, sortBy, sortOrder, pathname, router]);
+    }, [pageNumber, wordsPerPage, debouncedSearch, selectedPos, selectedLang, selectedAttr, sortBy, sortOrder, selectedLetter, pathname, router]);
 
     const { data: wordCount } = api.word.getWordCount.useQuery({
         search: debouncedSearch,
         partOfSpeechId: selectedPos,
         languageId: selectedLang,
-        attributeId: selectedAttr
+        attributeId: selectedAttr,
+        startsWith: selectedLetter || undefined
     })
 
     const totalPageNumber = wordCount ? Math.ceil(wordCount / wordsPerPage) : undefined;
@@ -144,7 +152,8 @@ export default function WordList() {
         languageId: selectedLang,
         attributeId: selectedAttr,
         sortBy,
-        sortOrder
+        sortOrder,
+        startsWith: selectedLetter || undefined
     }, {
         placeholderData: keepPreviousData
     })
@@ -201,7 +210,7 @@ export default function WordList() {
                     />
                 }
                 topContent={
-                    <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-4 p-4 bg-background/10 rounded-large shadow-small">
                         <h1 className="text-fs-1">
                             {t('title')}
                         </h1>
@@ -219,7 +228,9 @@ export default function WordList() {
                                 setSortOrder(order);
                             }}
                         />
+
                         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+
                             <Controller name="search" control={control} render={({ field }) => (
                                 <CustomInput
                                     {...field}
@@ -239,8 +250,11 @@ export default function WordList() {
                                     setWordsPerPage(parseInt(e.target.value));
                                 }}
                             />
-
                         </div>
+                        <AlphabetBar
+                            selectedLetter={selectedLetter}
+                            onLetterSelect={setSelectedLetter}
+                        />
                     </div>
                 }
 
