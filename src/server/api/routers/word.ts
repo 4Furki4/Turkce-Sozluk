@@ -62,6 +62,7 @@ export const wordRouter = createTRPCRouter({
         attributeId: z.array(z.string()).optional(),
         sortBy: z.enum(['alphabetical', 'date', 'length']).optional().default('alphabetical'),
         sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
+        startsWith: z.string().optional(),
       })
     )
     .query(async ({ input, ctx: { db } }) => {
@@ -73,6 +74,10 @@ export const wordRouter = createTRPCRouter({
 
       if (purifiedInput.search && purifiedInput.search.trim() !== "") {
         conditions.push(sql`w.name ILIKE ${`%${purifiedInput.search.trim()}%`}`);
+      }
+
+      if (purifiedInput.startsWith) {
+        conditions.push(sql`w.name ILIKE ${`${purifiedInput.startsWith}%`}`);
       }
 
       if (purifiedInput.partOfSpeechId?.length) {
@@ -616,6 +621,7 @@ export const wordRouter = createTRPCRouter({
         partOfSpeechId: z.array(z.string()).optional(),
         languageId: z.array(z.string()).optional(),
         attributeId: z.array(z.string()).optional(),
+        startsWith: z.string().optional(),
       })
     )
     .query(async ({ input, ctx: { db } }) => {
@@ -625,6 +631,10 @@ export const wordRouter = createTRPCRouter({
 
       if (purifiedInput.search) {
         conditions.push(sql`name ILIKE ${`%${purifiedInput.search}%`}`);
+      }
+
+      if (purifiedInput.startsWith) {
+        conditions.push(sql`name ILIKE ${`${purifiedInput.startsWith}%`}`);
       }
 
       if (purifiedInput.partOfSpeechId?.length) {

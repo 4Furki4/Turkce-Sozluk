@@ -73,7 +73,7 @@ export function FilterBar({
     };
 
     return (
-        <div className="flex flex-col sm:flex-row gap-4 w-full">
+        <div className="flex flex-col sm:flex-row  gap-4 w-full">
             <CustomMultiSelect
                 size="md"
                 options={posOptions}

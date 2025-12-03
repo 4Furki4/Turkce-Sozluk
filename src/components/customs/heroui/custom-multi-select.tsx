@@ -31,7 +31,7 @@ export function CustomMultiSelect({
     // We use tailwind-variants to define the default styles for our component slots.
     const customMultiSelectStyles = tv({
         slots: {
-            base: "sm:max-w-64",
+            base: "",
             trigger: "border-2 border-primary/40 cursor-pointer",
             label: "text-foreground",
             listbox: "bg-background/10",
