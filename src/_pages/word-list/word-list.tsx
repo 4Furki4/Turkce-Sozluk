@@ -14,6 +14,15 @@ import { CustomPagination } from "@/src/components/customs/heroui/custom-paginat
 import { CustomTable } from "@/src/components/customs/heroui/custom-table";
 import { CustomInput } from "@/src/components/customs/heroui/custom-input";
 import { CustomSelect, OptionsMap } from "@/src/components/customs/heroui/custom-select";
+import { FilterBar } from "./filter-bar";
+
+
+const areArraysEqual = (arr1: string[], arr2: string[]) => {
+    if (arr1.length !== arr2.length) return false;
+    const sorted1 = [...arr1].sort();
+    const sorted2 = [...arr2].sort();
+    return sorted1.every((value, index) => value === sorted2[index]);
+};
 
 const wordPerPageOptions = [
     {
@@ -43,10 +52,17 @@ export default function WordList() {
     // Get initial values from URL params
     const initialPage = Number(searchParams.get('page')) || 1;
     const initialPerPage = Number(searchParams.get('per_page')) || 10;
+
     const initialSearch = searchParams.get('search') || "";
+    const initialPos = searchParams.get('pos') ? searchParams.get('pos')!.split(',') : [];
+    const initialLang = searchParams.get('lang') ? searchParams.get('lang')!.split(',') : [];
+    const initialAttr = searchParams.get('attr') ? searchParams.get('attr')!.split(',') : [];
 
     const [pageNumber, setPageNumber] = React.useState<number>(initialPage);
     const [wordsPerPage, setWordsPerPage] = React.useState<number>(initialPerPage);
+    const [selectedPos, setSelectedPos] = React.useState<string[]>(initialPos);
+    const [selectedLang, setSelectedLang] = React.useState<string[]>(initialLang);
+    const [selectedAttr, setSelectedAttr] = React.useState<string[]>(initialAttr);
 
     const { control, watch, setValue } = useForm({
         defaultValues: {
@@ -60,17 +76,28 @@ export default function WordList() {
     // reset to first page when search changes
     useEffect(() => {
         setPageNumber(1);
-    }, [debouncedSearch]);
+    }, [debouncedSearch, selectedPos, selectedLang, selectedAttr]);
 
     // update state on URL param changes (back/forward)
     useEffect(() => {
         if (isFirstRender.current) return;
         const paramPage = Number(searchParams.get('page')) || 1;
         const paramPer = Number(searchParams.get('per_page')) || 10;
+
         const paramSearch = searchParams.get('search') || '';
+        const paramPos = searchParams.get('pos') ? searchParams.get('pos')!.split(',') : [];
+        const paramLang = searchParams.get('lang') ? searchParams.get('lang')!.split(',') : [];
+        const paramAttr = searchParams.get('attr') ? searchParams.get('attr')!.split(',') : [];
+
         setPageNumber(paramPage);
         setWordsPerPage(paramPer);
+
+        if (!areArraysEqual(selectedPos, paramPos)) setSelectedPos(paramPos);
+        if (!areArraysEqual(selectedLang, paramLang)) setSelectedLang(paramLang);
+        if (!areArraysEqual(selectedAttr, paramAttr)) setSelectedAttr(paramAttr);
+
         setValue('search', paramSearch, { shouldDirty: false });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchParams, setValue]);
 
     // sync state to URL, enable back/forward history
@@ -81,20 +108,31 @@ export default function WordList() {
         }
         const params = new URLSearchParams();
         if (debouncedSearch) params.set('search', debouncedSearch);
+        if (debouncedSearch) params.set('search', debouncedSearch);
+        if (selectedPos.length > 0) params.set('pos', selectedPos.join(','));
+        if (selectedLang.length > 0) params.set('lang', selectedLang.join(','));
+        if (selectedAttr.length > 0) params.set('attr', selectedAttr.join(','));
+
         params.set('page', pageNumber.toString());
         params.set('per_page', wordsPerPage.toString());
         router.push(`${pathname}?${params.toString()}`);
-    }, [pageNumber, wordsPerPage, debouncedSearch, pathname, router]);
+    }, [pageNumber, wordsPerPage, debouncedSearch, selectedPos, selectedLang, selectedAttr, pathname, router]);
 
     const { data: wordCount } = api.word.getWordCount.useQuery({
-        search: debouncedSearch
+        search: debouncedSearch,
+        partOfSpeechId: selectedPos,
+        languageId: selectedLang,
+        attributeId: selectedAttr
     })
 
     const totalPageNumber = wordCount ? Math.ceil(wordCount / wordsPerPage) : undefined;
     const wordsQuery = api.word.getWords.useQuery({
         take: wordsPerPage,
         skip: (pageNumber - 1) * wordsPerPage,
-        search: debouncedSearch
+        search: debouncedSearch,
+        partOfSpeechId: selectedPos,
+        languageId: selectedLang,
+        attributeId: selectedAttr
     }, {
         placeholderData: keepPreviousData
     })
@@ -139,7 +177,7 @@ export default function WordList() {
                 columns={columns}
                 items={rows}
                 renderCell={renderCell}
-                loadingState={wordsQuery.isPending ? 'loading' : 'idle'}
+                loadingState={wordsQuery.isFetching ? 'loading' : 'idle'}
                 bottomContent={
                     <CustomPagination
                         total={totalPageNumber ?? 1}
@@ -155,6 +193,14 @@ export default function WordList() {
                         <h1 className="text-fs-1">
                             {t('title')}
                         </h1>
+                        <FilterBar
+                            selectedPos={selectedPos}
+                            selectedLang={selectedLang}
+                            selectedAttr={selectedAttr}
+                            onPosChange={setSelectedPos}
+                            onLangChange={setSelectedLang}
+                            onAttrChange={setSelectedAttr}
+                        />
                         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                             <Controller name="search" control={control} render={({ field }) => (
                                 <CustomInput

@@ -467,6 +467,14 @@
     "columns": {
       "word": "Kelime",
       "meaning": "Anlam"
+    },
+    "filters": {
+      "partOfSpeech": "Sözcük Türü",
+      "allPartsOfSpeech": "Tüm Sözcük Türleri",
+      "language": "Dil",
+      "allLanguages": "Tüm Diller",
+      "attribute": "Özellik",
+      "allAttributes": "Tüm Özellikler"
     }
   },
   "SavedWords": {

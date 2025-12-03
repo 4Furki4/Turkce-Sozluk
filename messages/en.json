@@ -478,6 +478,14 @@
     "columns": {
       "word": "Word",
       "meaning": "Meaning"
+    },
+    "filters": {
+      "partOfSpeech": "Part of Speech",
+      "allPartsOfSpeech": "All Parts of Speech",
+      "language": "Language",
+      "allLanguages": "All Languages",
+      "attribute": "Attribute",
+      "allAttributes": "All Attributes"
     }
   },
   "SavedWords": {
