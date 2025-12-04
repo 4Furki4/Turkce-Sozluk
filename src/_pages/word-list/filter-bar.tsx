@@ -5,7 +5,6 @@ import { api } from "@/src/trpc/react";
 import { CustomMultiSelect, OptionsMap } from "@/src/components/customs/heroui/custom-multi-select";
 import { CustomSelect } from "@/src/components/customs/heroui/custom-select";
 import { useTranslations, useLocale } from "next-intl";
-import { Skeleton } from "@heroui/react";
 
 interface FilterBarProps {
     selectedPos: string[];
@@ -34,17 +33,6 @@ export function FilterBar({
     const locale = useLocale();
 
     const { data: filterOptions, isLoading } = api.word.getFilterOptions.useQuery();
-
-    if (isLoading) {
-        return (
-            <div className="flex flex-col sm:flex-row gap-4 w-full">
-                <Skeleton className="rounded-lg w-full sm:w-1/3 h-10" />
-                <Skeleton className="rounded-lg w-full sm:w-1/3 h-10" />
-                <Skeleton className="rounded-lg w-full sm:w-1/3 h-10" />
-                <Skeleton className="rounded-lg w-full sm:w-1/3 h-10" />
-            </div>
-        );
-    }
 
     const posOptions: OptionsMap = {};
     filterOptions?.partOfSpeechs.forEach(pos => {
@@ -75,6 +63,7 @@ export function FilterBar({
     return (
         <div className="flex flex-col lg:flex-row gap-4 w-full">
             <CustomMultiSelect
+                isLoading={isLoading}
                 size="md"
                 options={posOptions}
                 placeholder={t('filters.partOfSpeech')}
@@ -84,6 +73,7 @@ export function FilterBar({
                 onClear={() => onPosChange([])}
             />
             <CustomMultiSelect
+                isLoading={isLoading}
                 options={langOptions}
                 size="md"
                 placeholder={t('filters.language')}
@@ -93,6 +83,7 @@ export function FilterBar({
                 onClear={() => onLangChange([])}
             />
             <CustomMultiSelect
+                isLoading={isLoading}
                 size="md"
                 options={attrOptions}
                 placeholder={t('filters.attribute')}
@@ -102,7 +93,7 @@ export function FilterBar({
                 onClear={() => onAttrChange([])}
             />
             <CustomSelect
-
+                isLoading={isLoading}
                 size="md"
                 placeholder={t('sorting.label')}
                 label={t('sorting.label')}
