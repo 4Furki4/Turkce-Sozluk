@@ -18,6 +18,7 @@ import { FilterBar } from "./filter-bar";
 import { AlphabetBar } from "./alphabet-bar";
 import { WordCard } from "./word-card";
 import { LayoutGrid, List } from "lucide-react";
+import { WordCardSkeleton } from "./word-card-skeleton";
 
 
 const areArraysEqual = (arr1: string[], arr2: string[]) => {
@@ -445,10 +446,10 @@ export default function WordList() {
 
 
 
-                    {wordsQuery.isLoading ? (
+                    {wordsQuery.isFetching ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                             {Array.from({ length: wordsPerPage }).map((_, i) => (
-                                <div key={i} className="h-40 bg-content1 rounded-large animate-pulse" />
+                                <WordCardSkeleton key={i} />
                             ))}
                         </div>
                     ) : (
