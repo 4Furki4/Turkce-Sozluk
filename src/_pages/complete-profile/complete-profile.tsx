@@ -9,7 +9,7 @@ import { Button, Input } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 import { Session } from 'next-auth';
 import { toast } from 'sonner';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import CustomCard from '@/src/components/customs/heroui/custom-card';
 
 const createProfileSchema = (t: (key: string) => string) => z.object({
@@ -20,6 +20,7 @@ const createProfileSchema = (t: (key: string) => string) => z.object({
 type CompleteProfileForm = z.infer<ReturnType<typeof createProfileSchema>>;
 
 export default function CompleteProfile({ session }: { session: Session | null }) {
+    const { update } = useSession();
     const t = useTranslations("Profile");
     const router = useRouter();
     const completeProfileSchema = createProfileSchema(t);
@@ -33,8 +34,10 @@ export default function CompleteProfile({ session }: { session: Session | null }
     });
 
     const updateProfile = api.user.updateProfile.useMutation({
-        onSuccess: () => {
+        onSuccess: async () => {
+            await update();
             router.push(`/profile/${session?.user?.id}`);
+            router.refresh();
         },
         onError: (error) => {
             if (error?.data?.code === "CONFLICT") {
