@@ -135,6 +135,8 @@ type DashboardWordList = {
   word_id: number;
   name: string;
   meaning: string | null;
+  related_word_name: string | null;
+  relation_type: string | null;
 }
 
 type EditMeaningForm = {

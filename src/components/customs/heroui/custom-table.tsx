@@ -20,7 +20,7 @@ import { preferencesState } from '@/src/store/preferences';
 const customTableStyles = tv({
     slots: {
         base: "min-h-[300px]",
-        wrapper: "overflow-y-hidden flex flex-col relative h-auto text-foreground box-border outline-hidden data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 border-2 border-border rounded-sm p-2 w-full",
+        wrapper: "overflow-y-hidden flex flex-col relative h-auto text-foreground box-border outline-hidden data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 rounded-sm p-2 w-full",
         td: "group-data-[odd=true]/tr:before:transition-all group-data-[odd=true]/tr:before:bg-primary/10",
         th: "bg-primary/10",
     }

@@ -176,7 +176,11 @@ export const wordRouter = createTRPCRouter({
         SELECT
             rw.word_id,
             rw.name,
-            m.meaning
+            rw.word_id,
+            rw.name,
+            m.meaning,
+            w_rel.name AS related_word_name,
+            rw_rel.relation_type
         FROM
             RankedWords rw
             LEFT JOIN (
@@ -190,6 +194,18 @@ export const wordRouter = createTRPCRouter({
                     word_id,
                     id
             ) m ON rw.word_id = m.word_id
+            LEFT JOIN (
+                SELECT DISTINCT ON (word_id)
+                    word_id,
+                    related_word_id,
+                    relation_type
+                FROM
+                    related_words
+                ORDER BY
+                    word_id,
+                    related_word_id
+            ) rw_rel ON rw.word_id = rw_rel.word_id
+            LEFT JOIN words w_rel ON rw_rel.related_word_id = w_rel.id
         ORDER BY
             ${purifiedInput.sortBy === 'alphabetical' && purifiedInput.sortOrder === 'asc'
             ? sql`rw.match_rank, rw.name_length, rw.name` // Default search relevance
@@ -208,7 +224,11 @@ export const wordRouter = createTRPCRouter({
         SELECT
             w.id AS word_id,
             w.name AS name,
-            m.meaning
+            w.id AS word_id,
+            w.name AS name,
+            m.meaning,
+            w_rel.name AS related_word_name,
+            rw_rel.relation_type
         FROM
             words w
             LEFT JOIN (
@@ -222,6 +242,18 @@ export const wordRouter = createTRPCRouter({
                     word_id,
                     id
             ) m ON w.id = m.word_id
+            LEFT JOIN (
+                SELECT DISTINCT ON (word_id)
+                    word_id,
+                    related_word_id,
+                    relation_type
+                FROM
+                    related_words
+                ORDER BY
+                    word_id,
+                    related_word_id
+            ) rw_rel ON w.id = rw_rel.word_id
+            LEFT JOIN words w_rel ON rw_rel.related_word_id = w_rel.id
         WHERE ${whereSql}
         ORDER BY
             ${orderBySql}
