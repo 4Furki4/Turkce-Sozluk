@@ -214,30 +214,28 @@ export default function WordList() {
                         <h1 className="text-fs-1">
                             {t('title')}
                         </h1>
-                        <FilterBar
-                            selectedPos={selectedPos}
-                            selectedLang={selectedLang}
-                            selectedAttr={selectedAttr}
-                            onPosChange={setSelectedPos}
-                            onLangChange={setSelectedLang}
-                            onAttrChange={setSelectedAttr}
-                            sortBy={sortBy}
-                            sortOrder={sortOrder}
-                            onSortChange={(sort, order) => {
-                                setSortBy(sort);
-                                setSortOrder(order);
-                            }}
+                        <Controller name="search" control={control} render={({ field }) => (
+                            <CustomInput
+                                {...field}
+                                placeholder={t('searchPlaceholder')}
+                                size="lg"
+                            />
+                        )}
                         />
-
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-
-                            <Controller name="search" control={control} render={({ field }) => (
-                                <CustomInput
-                                    {...field}
-                                    placeholder={t('searchPlaceholder')}
-                                    size="lg"
-                                />
-                            )}
+                        <div className="flex flex-col sm:flex-row  gap-4 w-full">
+                            <FilterBar
+                                selectedPos={selectedPos}
+                                selectedLang={selectedLang}
+                                selectedAttr={selectedAttr}
+                                onPosChange={setSelectedPos}
+                                onLangChange={setSelectedLang}
+                                onAttrChange={setSelectedAttr}
+                                sortBy={sortBy}
+                                sortOrder={sortOrder}
+                                onSortChange={(sort, order) => {
+                                    setSortBy(sort);
+                                    setSortOrder(order);
+                                }}
                             />
                             <CustomSelect
                                 options={wordPerPageOptions.reduce((acc, option) => {
@@ -245,12 +243,14 @@ export default function WordList() {
                                     return acc;
                                 }, {} as OptionsMap)}
                                 label={t('wordsPerPage')}
+
                                 selectedKeys={[wordsPerPage.toString()]}
                                 onChange={(e) => {
                                     setWordsPerPage(parseInt(e.target.value));
                                 }}
                             />
                         </div>
+
                         <AlphabetBar
                             selectedLetter={selectedLetter}
                             onLetterSelect={setSelectedLetter}

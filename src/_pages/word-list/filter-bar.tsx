@@ -73,9 +73,9 @@ export function FilterBar({
     };
 
     return (
-        <div className="flex flex-col sm:flex-row  gap-4 w-full">
+        <>
             <CustomMultiSelect
-                size="md"
+                size="lg"
                 options={posOptions}
                 placeholder={t('filters.partOfSpeech')}
                 selectedKeys={selectedPos}
@@ -83,7 +83,7 @@ export function FilterBar({
                 onClear={() => onPosChange([])}
             />
             <CustomMultiSelect
-                size="md"
+                size="lg"
                 options={langOptions}
                 placeholder={t('filters.language')}
                 selectedKeys={selectedLang}
@@ -91,7 +91,7 @@ export function FilterBar({
                 onClear={() => onLangChange([])}
             />
             <CustomMultiSelect
-                size="md"
+                size="lg"
                 options={attrOptions}
                 placeholder={t('filters.attribute')}
                 selectedKeys={selectedAttr}
@@ -99,7 +99,7 @@ export function FilterBar({
                 onClear={() => onAttrChange([])}
             />
             <CustomSelect
-                size="md"
+                size="lg"
                 placeholder={t('sorting.label')}
                 options={sortOptions}
                 selectedKeys={[`${sortBy}-${sortOrder}`]}
@@ -110,6 +110,6 @@ export function FilterBar({
                     onSortChange(sort as 'alphabetical' | 'date' | 'length', order as 'asc' | 'desc');
                 }}
             />
-        </div>
+        </>
     );
 }
