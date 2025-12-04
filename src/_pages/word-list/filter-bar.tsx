@@ -28,7 +28,7 @@ export function FilterBar({
     onAttrChange,
     sortBy,
     sortOrder,
-    onSortChange
+    onSortChange,
 }: FilterBarProps) {
     const t = useTranslations('WordList');
     const locale = useLocale();
@@ -73,34 +73,39 @@ export function FilterBar({
     };
 
     return (
-        <>
+        <div className="flex flex-col lg:flex-row gap-4 w-full">
             <CustomMultiSelect
-                size="lg"
+                size="md"
                 options={posOptions}
                 placeholder={t('filters.partOfSpeech')}
+                label={t('filters.partOfSpeech')}
                 selectedKeys={selectedPos}
                 onSelectionChange={onPosChange}
                 onClear={() => onPosChange([])}
             />
             <CustomMultiSelect
-                size="lg"
                 options={langOptions}
+                size="md"
                 placeholder={t('filters.language')}
+                label={t('filters.language')}
                 selectedKeys={selectedLang}
                 onSelectionChange={onLangChange}
                 onClear={() => onLangChange([])}
             />
             <CustomMultiSelect
-                size="lg"
+                size="md"
                 options={attrOptions}
                 placeholder={t('filters.attribute')}
+                label={t('filters.attribute')}
                 selectedKeys={selectedAttr}
                 onSelectionChange={onAttrChange}
                 onClear={() => onAttrChange([])}
             />
             <CustomSelect
-                size="lg"
+
+                size="md"
                 placeholder={t('sorting.label')}
+                label={t('sorting.label')}
                 options={sortOptions}
                 selectedKeys={[`${sortBy}-${sortOrder}`]}
                 onChange={(e) => {
@@ -110,6 +115,6 @@ export function FilterBar({
                     onSortChange(sort as 'alphabetical' | 'date' | 'length', order as 'asc' | 'desc');
                 }}
             />
-        </>
+        </div>
     );
 }
