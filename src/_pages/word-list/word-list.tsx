@@ -280,7 +280,7 @@ export default function WordList() {
                                 />
                                 <CustomSelect
                                     size="md"
-                                    className="hidden sm:block"
+                                    className="hidden sm:block lg:w-1/4"
                                     options={wordPerPageOptions.reduce((acc, option) => {
                                         acc[option.key] = option.label;
                                         return acc;
@@ -294,6 +294,7 @@ export default function WordList() {
                                 />
                                 <div className="flex items-center gap-2 sm:hidden">
                                     <CustomSelect
+
                                         options={wordPerPageOptions.reduce((acc, option) => {
                                             acc[option.key] = option.label;
                                             return acc;
