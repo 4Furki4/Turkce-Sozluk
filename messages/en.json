@@ -54,6 +54,13 @@
     "EmailSigninLabel": "Email Sign In",
     "InvalidEmail": "Please enter a valid email address"
   },
+  "VerifyOtp": {
+    "title": "Verify your email",
+    "description": "Enter the 6-digit code sent to",
+    "verifyCode": "Verify Code",
+    "backToSignIn": "Back to Sign In",
+    "invalidCode": "Please enter a valid 6-digit code"
+  },
   "Home": {
     "alreadySignedIn": "You are already signed in",
     "hero": {
