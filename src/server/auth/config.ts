@@ -8,6 +8,7 @@ import { users } from "@/db/schema/users";
 import { verificationTokens } from "@/db/schema/verification_tokens";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import Nodemailer from "next-auth/providers/nodemailer"
+import { createTransport } from "nodemailer"
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -56,6 +57,54 @@ export const authConfig = {
             },
             from: process.env.EMAIL_FROM,
             name: "Email",
+            generateVerificationToken: async () => {
+                return Math.floor(100000 + Math.random() * 900000).toString();
+            },
+            sendVerificationRequest: async ({ identifier: email, token, provider }) => {
+                const transport = createTransport(provider.server)
+                await transport.sendMail({
+                    to: email,
+                    from: provider.from,
+                    subject: `Sign in to Turkish Dictionary`,
+                    text: `Sign in code: ${token}\n\nThis code will expire in 10 minutes.`,
+                    html: `
+<body style="background: #f9f9f9; font-family: Helvetica, Arial, sans-serif; padding: 20px;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+      <td align="center" style="padding: 10px 0px 20px 0px; font-size: 22px; font-family: Helvetica, Arial, sans-serif; color: #444;">
+        <strong>Turkish Dictionary</strong>
+      </td>
+    </tr>
+  </table>
+  <table width="100%" border="0" cellspacing="20" cellpadding="0" style="background: #fff; max-width: 600px; margin: auto; border-radius: 10px;">
+    <tr>
+      <td align="center" style="padding: 10px 0px 0px 0px; font-size: 18px; font-family: Helvetica, Arial, sans-serif; color: #444;">
+        Sign in to <strong>Turkish Dictionary</strong>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" style="padding: 20px 0;">
+        <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td align="center" style="border-radius: 5px;" bgcolor="#a91101">
+              <span style="font-size: 24px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; padding: 10px 20px; border: 1px solid #a91101; display: inline-block; font-weight: bold;">
+                ${token}
+              </span>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" style="padding: 0px 0px 10px 0px; font-size: 16px; line-height: 22px; font-family: Helvetica, Arial, sans-serif; color: #444;">
+        This code will expire in 10 minutes.
+      </td>
+    </tr>
+  </table>
+</body>
+                    `
+                })
+            }
         }),
     ],
     callbacks: {

@@ -54,6 +54,13 @@
     "EmailSigninLabel": "E-posta ile Giriş",
     "InvalidEmail": "Geçersiz e-posta formatı, lütfen doğru bir e-posta adresi giriniz."
   },
+  "VerifyOtp": {
+    "title": "E-postanızı doğrulayın",
+    "description": "adresine gönderilen 6 haneli kodu giriniz",
+    "verifyCode": "Kodu Doğrula",
+    "backToSignIn": "Giriş Ekranına Dön",
+    "invalidCode": "Lütfen geçerli 6 haneli kodu giriniz"
+  },
   "Home": {
     "alreadySignedIn": "Zaten giriş yaptınız",
     "hero": {
