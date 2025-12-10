@@ -26,7 +26,7 @@ export default async function ContributeWord({
         href: {
             pathname: "/signin",
             query: {
-                callbackUrl: `/contribute-word${word ? `?word=${word}` : ""}`,
+                backTo: `/contribute-word${word ? `?word=${word}` : ""}`,
             }
         },
         locale,

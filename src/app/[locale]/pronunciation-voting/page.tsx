@@ -10,10 +10,10 @@ export default async function Pronunciations() {
   const session = await auth.api.getSession({
     headers: await headers()
   });;
-  const callbackUrl = "/pronunciation-voting";
+  const backTo = "/pronunciation-voting";
   const queryParams = new URLSearchParams();
 
-  queryParams.set("callbackUrl", callbackUrl);
+  queryParams.set("backTo", backTo);
   if (!session) {
     redirect(`/signin?${queryParams.toString()}`);
   }

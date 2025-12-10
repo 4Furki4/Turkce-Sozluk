@@ -350,8 +350,8 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                         <button onClick={() => router.push({
                           pathname: "/signin",
                           query: {
-                            callbackUrl: pathname
-                          }
+                            backTo: window.location.pathname,
+                          },
                         })} className="text-primary underline underline-offset-2 cursor-pointer">
                           {t("SignIn")}
                         </button>

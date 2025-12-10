@@ -59,7 +59,8 @@
     "description": "adresine gönderilen 6 haneli kodu giriniz",
     "verifyCode": "Kodu Doğrula",
     "backToSignIn": "Giriş Ekranına Dön",
-    "invalidCode": "Lütfen geçerli 6 haneli kodu giriniz"
+    "invalidCode": "Lütfen geçerli 6 haneli kodu giriniz",
+    "successMessage": "E-posta başarıyla doğrulandı!"
   },
   "Home": {
     "alreadySignedIn": "Zaten giriş yaptınız",

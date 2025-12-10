@@ -59,7 +59,8 @@
     "description": "Enter the 6-digit code sent to",
     "verifyCode": "Verify Code",
     "backToSignIn": "Back to Sign In",
-    "invalidCode": "Please enter a valid 6-digit code"
+    "invalidCode": "Please enter a valid 6-digit code",
+    "successMessage": "Email verified successfully!"
   },
   "Home": {
     "alreadySignedIn": "You are already signed in",

@@ -2,13 +2,17 @@
 import { Button, InputOtp } from "@heroui/react";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { authClient } from "@/src/lib/auth-client";
+import { toast } from "sonner";
+
 export default function VerifyOtpPage() {
     const [email, setEmail] = useState<string | null>(null);
     const [otp, setOtp] = useState("");
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const backTo = searchParams.get("backTo");
     const t = useTranslations("VerifyOtp");
 
     useEffect(() => {
@@ -19,7 +23,6 @@ export default function VerifyOtpPage() {
             setEmail(storedEmail);
         }
     }, [router]);
-
 
     // ...
 
@@ -32,17 +35,13 @@ export default function VerifyOtpPage() {
             });
 
             if (res.error) {
-                // Handle error
-                console.error(res.error);
-                // Maybe set error state?
-                // For now, let's throw or alert
-                throw new Error(res.error.message);
+                toast.error(res.error.message)
+                return
             }
 
-            // On success, better-auth handles redirection or we can do it manually if redirect:false
-            // If we used default redirect: true (default), it redirects.
-            // But we should clear storage
+            toast.success(t("successMessage"))
             localStorage.removeItem("otp_email");
+            router.push(backTo || "/");
         }
     });
 
