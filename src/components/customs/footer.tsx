@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { FeedbackModal } from "@/src/components/customs/modals/add-feedback";
 import { Link } from '@heroui/react';
 import { Github } from 'lucide-react'; // Example icon
-import { Session } from 'next-auth';
+import { Session } from '@/src/lib/auth';
 
 export default async function Footer({ session }: { session: Session | null }) {
     const t = await getTranslations("Footer");

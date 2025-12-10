@@ -4,12 +4,13 @@ import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Avatar, Button, Card, CardBody } from '@heroui/react';
 import Image from 'next/image';
-import { type User } from 'next-auth';
+
 
 import EditProfileForm from './edit-profile-form';
 import { type ProfileDataUser as ProfileData } from './user-profile-page-client';
 import { useSnapshot } from 'valtio';
 import { preferencesState } from '@/src/store/preferences';
+import { User } from '@/src/lib/auth';
 
 interface UserProfileHeaderProps {
   profileData: ProfileData;

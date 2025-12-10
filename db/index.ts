@@ -27,8 +27,14 @@ import { dailyWords, dailyWordsRelations } from "./schema/daily-words";
 import { misspellings, misspellingsRelations } from "./schema/misspellings";
 import { galatiMeshur, galatiMeshurRelations } from "./schema/galatimeshur";
 import { badges, badgesRelations, usersToBadges, usersToBadgesRelations } from "./schema/gamification";
+import { accounts } from "./schema/accounts";
+import { sessions } from "./schema/session";
+import { verification } from "./schema/verification";
 
 export const schema = {
+  accounts,
+  sessions,
+  verification,
   users,
   usersRelations,
   words,

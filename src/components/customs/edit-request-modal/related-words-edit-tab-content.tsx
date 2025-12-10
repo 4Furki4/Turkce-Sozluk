@@ -3,7 +3,7 @@ import { Card, CardBody } from "@heroui/card";
 import { Button, useDisclosure } from '@heroui/react';
 import { Pencil, Trash2, PlusCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Session } from 'next-auth';
+import { Session } from '@/src/lib/auth-client';
 import RelatedWordCreateRequestModal from './related-word-create-request-modal';
 import { useSnapshot } from 'valtio';
 import { preferencesState } from '@/src/store/preferences';

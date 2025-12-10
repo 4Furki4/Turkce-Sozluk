@@ -3,7 +3,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslations } from 'next-intl';
-import type { Session } from 'next-auth';
+import { Session } from '@/src/lib/auth-client';
 import { toast } from 'sonner';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useDebounce } from '@uidotdev/usehooks';

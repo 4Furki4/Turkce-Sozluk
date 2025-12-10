@@ -1,9 +1,10 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { api } from "@/src/trpc/server";
 import { HydrateClient } from "@/src/trpc/server";
-import { auth } from "@/src/server/auth/auth";
+import { auth } from "@/src/lib/auth";
 import { FeedbackList } from "@/src/_pages/feedback/feedback-list";
 import { FeedbackModal } from "@/src/components/customs/modals/add-feedback";
+import { headers } from "next/headers";
 
 interface FeedbackPageProps {
     params: Promise<{
@@ -15,7 +16,9 @@ export default async function FeedbackPage({ params }: FeedbackPageProps) {
     const { locale } = await params;
     setRequestLocale(locale);
     const t = await getTranslations("Feedback");
-    const session = await auth();
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });;
 
     // Prefetch with default filters (exclude closed statuses by default)
     void api.feedback.list.prefetch({

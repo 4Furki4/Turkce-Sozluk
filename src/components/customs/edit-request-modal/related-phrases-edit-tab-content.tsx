@@ -4,7 +4,7 @@ import { Card, CardBody } from "@heroui/card";
 import { Plus, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import { Session } from 'next-auth';
+import { Session } from '@/src/lib/auth-client';
 import RelatedPhraseCreateRequestModal from './related-phrase-create-request-modal';
 import RelatedPhraseDeleteRequestModal from './related-phrase-delete-request-modal';
 import { useSnapshot } from "valtio"

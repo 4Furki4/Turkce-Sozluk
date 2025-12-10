@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-
+import { authClient } from "@/src/lib/auth-client";
 export default function VerifyOtpPage() {
     const [email, setEmail] = useState<string | null>(null);
     const [otp, setOtp] = useState("");
@@ -20,12 +20,29 @@ export default function VerifyOtpPage() {
         }
     }, [router]);
 
+
+    // ...
+
     const mutation = useMutation({
         mutationFn: async () => {
             if (!email || otp.length !== 6) return;
-            // Clear email from storage before redirecting to avoid stale state if user returns later
+            const res = await authClient.signIn.emailOtp({
+                email,
+                otp,
+            });
+
+            if (res.error) {
+                // Handle error
+                console.error(res.error);
+                // Maybe set error state?
+                // For now, let's throw or alert
+                throw new Error(res.error.message);
+            }
+
+            // On success, better-auth handles redirection or we can do it manually if redirect:false
+            // If we used default redirect: true (default), it redirects.
+            // But we should clear storage
             localStorage.removeItem("otp_email");
-            window.location.href = `/api/auth/callback/nodemailer?email=${encodeURIComponent(email)}&token=${otp}`;
         }
     });
 

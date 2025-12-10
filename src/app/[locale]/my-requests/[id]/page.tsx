@@ -2,9 +2,10 @@ import { Metadata } from "next";
 import RequestDetail from "@/src/_pages/requests/request-detail";
 import { getTranslations } from "next-intl/server";
 import { HydrateClient } from "@/src/trpc/server";
-import { auth } from "@/src/server/auth/auth";
+import { auth } from "@/src/lib/auth";
 import { redirect } from "next/navigation";
 import { api } from "@/src/trpc/server";
+import { headers } from "next/headers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Metadata");
@@ -19,7 +20,9 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const { id } = await params;
 
   // Check if user is authenticated
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers()
+  });;
 
   if (!session) {
     redirect("/signin");

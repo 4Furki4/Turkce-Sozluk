@@ -6,7 +6,7 @@ import Loading from "@/app/[locale]/(search)/search/_loading";
 import { useTranslations } from "next-intl";
 import { api } from "@/src/trpc/react";
 import WordCard from "./word-card";
-import { Session } from "next-auth";
+import { Session } from "@/src/lib/auth";
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
 import { Link as NextIntlLink } from "@/src/i18n/routing";

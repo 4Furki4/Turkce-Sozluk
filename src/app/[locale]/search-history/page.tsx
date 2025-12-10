@@ -1,11 +1,14 @@
-import { auth } from '@/src/server/auth/auth';
+import { auth } from "@/src/lib/auth";
 import { redirect } from 'next/navigation';
 import SearchHistory from '@/src/_pages/search-history/search-history';
 import { api } from '@/src/trpc/server';
 import { HydrateClient } from '@/src/trpc/server';
+import { headers } from "next/headers";
 
 export default async function SearchHistoryPage() {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers()
+  });;
 
   // Redirect to sign-in if not authenticated
   if (!session?.user) {

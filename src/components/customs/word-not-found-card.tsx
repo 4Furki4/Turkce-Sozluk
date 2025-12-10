@@ -3,14 +3,15 @@
 import React from "react";
 import { Card, CardBody, Button, useDisclosure, Tooltip } from "@heroui/react";
 import { useTranslations } from "next-intl";
-import { Link as NextIntlLink } from "@/src/i18n/routing";
+import { Link as NextIntlLink, usePathname, useRouter } from "@/src/i18n/routing";
 import { Plus, Search, BookOpen } from "lucide-react";
 import SimpleWordRequestModal from "./modals/simple-word-request-modal";
-import { Session } from "next-auth";
+
 import { useParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+
 import { useSnapshot } from "valtio";
 import { preferencesState } from "@/src/store/preferences";
+import { Session } from "@/src/lib/auth-client";
 
 interface WordNotFoundCardProps {
   session: Session | null;
@@ -22,6 +23,8 @@ export default function WordNotFoundCard({ session }: WordNotFoundCardProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const wordName = word ? decodeURIComponent(word) : "Unknown";
   const { isBlurEnabled } = useSnapshot(preferencesState)
+  const router = useRouter();
+  const pathname = usePathname();
 
   return (
     <>
@@ -57,7 +60,12 @@ export default function WordNotFoundCard({ session }: WordNotFoundCardProps) {
               </Button>
             ) : (
               <Tooltip content={t("signInToRequestWord")}>
-                <Button color="primary" variant="solid" size="lg" onPress={() => signIn()}>
+                <Button color="primary" variant="solid" size="lg" onPress={() => router.push({
+                  pathname: "/signin",
+                  query: {
+                    callbackUrl: pathname
+                  }
+                })}>
                   {t("signIn")}
                 </Button>
               </Tooltip>

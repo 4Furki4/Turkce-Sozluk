@@ -22,12 +22,12 @@ import {
     PopoverContent,
 } from "@heroui/react";
 import { feedbackTypeEnum } from "@/db/schema/feedbacks"; // Corrected import path
-import { type Session } from "next-auth";
-import { signIn } from "next-auth/react";
+import { type Session } from "@/src/lib/auth";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3"
 import { cn } from '@/lib/utils';
 import { useSnapshot } from 'valtio';
 import { preferencesState } from '@/src/store/preferences';
+import { usePathname, useRouter } from "@/src/i18n/routing";
 // Zod schema for form validation
 const feedbackSchema = z.object({
     title: z.string().min(5, "Error.titleMinLength"),
@@ -55,6 +55,8 @@ export function FeedbackModal({
     const tError = useTranslations('Errors');
     const tGlobal = useTranslations("Navbar");
     const utils = api.useUtils();
+    const router = useRouter();
+    const pathName = usePathname();
     const { executeRecaptcha } = useGoogleReCaptcha();
     const {
         register,
@@ -121,7 +123,12 @@ export function FeedbackModal({
                             <Button
                                 color="primary"
                                 variant="light"
-                                onPress={() => signIn()}
+                                onPress={() => router.push({
+                                    pathname: '/signin',
+                                    query: {
+                                        callbackUrl: pathName,
+                                    },
+                                })}
                                 className="p-0 m-0 h-max text-base font-semibold data-[hover]:dark:bg-transparent data-[hover]:bg-transparent data-[hover]:text-primary data-[hover]:underline data-[hover]:underline-offset-2 text-primary underline underline-offset-2"
                                 disableAnimation
                                 disableRipple

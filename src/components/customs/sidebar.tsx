@@ -2,7 +2,6 @@
 import { BellIcon, GitPullRequestArrow, HandHeart, HeartHandshake, HistoryIcon, HomeIcon, LayoutDashboard, ListTree, LogIn, MicIcon, StarIcon, UserIcon, WifiOff } from 'lucide-react'
 import React from 'react'
 import { Link as NextIntlLink } from "@/src/i18n/routing";
-import { Session } from 'next-auth';
 import {
     Sheet,
     SheetContent,
@@ -13,6 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import logo from "@/public/logo.svg";
+import { Session } from '@/src/lib/auth-client';
 export default function Sidebar(
     {
         session,
@@ -115,7 +115,7 @@ export default function Sidebar(
                             )}
 
 
-                            {session?.user?.role === "admin" ? (
+                            {(session?.user as any)?.role === "admin" ? (
                                 <li>
                                     <NextIntlLink href={"/dashboard"} className='flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 rounded-sm' onClick={() => setIsSidebarOpen(false)}>
                                         <LayoutDashboard className='h-6 w-6' /> <span className={`text-nowrap`}>{t("Navbar.Dashboard")}</span>

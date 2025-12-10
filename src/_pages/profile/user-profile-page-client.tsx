@@ -4,7 +4,7 @@ import React from 'react';
 import { Link as NextIntlLink } from '@/src/i18n/routing'
 import { CardFooter, Link as HeroUILink } from '@heroui/react'
 import { useTranslations } from 'next-intl';
-import { type Session } from 'next-auth';
+import { type Session } from '@/src/lib/auth';
 import { type RouterOutputs } from '@/src/trpc/shared';
 import { UserProfileHeader } from './UserProfileHeader';
 import { Card, CardHeader, CardBody, Tooltip } from '@heroui/react';

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Tab } from "@heroui/react";
 import { useTranslations } from "next-intl";
-import type { Session } from "next-auth";
+import type { Session } from "@/src/lib/auth";
 
 import ContributeWordHeader from "./components/contribute-word-header";
 import SimpleContributionForm from "./components/simple-contribution-form";

@@ -2,18 +2,18 @@
 
 import { useEffect, useState } from "react";
 
-import { useSession } from "next-auth/react";
 import { useWordSearch } from "@/src/hooks/useWordSearch";
 import Loading from "../_loading";
 import WordNotFoundCard from "@/src/components/customs/word-not-found-card";
 import WordCardWrapper from "@/src/components/customs/word-card-wrapper";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
+import { authClient } from "@/src/lib/auth-client";
 
 export default function SearchPageClient() {
     const pathname = usePathname();
     const router = useRouter();
-    const { data: session } = useSession();
+    const { data: session } = authClient.useSession();
     const locale = useLocale();
     const [wordName, setWordName] = useState<string | null>(null);
 

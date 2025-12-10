@@ -6,10 +6,8 @@ import { WordSearchResult } from "@/types";
 import SaveWord from "./save-word";
 import { Button, useDisclosure, Popover, PopoverTrigger, PopoverContent, Tabs, Tab } from "@heroui/react";
 import { Link as NextUILink } from "@heroui/react"
-import { Session } from "next-auth";
-import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/src/i18n/routing";
+import { Link, usePathname, useRouter } from "@/src/i18n/routing";
 import { Camera, Share2, Volume2, WifiOff, WifiSync } from "lucide-react";
 import Image from "next/image";
 import { useRef, } from "react";
@@ -19,6 +17,7 @@ import clsx from "clsx";
 import WordCardRequestModal from "./modals/word-card-request-modal";
 import CustomCard from "./heroui/custom-card";
 import PronunciationCard from "./pronunciation-card";
+import { Session } from '@/src/lib/auth-client';
 
 type WordCardProps = {
   word_data: WordSearchResult["word_data"] & { source?: "online" | "offline" };
@@ -32,7 +31,8 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
 
   const { isOpen, onOpenChange, onClose } = useDisclosure()
   const t = useTranslations("WordCard");
-
+  const router = useRouter();
+  const pathname = usePathname();
   const isOffline = word_data.source === "offline";
 
   const cardRef = useRef<HTMLDivElement>(null);
@@ -347,7 +347,12 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                         <p>
                           {t("You can request an edit if you are signed in")}
                         </p>
-                        <button onClick={() => signIn()} className="text-primary underline underline-offset-2 cursor-pointer">
+                        <button onClick={() => router.push({
+                          pathname: "/signin",
+                          query: {
+                            callbackUrl: pathname
+                          }
+                        })} className="text-primary underline underline-offset-2 cursor-pointer">
                           {t("SignIn")}
                         </button>
                       </div>

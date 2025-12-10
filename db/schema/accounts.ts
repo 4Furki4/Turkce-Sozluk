@@ -1,32 +1,28 @@
-import { integer, pgTable, text } from "drizzle-orm/pg-core";
+import { pgTable, text } from "drizzle-orm/pg-core";
 
-import { AdapterAccount } from "next-auth/adapters";
+
 import { users } from "./users";
-import { primaryKey, timestamp } from "drizzle-orm/pg-core";
+import { timestamp } from "drizzle-orm/pg-core";
 import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 export const accounts = pgTable(
   "accounts",
   {
+    id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
     userId: text("userId")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    type: text("type").$type<AdapterAccount["type"]>().notNull(),
-    provider: text("provider").notNull(),
-    providerAccountId: text("providerAccountId").notNull(),
-    refresh_token: text("refresh_token"),
-    access_token: text("access_token"),
-    expires_at: integer("expires_at"),
-    token_type: text("token_type"),
+    accountId: text("accountId").notNull(),
+    providerId: text("providerId").notNull(),
+    accessToken: text("accessToken"),
+    refreshToken: text("refreshToken"),
+    accessTokenExpiresAt: timestamp("accessTokenExpiresAt", { mode: "date" }),
+    refreshTokenExpiresAt: timestamp("refreshTokenExpiresAt", { mode: "date" }),
     scope: text("scope"),
-    id_token: text("id_token"),
-    session_state: text("session_state"),
-    createdAt: timestamp("createdAt", { mode: "date" }).defaultNow(),
-  },
-  (account) => ({
-    compoundKey: primaryKey({
-      columns: [account.provider, account.providerAccountId],
-    }),
-  })
+    password: text("password"),
+    idToken: text("idToken"),
+    createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow().notNull(),
+  }
 );
 
 export type SelectAccount = InferSelectModel<typeof accounts>;

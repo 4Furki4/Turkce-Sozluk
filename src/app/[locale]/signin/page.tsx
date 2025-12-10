@@ -2,29 +2,12 @@ import SigninForm from "@/src/components/customs/auth/signin-form";
 import React from "react";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { auth } from "@/src/server/auth/auth";
+import { auth } from "@/src/lib/auth"; // Updated import
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Params } from "next/dist/server/request/params";
+import { headers } from "next/headers"; // Added headers
 
-export async function generateMetadata({
-  params
-}: {
-  params: Promise<Params>
-}): Promise<Metadata> {
-  const { locale } = await params
-  switch (locale) {
-    case "tr":
-      return {
-        title: "Giriş yap",
-        description: "Hesabınıza giriş yapın",
-      };
-    default:
-      return {
-        title: "Sign in",
-        description: "Sign in to your account",
-      };
-  }
-}
+// ...
 
 export default async function page({
   params
@@ -33,7 +16,9 @@ export default async function page({
 }) {
   const { locale } = await params
   setRequestLocale(locale as string)
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers()
+  });
   const t = await getTranslations("SigninForm");
   if (session) redirect("/?warning=alreadySignedIn");
   return (
