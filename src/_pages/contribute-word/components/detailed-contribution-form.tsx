@@ -10,7 +10,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { uploadFiles } from "@/src/utils/uploadthing";
-import type { Session } from "next-auth";
+import type { Session } from "@/src/lib/auth";
 
 import { api } from "@/src/trpc/react";
 import CustomCard from "@/src/components/customs/heroui/custom-card";

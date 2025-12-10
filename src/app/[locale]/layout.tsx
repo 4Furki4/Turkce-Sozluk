@@ -10,7 +10,8 @@ import { Toaster } from "@/src/components/customs/sonner";
 import Footer from "@/src/components/customs/footer";
 import { routing } from "@/src/i18n/routing";
 import { notFound } from "next/navigation";
-import { auth } from "@/src/server/auth/auth";
+import { headers } from "next/headers";
+import { auth } from "@/src/lib/auth";
 import { Params } from "next/dist/server/request/params";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
@@ -18,9 +19,10 @@ import NavbarAndSidebar from "@/src/components/customs/navbar-and-sidebar";
 import { BackgroundGradient } from "@/src/components/customs/background-gradient";
 import { CaptchaProvider } from "@/src/components/customs/captcha-provider";
 import { PreferencesInitializer } from "@/src/components/customs/preferences-initializer";
-import { SessionProvider } from "next-auth/react";
+// import { SessionProvider } from "next-auth/react"; // Removed
 import { AutocompleteSync } from "@/src/components/customs/complete-sync";
 import ProfileGuard from "@/src/components/customs/profile-guard";
+import { authClient } from "@/src/lib/auth-client";
 
 export function generateStaticParams() {
   return [{ locale: "en" }, { locale: "tr" }];
@@ -146,7 +148,9 @@ export default async function RootLayout({
   params: Promise<Params>
 }) {
   const { locale } = await params;
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers()
+  })
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
@@ -165,43 +169,41 @@ export default async function RootLayout({
           <NextIntlClientProvider messages={messages}>
             <CaptchaProvider>
               <Providers>
-                <AutocompleteSync /> {/* Add it right inside Providers */}
-                <SessionProvider session={session}>
-                  <ProfileGuard />
-                  <div className="flex flex-col min-h-screen">
-                    <PreferencesInitializer />
-                    <NavbarAndSidebar
-                      session={session}
-                      HomeIntl={t("Home")}
-                      SignInIntl={t("Sign In")}
-                      WordListIntl={t("Word List")}
-                      TitleIntl={t("Title")}
-                      ProfileIntl={t("Profile")}
-                      SavedWordsIntl={t("SavedWords")}
-                      MyRequestsIntl={t("MyRequests")}
-                      SearchHistoryIntl={t("SearchHistory")}
-                      LogoutIntl={t("Logout")}
-                      AnnouncementsIntl={t("Announcements")}
-                      ContributeWordIntl={t("ContributeWord")}
-                      PronunciationsIntl={t("Pronunciations")}
-                      ariaAvatar={t("ariaAvatar")}
-                      ariaMenu={t("ariaMenu")}
-                      ariaLanguages={t("ariaLanguages")}
-                      ariaSwitchTheme={t("ariaSwitchTheme")}
-                      ariaBlur={t("ariaBlur")}
-                      ContributeIntl={t("Contribute")}
-                      FeedbackIntl={t("Feedback")}
-                    />
-                    <main className="relative w-full flex-grow flex min-h-[calc(100vh-var(--navbar-height))]">
-                      {/* ✨ Moved BackgroundGradient here */}
-                      <BackgroundGradient />
-                      {children}
-                    </main>
-                    <Footer session={session} />
-                  </div>
-                  <SpeedInsights />
-                  <Analytics />
-                </SessionProvider>
+                <AutocompleteSync />
+                <ProfileGuard />
+                <div className="flex flex-col min-h-screen">
+                  <PreferencesInitializer />
+                  <NavbarAndSidebar
+                    session={session}
+                    HomeIntl={t("Home")}
+                    SignInIntl={t("Sign In")}
+                    WordListIntl={t("Word List")}
+                    TitleIntl={t("Title")}
+                    ProfileIntl={t("Profile")}
+                    SavedWordsIntl={t("SavedWords")}
+                    MyRequestsIntl={t("MyRequests")}
+                    SearchHistoryIntl={t("SearchHistory")}
+                    LogoutIntl={t("Logout")}
+                    AnnouncementsIntl={t("Announcements")}
+                    ContributeWordIntl={t("ContributeWord")}
+                    PronunciationsIntl={t("Pronunciations")}
+                    ariaAvatar={t("ariaAvatar")}
+                    ariaMenu={t("ariaMenu")}
+                    ariaLanguages={t("ariaLanguages")}
+                    ariaSwitchTheme={t("ariaSwitchTheme")}
+                    ariaBlur={t("ariaBlur")}
+                    ContributeIntl={t("Contribute")}
+                    FeedbackIntl={t("Feedback")}
+                  />
+                  <main className="relative w-full flex-grow flex min-h-[calc(100vh-var(--navbar-height))]">
+                    {/* ✨ Moved BackgroundGradient here */}
+                    <BackgroundGradient />
+                    {children}
+                  </main>
+                  <Footer session={session} />
+                </div>
+                <SpeedInsights />
+                <Analytics />
               </Providers>
             </CaptchaProvider >
             <Toaster />

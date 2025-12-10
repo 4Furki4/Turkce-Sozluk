@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import SavedWordsToolbar, { AlphabetOrder, DateOrder } from "./saved-words-toolbar";
 import SavedWordCard from "./saved-word-card";
 import SavedWordCardSkeleton from "./saved-word-card-skeleton";
-import { Session } from "next-auth";
+import { Session } from "@/src/lib/auth";
 import { api } from "@/src/trpc/react";
 import { CustomPagination } from "./heroui/custom-pagination";
 

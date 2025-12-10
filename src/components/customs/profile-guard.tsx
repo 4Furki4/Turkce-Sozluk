@@ -1,16 +1,16 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { authClient } from "@/src/lib/auth-client";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function ProfileGuard() {
-    const { data: session, status } = useSession();
+    const { data: session, isPending, refetch } = authClient.useSession();
     const router = useRouter();
     const pathname = usePathname();
 
     useEffect(() => {
-        if (status === "loading") return;
+        if (isPending) return;
 
         if (session?.user) {
             const isProfileIncomplete = !session.user.name;
@@ -34,7 +34,7 @@ export default function ProfileGuard() {
                 router.push(targetPath);
             }
         }
-    }, [session, status, pathname, router]);
+    }, [session, isPending, pathname, router]);
 
     return null;
 }

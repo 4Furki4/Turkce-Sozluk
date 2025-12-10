@@ -1,10 +1,15 @@
 "use client"
 import { Button } from "@heroui/button";
-import { signIn } from "next-auth/react";
+import { authClient } from "@/src/lib/auth-client"; // Added
 export default function SigninButton({ provider, IntlMessage, startContent, redirectUrl }: { provider: "google" | "discord" | "github", IntlMessage: string, startContent: React.ReactNode, redirectUrl?: string }) {
     return (
         <Button
-            onPress={() => signIn(provider, { redirectTo: redirectUrl })}
+            onPress={async () => {
+                await authClient.signIn.social({
+                    provider: provider,
+                    callbackURL: redirectUrl
+                });
+            }}
             className="rounded-sm w-full"
             variant="flat"
             color="primary"

@@ -9,15 +9,16 @@ import {
   DropdownTrigger,
   DropdownMenu,
   NavbarBrand,
-  DropdownSection,
+  DropdownSection
 } from "@heroui/react";
 import { ChevronDown, GitPullRequestArrow, HandHeart, HeartHandshake, HistoryIcon, Languages, LogOut, Menu, Mic, Moon, Sparkle, Sparkles, StarIcon, Sun, UserIcon } from "lucide-react";
-import { signIn, signOut } from "next-auth/react";
+// import { signIn, signOut } from "next-auth/react"; // Removed
+import { authClient, type User } from "@/src/lib/auth-client"; // Added
 import { useTheme } from "next-themes";
 import { useLocale } from "next-intl";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { usePathname, Link as NextIntlLink } from "@/src/i18n/routing";
-import { Session } from "next-auth";
+// import { Session } from "@/src/lib/auth"; // Removed
 import logo from "@/public/svg/navbar/logo.svg";
 import Image from "next/image";
 import { useSnapshot } from "valtio";
@@ -25,9 +26,10 @@ import { preferencesState, toggleBlur } from "@/src/store/preferences";
 import { cn } from "@/lib/utils";
 import CustomDropdown from "./heroui/custom-dropdown";
 import { useOnlineStatus } from "@/src/hooks/use-online-status";
+import { Session } from "@/src/lib/auth-client";
+
 type NavbarProps = {
   session: Session | null;
-  setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
 } & Record<"TitleIntl" | "WordListIntl" | "SignInIntl" | "HomeIntl" | "ProfileIntl" | "SavedWordsIntl" | "MyRequestsIntl" | "SearchHistoryIntl" | "LogoutIntl" | "AnnouncementsIntl" | "ContributeWordIntl" | "PronunciationsIntl" | "ariaAvatar" | "ariaMenu" | "ariaLanguages" | "ariaSwitchTheme" | "ariaBlur" | "ContributeIntl" | "FeedbackIntl", string>;
 
 export default function Navbar({
@@ -52,17 +54,25 @@ export default function Navbar({
   ariaBlur,
   ContributeIntl,
   FeedbackIntl
-}: NavbarProps) {
+}: NavbarProps & { setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>> }) { // Merged props type
   const { theme, setTheme } = useTheme();
   const pathName = usePathname();
   const searchParams = useSearchParams();
   const locale = useLocale();
   const params = useParams();
+  const router = useRouter();
   const isAuthPage = ["/signup", "/signin", "/forgot-password"].includes(
     pathName
   );
   const isOnline = useOnlineStatus()
   const snap = useSnapshot(preferencesState);
+
+  const handleSignOut = async () => {
+    await authClient.signOut();
+    router.refresh();
+    router.push("/signin");
+  };
+
   return (
     <NextuiNavbar
       className="bg-background-foreground/100 border-b border-border"
@@ -100,7 +110,7 @@ export default function Navbar({
         </NavbarBrand>
       </NavbarItem>
       <NavbarContent justify="end" className="gap-2 md:gap-4 lg:gap-6">
-        {session?.user.role === "admin" ? (
+        {(session?.user as User & { role: string })?.role === "admin" ? (
           <NavbarItem className="hidden md:flex" isActive={pathName === "/dashboard"}>
             <NextIntlLink href={"/dashboard"} className='flex items-center gap-2 hover:text-primary text-gray-900 dark:hover:text-primary dark:text-gray-50 hover:underline rounded-sm'>
               <span className={`text-nowrap`}>Dashboard</span>
@@ -221,7 +231,7 @@ export default function Navbar({
           <NavbarItem>
             <Button
               size="md"
-              onPress={() => signIn()}
+              onPress={() => router.push("/signin")}
               aria-disabled={isAuthPage}
               isDisabled={isAuthPage}
               variant="shadow"
@@ -232,7 +242,7 @@ export default function Navbar({
             </Button>
             <Button
               size="sm"
-              onPress={() => signIn()}
+              onPress={() => router.push("/signin")}
               aria-disabled={isAuthPage}
               isDisabled={isAuthPage}
               variant="shadow"
@@ -268,7 +278,7 @@ export default function Navbar({
                 onAction={(key) => {
                   switch (key) {
                     case "sign-out":
-                      signOut();
+                      handleSignOut();
                       break;
                   }
                 }}
@@ -312,7 +322,7 @@ export default function Navbar({
                   className="rounded-sm text-destructive"
                   key={"sign-out"}
                   color="danger"
-                  onPress={() => signOut()}
+                  onPress={() => handleSignOut()}
                 >
                   {LogoutIntl}
                 </DropdownItem>

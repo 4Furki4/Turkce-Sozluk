@@ -12,8 +12,9 @@ import superjson from "superjson";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { ZodError } from "zod";
-import { auth } from "../auth/auth";
+import { auth } from "@/src/lib/auth";
 import { db } from "@/db";
+import { headers } from "next/headers";
 
 
 /**
@@ -29,7 +30,9 @@ import { db } from "@/db";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers()
+  })
 
   return {
     db,

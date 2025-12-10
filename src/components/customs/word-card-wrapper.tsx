@@ -1,7 +1,7 @@
 "use client"
 import React from 'react'
 import WordCard from './word-card';
-import { Session } from 'next-auth';
+import { Session } from '@/src/lib/auth-client';
 import WordNotFoundCard from './word-not-found-card';
 import { WordSearchResult } from '@/types';
 

@@ -2,8 +2,9 @@
 import { api } from '@/src/trpc/react'
 import React from 'react'
 import { ProfileDataUser, UserProfilePageClient } from './user-profile-page-client'
-import { Session } from 'next-auth'
+
 import { notFound } from 'next/navigation'
+import { Session } from '@/src/lib/auth'
 
 export default function ProfilePageWrapper({ profileData, userId, session, locale }: { profileData: ProfileDataUser, userId: string, session: Session | null, locale: string }) {
     const [data, { error }] = api.user.getPublicProfileData.useSuspenseQuery({ userId: userId }, {

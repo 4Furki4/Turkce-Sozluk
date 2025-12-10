@@ -9,7 +9,7 @@ import { z } from "zod";
 import { api } from "@/src/trpc/react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import { Session } from "next-auth";
+import { Session } from '@/src/lib/auth-client';
 import { RelatedPhraseItemType } from './related-phrases-edit-tab-content';
 import { cn } from '@/lib/utils';
 import { useSnapshot } from 'valtio';

@@ -9,8 +9,10 @@ import { z } from 'zod';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { api } from '@/src/trpc/react';
-import type { User } from 'next-auth';
+
 import { uploadFiles } from '@/src/utils/uploadthing';
+import { User } from '@/src/lib/auth';
+
 
 // Zod Schema for name and username
 const profileFormSchema = z.object({
@@ -23,7 +25,7 @@ type ProfileFormData = z.infer<typeof profileFormSchema>;
 interface EditProfileFormProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  user: User;
+  user: User
 }
 
 const MAX_FILE_SIZE_MB = 1;

@@ -9,7 +9,7 @@ import { useTranslations } from 'next-intl';
 import { WordSearchResult } from '@/types';
 import RelatedWordEditRequestModal from '../edit-request-modal/related-word-edit-request-modal';
 import RelatedWordDeleteRequestModal from '../edit-request-modal/related-word-delete-request-modal';
-import { Session } from 'next-auth';
+import { Session } from '@/src/lib/auth-client';
 import { useSnapshot } from "valtio"
 import { preferencesState } from "@/src/store/preferences"
 import { cn } from '@/lib/utils';

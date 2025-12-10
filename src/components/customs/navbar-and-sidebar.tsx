@@ -1,11 +1,14 @@
 "use client"
-import { Session } from 'next-auth'
 import React, { useState } from 'react'
 import Navbar from './navbar'
 import Sidebar from './sidebar'
+import { Session } from '@/src/lib/auth-client'
+
+import { authClient } from '@/src/lib/auth-client';
+
 export default function NavbarAndSidebar({
 
-    session,
+    session: serverSession,
     HomeIntl,
     SignInIntl,
     WordListIntl,
@@ -49,6 +52,8 @@ export default function NavbarAndSidebar({
 }) {
     // Render children if on client side, otherwise return null
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+    const { data: clientSession, isPending } = authClient.useSession()
+    const session = isPending ? serverSession : clientSession
     return (
         <>
             <Navbar

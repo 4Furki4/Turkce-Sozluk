@@ -1,10 +1,11 @@
-import { auth } from "@/src/server/auth/auth";
+import { auth } from "@/src/lib/auth";
 import { api, HydrateClient } from "@/src/trpc/server";
 import { Metadata } from "next";
 import { Params } from "next/dist/server/request/params";
 import { redirect, RedirectType } from "next/navigation";
 import React from "react";
 import SavedWordsPage from "@/src/components/customs/saved-words-page";
+import { headers } from "next/headers";
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { locale } = await params
@@ -24,7 +25,9 @@ export default async function SavedWords(
   const {
     locale
   } = params;
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers()
+  });;
   if (!session) redirect("/signin", RedirectType.replace);
   void api.user.getSavedWords.prefetch({});
   return (

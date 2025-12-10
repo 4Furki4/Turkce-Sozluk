@@ -7,7 +7,7 @@ import { formatDate } from "@/src/utils/date";
 import { toast } from "sonner";
 import { type inferRouterOutputs, type inferRouterInputs } from "@trpc/server";
 import { type AppRouter } from "@/src/server/api/root";
-import { Session } from "next-auth";
+import { Session } from "@/src/lib/auth";
 import { FeedbackStatus, statusColorMap } from "../dashboard/feedback/feedback-list";
 import { useCallback, useState, useMemo } from "react";
 import { PublicFeedbackFilterBar, type PublicFeedbackFilters } from "@/src/_pages/feedback/public-feedback-filter-bar";

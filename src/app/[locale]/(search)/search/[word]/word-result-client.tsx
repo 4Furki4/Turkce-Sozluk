@@ -3,7 +3,7 @@
 import { useWordSearch } from "@/src/hooks/useWordSearch";
 import Loading from "../_loading";
 import WordNotFoundCard from "@/src/components/customs/word-not-found-card";
-import { Session } from "next-auth";
+import { Session } from "@/src/lib/auth";
 import WordCardWrapper from "@/src/components/customs/word-card-wrapper";
 import { useLocale } from "next-intl";
 

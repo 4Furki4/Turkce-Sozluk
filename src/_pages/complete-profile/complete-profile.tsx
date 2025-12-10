@@ -7,10 +7,11 @@ import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { Button, Input } from '@heroui/react';
 import { useTranslations } from 'next-intl';
-import { Session } from 'next-auth';
+
 import { toast } from 'sonner';
-import { signOut, useSession } from 'next-auth/react';
 import CustomCard from '@/src/components/customs/heroui/custom-card';
+import { Session } from '@/src/lib/auth';
+import { authClient } from '@/src/lib/auth-client';
 
 const createProfileSchema = (t: (key: string) => string) => z.object({
     username: z.string().min(1, t("username_required")).min(3, t("username_min_length")),
@@ -20,7 +21,7 @@ const createProfileSchema = (t: (key: string) => string) => z.object({
 type CompleteProfileForm = z.infer<ReturnType<typeof createProfileSchema>>;
 
 export default function CompleteProfile({ session }: { session: Session | null }) {
-    const { update } = useSession();
+    const { refetch } = authClient.useSession();
     const t = useTranslations("Profile");
     const router = useRouter();
     const completeProfileSchema = createProfileSchema(t);
@@ -35,7 +36,7 @@ export default function CompleteProfile({ session }: { session: Session | null }
 
     const updateProfile = api.user.updateProfile.useMutation({
         onSuccess: async () => {
-            await update();
+            await refetch();
             router.push(`/profile/${session?.user?.id}`);
             router.refresh();
         },
@@ -48,8 +49,9 @@ export default function CompleteProfile({ session }: { session: Session | null }
 
     const deleteUser = api.user.deleteCurrentUser.useMutation({
         onSuccess: async () => {
-            await signOut({ callbackUrl: "/" });
+            await authClient.signOut()
             toast.success(t("account_deleted"));
+            router.push("/");
         }
     });
 

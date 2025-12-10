@@ -6,6 +6,7 @@ import {
   text,
   timestamp,
   varchar,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { words } from "./words";
 import { pronunciations } from "./pronunciations";
@@ -24,13 +25,17 @@ export const users = pgTable("users", {
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name"),
   email: text("email").notNull(),
-  emailVerified: timestamp("emailVerified", { mode: "date" }),
+  emailVerified: boolean("email_verified").default(false).notNull(),
+  emailVerifiedTimestamp: timestamp("emailVerifiedTimestamp", { mode: "date" }),
   image: text("image"),
   username: varchar("username", { length: 255 }),
   role: rolesEnum("role").default("user").notNull(),
-  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+  createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true }).defaultNow().notNull(),
   points: integer("points").default(0).notNull(),
+  banned: boolean("banned").default(false),
+  banReason: text("ban_reason"),
+  banExpires: timestamp("ban_expires", { mode: "date" }),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({

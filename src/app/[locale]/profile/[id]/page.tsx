@@ -1,4 +1,4 @@
-import { auth } from '@/src/server/auth/auth';
+import { auth } from "@/src/lib/auth";
 import { api } from '@/src/trpc/server';
 import React from 'react';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation';
 import { TRPCError } from '@trpc/server';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Card, CardBody } from '@heroui/react';
+import { headers } from "next/headers";
 interface ProfilePageProps {
     params: Promise<{
         id: string;
@@ -18,7 +19,9 @@ export default async function ProfilePage({ params: paramsPromise }: ProfilePage
     const { id, locale } = await paramsPromise;
     setRequestLocale(locale);
     const t = await getTranslations('Common');
-    const session = await auth();
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
     try {
         const profileData = await api.user.getPublicProfileData({ userId: id });
 

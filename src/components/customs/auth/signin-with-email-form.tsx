@@ -3,10 +3,10 @@ import { Button, Input } from '@heroui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { MailIcon } from 'lucide-react'
-import { signIn } from 'next-auth/react'
 import React, { useState } from 'react'
 import { Controller, FieldValues, useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { authClient } from "@/src/lib/auth-client"
 
 export default function SigninWithEmailForm({ SigninWithEmailIntl, EnterYourEmailIntl, EmailSigninLabelIntl, MagicLinkIntl, InvalidEmailIntl }: { SigninWithEmailIntl: string, EnterYourEmailIntl: string, EmailSigninLabelIntl: string, MagicLinkIntl: string, InvalidEmailIntl: string }) {
     const [step, setStep] = useState<"email" | "otp">("email")
@@ -21,12 +21,15 @@ export default function SigninWithEmailForm({ SigninWithEmailIntl, EnterYourEmai
     })
     const mutation = useMutation({
         mutationFn: async (data: FieldValues) => {
-            const res = await signIn("nodemailer", { email: data.email, redirect: false })
-            if (res?.ok && !res.error) {
+            const res = await authClient.emailOtp.sendVerificationOtp({
+                email: data.email,
+                type: "sign-in"
+            });
+            if (!res?.error) {
                 localStorage.setItem("otp_email", data.email)
                 window.location.href = "/verify-otp"
             } else {
-                throw new Error("Failed to send email")
+                throw new Error(res?.error?.message || "Failed to send email")
             }
         }
     })

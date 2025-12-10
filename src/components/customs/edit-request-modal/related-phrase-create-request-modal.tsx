@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Textarea, Autocomplete, AutocompleteItem } from '@heroui/react';
 import { useDebounce } from '@uidotdev/usehooks';
 import { useTranslations } from 'next-intl';
-import { Session } from 'next-auth';
+import { Session } from '@/src/lib/auth-client';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';

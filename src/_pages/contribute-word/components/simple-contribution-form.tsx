@@ -14,7 +14,7 @@ import CustomCard from "@/src/components/customs/heroui/custom-card";
 import { CustomInput } from "@/src/components/customs/heroui/custom-input";
 import type { TRPCClientErrorLike } from "@trpc/client";
 import type { AppRouter } from "@/src/server/api/root";
-import type { Session } from "next-auth";
+import type { Session } from "@/src/lib/auth";
 
 // Schema for simple form
 const getSimpleFormSchema = (minLengthIntl: string) => z.object({

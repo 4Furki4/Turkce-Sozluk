@@ -1,9 +1,10 @@
 import React from 'react'
 import { api, HydrateClient } from '@/src/trpc/server';
 import { Metadata } from 'next';
-import { auth } from '@/src/server/auth/auth';
+import { auth } from "@/src/lib/auth";
 import WordResultClient from './word-result-client';
 import { getWordCanonicalUrl, getWordHreflangUrls } from '@/src/lib/seo-utils';
+import { headers } from 'next/headers';
 
 // This is the updated metadata generation function
 export async function generateMetadata({
@@ -141,7 +142,9 @@ export default async function SearchResultPage(
     // Properly decode URL parameters with special characters like commas
     const decodedWordName = decodeURIComponent(params.word);
 
-    const session = await auth()
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
 
     // 1. Fetch data on the server for SEO and initial load.
     try {

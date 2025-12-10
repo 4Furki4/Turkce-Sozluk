@@ -17,7 +17,7 @@ import { ArrowUpIcon, ArrowDownIcon } from "lucide-react";
 import { api } from "@/src/trpc/react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { Session } from "next-auth";
+import { Session } from '@/src/lib/auth-client';
 import { useLocale } from 'next-intl';
 import CustomCard from "./heroui/custom-card";
 import { CustomAudioPlayer } from "./custom-audio";
