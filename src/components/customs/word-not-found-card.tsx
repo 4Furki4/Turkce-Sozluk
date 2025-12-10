@@ -63,7 +63,7 @@ export default function WordNotFoundCard({ session }: WordNotFoundCardProps) {
                 <Button color="primary" variant="solid" size="lg" onPress={() => router.push({
                   pathname: "/signin",
                   query: {
-                    callbackUrl: pathname
+                    backTo: pathname
                   }
                 })}>
                   {t("signIn")}

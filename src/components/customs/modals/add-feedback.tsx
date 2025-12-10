@@ -126,7 +126,7 @@ export function FeedbackModal({
                                 onPress={() => router.push({
                                     pathname: '/signin',
                                     query: {
-                                        callbackUrl: pathName,
+                                        backTo: window.location.pathname,
                                     },
                                 })}
                                 className="p-0 m-0 h-max text-base font-semibold data-[hover]:dark:bg-transparent data-[hover]:bg-transparent data-[hover]:text-primary data-[hover]:underline data-[hover]:underline-offset-2 text-primary underline underline-offset-2"

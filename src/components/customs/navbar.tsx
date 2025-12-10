@@ -16,7 +16,8 @@ import { ChevronDown, GitPullRequestArrow, HandHeart, HeartHandshake, HistoryIco
 import { authClient, type User } from "@/src/lib/auth-client"; // Added
 import { useTheme } from "next-themes";
 import { useLocale } from "next-intl";
-import { useParams, useSearchParams, useRouter } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
+import { useRouter } from "@/src/i18n/routing";
 import { usePathname, Link as NextIntlLink } from "@/src/i18n/routing";
 // import { Session } from "@/src/lib/auth"; // Removed
 import logo from "@/public/svg/navbar/logo.svg";
@@ -70,7 +71,6 @@ export default function Navbar({
   const handleSignOut = async () => {
     await authClient.signOut();
     router.refresh();
-    router.push("/signin");
   };
 
   return (
@@ -231,7 +231,12 @@ export default function Navbar({
           <NavbarItem>
             <Button
               size="md"
-              onPress={() => router.push("/signin")}
+              onPress={() => router.push({
+                pathname: "/signin",
+                query: {
+                  backTo: window.location.pathname
+                }
+              })}
               aria-disabled={isAuthPage}
               isDisabled={isAuthPage}
               variant="shadow"
@@ -242,7 +247,12 @@ export default function Navbar({
             </Button>
             <Button
               size="sm"
-              onPress={() => router.push("/signin")}
+              onPress={() => router.push({
+                pathname: "/signin",
+                query: {
+                  backTo: window.location.pathname
+                }
+              })}
               aria-disabled={isAuthPage}
               isDisabled={isAuthPage}
               variant="shadow"

@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { MailIcon } from 'lucide-react'
 import React, { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Controller, FieldValues, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { authClient } from "@/src/lib/auth-client"
@@ -11,6 +12,8 @@ import { authClient } from "@/src/lib/auth-client"
 export default function SigninWithEmailForm({ SigninWithEmailIntl, EnterYourEmailIntl, EmailSigninLabelIntl, MagicLinkIntl, InvalidEmailIntl }: { SigninWithEmailIntl: string, EnterYourEmailIntl: string, EmailSigninLabelIntl: string, MagicLinkIntl: string, InvalidEmailIntl: string }) {
     const [step, setStep] = useState<"email" | "otp">("email")
     const [email, setEmail] = useState("")
+    const searchParams = useSearchParams()
+    const backTo = searchParams.get("backTo") || searchParams.get("backTo") || "/"
 
     const { control, handleSubmit, reset } = useForm({
         resolver: zodResolver(z.object({
@@ -27,7 +30,11 @@ export default function SigninWithEmailForm({ SigninWithEmailIntl, EnterYourEmai
             });
             if (!res?.error) {
                 localStorage.setItem("otp_email", data.email)
-                window.location.href = "/verify-otp"
+                const url = new URL("/verify-otp", window.location.origin)
+                if (backTo !== "/") {
+                    url.searchParams.set("backTo", backTo)
+                }
+                window.location.href = url.toString()
             } else {
                 throw new Error(res?.error?.message || "Failed to send email")
             }
