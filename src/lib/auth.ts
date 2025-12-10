@@ -5,6 +5,9 @@ import { schema } from "@/db/index";
 import { nextCookies } from "better-auth/next-js";
 import { admin, emailOTP } from "better-auth/plugins";
 import nodemailer from "nodemailer";
+import { render } from "@react-email/render";
+import OtpEmail from "@/src/emails/otp-email";
+import { cookies } from "next/headers";
 
 const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_SERVER_HOST,
@@ -48,34 +51,30 @@ export const auth = betterAuth({
         nextCookies(),
         emailOTP({
             async sendVerificationOTP({ email, otp, type }) {
-                if (type === "sign-in") {
+                if (type === "sign-in" || type === "email-verification") {
                     try {
+                        const cookieStore = await cookies();
+                        const locale = cookieStore.get("NEXT_LOCALE")?.value || "tr";
+                        const view = await render(OtpEmail({ validationCode: otp, locale }));
+
+                        let subject = "";
+                        if (locale === "tr") {
+                            subject = type === "sign-in" ? "Giriş Kodunuz - Türkçe Sözlük" : "E-posta Doğrulama - Türkçe Sözlük";
+                        } else {
+                            subject = type === "sign-in" ? "Your Login Code - Turkish Dictionary" : "Email Verification - Turkish Dictionary";
+                        }
+
                         await transporter.sendMail({
                             from: process.env.EMAIL_FROM,
                             to: email,
-                            subject: "Your Login OTP",
+                            subject,
                             text: `Your OTP is ${otp}`,
-                            html: `<b>Your OTP is ${otp}</b>`
+                            html: view
                         });
                     } catch (e) {
                         console.error("Failed to send OTP", e);
                     }
                 }
-                if (type === "email-verification") {
-                    try {
-                        await transporter.sendMail({
-                            from: process.env.EMAIL_FROM,
-                            to: email,
-                            subject: "Your Email Verification OTP",
-                            text: `Your OTP is ${otp}`,
-                            html: `<b>Your OTP is ${otp}</b>`
-                        });
-                    } catch (e) {
-                        console.error("Failed to send OTP", e);
-                    }
-                }
-
-
             },
         }),
         admin()
