@@ -108,7 +108,7 @@
     "@types/web-push": "^3.6.4",
     "critters": "^0.0.23",
     "dotenv-cli": "^8.0.0",
-    "drizzle-kit": "^0.31.0",
+    "drizzle-kit": "^0.31.8",
     "eslint-plugin-jest-dom": "^5.1.0",
     "eslint-plugin-testing-library": "^6.1.0",
     "eslint-plugin-unused-imports": "^4.1.4",
