@@ -1,7 +1,7 @@
 import { createTRPCRouter, publicProcedure } from "@/src/server/api/trpc";
 import { z } from "zod";
 import { words } from "@/db/schema/words";
-import { eq, ilike, or } from "drizzle-orm";
+import { ilike } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 export const searchRouter = createTRPCRouter({

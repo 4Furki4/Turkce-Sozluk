@@ -10,7 +10,6 @@ import {
     getLocalVersion,
     setLocalVersion,
     clearOfflineData,
-    processWordFile,
 } from "@/src/lib/offline-db";
 import { Download, Trash2, RefreshCw } from "lucide-react";
 

@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { galatiMeshur } from "@/db/schema/galatimeshur"; // Updated import
 import { misspellings } from "@/db/schema/misspellings";
 import { words } from "@/db/schema/words";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 export const extrasRouter = createTRPCRouter({
     getGalatiMeshur: publicProcedure
