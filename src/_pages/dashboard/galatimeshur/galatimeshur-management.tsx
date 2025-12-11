@@ -6,7 +6,6 @@ import {
     ModalBody,
     ModalFooter,
     Button,
-    Input,
     Textarea,
     Autocomplete,
     AutocompleteItem,

@@ -1,6 +1,6 @@
 "use client";
 import { useLocale, useTranslations } from "next-intl";
-import { Download, Edit3, HeartHandshake, KeyboardIcon, Search as SearchIcon, Stars, PuzzleIcon } from "lucide-react";
+import { Download, Edit3, HeartHandshake, KeyboardIcon, Search as SearchIcon, PuzzleIcon } from "lucide-react";
 import { Link, useRouter } from "@/src/i18n/routing";
 import { Input } from "@heroui/input";
 import { useEffect, useRef, useState } from "react";

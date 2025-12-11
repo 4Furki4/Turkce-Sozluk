@@ -1,6 +1,5 @@
 import SigninForm from "@/src/components/customs/auth/signin-form";
 import React from "react";
-import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/src/lib/auth"; // Updated import
 import { getTranslations, setRequestLocale } from "next-intl/server";

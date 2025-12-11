@@ -22,7 +22,7 @@ import { PreferencesInitializer } from "@/src/components/customs/preferences-ini
 // import { SessionProvider } from "next-auth/react"; // Removed
 import { AutocompleteSync } from "@/src/components/customs/complete-sync";
 import ProfileGuard from "@/src/components/customs/profile-guard";
-import { authClient } from "@/src/lib/auth-client";
+
 
 export function generateStaticParams() {
   return [{ locale: "en" }, { locale: "tr" }];
