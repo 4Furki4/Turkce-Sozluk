@@ -26,6 +26,29 @@ export default function VerifyOtpPage() {
 
     // ...
 
+    const getErrorMessage = (error: { code?: string; message?: string } | null | undefined) => {
+        if (!error) return t("errors.generic");
+
+        // Map better-auth error codes to translation keys
+        const errorCode = error.code?.toLowerCase() || "";
+        const errorMessage = error.message?.toLowerCase() || "";
+
+        if (errorCode.includes("invalid") || errorMessage.includes("invalid") || errorMessage.includes("incorrect")) {
+            return t("errors.invalidOtp");
+        }
+        if (errorCode.includes("expired") || errorMessage.includes("expired")) {
+            return t("errors.expiredOtp");
+        }
+        if (errorCode.includes("too_many") || errorMessage.includes("too many") || errorMessage.includes("rate")) {
+            return t("errors.tooManyAttempts");
+        }
+        if (errorCode.includes("not_found") || errorMessage.includes("not found") || errorMessage.includes("user")) {
+            return t("errors.userNotFound");
+        }
+
+        return t("errors.generic");
+    };
+
     const mutation = useMutation({
         mutationFn: async () => {
             if (!email || otp.length !== 6) return;
@@ -35,7 +58,7 @@ export default function VerifyOtpPage() {
             });
 
             if (res.error) {
-                toast.error(res.error.message)
+                toast.error(getErrorMessage(res.error))
                 return
             }
 

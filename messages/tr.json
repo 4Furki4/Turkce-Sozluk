@@ -60,7 +60,14 @@
     "verifyCode": "Kodu Doğrula",
     "backToSignIn": "Giriş Ekranına Dön",
     "invalidCode": "Lütfen geçerli 6 haneli kodu giriniz",
-    "successMessage": "E-posta başarıyla doğrulandı!"
+    "successMessage": "E-posta başarıyla doğrulandı!",
+    "errors": {
+      "invalidOtp": "Geçersiz doğrulama kodu. Lütfen tekrar deneyin.",
+      "expiredOtp": "Doğrulama kodunun süresi doldu. Lütfen yeni bir kod isteyin.",
+      "tooManyAttempts": "Çok fazla deneme. Lütfen bir süre bekleyip tekrar deneyin.",
+      "userNotFound": "Kullanıcı bulunamadı. Lütfen e-posta adresinizi kontrol edin.",
+      "generic": "Doğrulama başarısız oldu. Lütfen tekrar deneyin."
+    }
   },
   "Home": {
     "alreadySignedIn": "Zaten giriş yaptınız",
