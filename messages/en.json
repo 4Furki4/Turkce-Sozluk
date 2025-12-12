@@ -60,7 +60,14 @@
     "verifyCode": "Verify Code",
     "backToSignIn": "Back to Sign In",
     "invalidCode": "Please enter a valid 6-digit code",
-    "successMessage": "Email verified successfully!"
+    "successMessage": "Email verified successfully!",
+    "errors": {
+      "invalidOtp": "Invalid verification code. Please try again.",
+      "expiredOtp": "Verification code has expired. Please request a new one.",
+      "tooManyAttempts": "Too many attempts. Please wait before trying again.",
+      "userNotFound": "User not found. Please check your email address.",
+      "generic": "Verification failed. Please try again."
+    }
   },
   "Home": {
     "alreadySignedIn": "You are already signed in",
