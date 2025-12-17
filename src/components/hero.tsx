@@ -1,6 +1,6 @@
 "use client";
 import { useLocale, useTranslations } from "next-intl";
-import { Search as SearchIcon, PuzzleIcon, KeyboardIcon, ArrowRight, XCircle, CheckCircle2, BookOpen, TrendingUpIcon } from "lucide-react";
+import { Search as SearchIcon, PuzzleIcon, KeyboardIcon, ArrowRight, XCircle, CheckCircle2, BookOpen, TrendingUpIcon, Download, Wifi, HeartHandshake } from "lucide-react";
 import { Link, useRouter } from "@/src/i18n/routing";
 import { Input } from "@heroui/input";
 import { useEffect, useRef, useState } from "react";
@@ -329,6 +329,11 @@ export default function Hero({ children }: {
             <BentoCommonMistake />
             <BentoGalatiMeshur />
           </div>
+
+          {/* Features Row - Spans 3 Columns */}
+          <div className="md:col-span-3">
+            <BentoFeatures />
+          </div>
         </div>
 
 
@@ -463,5 +468,45 @@ function BentoGalatiMeshur() {
         </p> */}
       </CardBody>
     </Card>
+  )
+}
+
+function BentoFeatures() {
+  const t = useTranslations("Home");
+
+  const features = [
+    {
+      title: t("hero.offlineFeature.title"),
+      description: t("hero.offlineFeature.description"),
+      icon: <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500"><Wifi className="w-6 h-6" /></div>,
+      gradient: "from-blue-500/10 to-transparent"
+    },
+    {
+      title: t("hero.pwaFeature.title"),
+      description: t("hero.pwaFeature.description"),
+      icon: <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500"><Download className="w-6 h-6" /></div>,
+      gradient: "from-red-500/10 to-transparent"
+    },
+    {
+      title: t("hero.feature1.title"),
+      description: t("hero.feature1.description"),
+      icon: <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500"><HeartHandshake className="w-6 h-6" /></div>,
+      gradient: "from-green-500/10 to-transparent"
+    }
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {features.map((feature, idx) => (
+        <Card key={idx} className="h-full border border-zinc-800 bg-background/50 hover:border-zinc-700 transition-colors shadow-none">
+          <CardBody className="p-6 relative overflow-hidden">
+            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl ${feature.gradient} opacity-20 rounded-bl-full pointer-events-none`} />
+            <div className="mb-4">{feature.icon}</div>
+            <h3 className="text-lg font-bold text-foreground mb-2">{feature.title}</h3>
+            <p className="text-sm text-balance text-muted-foreground leading-relaxed">{feature.description}</p>
+          </CardBody>
+        </Card>
+      ))}
+    </div>
   )
 }

@@ -98,6 +98,10 @@
         "title": "Işık Hızında & Çevrim dışı",
         "description": "Çevrim dışı sözlüğü indirerek internetiniz yokken de sözlüğü kullanın ve internetiniz varken daha hızlı sonuçlara ulaşın"
       },
+      "pwaFeature": {
+        "title": "Uygulama Olarak Yükle",
+        "description": "Cihazınıza yükleyerek yerel uygulama deneyimi yaşayın. Ana ekranınızdan tek tıkla erişin."
+      },
       "WordOfTheDay": {
         "title": "Günün Kelimesi",
         "noMeaningFound": "Anlam bulunamadı.",
