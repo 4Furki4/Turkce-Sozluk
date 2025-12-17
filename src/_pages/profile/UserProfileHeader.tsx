@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Avatar, Button, Card, CardBody } from '@heroui/react';
+import { Avatar, Button, CardBody } from '@heroui/react';
 import Image from 'next/image';
 
 
@@ -11,6 +11,7 @@ import { type ProfileDataUser as ProfileData } from './user-profile-page-client'
 import { useSnapshot } from 'valtio';
 import { preferencesState } from '@/src/store/preferences';
 import { User } from '@/src/lib/auth';
+import CustomCard from '@/src/components/customs/heroui/custom-card';
 
 interface UserProfileHeaderProps {
   profileData: ProfileData;
@@ -34,9 +35,7 @@ export function UserProfileHeader({ profileData, locale, isOwnProfile, user, cla
 
   return (
     <>
-      <Card isBlurred={isBlurEnabled} className={`border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors ${className}`} classNames={{
-        base: "dark:bg-zinc-900/60 bg-zinc-200/90",
-      }}>
+      <CustomCard isBlurred={isBlurEnabled} className={`border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors ${className}`}>
         <CardBody className="flex flex-col items-center gap-6 rounded-lg p-6 shadow-sm sm:flex-row">
           <Avatar
             src={profileData.image || undefined}
@@ -71,7 +70,7 @@ export function UserProfileHeader({ profileData, locale, isOwnProfile, user, cla
             )}
           </div>
         </CardBody>
-      </Card>
+      </CustomCard>
 
       {isOwnProfile && user && <EditProfileForm isOpen={isModalOpen} onOpenChange={setIsModalOpen} user={user} />}
     </>

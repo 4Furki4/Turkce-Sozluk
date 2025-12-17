@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Link as NextIntlLink } from '@/src/i18n/routing'
-import { Link as HeroUILink, Card, CardHeader, CardBody, Tooltip } from '@heroui/react'
+import { Link as HeroUILink, CardHeader, CardBody, Tooltip } from '@heroui/react'
 import { useTranslations } from 'next-intl';
 import { type Session } from '@/src/lib/auth';
 import { type RouterOutputs } from '@/src/trpc/shared';
@@ -10,6 +10,7 @@ import { UserProfileHeader } from './UserProfileHeader';
 import { CheckCheck, Clock, X } from 'lucide-react';
 import { useSnapshot } from 'valtio';
 import { preferencesState } from '@/src/store/preferences';
+import CustomCard from '@/src/components/customs/heroui/custom-card';
 
 export type ProfileDataUser = RouterOutputs['user']['getPublicProfileData'];
 
@@ -90,9 +91,7 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                 />
 
                 {/* Contribution Stats - Spans 1 Column */}
-                <Card isBlurred={isBlurEnabled} className="md:col-span-1 h-full border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors" classNames={{
-                    base: "dark:bg-zinc-900/60 bg-zinc-200/90",
-                }}>
+                <CustomCard isBlurred={isBlurEnabled} className="md:col-span-1 h-full border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors">
                     <CardHeader className="pb-2">
                         <h3 className="text-lg font-semibold text-foreground/90">{t('contributionStatsTitle')}</h3>
                     </CardHeader>
@@ -125,12 +124,10 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                             </div>
                         </div>
                     </CardBody>
-                </Card>
+                </CustomCard>
 
                 {/* Badges Section - Spans Full Width (3 Columns) */}
-                <Card isBlurred={isBlurEnabled} className="md:col-span-3 border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors" classNames={{
-                    base: "dark:bg-zinc-900/60 bg-zinc-200/90",
-                }}>
+                <CustomCard isBlurred={isBlurEnabled} className="md:col-span-3 border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors">
                     <CardHeader>
                         <h3 className="text-lg font-semibold text-foreground/90">{t('badgesTitle')}</h3>
                     </CardHeader>
@@ -162,13 +159,11 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                             )}
                         </div>
                     </CardBody>
-                </Card>
+                </CustomCard>
 
                 {/* Saved Words Section - Spans 1 Column (Only for Own Profile) */}
                 {isOwnProfile && (
-                    <Card isBlurred={isBlurEnabled} className="md:col-span-1 h-[500px] border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors" classNames={{
-                        base: "dark:bg-zinc-900/60 bg-zinc-200/90",
-                    }}>
+                    <CustomCard isBlurred={isBlurEnabled} className="md:col-span-1 h-[500px] border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors">
                         <CardHeader className="flex justify-between items-center pb-2">
                             <h3 className="text-lg font-semibold text-foreground/90">{t('savedWordsTitle')}</h3>
                             <NextIntlLink href="/saved-words" className="text-xs font-mono text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest">
@@ -204,13 +199,11 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                                 </div>
                             )}
                         </CardBody>
-                    </Card>
+                    </CustomCard>
                 )}
 
                 {/* Recent Contributions Section - Spans 2 Columns (or 3 if not own) */}
-                <Card isBlurred={isBlurEnabled} className={`${isOwnProfile ? 'md:col-span-2' : 'md:col-span-3'} h-[500px] border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors`} classNames={{
-                    base: "dark:bg-zinc-900/60 bg-zinc-200/90",
-                }}>
+                <CustomCard isBlurred={isBlurEnabled} className={`${isOwnProfile ? 'md:col-span-2' : 'md:col-span-3'} h-[500px] border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors`} >
                     <CardHeader className="flex justify-between items-center pb-2">
                         <h3 className="text-lg font-semibold text-foreground/90">{t('recentContributionsTitle')}</h3>
                         <NextIntlLink href={{ pathname: '/my-requests', query: { status: 'approved' } }} className="text-xs font-mono text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest">
@@ -258,7 +251,7 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                             </div>
                         )}
                     </CardBody>
-                </Card>
+                </CustomCard>
             </div>
         </div>
     );
