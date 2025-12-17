@@ -1,6 +1,6 @@
 "use client";
 import { useLocale, useTranslations } from "next-intl";
-import { Search as SearchIcon, PuzzleIcon, KeyboardIcon, ArrowRight, XCircle, CheckCircle2, BookOpen } from "lucide-react";
+import { Search as SearchIcon, PuzzleIcon, KeyboardIcon, ArrowRight, XCircle, CheckCircle2, BookOpen, TrendingUpIcon } from "lucide-react";
 import { Link, useRouter } from "@/src/i18n/routing";
 import { Input } from "@heroui/input";
 import { useEffect, useRef, useState } from "react";
@@ -239,7 +239,7 @@ export default function Hero({ children }: {
                       setSelectedIndex(-1);
                     }, 200);
                   }}
-                  color="default"
+                  color="primary"
                   variant="flat"
                   name="search"
                   placeholder={typeWriterText}
@@ -250,7 +250,7 @@ export default function Hero({ children }: {
 
                 {/* Recommendations Dropdown */}
                 {showRecommendations && (
-                  <div className="absolute z-50 w-full mt-2 bg-zinc-900/95 backdrop-blur-xl border border-zinc-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="absolute z-50 w-full mt-2 bg-background/95 backdrop-blur-xl border border-zinc-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                     {isLoading ? (
                       <div className="p-2">
                         {Array.from({ length: 3 }).map((_, idx) => (
@@ -286,11 +286,13 @@ export default function Hero({ children }: {
 
             {/* Trending Tags */}
             <div className="mt-6 flex flex-wrap justify-center items-center gap-2 min-h-[32px]">
-              <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest mr-2">{t("Trending")}:</span>
+              <span className="flex items-center gap-2 text-xs font-mono text-zinc-500 uppercase tracking-widest mr-2">
+                <TrendingUpIcon className="w-4 h-4" /> {t("Trending")}:
+              </span>
               {isTrendingLoading ? (
                 <>
                   {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="h-6 w-16 bg-zinc-900/50 rounded-full animate-pulse border border-zinc-800/50" />
+                    <div key={i} className="h-8 w-24 bg-zinc-800/50 rounded-lg animate-pulse border border-zinc-800/50" />
                   ))}
                 </>
               ) : (
@@ -298,9 +300,9 @@ export default function Hero({ children }: {
                   <button
                     key={tag.id}
                     onClick={() => handleRecommendationClick(tag.name)}
-                    className="px-4 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-sm text-zinc-300 hover:text-primary hover:border-primary/50 transition-all duration-200"
+                    className="px-4 py-1.5 rounded-lg bg-background/50 border border-zinc-800 text-sm text-zinc-300 hover:text-primary hover:border-primary/50 transition-all duration-200"
                   >
-                    #{tag.name}
+                    {tag.name}
                   </button>
                 ))
               )}
@@ -346,7 +348,7 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
   };
 
   return (
-    <Card className="h-full min-h-[300px] dark:bg-zinc-900/60 bg-zinc-200/90 border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors group relative overflow-hidden">
+    <Card className="h-full min-h-[300px] dark:bg-background/60 bg-background/90 border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors group relative overflow-hidden">
       {/* Background Decoration */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors duration-500" />
 
@@ -388,7 +390,7 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
 function BentoCommonMistake() {
   const t = useTranslations("Home");
   return (
-    <Card className="h-[200px] dark:bg-zinc-900/50 bg-zinc-200/50 border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors group relative overflow-hidden flex flex-col justify-center">
+    <Card className="h-[200px] dark:bg-background/50 bg-background/50 border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors group relative overflow-hidden flex flex-col justify-center">
       {/* Glow Effect */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none" />
 
@@ -423,7 +425,7 @@ function BentoCommonMistake() {
 function BentoGalatiMeshur() {
   const t = useTranslations("Home");
   return (
-    <Card className="h-[200px] dark:bg-zinc-900/50 bg-zinc-200/50 border border-amber-900/30 shadow-none hover:border-amber-700/50 transition-colors group relative overflow-hidden flex flex-col">
+    <Card className="h-[200px] dark:bg-background/50 bg-background/50 border border-amber-900/30 shadow-none hover:border-amber-700/50 transition-colors group relative overflow-hidden flex flex-col">
       <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
         <BookOpen className="w-24 h-24 text-amber-500" />
       </div>
