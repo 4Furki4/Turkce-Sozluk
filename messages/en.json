@@ -98,6 +98,10 @@
         "title": "Blazing Fast & Offline",
         "description": "Download the offline dictionary to use it without an internet connection and get even faster results when you are online."
       },
+      "pwaFeature": {
+        "title": "Download as a Native App",
+        "description": "You can add the dictionary to your home screen and use it offline."
+      },
       "WordOfTheDay": {
         "title": "Word of the Day",
         "noMeaningFound": "No meaning found.",
