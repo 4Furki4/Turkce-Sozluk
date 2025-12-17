@@ -145,6 +145,9 @@ export default function Hero({ children }: {
         }}
       />
 
+      {/* Dot Pattern Background */}
+      <div className="absolute inset-0 -z-20 h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)] pointer-events-none opacity-50" />
+
       <div className="mx-auto max-w-7xl px-4 pb-12 pt-10 sm:pb-16 lg:px-8 w-full">
         {/* --- Hero Header Section --- */}
         <div className="mx-auto text-center space-y-6 mb-16">
