@@ -33,11 +33,11 @@ export function BackgroundGradient() {
                 className="absolute inset-0"
                 style={{
                     background: `
-                        linear-gradient(
-                            135deg,
-                            hsl(var(--primary) / 0.20) 0%,
-                            hsl(var(--primary) / 0.10) 40%,
-                            transparent 100%
+                        radial-gradient(
+                        circle at 50% -20%, 
+                        rgba(169, 17, 1, 0.4) 0%,
+                        rgba(169, 17, 1, 0.1) 40%, 
+                        transparent 70%
                         )
                     `
                 }}

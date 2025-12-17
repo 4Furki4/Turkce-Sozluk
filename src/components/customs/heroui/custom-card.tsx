@@ -16,7 +16,7 @@ export default function CustomCard({ children, ...props }: CustomCardProps) {
             {...props}
             className={cn("border border-border rounded-sm p-2 w-full", props.className)}
             classNames={{
-                base: cn("bg-background/10", props.classNames?.base),
+                base: cn("bg-background/20", props.classNames?.base),
                 ...props.classNames
             }}>
             {children}

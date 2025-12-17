@@ -71,6 +71,7 @@
   },
   "Home": {
     "alreadySignedIn": "Zaten giriş yaptınız",
+    "Trending": "Trendler",
     "hero": {
       "turkishLetters": "Türkçe karakterler",
       "title": "Çağdaş Türkçe Sözlüğü",
@@ -104,7 +105,13 @@
         "addToYourSite": "Sitene Ekle",
         "embedComingSoon": "Sitene ekle özelliği çok yakında!",
         "NavigationWord": "Yönlendirme Kelimesi",
-        "NoMeaningsFound": "Anlam bulunamadı."
+        "NoMeaningsFound": "Anlam bulunamadı.",
+        "mock": {
+          "word": "pepe",
+          "phonetic": "pe-pe",
+          "origin": "Rumca",
+          "meaning": "Konuşma bozukluğu olan, kekeleyen (kimse)."
+        }
       }
     },
     "HomeExtras": {
@@ -113,7 +120,15 @@
       "misspellingsTitle": "Sık Yapılan Yanlışlar",
       "correct": "Doğru",
       "wrong": "Yanlış",
-      "seeDetails": "Kelimeye Git"
+      "seeDetails": "Kelimeye Git",
+      "galatiMeshurExample": {
+        "title": "Eşek hoşaftan ne anlar?",
+        "description": "Aslı <highlight>\"Eşek hoş laftan ne anlar\"</highlight> değildir. Hoşaf, Farsça \"hoş-ab\" (güzel su) kelimesinden gelir."
+      },
+      "misspellingExample": {
+        "wrong": "yanlız",
+        "correct": "yalnız"
+      }
     }
   },
   "WordCard": {

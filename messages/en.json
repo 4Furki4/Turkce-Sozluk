@@ -71,6 +71,7 @@
   },
   "Home": {
     "alreadySignedIn": "You are already signed in",
+    "Trending": "Trending",
     "hero": {
       "title": "Modern Turkish Dictionary",
       "motto": "Enrich your vocabulary, enhance your understanding",
@@ -103,8 +104,14 @@
         "details": "Details",
         "addToYourSite": "Add to Your Site",
         "embedComingSoon": "Embed code functionality coming soon!",
-        "NavigationWord": "Navigation Word",
-        "NoMeaningsFound": "No meanings found."
+        "NavigationWord": "Redirect Word",
+        "NoMeaningsFound": "No meanings found.",
+        "mock": {
+          "word": "pepe",
+          "phonetic": "pe-pe",
+          "origin": "Greek",
+          "meaning": "Someone who stutters or has a speech impediment."
+        }
       }
     },
     "HomeExtras": {
@@ -113,7 +120,15 @@
       "misspellingsTitle": "Common Misspellings",
       "correct": "Correct",
       "wrong": "Wrong",
-      "seeDetails": "See Word"
+      "seeDetails": "Go to Word",
+      "galatiMeshurExample": {
+        "title": "Eşek hoşaftan ne anlar?",
+        "description": "The original is not <highlight>\"Eşek hoşaftan ne anlar\"</highlight> (Donkey doesn't understand compote) but <highlight>\"Eşek hoş laftan ne anlar\"</highlight> (Donkey doesn't understand pleasant words). Hoşaf comes from Persian \"hoş-ab\" (nice water)."
+      },
+      "misspellingExample": {
+        "wrong": "yanlız",
+        "correct": "yalnız"
+      }
     }
   },
   "WordCard": {
