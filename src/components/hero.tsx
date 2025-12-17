@@ -346,14 +346,50 @@ export default function Hero({ children }: {
 
 function BentoWordOfTheDay({ locale }: { locale: string }) {
   const t = useTranslations("Home");
+  const { data: wordOfTheDay, isLoading } = api.word.getWordOfTheDay.useQuery();
 
-  // Localized Mock Data
-  const mockWord = {
+  if (isLoading) {
+    return (
+      <Card className="h-full min-h-[300px] dark:bg-background/60 bg-background/90 border border-zinc-800 shadow-none">
+        <CardHeader className="flex flex-row justify-between items-start pt-6 px-8 relative z-10">
+          <div className="w-32 h-6 bg-primary/10 rounded-md animate-pulse" />
+          <div className="w-20 h-4 bg-zinc-800/50 rounded-md animate-pulse" />
+        </CardHeader>
+        <CardBody className="px-8 py-4 flex flex-col justify-center gap-6 relative z-10">
+          <div className="space-y-4">
+            <div className="w-3/4 h-16 sm:h-20 bg-zinc-800/50 rounded-xl animate-pulse" />
+            <div className="flex gap-2">
+              <div className="w-16 h-4 bg-zinc-800/50 rounded-md animate-pulse" />
+              <div className="w-16 h-4 bg-zinc-800/50 rounded-md animate-pulse" />
+            </div>
+          </div>
+          <div className="space-y-3">
+            <div className="w-full h-4 bg-zinc-800/50 rounded-md animate-pulse" />
+            <div className="w-full h-4 bg-zinc-800/50 rounded-md animate-pulse" />
+            <div className="w-2/3 h-4 bg-zinc-800/50 rounded-md animate-pulse" />
+          </div>
+        </CardBody>
+        <CardFooter className="px-8 pb-8 pt-0 relative z-10">
+          <div className="w-full h-px bg-zinc-800/50 animate-pulse" />
+        </CardFooter>
+      </Card>
+    );
+  }
+
+  const wordData = wordOfTheDay ? {
+    word: wordOfTheDay.word.name,
+    phonetic: wordOfTheDay.word.phonetic || "",
+    meaning: wordOfTheDay.word.meanings[0]?.meaning || "",
+    origin: wordOfTheDay.word.origin || null
+  } : {
     word: t("hero.WordOfTheDay.mock.word"),
     phonetic: t("hero.WordOfTheDay.mock.phonetic"),
     meaning: t("hero.WordOfTheDay.mock.meaning"),
     origin: t("hero.WordOfTheDay.mock.origin")
   };
+
+
+
 
   return (
     <Card className="h-full min-h-[300px] dark:bg-background/60 bg-background/90 border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors group relative overflow-hidden">
@@ -366,7 +402,7 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
             {t("hero.WordOfTheDay.title")}
           </span>
         </div>
-        <Link href={{ pathname: "/search/[word]", params: { word: mockWord.word } }} className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
+        <Link href={{ pathname: "/search/[word]", params: { word: wordData.word } }} className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
           {t("hero.WordOfTheDay.details")} <ArrowRight className="w-4 h-4" />
         </Link>
       </CardHeader>
@@ -374,17 +410,19 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
       <CardBody className="px-8 py-4 flex flex-col justify-center gap-4 relative z-10">
         <div>
           <h2 className="text-6xl sm:text-7xl font-serif font-bold text-foreground mb-4 group-hover:text-primary transition-colors duration-300">
-            {mockWord.word}
+            {wordData.word}
           </h2>
           <div className="flex items-center gap-3 text-muted-foreground font-mono text-sm">
-            <span>/{mockWord.phonetic}/</span>
-            <span className="w-1 h-1 bg-zinc-700 rounded-full" />
-            <span>{mockWord.origin}</span>
+            {/* Only show phonetic if it exists */}
+            {wordData.phonetic && <span>/{wordData.phonetic}/</span>}
+            {/* Divider */}
+            {wordData.phonetic && wordData.origin && <span className="w-1 h-1 bg-zinc-700 rounded-full" />}
+            {wordData.origin && <span>{wordData.origin}</span>}
           </div>
         </div>
 
-        <p className="text-xl sm:text-2xl text-zinc-300 font-light italic leading-relaxed">
-          &ldquo;{mockWord.meaning}&rdquo;
+        <p className="text-xl sm:text-2xl text-zinc-300 font-light italic leading-relaxed line-clamp-3">
+          &ldquo;{wordData.meaning}&rdquo;
         </p>
       </CardBody>
 

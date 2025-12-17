@@ -767,9 +767,11 @@ export const wordRouter = createTRPCRouter({
     // Fetch the latest daily word up to today
     // @ts-ignore
     const result = await ctx.db.execute(sql`
-      SELECT dw.date, w.id, w.name, w.phonetic, w.created_at, w.updated_at, w.root_id, w.prefix, w.suffix, w.view_count, w.variant, w.request_type
+      SELECT dw.date, w.id, w.name, w.phonetic, w.created_at, w.updated_at, w.root_id, w.prefix, w.suffix, w.view_count, w.variant, w.request_type, l.language_tr as origin
       FROM daily_words dw
       JOIN words w ON dw.word_id = w.id
+      LEFT JOIN roots r ON w.id = r.word_id
+      LEFT JOIN languages l ON r.language_id = l.id
       WHERE dw.date <= ${today}
       ORDER BY dw.date DESC
       LIMIT 1
@@ -804,6 +806,7 @@ export const wordRouter = createTRPCRouter({
         id: dailyWordData.id as number,
         name: dailyWordData.name as string,
         phonetic: dailyWordData.phonetic as string | null,
+        origin: dailyWordData.origin as string | null,
         meanings: meaningsResult as unknown as { meaning: string }[],
         relatedWordsList: relatedWordsResult.map((r: any) => ({
           relatedWord: {
