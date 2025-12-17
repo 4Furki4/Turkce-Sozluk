@@ -73,7 +73,7 @@
     "alreadySignedIn": "You are already signed in",
     "Trending": "Trending",
     "hero": {
-      "title": "Modern Turkish Dictionary",
+      "title": "Modern Turkish <red>Dictionary</red>",
       "motto": "Enrich your vocabulary, enhance your understanding",
       "searchPlaceholder": "Search for a word...",
       "searchPlaceholderPhrase": "Search for a phrase...",
@@ -122,8 +122,9 @@
       "wrong": "Wrong",
       "seeDetails": "Go to Word",
       "galatiMeshurExample": {
-        "title": "Eşek hoşaftan ne anlar?",
-        "description": "The original is not <highlight>\"Eşek hoşaftan ne anlar\"</highlight> (Donkey doesn't understand compote) but <highlight>\"Eşek hoş laftan ne anlar\"</highlight> (Donkey doesn't understand pleasant words). Hoşaf comes from Persian \"hoş-ab\" (nice water)."
+        "wrong": "Eşek hoşaftan ne anlar?",
+        "correct": "Eşek hoş laftan ne anlar",
+        "explanation": "Donkey doesn't understand pleasant words. Hoşaf comes from Persian \"hoş-ab\" (nice water)."
       },
       "misspellingExample": {
         "wrong": "yanlız",

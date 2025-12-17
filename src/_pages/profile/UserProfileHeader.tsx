@@ -17,9 +17,10 @@ interface UserProfileHeaderProps {
   locale: string;
   isOwnProfile: boolean;
   user: User | null;
+  className?: string;
 }
 
-export function UserProfileHeader({ profileData, locale, isOwnProfile, user }: UserProfileHeaderProps) {
+export function UserProfileHeader({ profileData, locale, isOwnProfile, user, className }: UserProfileHeaderProps) {
   const t = useTranslations('ProfilePage');
   const tCommon = useTranslations('Common');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,8 +34,8 @@ export function UserProfileHeader({ profileData, locale, isOwnProfile, user }: U
 
   return (
     <>
-      <Card isBlurred={isBlurEnabled} className="border border-border rounded-sm p-2 w-full" classNames={{
-        base: "bg-background/10",
+      <Card isBlurred={isBlurEnabled} className={`border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors ${className}`} classNames={{
+        base: "dark:bg-zinc-900/60 bg-zinc-200/90",
       }}>
         <CardBody className="flex flex-col items-center gap-6 rounded-lg p-6 shadow-sm sm:flex-row">
           <Avatar

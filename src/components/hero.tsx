@@ -149,8 +149,10 @@ export default function Hero({ children }: {
         {/* --- Hero Header Section --- */}
         <div className="mx-auto text-center space-y-6 mb-16">
           <div className="mx-auto max-w-3xl space-y-4">
-            <h1 className="font-bold tracking-tight text-fs-4 sm:text-fs-6 bg-clip-text text-transparent bg-gradient-to-br from-primary to-primary/70">
-              {t("hero.title")}
+            <h1 className="font-bold tracking-tight text-fs-4 sm:text-fs-6 text-foreground">
+              {t.rich("hero.title", {
+                red: (chunks) => <span className="text-primary">{chunks}</span>
+              })}
             </h1>
             <p className="text-fs-1 sm:text-fs-2 leading-8 text-muted-foreground sm:text-xl font-sans text-balance">
               {t("hero.motto")}
@@ -296,7 +298,7 @@ export default function Hero({ children }: {
                   <button
                     key={tag.id}
                     onClick={() => handleRecommendationClick(tag.name)}
-                    className="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs text-zinc-400 hover:text-primary hover:border-primary/30 transition-all duration-200"
+                    className="px-4 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-sm text-zinc-300 hover:text-primary hover:border-primary/50 transition-all duration-200"
                   >
                     #{tag.name}
                   </button>
@@ -371,7 +373,7 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
           </div>
         </div>
 
-        <p className="text-xl sm:text-2xl text-zinc-400 font-light italic leading-relaxed">
+        <p className="text-xl sm:text-2xl text-zinc-300 font-light italic leading-relaxed">
           &ldquo;{mockWord.meaning}&rdquo;
         </p>
       </CardBody>
@@ -433,15 +435,27 @@ function BentoGalatiMeshur() {
         </span>
       </CardHeader>
 
-      <CardBody className="px-6 py-2 z-10 flex flex-col justify-center">
-        <h3 className="text-lg font-serif font-bold text-foreground mb-2">
-          {t("HomeExtras.galatiMeshurExample.title")}
-        </h3>
-        <p className="text-sm text-zinc-400 leading-relaxed">
-          {t.rich("HomeExtras.galatiMeshurExample.description", {
-            highlight: (chunks) => <span className="text-amber-500 font-medium">{chunks}</span>
-          })}
-        </p>
+      <CardBody className="px-6 py-2 z-10 flex flex-col justify-center gap-2">
+        {/* Wrong */}
+        <div className="flex items-center gap-2 opacity-60">
+          <XCircle className="w-4 h-4 text-danger shrink-0" />
+          <span className="text-lg font-serif text-zinc-500 line-through decoration-danger/50">
+            {t("HomeExtras.galatiMeshurExample.wrong")}
+          </span>
+        </div>
+
+        {/* Correct */}
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+          <span className="text-lg font-serif font-bold text-foreground">
+            {t("HomeExtras.galatiMeshurExample.correct")}
+          </span>
+        </div>
+
+        {/* Explanation (Truncated/Hidden for now as requested for cleaner grid) */}
+        {/* <p className="text-xs text-zinc-500 mt-2 line-clamp-2">
+           {t("HomeExtras.galatiMeshurExample.explanation")}
+        </p> */}
       </CardBody>
     </Card>
   )

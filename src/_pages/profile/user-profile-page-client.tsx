@@ -2,12 +2,11 @@
 
 import React from 'react';
 import { Link as NextIntlLink } from '@/src/i18n/routing'
-import { CardFooter, Link as HeroUILink } from '@heroui/react'
+import { Link as HeroUILink, Card, CardHeader, CardBody, Tooltip } from '@heroui/react'
 import { useTranslations } from 'next-intl';
 import { type Session } from '@/src/lib/auth';
 import { type RouterOutputs } from '@/src/trpc/shared';
 import { UserProfileHeader } from './UserProfileHeader';
-import { Card, CardHeader, CardBody, Tooltip } from '@heroui/react';
 import { CheckCheck, Clock, X } from 'lucide-react';
 import { useSnapshot } from 'valtio';
 import { preferencesState } from '@/src/store/preferences';
@@ -79,170 +78,189 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
     const totalRejectedCount = (rawStats as any)?.totalRejected ?? 0;
 
     return (
-        <div className="container mx-auto px-4 py-8 space-y-8">
-            <UserProfileHeader profileData={profileData} locale={locale} isOwnProfile={isOwnProfile} user={session?.user ?? null} />
-            {/* Contribution Stats Section */}
-            <Card isBlurred={isBlurEnabled} className="border border-border rounded-sm p-2 w-full" classNames={{
-                base: "bg-background/10",
-            }}>
-                <CardHeader>
-                    <h3 className="text-lg font-semibold">{t('contributionStatsTitle')}</h3>
-                </CardHeader>
-                <CardBody>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div className="p-4 bg-background/50 rounded-md shadow-sm text-center border">
-                            <p className="text-2xl font-bold">{totalPoints}</p>
-                            <div className="w-full flex items-center justify-center gap-1">
-                                <p className=" text-muted-foreground">{t('totalContributionPointsLabel')}</p>
-                            </div>
-                        </div>
-                        <div className="p-4 bg-background/50 rounded-md shadow-sm text-center border">
-                            <p className="text-2xl font-bold">{totalApprovedCount}</p>
-                            <div className="w-full flex items-center justify-center gap-1">
-                                <p className=" text-muted-foreground">{t('approvedContributionsLabel')}</p>
-                                <CheckCheck className="h-5 w-5 text-green-500" />
-                            </div>
-                        </div>
-                        <div className="p-4 bg-background/50 rounded-md shadow-sm text-center border">
-                            <p className="text-2xl font-bold">{totalPendingCount}</p>
-                            <div className="w-full flex items-center justify-center gap-1">
-                                <p className=" text-muted-foreground">{t('pendingContributionsLabel')}</p>
-                                <Clock className="h-5 w-5 text-yellow-500" />
-                            </div>
-                        </div>
-                        <div className="p-4 bg-background/50 rounded-md shadow-sm text-center border">
-                            <p className="text-2xl font-bold">{totalRejectedCount}</p>
-                            <div className="w-full flex items-center justify-center gap-1">
-                                <p className=" text-muted-foreground">{t('rejectedContributionsLabel')}</p>
-                                <X className="h-5 w-5 text-red-500" />
-                            </div>
-                        </div>
-                    </div>
-                </CardBody>
-            </Card>
+        <div className="container mx-auto px-4 py-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                {/* Profile Header - Spans 2 Columns */}
+                <UserProfileHeader
+                    profileData={profileData}
+                    locale={locale}
+                    isOwnProfile={isOwnProfile}
+                    user={session?.user ?? null}
+                    className="md:col-span-2 h-full"
+                />
 
-            {/* Badges Section */}
-            <Card isBlurred={isBlurEnabled} className="border border-border rounded-sm p-2 w-full" classNames={{
-                base: "bg-background/10",
-            }}>
-                <CardHeader>
-                    <h3 className="text-lg font-semibold">{t('badgesTitle')}</h3>
-                </CardHeader>
-                <CardBody>
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        {(profileData as any).badges?.map((badge: any) => {
-                            const name = locale === 'tr' ? badge.nameTr : badge.nameEn;
-                            const description = locale === 'tr' ? badge.descriptionTr : badge.descriptionEn;
+                {/* Contribution Stats - Spans 1 Column */}
+                <Card isBlurred={isBlurEnabled} className="md:col-span-1 h-full border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors" classNames={{
+                    base: "dark:bg-zinc-900/60 bg-zinc-200/90",
+                }}>
+                    <CardHeader className="pb-2">
+                        <h3 className="text-lg font-semibold text-foreground/90">{t('contributionStatsTitle')}</h3>
+                    </CardHeader>
+                    <CardBody className="pt-0">
+                        <div className="grid grid-cols-2 gap-3 h-full content-center">
+                            <div className="p-3 bg-zinc-500/10 rounded-xl border border-zinc-500/20 flex flex-col items-center justify-center gap-1 group hover:bg-zinc-500/20 transition-colors">
+                                <p className="text-2xl font-bold text-foreground">{totalPoints}</p>
+                                <p className="text-xs text-muted-foreground text-center line-clamp-1">{t('totalContributionPointsLabel')}</p>
+                            </div>
+                            <div className="p-3 bg-green-500/10 rounded-xl border border-green-500/20 flex flex-col items-center justify-center gap-1 group hover:bg-green-500/20 transition-colors">
+                                <div className="flex items-center gap-1">
+                                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">{totalApprovedCount}</p>
+                                    <CheckCheck className="h-4 w-4 text-green-500" />
+                                </div>
+                                <p className="text-xs text-muted-foreground text-center line-clamp-1">{t('approvedContributionsLabel')}</p>
+                            </div>
+                            <div className="p-3 bg-yellow-500/10 rounded-xl border border-yellow-500/20 flex flex-col items-center justify-center gap-1 group hover:bg-yellow-500/20 transition-colors">
+                                <div className="flex items-center gap-1">
+                                    <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{totalPendingCount}</p>
+                                    <Clock className="h-4 w-4 text-yellow-500" />
+                                </div>
+                                <p className="text-xs text-muted-foreground text-center line-clamp-1">{t('pendingContributionsLabel')}</p>
+                            </div>
+                            <div className="p-3 bg-red-500/10 rounded-xl border border-red-500/20 flex flex-col items-center justify-center gap-1 group hover:bg-red-500/20 transition-colors">
+                                <div className="flex items-center gap-1">
+                                    <p className="text-2xl font-bold text-red-600 dark:text-red-400">{totalRejectedCount}</p>
+                                    <X className="h-4 w-4 text-red-500" />
+                                </div>
+                                <p className="text-xs text-muted-foreground text-center line-clamp-1">{t('rejectedContributionsLabel')}</p>
+                            </div>
+                        </div>
+                    </CardBody>
+                </Card>
 
-                            return (
-                                <Tooltip
-                                    key={badge.slug}
-                                    content={badge.earned ? `${name}: ${description}` : `${t('lockedBadge')}: ${description}`}
-                                >
-                                    <div className={`flex flex-col items-center justify-center p-4 rounded-lg border ${badge.earned ? 'bg-primary/10 border-primary/20' : 'bg-muted/50 border-muted grayscale opacity-70'}`}>
-                                        <div className="text-4xl mb-2">{badge.icon}</div>
-                                        <p className="font-semibold text-center text-sm">{name}</p>
-                                        {badge.earned && (
-                                            <p className="text-xs text-muted-foreground mt-1">
-                                                {new Date(badge.awardedAt).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' })}
-                                            </p>
-                                        )}
-                                    </div>
-                                </Tooltip>
-                            );
-                        })}
-                        {(!(profileData as any).badges || (profileData as any).badges.length === 0) && (
-                            <p className="text-muted-foreground col-span-full">{t('noBadges')}</p>
-                        )}
-                    </div>
-                </CardBody>
-            </Card>
-
-            {/* Saved Words Section */}
-            {isOwnProfile && (
-                <Card isBlurred={isBlurEnabled} className="border border-border rounded-sm p-2 w-full" classNames={{
-                    base: "bg-background/10",
+                {/* Badges Section - Spans Full Width (3 Columns) */}
+                <Card isBlurred={isBlurEnabled} className="md:col-span-3 border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors" classNames={{
+                    base: "dark:bg-zinc-900/60 bg-zinc-200/90",
                 }}>
                     <CardHeader>
-                        <h3 className="text-lg font-semibold">{t('savedWordsTitle')}</h3>
+                        <h3 className="text-lg font-semibold text-foreground/90">{t('badgesTitle')}</h3>
                     </CardHeader>
                     <CardBody>
-                        {savedWordsToRender.length > 0 ? (
-                            <ul className="space-y-3">
-                                {savedWordsToRender.map((savedWord) => (
-                                    <li key={savedWord.wordId} className="p-3 bg-background rounded-md shadow-sm border">
-                                        <HeroUILink as={NextIntlLink} href={`/search/${savedWord.wordName}`}>{savedWord.wordName}</HeroUILink>
-                                        {/* <p className="font-medium">{savedWord.wordName || t('unknownWord')}</p> */}
-                                        {savedWord.firstMeaning && <p className="text-sm text-muted-foreground truncate">{savedWord.firstMeaning}</p>}
-                                        <p className="text-xs text-muted-foreground">
-                                            {t('savedOnLabel')}: {new Date(savedWord.savedAt).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' })}
-                                        </p>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p className="text-muted-foreground">{t('noSavedWords')}</p>
-                        )}
-                    </CardBody>
-                    <CardFooter>
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                            {(profileData as any).badges?.map((badge: any) => {
+                                const name = locale === 'tr' ? badge.nameTr : badge.nameEn;
+                                const description = locale === 'tr' ? badge.descriptionTr : badge.descriptionEn;
 
-                        <NextIntlLink href={{
-                            pathname: '/saved-words',
-                        }} className='text-primary hover:underline'>
-                            {t('seeAllSavedWords', { count: profileData.totalSavedWordsCount ?? 0 })}
-                        </NextIntlLink>
-                    </CardFooter>
-                </Card>
-            )}
-
-            {/* Recent Contributions Section */}
-            <Card isBlurred={isBlurEnabled} className="border border-border rounded-sm p-2 w-full" classNames={{
-                base: "bg-background/10",
-            }}>
-                <CardHeader>
-                    <h3 className="text-lg font-semibold">{t('recentContributionsTitle')}</h3>
-                </CardHeader>
-                <CardBody>
-                    {contributionsToRender.length > 0 ? (
-                        <ul className="space-y-3">
-                            {contributionsToRender.map((contribution) => {
-
-                                let displayText = `${tAction(contribution.requestType)} - ${tEntity(contribution.entityType)}`;
-                                if (contribution.word?.word) {
-                                    displayText = `${contribution.word.word} (${tEntity(contribution.entityType)} - ${tAction(contribution.requestType)})`;
-                                }
                                 return (
-                                    <li key={contribution.id} className="p-3 bg-background rounded-md shadow-sm border">
-                                        <NextIntlLink className='text-primary hover:underline' href={{
-                                            pathname: '/my-requests/[id]',
-                                            params: {
-                                                id: contribution.id
-                                            }
-                                        }}>
-                                            {displayText}
-                                        </NextIntlLink>
-                                        <p className="text-xs text-muted-foreground">
-                                            {new Date(contribution.createdAt).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' })} - {tStatus(contribution.status)}
-                                        </p>
-                                    </li>
+                                    <Tooltip
+                                        key={badge.slug}
+                                        content={badge.earned ? `${name}: ${description}` : `${t('lockedBadge')}: ${description}`}
+                                    >
+                                        <div className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-200 hover:scale-105 cursor-help ${badge.earned ? 'bg-primary/10 border-primary/20' : 'bg-muted/50 border-muted grayscale opacity-60'}`}>
+                                            <div className="text-4xl mb-2 filter drop-shadow-sm">{badge.icon}</div>
+                                            <p className="font-semibold text-center text-sm">{name}</p>
+                                            {badge.earned && (
+                                                <p className="text-xs text-muted-foreground mt-1 text-center">
+                                                    {new Date(badge.awardedAt).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' })}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </Tooltip>
                                 );
                             })}
-                        </ul>
-                    ) : (
-                        <p className="text-muted-foreground">{t('noContributions')}</p>
-                    )}
-                </CardBody>
-                <CardFooter>
-                    <NextIntlLink href={{
-                        pathname: '/my-requests',
-                        query: {
-                            status: 'approved'
-                        }
-                    }} className="text-primary hover:underline">
-                        {t('seeAllContributions')} ({profileData.contributionStats.totalApproved})
-                    </NextIntlLink>
-                </CardFooter>
-            </Card>
+                            {(!(profileData as any).badges || (profileData as any).badges.length === 0) && (
+                                <p className="text-muted-foreground col-span-full text-center py-8 italic">{t('noBadges')}</p>
+                            )}
+                        </div>
+                    </CardBody>
+                </Card>
+
+                {/* Saved Words Section - Spans 1 Column (Only for Own Profile) */}
+                {isOwnProfile && (
+                    <Card isBlurred={isBlurEnabled} className="md:col-span-1 h-[500px] border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors" classNames={{
+                        base: "dark:bg-zinc-900/60 bg-zinc-200/90",
+                    }}>
+                        <CardHeader className="flex justify-between items-center pb-2">
+                            <h3 className="text-lg font-semibold text-foreground/90">{t('savedWordsTitle')}</h3>
+                            <NextIntlLink href="/saved-words" className="text-xs font-mono text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest">
+                                {t('seeAllSavedWords', { count: profileData.totalSavedWordsCount ?? 0 })}
+                            </NextIntlLink>
+                        </CardHeader>
+                        <CardBody className="pt-0 overflow-y-auto custom-scrollbar">
+                            {savedWordsToRender.length > 0 ? (
+                                <ul className="space-y-2">
+                                    {savedWordsToRender.map((savedWord) => (
+                                        <li key={savedWord.wordId}>
+                                            <HeroUILink as={NextIntlLink} href={`/search/${savedWord.wordName}`} className="block w-full text-left">
+                                                <div className="p-3 bg-zinc-500/5 hover:bg-zinc-500/10 rounded-lg border border-transparent hover:border-zinc-500/20 transition-all duration-200 group">
+                                                    <div className="flex justify-between items-start">
+                                                        <span className="font-medium text-foreground group-hover:text-primary transition-colors">{savedWord.wordName}</span>
+                                                        <span className="text-[10px] text-muted-foreground bg-zinc-500/10 px-1.5 py-0.5 rounded-full">
+                                                            {new Date(savedWord.savedAt).toLocaleDateString(locale, { month: 'short', day: 'numeric' })}
+                                                        </span>
+                                                    </div>
+                                                    {savedWord.firstMeaning && (
+                                                        <p className="text-xs text-muted-foreground truncate mt-1 group-hover:text-foreground/80 transition-colors">
+                                                            {savedWord.firstMeaning}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </HeroUILink>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <div className="h-full flex flex-col items-center justify-center text-center p-4 text-muted-foreground">
+                                    <p>{t('noSavedWords')}</p>
+                                </div>
+                            )}
+                        </CardBody>
+                    </Card>
+                )}
+
+                {/* Recent Contributions Section - Spans 2 Columns (or 3 if not own) */}
+                <Card isBlurred={isBlurEnabled} className={`${isOwnProfile ? 'md:col-span-2' : 'md:col-span-3'} h-[500px] border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors`} classNames={{
+                    base: "dark:bg-zinc-900/60 bg-zinc-200/90",
+                }}>
+                    <CardHeader className="flex justify-between items-center pb-2">
+                        <h3 className="text-lg font-semibold text-foreground/90">{t('recentContributionsTitle')}</h3>
+                        <NextIntlLink href={{ pathname: '/my-requests', query: { status: 'approved' } }} className="text-xs font-mono text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest">
+                            {t('seeAllContributions')}
+                        </NextIntlLink>
+                    </CardHeader>
+                    <CardBody className="pt-0 overflow-y-auto custom-scrollbar">
+                        {contributionsToRender.length > 0 ? (
+                            <ul className="space-y-2">
+                                {contributionsToRender.map((contribution) => {
+                                    let displayText = `${tAction(contribution.requestType)} - ${tEntity(contribution.entityType)}`;
+                                    if (contribution.word?.word) {
+                                        displayText = `${contribution.word.word} (${tEntity(contribution.entityType)} - ${tAction(contribution.requestType)})`;
+                                    }
+                                    return (
+                                        <li key={contribution.id}>
+                                            <NextIntlLink className='block w-full' href={{
+                                                pathname: '/my-requests/[id]',
+                                                params: { id: contribution.id }
+                                            }}>
+                                                <div className="p-3 bg-zinc-500/5 hover:bg-zinc-500/10 rounded-lg border border-transparent hover:border-zinc-500/20 transition-all duration-200 group flex items-center justify-between gap-4">
+                                                    <div className="truncate flex-1">
+                                                        <span className="font-medium text-foreground group-hover:text-primary transition-colors block truncate">{displayText}</span>
+                                                        <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                                                            {new Date(contribution.createdAt).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' })}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex-shrink-0">
+                                                        <span className={`text-[10px] font-mono px-2 py-1 rounded-full uppercase tracking-wider border ${contribution.status === 'APPROVED' ? 'bg-green-500/10 text-green-600 border-green-500/20' :
+                                                            contribution.status === 'REJECTED' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
+                                                                'bg-yellow-500/10 text-yellow-600 border-yellow-500/20'
+                                                            }`}>
+                                                            {tStatus(contribution.status)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </NextIntlLink>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        ) : (
+                            <div className="h-full flex flex-col items-center justify-center text-center p-4 text-muted-foreground">
+                                <p>{t('noContributions')}</p>
+                            </div>
+                        )}
+                    </CardBody>
+                </Card>
+            </div>
         </div>
     );
+
 }

@@ -74,7 +74,7 @@
     "Trending": "Trendler",
     "hero": {
       "turkishLetters": "Türkçe karakterler",
-      "title": "Çağdaş Türkçe Sözlüğü",
+      "title": "Çağdaş Türkçe <red>Sözlüğü</red>",
       "motto": "Söz hazineni genişlet, zihin hazinen genişlesin.",
       "searchPlaceholder": "Kelime ara...",
       "searchPlaceholderPhrase": "Deyim ara...",
@@ -122,8 +122,9 @@
       "wrong": "Yanlış",
       "seeDetails": "Kelimeye Git",
       "galatiMeshurExample": {
-        "title": "Eşek hoşaftan ne anlar?",
-        "description": "Aslı <highlight>\"Eşek hoş laftan ne anlar\"</highlight> değildir. Hoşaf, Farsça \"hoş-ab\" (güzel su) kelimesinden gelir."
+        "wrong": "Eşek hoşaftan ne anlar?",
+        "correct": "Eşek hoş laftan ne anlar",
+        "explanation": "Hoşaf, Farsça \"hoş-ab\" (güzel su) kelimesinden gelir. Aslı bozulmuştur."
       },
       "misspellingExample": {
         "wrong": "yanlız",
