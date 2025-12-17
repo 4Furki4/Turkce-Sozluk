@@ -1,7 +1,7 @@
 import { Metadata, Viewport } from "next";
 import "@/app/globals.css";
 import { TRPCReactProvider } from "@/src/trpc/react";
-import { GeistSans } from "geist/font/sans";
+import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import Providers from "@/src/components/customs/provider";
 import IOSPWAMeta from "@/src/components/ios-pwa-meta";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
@@ -23,6 +23,17 @@ import { PreferencesInitializer } from "@/src/components/customs/preferences-ini
 import { AutocompleteSync } from "@/src/components/customs/complete-sync";
 import ProfileGuard from "@/src/components/customs/profile-guard";
 
+const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700"],
+  variable: "--font-ibm-plex-sans",
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700"],
+  variable: "--font-ibm-plex-mono",
+});
 
 export function generateStaticParams() {
   return [{ locale: "en" }, { locale: "tr" }];
@@ -164,7 +175,7 @@ export default async function RootLayout({
         <IOSPWAMeta />
       </head>
 
-      <body className={`${GeistSans.className} relative`}>
+      <body className={`${ibmPlexSans.variable} ${ibmPlexMono.variable} font-sans antialiased relative`}>
         <TRPCReactProvider>
           <NextIntlClientProvider messages={messages}>
             <CaptchaProvider>

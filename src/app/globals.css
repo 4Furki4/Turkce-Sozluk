@@ -6,14 +6,6 @@
 @custom-variant dark (&:is(.dark *));
 @config '../../tailwind.config.ts';
 
-/*
-  The default border color has changed to `currentcolor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
 @layer base {
   *,
   ::after,
@@ -23,14 +15,14 @@
     border-color: var(--color-gray-200, currentcolor);
   }
 }
+
 @theme {
   --breakpoint-xs: 20rem;
-
 }
 
 @layer base {
   :root {
-    /* @link https://utopia.fyi/type/calculator?c=320,18,1.2,1024,20,1.25,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=s,l,xl,12 */
+    /* Fluid Typography Variables remain unchanged */
     --navbar-height: 4rem;
     --sidebar-width: 16rem;
     --sidebar-width-collapsed: 4rem;
@@ -46,57 +38,70 @@
     --step-7: clamp(4.0313rem, 3.1543rem + 4.3849vw, 5.9606rem);
     --step-8: clamp(4.8375rem, 3.6497rem + 5.9389vw, 7.4506rem);
 
+    /* LIGHT MODE: Clean White & Zinc */
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --foreground: 240 10% 3.9%; /* Zinc 950 */
+    
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
+    
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 5.71 98.82% 33.33%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 190.41 92.45% 58.43%;
-    --secondary-foreground: 192.41 100% 5.69%;
+    
+    /* YOUR RED: #a91101 -> HSL 5.7 99% 33% */
+    --primary: 5.71 98.82% 33.33%; 
+    --primary-foreground: 0 0% 98%;
+    
+    /* NEUTRAL SECONDARY (Slate) instead of Cyan */
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
+    
     --accent: 240 4.8% 95.9%;
     --accent-foreground: 240 5.9% 10%;
-    --destructive: 5.71 98.82% 33.33%;
+    
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
+
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 5.71 98.82% 33.33%;
-    --radius: 0rem;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --ring: 5.71 98.82% 33.33%; /* Matches Primary */
+    
+    --radius: 0.5rem;
   }
+
   .dark {
-    --background: 20 14.3% 4.1%;
-    --foreground: 0 0% 95%;
-    --card: 24 9.8% 10%;
-    --card-foreground: 0 0% 95%;
-    --popover: 0 0% 9%;
-    --popover-foreground: 0 0% 95%;
+    /* DARK MODE: Deep Neutral Zinc (No Red Tint) */
+    --background: 240 10% 3.9%; /* Zinc 950 */
+    --foreground: 0 0% 98%;
+    
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    
+    /* YOUR RED: Same as light, or slightly adjusted for dark mode readability */
     --primary: 5.71 98.82% 33.33%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 190.41 92.45% 58.43%;
+    --primary-foreground: 0 0% 98%;
+    
+    --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 15%;
+    
+    --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
-    --accent: 12 6.5% 15.1%;
+    
+    --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 5.71 98.82% 33.33%;
+    
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
+    
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 5.71 98.82% 33.33%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
   }
 
   html {
@@ -105,33 +110,31 @@
   * {
     @apply border-border;
   }
-  ::file-selector-button {
-    @apply border-0 p-2 bg-primary rounded-md cursor-pointer hover:opacity-70 active:opacity-100 transition-opacity;
-  }
+  
+  /* Removed the ::file-selector-button styling to let HeroUI handle it or style cleanly */
+  
   button,
   input[type="button"],
   a {
     outline: none;
   }
-  button::-moz-focus-inner,
-  input[type="button"]::-moz-focus-inner {
-    border: 0;
-  }
-  button:focus,
-  li a:focus {
-    box-shadow: 0 0 0 4px hsl(var(--background)), 0 0 0 6px hsl(var(--ring));
-    transition: box-shadow 0.1s ease-in;
+  
+  /* Focus states now use the ring variable which matches your Red */
+  button:focus-visible,
+  li a:focus-visible {
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
   }
 }
 
+/* Kept your Glow Animation - It's cool for special features */
 @keyframes glow {
   0%, 100% {
-    text-shadow: 0 0 10px rgba(220, 114, 102, 0.2),
-                 0 0 20px rgba(220, 114, 102, 0.1);
+    text-shadow: 0 0 10px rgba(169, 17, 1, 0.2),
+                 0 0 20px rgba(169, 17, 1, 0.1);
   }
   50% {
-    text-shadow: 0 0 20px rgba(220, 114, 102, 0.3),
-                 0 0 30px rgba(220, 114, 102, 0.2);
+    text-shadow: 0 0 20px rgba(169, 17, 1, 0.3),
+                 0 0 30px rgba(169, 17, 1, 0.2);
   }
 }
 
@@ -139,40 +142,39 @@
   animation: glow 3s ease-in-out infinite;
 }
 
-/* Shine Effect only on md and above screens */
 @media (min-width: 768px) {
   .feature-card-shine {
     position: relative;
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  isolation: isolate;
-}
+    isolation: isolate;
+  }
 
-.feature-card-shine::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    120deg,
-    transparent 0%,
-    transparent 25%,
-    rgba(255, 255, 255, 0.1) 45%,
-    rgba(255, 255, 255, 0.15) 50%,
-    rgba(255, 255, 255, 0.1) 55%,
-    transparent 75%,
-    transparent 100%
-  );
-  transform: translateX(-100%) skewX(-10deg);
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 1;
-}
+  .feature-card-shine::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      120deg,
+      transparent 0%,
+      transparent 25%,
+      rgba(255, 255, 255, 0.05) 45%, /* Made more subtle */
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0.05) 55%,
+      transparent 75%,
+      transparent 100%
+    );
+    transform: translateX(-100%) skewX(-10deg);
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+  }
 
-.feature-card-shine:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
+  .feature-card-shine:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
 
-.feature-card-shine:hover::before {
-  transform: translateX(100%) skewX(-10deg);
-}
+  .feature-card-shine:hover::before {
+    transform: translateX(100%) skewX(-10deg);
+  }
 }

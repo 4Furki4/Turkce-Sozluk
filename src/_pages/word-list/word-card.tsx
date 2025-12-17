@@ -39,7 +39,7 @@ export function WordCard({ id, name, meanings, partOfSpeech, origin, relatedWord
                                 variant="flat"
                                 color="secondary"
                                 classNames={{
-                                    base: "bg-secondary/20 text-secondary-foreground font-medium",
+                                    base: "bg-secondary/20 text-secondary-foreground font-medium font-mono",
                                 }}
                             >
                                 {partOfSpeech}
@@ -47,7 +47,7 @@ export function WordCard({ id, name, meanings, partOfSpeech, origin, relatedWord
                         )}
                     </div>
                     {origin && (
-                        <span className="text-xs text-muted-foreground italic">
+                        <span className="text-xs text-muted-foreground italic font-mono">
                             {origin}
                         </span>
                     )}

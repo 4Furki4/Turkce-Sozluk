@@ -22,6 +22,10 @@ module.exports = ({
     },
 
     extend: {
+      fontFamily: {
+        sans: ["var(--font-ibm-plex-sans)", "sans-serif"],
+        mono: ["var(--font-ibm-plex-mono)", "monospace"],
+      },
       fontSize: {
         "fs--2": "var(--step--2)",
         "fs--1": "var(--step--1)",
@@ -104,82 +108,74 @@ module.exports = ({
       themes: {
         light: {
           colors: {
+            background: "#FFFFFF", // Pure white for crisp reading
+            foreground: "#09090b", // Almost black, easier on eyes than #000
             primary: {
               DEFAULT: "#a91101",
-              50: '#ffe5e2',
-              100: '#ffb9b1',
-              200: '#ff8b7f',
-              300: '#fe5e4e',
-              400: '#fd321c',
-              500: '#e31a02',
-              600: '#b11201',
-              700: '#800b00',
-              800: '#4e0500',
-              900: '#1f0000',
-              foreground: "hsl(355.7 100% 97.3%)",
+              50: '#fff1f1', // Lighter, pinkish for very subtle bg
+              100: '#ffdfdf',
+              200: '#ffc5c5',
+              300: '#ff9d9d',
+              400: '#ff6464',
+              500: '#f83b3b',
+              600: '#e52222',
+              700: '#c21515',
+              800: '#a91101', // Your Target Red
+              900: '#8c1313',
+              foreground: "#FFFFFF",
             },
+            // Switched to Slate (Neutral Cool Gray) - Professional & Clean
             secondary: {
-              DEFAULT: "#dbfcff",
-              50: '#dbfcff',
-              100: '#b1f2ff',
-              200: '#83e8fb',
-              300: '#57dff9',
-              400: '#33d5f7',
-              500: '#24bcdd',
-              600: '#1493ac',
-              700: '#04697c',
-              800: '#003f4b',
-              900: '#00171d',
-              foreground: "hsl(240 5.9% 10%)",
+              DEFAULT: "#f4f4f5",
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              900: '#0f172a',
+              foreground: "#0f172a",
             },
-            danger: {
-              DEFAULT: "hsl(5.71 98.82% 33.33%)",
-              foreground: "hsl(0 0% 98%)",
-            },
-            focus: {
-              DEFAULT: "hsl(5.71 98.82% 33.33%)",
-              foreground: "hsl(355.7 100% 97.3%)",
-            },
+            focus: "#a91101",
           },
         },
         dark: {
           colors: {
+            background: "#09090b", // Deep Zinc (Neutral Black), NOT Red-Black
+            foreground: "#fafafa",
             primary: {
               DEFAULT: "#a91101",
-              50: '#ffe5e2',
-              100: '#ffb9b1',
-              200: '#ff8b7f',
-              300: '#fe5e4e',
-              400: '#fd321c',
-              500: '#e31a02',
-              600: '#b11201',
-              700: '#800b00',
-              800: '#4e0500',
-              900: '#1f0000',
-              foreground: "hsl(355.7 100% 97.3%)",
+              50: '#2f0505',
+              100: '#5a0a0a',
+              200: '#800e0e',
+              300: '#a91101', // Your Target Red
+              400: '#d92626',
+              500: '#f83b3b',
+              600: '#ff6464',
+              700: '#ff9d9d',
+              800: '#ffc5c5',
+              900: '#ffe5e2',
+              foreground: "#FFFFFF",
             },
+            // Dark Mode Secondary: Dark Slate
             secondary: {
-              DEFAULT: "#83e8fb",
-              50: '#dbfcff',
-              100: '#b1f2ff',
-              200: '#83e8fb',
-              300: '#57dff9',
-              400: '#33d5f7',
-              500: '#24bcdd',
-              600: '#1493ac',
-              700: '#04697c',
-              800: '#003f4b',
-              900: '#00171d',
-              foreground: "hsl(0 0% 98%)",
+              DEFAULT: "#27272a",
+              50: '#0f172a',
+              100: '#1e293b',
+              200: '#334155',
+              300: '#475569',
+              400: '#64748b',
+              500: '#94a3b8',
+              600: '#cbd5e1',
+              700: '#e2e8f0',
+              800: '#f1f5f9',
+              900: '#f8fafc',
+              foreground: "#FFFFFF",
             },
-            danger: {
-              DEFAULT: "hsl(5.71 98.82% 33.33%)",
-              foreground: "hsl(0 0% 98%)",
-            },
-            focus: {
-              DEFAULT: "hsl(5.71 98.82% 33.33%)",
-              foreground: "hsl(355.7 100% 97.3%)",
-            }
+            focus: "#a91101",
           },
         },
       }

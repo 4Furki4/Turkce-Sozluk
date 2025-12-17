@@ -115,7 +115,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
         <div className="space-y-2 mt-2">
           {/* Root information section */}
           {word_data.root?.root && (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground font-mono">
               <span className="font-medium mr-2">{t("Root")}:</span>
               <span>
                 <span className="text-fs--1 font-medium">{word_data.root?.root}</span>
@@ -130,7 +130,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
 
           {/* Word attributes section */}
           {word_data.attributes && word_data.attributes.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
+            <div className="flex flex-wrap gap-2 mt-2 font-mono">
               {word_data.attributes.map((attribute) => (
                 <Chip
                   key={attribute.attribute_id}
@@ -162,7 +162,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                       {(meaning.part_of_speech || (meaning.attributes && meaning.attributes.length > 0)) && (
                         <div className="flex gap-2 items-center">
                           <Divider orientation="vertical" className="w-[2px] bg-primary h-5" />
-                          <p className="my-auto">
+                          <p className="my-auto font-mono text-sm">
                             {meaning.part_of_speech}
                             {meaning.attributes && meaning.attributes.length > 0 && (
                               <>
