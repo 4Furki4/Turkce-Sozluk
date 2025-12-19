@@ -54,7 +54,7 @@ export default function SaveWord({
         >
             <Heart
                 aria-label="save word"
-                className={`w-5 h-5 sm:w-6 sm:h-6 ${savedWordsQuery.data ? "fill-primary text-primary" : "fill-transparent text-gray-400"} transition-colors`}
+                className={`w-5 h-5 sm:w-6 sm:h-6 ${savedWordsQuery.data ? "fill-primary text-primary" : "fill-transparent"} transition-colors`}
             />
         </Button>
     )
