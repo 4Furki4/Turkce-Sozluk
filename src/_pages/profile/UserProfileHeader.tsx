@@ -35,8 +35,8 @@ export function UserProfileHeader({ profileData, locale, isOwnProfile, user, cla
 
   return (
     <>
-      <CustomCard isBlurred={isBlurEnabled} className={`border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors ${className}`}>
-        <CardBody className="flex flex-col items-center gap-6 rounded-lg p-6 shadow-sm sm:flex-row">
+      <CustomCard isBlurred={isBlurEnabled} className={` ${className}`}>
+        <CardBody className="flex flex-col items-center gap-6 sm:flex-row">
           <Avatar
             src={profileData.image || undefined}
             alt={`${displayName}'s profile picture`}
