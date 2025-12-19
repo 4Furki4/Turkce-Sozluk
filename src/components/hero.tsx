@@ -12,6 +12,7 @@ import { searchAutocompleteOffline, searchByPattern } from "@/src/lib/offline-db
 import { useTypewriter } from "../hooks/use-typewriter";
 
 import { api } from "@/src/trpc/react";
+import CustomCard from "./customs/heroui/custom-card";
 
 // Removes TRENDING_TAGS constant
 
@@ -141,12 +142,12 @@ export default function Hero({ children }: {
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[500px] pointer-events-none -z-10"
         style={{
-          background: `radial-gradient(circle at 50% 0%, rgba(169, 17, 1, 0.15) 0%, transparent 70%)`
+          background: `radial-gradient(circle at 50% 0%, rgba(169, 17, 1, 0.15) 0%, transparent 0%)`
         }}
       />
 
       {/* Dot Pattern Background */}
-      <div className="absolute inset-0 -z-20 h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)] pointer-events-none opacity-50" />
+      <div className="absolute inset-0 -z-20 h-full w-full bg-[radial-gradient(#e5e7eb_2px,transparent_2px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)] pointer-events-none opacity-50" />
 
       <div className="mx-auto max-w-7xl px-4 pb-12 pt-10 sm:pb-16 lg:px-8 w-full">
         {/* --- Hero Header Section --- */}
@@ -208,6 +209,7 @@ export default function Hero({ children }: {
                       "hover:border-zinc-700",
                       "group-data-[focus=true]:border-primary/50",
                       "group-data-[focus=true]:bg-zinc-900/60",
+                      "group-data-[focus=true]:bg-background",
                       "transition-all duration-300",
                       "!cursor-text"
                     ],
@@ -303,7 +305,7 @@ export default function Hero({ children }: {
                   <button
                     key={tag.id}
                     onClick={() => handleRecommendationClick(tag.name)}
-                    className="px-4 py-1.5 rounded-lg bg-background/50 border border-zinc-800 text-sm text-zinc-300 hover:text-primary hover:border-primary/50 transition-all duration-200"
+                    className="px-4 py-1.5 rounded-md bg-background shadow-sm border border-border  text-sm cursor-pointer hover:text-primary transition-all duration-200"
                   >
                     {tag.name}
                   </button>
@@ -350,7 +352,7 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
 
   if (isLoading) {
     return (
-      <Card className="h-full min-h-[300px] dark:bg-background/60 bg-background/90 border border-zinc-800 shadow-none">
+      <Card className="h-full min-h-[300px] dark:bg-background/60 bg-background/90 shadow-sm">
         <CardHeader className="flex flex-row justify-between items-start pt-6 px-8 relative z-10">
           <div className="w-32 h-6 bg-primary/10 rounded-md animate-pulse" />
           <div className="w-20 h-4 bg-zinc-800/50 rounded-md animate-pulse" />
@@ -392,7 +394,7 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
 
 
   return (
-    <Card className="h-full min-h-[300px] dark:bg-background/60 bg-background/90 border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors group relative overflow-hidden">
+    <CustomCard className="h-full min-h-[300px]  shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
       {/* Background Decoration */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors duration-500" />
 
@@ -429,16 +431,16 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
       <CardFooter className="px-8 pb-8 pt-0 relative z-10">
         <div className="w-full h-px bg-gradient-to-r from-transparent via-zinc-700 to-transparent opacity-50" />
       </CardFooter>
-    </Card>
+    </CustomCard>
   );
 }
 
 function BentoCommonMistake() {
   const t = useTranslations("Home");
   return (
-    <Card className="h-[200px] dark:bg-background/50 bg-background/50 border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors group relative overflow-hidden flex flex-col justify-center">
+    <CustomCard className="h-[200px] dark:bg-background/50 bg-background/50   group relative overflow-hidden flex flex-col justify-center">
       {/* Glow Effect */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none" />
+      <div className="absolute inset-0 dark:bg-gradient-to-b dark:from-transparent dark:from-10% dark:to-primary/20 bg-gradient-to-b from-transparent to-primary/20 pointer-events-none" />
 
       <CardHeader className="absolute top-0 left-0 pt-4 px-6 z-10">
         <span className="flex items-center gap-2 text-xs font-mono text-zinc-500 uppercase tracking-widest">
@@ -464,15 +466,15 @@ function BentoCommonMistake() {
           <CheckCircle2 className="w-5 h-5 text-success" />
         </div>
       </CardBody>
-    </Card>
+    </CustomCard>
   )
 }
 
 function BentoGalatiMeshur() {
   const t = useTranslations("Home");
   return (
-    <Card className="h-[200px] dark:bg-background/50 bg-background/50 border border-amber-900/30 shadow-none hover:border-amber-700/50 transition-colors group relative overflow-hidden flex flex-col">
-      <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+    <CustomCard className="h-[200px] dark:bg-background/50 bg-background/50 group relative overflow-hidden flex flex-col">
+      <div className="absolute top-0 right-0 p-4 opacity-50 transition-opacity">
         <BookOpen className="w-24 h-24 text-amber-500" />
       </div>
 
@@ -500,12 +502,11 @@ function BentoGalatiMeshur() {
           </span>
         </div>
 
-        {/* Explanation (Truncated/Hidden for now as requested for cleaner grid) */}
-        {/* <p className="text-xs text-zinc-500 mt-2 line-clamp-2">
-           {t("HomeExtras.galatiMeshurExample.explanation")}
-        </p> */}
+        {/* 
+          todo: add details button to show explanation
+        */}
       </CardBody>
-    </Card>
+    </CustomCard>
   )
 }
 
@@ -536,14 +537,14 @@ function BentoFeatures() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {features.map((feature, idx) => (
-        <Card key={idx} className="h-full border border-zinc-800 bg-background/50 hover:border-zinc-700 transition-colors shadow-none">
+        <CustomCard key={idx} className="h-full bg-background/50 p-0">
           <CardBody className="p-6 relative overflow-hidden">
-            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl ${feature.gradient} opacity-20 rounded-bl-full pointer-events-none`} />
+            <div className={`absolute top-0 right-0 w-full h-full bg-gradient-to-bl ${feature.gradient} dark:opacity-30 opacity-40 rounded-bl-full pointer-events-none`} />
             <div className="mb-4">{feature.icon}</div>
             <h3 className="text-lg font-bold text-foreground mb-2">{feature.title}</h3>
             <p className="text-sm text-balance text-muted-foreground leading-relaxed">{feature.description}</p>
           </CardBody>
-        </Card>
+        </CustomCard>
       ))}
     </div>
   )
