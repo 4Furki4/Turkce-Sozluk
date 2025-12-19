@@ -91,7 +91,7 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                 />
 
                 {/* Contribution Stats - Spans 1 Column */}
-                <CustomCard isBlurred={isBlurEnabled} className="md:col-span-1 h-full border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors">
+                <CustomCard isBlurred={isBlurEnabled} className="md:col-span-1 h-full transition-colors">
                     <CardHeader className="pb-2">
                         <h3 className="text-lg font-semibold text-foreground/90">{t('contributionStatsTitle')}</h3>
                     </CardHeader>
@@ -127,7 +127,7 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                 </CustomCard>
 
                 {/* Badges Section - Spans Full Width (3 Columns) */}
-                <CustomCard isBlurred={isBlurEnabled} className="md:col-span-3 border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors">
+                <CustomCard isBlurred={isBlurEnabled} className="md:col-span-3 transition-colors">
                     <CardHeader>
                         <h3 className="text-lg font-semibold text-foreground/90">{t('badgesTitle')}</h3>
                     </CardHeader>
@@ -163,7 +163,7 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
 
                 {/* Saved Words Section - Spans 1 Column (Only for Own Profile) */}
                 {isOwnProfile && (
-                    <CustomCard isBlurred={isBlurEnabled} className="md:col-span-1 h-[500px] border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors">
+                    <CustomCard isBlurred={isBlurEnabled} className="md:col-span-1 h-[500px] transition-colors">
                         <CardHeader className="flex justify-between items-center pb-2">
                             <h3 className="text-lg font-semibold text-foreground/90">{t('savedWordsTitle')}</h3>
                             <NextIntlLink href="/saved-words" className="text-xs font-mono text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest">
@@ -203,7 +203,7 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                 )}
 
                 {/* Recent Contributions Section - Spans 2 Columns (or 3 if not own) */}
-                <CustomCard isBlurred={isBlurEnabled} className={`${isOwnProfile ? 'md:col-span-2' : 'md:col-span-3'} h-[500px] border border-zinc-800 shadow-none hover:border-zinc-700 transition-colors`} >
+                <CustomCard isBlurred={isBlurEnabled} className={`${isOwnProfile ? 'md:col-span-2' : 'md:col-span-3'} h-[500px] transition-colors`} >
                     <CardHeader className="flex justify-between items-center pb-2">
                         <h3 className="text-lg font-semibold text-foreground/90">{t('recentContributionsTitle')}</h3>
                         <NextIntlLink href={{ pathname: '/my-requests', query: { status: 'approved' } }} className="text-xs font-mono text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest">
