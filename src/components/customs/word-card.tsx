@@ -152,7 +152,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
           <Tabs color="primary" disableAnimation classNames={{
             tabList: "w-full bg-primary/10 border border-primary",
             tabContent: "text-primary md:w-full",
-            tab: "data-[selected=true]:bg-primary/60",
+            tab: "dark:data-[selected=true]:bg-primary/60 ",
           }}>
             <Tab value={"meaning"} title={t("Meanings")} >
               {word_data.meanings && word_data.meanings.length > 0 ? (
