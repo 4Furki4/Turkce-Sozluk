@@ -79,13 +79,13 @@ export default function Navbar({
       maxWidth="xl"
       shouldHideOnScroll
       classNames={{
-
         item: [
           "relative",
           "flex",
           "h-full",
           "items-center",
           "data-[active=true]",
+          // Active styles
           "data-[active=true]:after:content-['']",
           "data-[active=true]:after:absolute",
           "data-[active=true]:after:bottom-0",
@@ -94,6 +94,15 @@ export default function Navbar({
           "data-[active=true]:after:h-[2px]",
           "data-[active=true]:after:rounded-[2px]",
           "data-[active=true]:after:bg-primary",
+          // Hover styles for nav links
+          "data-[nav-link=true]:hover:after:content-['']",
+          "data-[nav-link=true]:hover:after:absolute",
+          "data-[nav-link=true]:hover:after:bottom-0",
+          "data-[nav-link=true]:hover:after:left-0",
+          "data-[nav-link=true]:hover:after:right-0",
+          "data-[nav-link=true]:hover:after:h-[2px]",
+          "data-[nav-link=true]:hover:after:rounded-[2px]",
+          "data-[nav-link=true]:hover:after:bg-primary",
         ],
         // wrapper: ["sm:px-0"]
       }}
@@ -111,19 +120,19 @@ export default function Navbar({
       </NavbarItem>
       <NavbarContent justify="end" className="gap-2 md:gap-4 lg:gap-6">
         {(session?.user as User & { role: string })?.role === "admin" ? (
-          <NavbarItem className="hidden md:flex" isActive={pathName === "/dashboard"}>
-            <NextIntlLink href={"/dashboard"} className='flex items-center gap-2 hover:text-primary text-gray-900 dark:hover:text-primary dark:text-gray-50 hover:underline rounded-sm'>
+          <NavbarItem className="hidden md:flex" isActive={pathName === "/dashboard"} data-nav-link="true">
+            <NextIntlLink href={"/dashboard"} className='flex items-center gap-2 text-gray-900 dark:text-gray-50 rounded-sm'>
               <span className={`text-nowrap`}>Dashboard</span>
             </NextIntlLink>
           </NavbarItem>
         ) : null}
-        <NavbarItem className="hidden md:flex" isActive={pathName === "/announcements"}>
-          <NextIntlLink href={'/announcements'} as={Link as any} className='flex items-center gap-2 hover:text-primary text-gray-900 dark:hover:text-primary dark:text-gray-50 hover:underline rounded-sm'>
+        <NavbarItem className="hidden md:flex" isActive={pathName === "/announcements"} data-nav-link="true">
+          <NextIntlLink href={'/announcements'} as={Link as any} className='flex items-center gap-2 text-gray-900 dark:text-gray-50 rounded-sm'>
             <span className={`text-nowrap`}>{AnnouncementsIntl}</span>
           </NextIntlLink>
         </NavbarItem>
-        <NavbarItem className="hidden md:flex" isActive={pathName === "/word-list"}>
-          <NextIntlLink href={"/word-list"} className='flex items-center gap-2 hover:text-primary text-gray-900 dark:hover:text-primary dark:text-gray-50 hover:underline rounded-sm'>
+        <NavbarItem className="hidden md:flex" isActive={pathName === "/word-list"} data-nav-link="true">
+          <NextIntlLink href={"/word-list"} className='flex items-center gap-2 text-gray-900 dark:text-gray-50 rounded-sm'>
             <span className={`text-nowrap`}>{WordListIntl}</span>
           </NextIntlLink>
         </NavbarItem>
