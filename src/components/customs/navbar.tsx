@@ -113,9 +113,7 @@ export default function Navbar({
             <Image src={logo} alt="Turkish Dictionary Logo" className="h-8 w-8" />
             <span className="text-fs-1 font-bold text-primary">{TitleIntl}</span>
           </NextIntlLink>
-          <button className="md:hidden">
-            <Menu aria-label={ariaMenu} className="h-7 w-7" onClick={() => setIsSidebarOpen(true)} />
-          </button>
+          {/* Mobile menu button moved to bottom nav */}
         </NavbarBrand>
       </NavbarItem>
       <NavbarContent justify="end" className="gap-2 md:gap-4 lg:gap-6">

@@ -205,6 +205,7 @@ export default async function RootLayout({
                     ariaBlur={t("ariaBlur")}
                     ContributeIntl={t("Contribute")}
                     FeedbackIntl={t("Feedback")}
+                    SearchIntl={t("Search")}
                   />
                   <main className="relative w-full flex-grow flex min-h-[calc(100vh-var(--navbar-height))]">
                     {/* ✨ Moved BackgroundGradient here */}

@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import Navbar from './navbar'
 import Sidebar from './sidebar'
+import MobileBottomNav from './mobile-bottom-nav'
 import { Session } from '@/src/lib/auth-client'
 
 import { authClient } from '@/src/lib/auth-client';
@@ -27,7 +28,8 @@ export default function NavbarAndSidebar({
     ariaSwitchTheme,
     ariaBlur,
     ContributeIntl,
-    FeedbackIntl
+    FeedbackIntl,
+    SearchIntl // New prop
 }: {
     session: Session | null
     HomeIntl: string
@@ -48,7 +50,8 @@ export default function NavbarAndSidebar({
     ariaSwitchTheme: string,
     ariaBlur: string,
     ContributeIntl: string,
-    FeedbackIntl: string
+    FeedbackIntl: string,
+    SearchIntl: string // New Prop Type
 }) {
     // Render children if on client side, otherwise return null
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -80,6 +83,15 @@ export default function NavbarAndSidebar({
                 FeedbackIntl={FeedbackIntl}
             />
             <Sidebar session={session} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
+            <MobileBottomNav
+                setIsSidebarOpen={setIsSidebarOpen}
+                HomeIntl={HomeIntl}
+                WordListIntl={WordListIntl}
+                ContributeWordIntl={ContributeWordIntl}
+                SavedWordsIntl={SavedWordsIntl}
+                ariaMenu={ariaMenu}
+                SearchIntl={SearchIntl}
+            />
         </>
     )
 }
