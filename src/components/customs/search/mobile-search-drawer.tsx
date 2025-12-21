@@ -2,6 +2,7 @@
 
 import { Modal, ModalContent, ModalBody, ModalHeader } from "@heroui/react";
 import SearchContainer from "./search-container";
+import { motion } from "framer-motion";
 
 interface MobileSearchDrawerProps {
     isOpen: boolean;
@@ -51,10 +52,20 @@ export default function MobileSearchDrawer({
             <ModalContent className="bg-background/95 backdrop-blur-xl">
                 {(onClose) => (
                     <>
-                        <ModalHeader className="flex flex-col gap-1 text-center items-center justify-center pt-6 pb-4">
-                            {SearchIntl}
-                            <div className="w-12 h-1 bg-zinc-700/50 rounded-full mt-2" />
-                        </ModalHeader>
+                        <motion.div
+                            className="w-full touch-none cursor-grab active:cursor-grabbing"
+                            onPanEnd={(e, info) => {
+                                // Close if dragged down sufficiently
+                                if (info.offset.y > 50) {
+                                    onClose();
+                                }
+                            }}
+                        >
+                            <ModalHeader className="flex flex-col gap-1 text-center items-center justify-center pt-6 pb-4 select-none">
+                                {SearchIntl}
+                                <div className="w-12 h-1 bg-zinc-700/50 rounded-full mt-2" />
+                            </ModalHeader>
+                        </motion.div>
                         <ModalBody className="pt-6">
                             <SearchContainer
                                 autoFocus
