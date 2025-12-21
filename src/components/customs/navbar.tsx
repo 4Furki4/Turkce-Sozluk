@@ -75,7 +75,7 @@ export default function Navbar({
 
   return (
     <NextuiNavbar
-      className="invisible md:visible flex bg-background-foreground/100 border-b border-border"
+      className="max-sm:h-4 invisible md:visible flex bg-background-foreground/100 border-b border-border"
       maxWidth="xl"
       shouldHideOnScroll
       classNames={{
