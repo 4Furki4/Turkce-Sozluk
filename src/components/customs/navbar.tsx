@@ -75,7 +75,7 @@ export default function Navbar({
 
   return (
     <NextuiNavbar
-      className="bg-background-foreground/100 border-b border-border"
+      className="hidden md:flex bg-background-foreground/100 border-b border-border"
       maxWidth="xl"
       shouldHideOnScroll
       classNames={{
@@ -170,7 +170,7 @@ export default function Navbar({
           {isOnline ? <NavbarItem>
             {locale === "en" ? (
               <NextIntlLink
-                className="w-full block"
+                className="w-full hidden md:block"
                 // @ts-ignore
                 href={{
                   pathname: pathName,
@@ -189,7 +189,7 @@ export default function Navbar({
               </NextIntlLink>
             ) : (
               <NextIntlLink
-                className="w-full block"
+                className="w-full hidden md:block"
                 // @ts-ignore
                 href={{
                   pathname: pathName,
@@ -213,23 +213,15 @@ export default function Navbar({
         </>
         <NavbarItem>
           {/* theme button */}
-          <Button className="hidden xs:inline-flex" aria-label={ariaSwitchTheme} variant="light" isIconOnly onPress={() => setTheme(theme === "dark" ? "light" : "dark")}>
+          <Button className="hidden md:inline-flex" aria-label={ariaSwitchTheme} variant="light" isIconOnly onPress={() => setTheme(theme === "dark" ? "light" : "dark")}>
             <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          </Button>
-          <Button size="sm" className="xs:hidden" aria-label={ariaSwitchTheme} variant="light" isIconOnly onPress={() => setTheme(theme === "dark" ? "light" : "dark")}>
-            <Sun className="h-[1rem] w-[1rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-[1rem] w-[1rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           </Button>
 
         </NavbarItem>
         <NavbarItem>
 
-          <Button className="xs:hidden" size="sm" aria-label={ariaBlur} variant="light" isIconOnly onPress={toggleBlur}>
-            <Sparkles className={cn("h-[1rem] w-[1rem] rotate-0 scale-100 transition-all", snap.isBlurEnabled ? "rotate-0 scale-100" : "rotate-90 scale-0")} />
-            <Sparkle className={cn("absolute h-[1rem] w-[1rem] rotate-0 scale-100 transition-all", snap.isBlurEnabled ? "rotate-90 scale-0" : "rotate-0 scale-100")} />
-          </Button>
-          <Button className="hidden xs:inline-flex" aria-label={ariaBlur} variant="light" isIconOnly onPress={toggleBlur}>
+          <Button className="hidden md:inline-flex" aria-label={ariaBlur} variant="light" isIconOnly onPress={toggleBlur}>
             <Sparkles className={cn("h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all", snap.isBlurEnabled ? "rotate-0 scale-100" : "rotate-90 scale-0")} />
             <Sparkle className={cn("absolute h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all", snap.isBlurEnabled ? "rotate-90 scale-0" : "rotate-0 scale-100")} />
           </Button>
@@ -248,23 +240,7 @@ export default function Navbar({
               isDisabled={isAuthPage}
               variant="shadow"
               color="primary"
-              className="font-bold hidden xs:inline-flex"
-            >
-              {SignInIntl}
-            </Button>
-            <Button
-              size="sm"
-              onPress={() => router.push({
-                pathname: "/signin",
-                query: {
-                  backTo: window.location.pathname
-                }
-              })}
-              aria-disabled={isAuthPage}
-              isDisabled={isAuthPage}
-              variant="shadow"
-              color="primary"
-              className="xs:hidden font-bold"
+              className="font-bold hidden md:inline-flex"
             >
               {SignInIntl}
             </Button>
@@ -273,7 +249,7 @@ export default function Navbar({
           <>
             {/* <NavbarItem className="cursor-pointer"> */}
             <CustomDropdown>
-              <DropdownTrigger>
+              <DropdownTrigger className="hidden md:flex">
                 <Button isIconOnly disableAnimation disableRipple
                   className="bg-transparent"
                   aria-label={ariaAvatar}
