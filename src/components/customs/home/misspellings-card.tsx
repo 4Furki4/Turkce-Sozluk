@@ -9,7 +9,7 @@ import Link from "next/link";
 
 export function MisspellingsCard() {
     const t = useTranslations("Home.HomeExtras");
-    const { data, isLoading } = api.extras.getMisspellings.useQuery({ limit: 5 });
+    const { data: misspellings, isLoading } = api.extras.getMisspellings.useQuery({ limit: 5 });
 
     if (isLoading) {
         return (
@@ -51,7 +51,7 @@ export function MisspellingsCard() {
         );
     }
 
-    if (!data || data.length === 0) return null;
+    if (!misspellings?.data || misspellings.data.length === 0) return null;
 
     return (
         <CustomCard className="h-full">
@@ -64,10 +64,10 @@ export function MisspellingsCard() {
 
             <CardBody className="py-2 px-0">
                 <div className="flex flex-col">
-                    {data.map((item, index) => (
+                    {misspellings.data.map((item, index) => (
                         <div
                             key={item.id}
-                            className={`flex items-center justify-between px-4 py-3 ${index !== data.length - 1 ? "border-b border-divider" : ""
+                            className={`flex items-center justify-between px-4 py-3 ${index !== misspellings.data.length - 1 ? "border-b border-divider" : ""
                                 }`}
                         >
                             {/* Incorrect Side */}
