@@ -781,7 +781,11 @@
       "deletionRequest": "Deletion Request",
       "deletionWarning": "Deletion request submitted, the request will be processed after approval.",
       "cancelRequestModalTitle": "Cancel Request",
-      "confirmCancelRequest": "Are you sure you want to cancel this request? This action cannot be undone."
+      "confirmCancelRequest": "Are you sure you want to cancel this request? This action cannot be undone.",
+      "resolution": "Resolution",
+      "resolvedAtLabel": "Resolved At",
+      "resolvedByLabel": "Resolved By",
+      "moderationReason": "Moderation Reason"
     },
     "RequestedAttributeByYou": "Requested Attribute by You",
     "NoChanges": "No changes detected",

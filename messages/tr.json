@@ -740,7 +740,11 @@
       "wordNameNotFound": "Kelime bulunamadı",
       "willChangeTo": "Bununla değişecek",
       "deletionRequest": "Silme İsteği",
-      "deletionWarning": "Silme isteğinde bulundunuz, isteğiniz onaylandıktan sonra silinecektir."
+      "deletionWarning": "Silme isteğinde bulundunuz, isteğiniz onaylandıktan sonra silinecektir.",
+      "resolution": "Karar",
+      "resolvedAtLabel": "Karar Tarihi",
+      "resolvedByLabel": "Karar Veren Kişi",
+      "moderationReason": "Kararın Nedeni"
     },
     "RequestedAttributeByYou": "Sizin eklediğiniz özellik",
     "NoChanges": "Değişiklik tespit edilmedi, lütfen değişiklik yapınız.",
