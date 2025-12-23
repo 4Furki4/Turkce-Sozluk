@@ -134,7 +134,12 @@
       "misspellingExample": {
         "wrong": "yanlız",
         "correct": "yalnız"
-      }
+      },
+      "backToHome": "Ana sayfaya dön",
+      "explanation": "Açıklama",
+      "actually": "Doğrusu: {correctUsage}",
+      "seeDetailedMeaning": "Detaylı kelime anlamına bakmak isterseniz:",
+      "seeInDictionary": "Sözlükte Gör"
     }
   },
   "WordCard": {

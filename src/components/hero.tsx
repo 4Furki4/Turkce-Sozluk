@@ -181,34 +181,76 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
 
 function BentoCommonMistake() {
   const t = useTranslations("Home");
+  const [offset, setOffset] = useState(0);
+  const { data, isLoading } = api.extras.getMisspellings.useQuery({ limit: 1, offset });
+
+  const handleNext = () => {
+    if (data?.total && offset < data.total - 1) {
+      setOffset(prev => prev + 1);
+    }
+  };
+
+  const handlePrev = () => {
+    if (offset > 0) {
+      setOffset(prev => prev - 1);
+    }
+  };
+
+  const item = data?.data[0];
+
   return (
-    <CustomCard className="h-[200px] dark:bg-background/50 bg-background/50   group relative overflow-hidden flex flex-col justify-center">
+    <CustomCard className="h-[200px] dark:bg-background/50 bg-background/50 group relative overflow-hidden flex flex-col justify-center">
       {/* Glow Effect */}
       <div className="absolute inset-0 dark:bg-gradient-to-b dark:from-transparent dark:from-10% dark:to-primary/20 bg-gradient-to-b from-transparent to-primary/20 pointer-events-none" />
 
-      <CardHeader className="absolute top-0 left-0 pt-4 px-6 z-10">
+      <CardHeader className="absolute top-0 left-0 pt-4 px-6 z-50 w-full flex flex-row justify-between items-center">
         <span className="flex items-center gap-2 text-xs font-mono text-zinc-500 uppercase tracking-widest">
           <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
           {t("HomeExtras.misspellingsTitle")}
         </span>
       </CardHeader>
 
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-4">
+        <Button isIconOnly size="sm" variant="light" className="text-muted-foreground hover:text-foreground" onPress={handlePrev} isDisabled={offset === 0}>
+          <ArrowRight className="w-4 h-4 rotate-180" />
+        </Button>
+        <Button isIconOnly size="sm" variant="light" className="text-muted-foreground hover:text-foreground" onPress={handleNext} isDisabled={!data?.total || offset >= data.total - 1}>
+          <ArrowRight className="w-4 h-4" />
+        </Button>
+      </div>
+
       <CardBody className="flex flex-row items-center justify-center gap-8 z-10">
-        <div className="flex flex-col items-center gap-2 group/wrong opacity-60">
-          <span className="text-2xl sm:text-3xl font-serif text-zinc-500 line-through decoration-danger decoration-2">
-            {t("HomeExtras.misspellingExample.wrong")}
-          </span>
-          <XCircle className="w-5 h-5 text-danger" />
-        </div>
+        {isLoading ? (
+          <div className="flex items-center gap-8 w-full justify-center">
+            <div className="flex flex-col items-center gap-2 w-1/3">
+              <div className="w-24 h-8 bg-zinc-800/10 dark:bg-zinc-800/50 rounded animate-pulse" />
+            </div>
+            <div className="w-px h-12 bg-zinc-800/20" />
+            <div className="flex flex-col items-center gap-2 w-1/3">
+              <div className="w-24 h-8 bg-zinc-800/10 dark:bg-zinc-800/50 rounded animate-pulse" />
+            </div>
+          </div>
+        ) : item ? (
+          <>
+            <div className="flex flex-col items-center gap-2 group/wrong opacity-60">
+              <span className="text-2xl sm:text-3xl font-serif text-zinc-500 line-through decoration-danger decoration-2 text-center">
+                {item.wrong}
+              </span>
+              <XCircle className="w-5 h-5 text-danger" />
+            </div>
 
-        <div className="w-px h-12 bg-zinc-800" />
+            <div className="w-px h-12 bg-zinc-800" />
 
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-2xl sm:text-3xl font-serif font-bold text-foreground">
-            {t("HomeExtras.misspellingExample.correct")}
-          </span>
-          <CheckCircle2 className="w-5 h-5 text-success" />
-        </div>
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-2xl sm:text-3xl font-serif font-bold text-foreground text-center">
+                {item.correct}
+              </span>
+              <CheckCircle2 className="w-5 h-5 text-success" />
+            </div>
+          </>
+        ) : (
+          <div className="text-muted-foreground text-sm">No data available</div>
+        )}
       </CardBody>
     </CustomCard>
   )
@@ -216,39 +258,83 @@ function BentoCommonMistake() {
 
 function BentoGalatiMeshur() {
   const t = useTranslations("Home");
+  const [offset, setOffset] = useState(0);
+  const { data, isLoading } = api.extras.getGalatiMeshur.useQuery({ limit: 1, offset });
+
+  const handleNext = () => {
+    if (data?.total && offset < data.total - 1) {
+      setOffset(prev => prev + 1);
+    }
+  };
+
+  const handlePrev = () => {
+    if (offset > 0) {
+      setOffset(prev => prev - 1);
+    }
+  };
+
+  const item = data?.data[0];
+
   return (
     <CustomCard className="h-[200px] dark:bg-background/50 bg-background/50 group relative overflow-hidden flex flex-col">
       <div className="absolute top-0 right-0 p-4 opacity-50 transition-opacity">
-        <BookOpen className="w-24 h-24 text-amber-500" />
+        <BookOpen className="w-16 h-16 text-amber-500" />
       </div>
 
-      <CardHeader className="pt-4 px-6 z-10">
+      <CardHeader className="pt-4 px-6 z-10 flex flex-row justify-between items-center">
         <span className="text-xs font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest flex items-center gap-2">
           <BookOpen className="w-3 h-3" />
           {t("HomeExtras.galatiMeshurTitle")}
         </span>
       </CardHeader>
 
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-4">
+        <Button isIconOnly size="sm" variant="light" className="text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400" onPress={handlePrev} isDisabled={offset === 0}>
+          <ArrowRight className="w-4 h-4 rotate-180" />
+        </Button>
+        <Button isIconOnly size="sm" variant="light" className="text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400" onPress={handleNext} isDisabled={!data?.total || offset >= data.total - 1}>
+          <ArrowRight className="w-4 h-4" />
+        </Button>
+      </div>
+
       <CardBody className="px-6 py-2 z-10 flex flex-col justify-center gap-2">
-        {/* Wrong */}
-        <div className="flex items-center gap-2 opacity-60">
-          <XCircle className="w-4 h-4 text-danger shrink-0" />
-          <span className="text-lg font-serif text-zinc-500 line-through decoration-danger/50">
-            {t("HomeExtras.galatiMeshurExample.wrong")}
-          </span>
-        </div>
+        {isLoading ? (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-2 w-full">
+              <div className="w-4 h-4 rounded-full bg-zinc-800/10 dark:bg-zinc-800/50 animate-pulse" />
+              <div className="h-6 w-3/4 bg-zinc-800/10 dark:bg-zinc-800/50 rounded animate-pulse" />
+            </div>
+            <div className="flex items-center gap-2 w-full">
+              <div className="w-4 h-4 rounded-full bg-zinc-800/10 dark:bg-zinc-800/50 animate-pulse" />
+              <div className="h-6 w-1/2 bg-zinc-800/10 dark:bg-zinc-800/50 rounded animate-pulse" />
+            </div>
+          </div>
+        ) : item ? (
+          <Link href={{
+            pathname: '/galati-meshur/[id]',
+            params: {
+              id: item.id.toString()
+            }
+          }} className="block group/link">
+            {/* Wrong */}
+            <div className="flex items-center gap-2 opacity-60 mb-2">
+              <XCircle className="w-4 h-4 text-danger shrink-0" />
+              <span className="text-lg font-serif text-zinc-500 line-through decoration-danger/50 line-clamp-1 group-hover/link:text-zinc-400 transition-colors">
+                {item.explanation}
+              </span>
+            </div>
 
-        {/* Correct */}
-        <div className="flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
-          <span className="text-lg font-serif font-bold text-foreground">
-            {t("HomeExtras.galatiMeshurExample.correct")}
-          </span>
-        </div>
-
-        {/* 
-          todo: add details button to show explanation
-        */}
+            {/* Correct */}
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+              <span className="text-lg font-serif font-bold text-foreground line-clamp-1 group-hover/link:text-primary transition-colors">
+                {item.correctUsage || item.word}
+              </span>
+            </div>
+          </Link>
+        ) : (
+          <div className="text-muted-foreground text-sm">No data available</div>
+        )}
       </CardBody>
     </CustomCard>
   )

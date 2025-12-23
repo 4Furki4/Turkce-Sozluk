@@ -134,7 +134,12 @@
       "misspellingExample": {
         "wrong": "yanlız",
         "correct": "yalnız"
-      }
+      },
+      "backToHome": "Back to Home",
+      "explanation": "Explanation",
+      "actually": "Actually: {correctUsage}",
+      "seeDetailedMeaning": "If you want to check the detailed word meaning:",
+      "seeInDictionary": "See in Dictionary"
     }
   },
   "WordCard": {

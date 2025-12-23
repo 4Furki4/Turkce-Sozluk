@@ -41,9 +41,9 @@ export function GalatiMeshurCard() {
         );
     }
 
-    if (!data || data.length === 0) return null;
+    if (!data || data.data.length === 0) return null;
 
-    const item = data[0];
+    const item = data.data[0];
 
     return (
         <CustomCard className="h-full bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-amber-200/50 dark:border-amber-800/50">

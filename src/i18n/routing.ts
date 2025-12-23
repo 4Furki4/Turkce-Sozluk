@@ -183,6 +183,10 @@ export const routing = defineRouting({
       "en": "/offline-dictionary",
       "tr": "/çevrim-dışı-sözlük",
     },
+    "/galati-meshur/[id]": {
+      "en": "/galati-meshur/[id]",
+      "tr": "/galati-meshur/[id]",
+    },
   }
 
 })
