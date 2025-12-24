@@ -29,7 +29,9 @@ export default function NavbarAndSidebar({
     ariaBlur,
     ContributeIntl,
     FeedbackIntl,
-    SearchIntl // New prop
+    SearchIntl,
+    LearnIntl,
+    FlashcardGameIntl
 }: {
     session: Session | null
     HomeIntl: string
@@ -51,7 +53,9 @@ export default function NavbarAndSidebar({
     ariaBlur: string,
     ContributeIntl: string,
     FeedbackIntl: string,
-    SearchIntl: string // New Prop Type
+    SearchIntl: string,
+    LearnIntl: string,
+    FlashcardGameIntl: string
 }) {
     // Render children if on client side, otherwise return null
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -81,6 +85,8 @@ export default function NavbarAndSidebar({
                 ariaBlur={ariaBlur}
                 ContributeIntl={ContributeIntl}
                 FeedbackIntl={FeedbackIntl}
+                LearnIntl={LearnIntl}
+                FlashcardGameIntl={FlashcardGameIntl}
             />
             <Sidebar session={session} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
             <MobileBottomNav
@@ -95,3 +101,4 @@ export default function NavbarAndSidebar({
         </>
     )
 }
+

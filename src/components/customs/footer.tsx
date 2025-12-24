@@ -17,6 +17,7 @@ export default async function Footer({ session }: { session: Session | null }) {
             { href: "/word-list", label: t("links.wordList") },
             { href: "/announcements", label: t("links.announcements") },
             { href: "/offline-dictionary", label: t("links.offlineDictionary") },
+            { href: "/flashcard-game", label: t("links.flashcardGame") },
         ],
         community: [
             { href: "/contribute-word", label: t("links.contributeWord") },
