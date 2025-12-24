@@ -187,6 +187,10 @@ export const routing = defineRouting({
       "en": "/galati-meshur/[id]",
       "tr": "/galati-meshur/[id]",
     },
+    "/flashcard-game": {
+      "en": "/flashcard-game",
+      "tr": "/kelime-kartlari",
+    },
   }
 
 })

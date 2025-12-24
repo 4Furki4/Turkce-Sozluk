@@ -21,7 +21,9 @@
     "Contribute": "Contribute",
     "Feedback": "Feedback",
     "Search": "Search",
-    "OfflineDictionary": "Offline Dictionary"
+    "OfflineDictionary": "Offline Dictionary",
+    "FlashcardGame": "Flashcard Game",
+    "Learn": "Learn"
   },
   "Footer": {
     "description": "Community-driven, open source and modern Turkish dictionary.",
@@ -41,7 +43,8 @@
       "contributeWord": "Contribute Word",
       "pronunciations": "Pronunciations",
       "privacy": "Privacy Policy",
-      "terms": "Terms of Service"
+      "terms": "Terms of Service",
+      "flashcardGame": "Flashcard Game"
     }
   },
   "SigninForm": {
@@ -1479,5 +1482,27 @@
     "downloading": "Word suggestions data is being downloaded. Suggestions may not appear for a few seconds.",
     "success": "Word suggestions data is ready!",
     "error": "Failed to update word suggestions data."
+  },
+  "FlashcardGame": {
+    "title": "Flashcard Game",
+    "description": "Test your vocabulary with interactive flashcards",
+    "flip": "Flip Card",
+    "next": "Next",
+    "previous": "Previous",
+    "shuffle": "Shuffle",
+    "progress": "{current} of {total}",
+    "settings": "Settings",
+    "cardCount": "Number of Cards",
+    "source": "Word Source",
+    "sourceAll": "All Words",
+    "sourceSaved": "Saved Words",
+    "signInForSaved": "Sign in to use saved words",
+    "startGame": "Start Game",
+    "noWords": "No words available",
+    "loading": "Loading cards...",
+    "word": "Word",
+    "meaning": "Meaning",
+    "clickToFlip": "Click to flip",
+    "restart": "Restart"
   }
 }

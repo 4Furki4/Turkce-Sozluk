@@ -21,7 +21,9 @@
     "Contribute": "Katkıda Bulun",
     "Feedback": "Geri Bildirim",
     "Search": "Ara",
-    "OfflineDictionary": "Çevrim Dışı Sözlük"
+    "OfflineDictionary": "Çevrim Dışı Sözlük",
+    "FlashcardGame": "Kelime Kartları",
+    "Learn": "Öğren"
   },
   "Footer": {
     "description": "Topluluk ile gelişen, açık kaynak ve modern Türkçe sözlüğü.",
@@ -41,7 +43,8 @@
       "privacy": "Gizlilik Politikası",
       "terms": "Kullanım Şartları",
       "contributeWord": "Kelime Katkısı",
-      "pronunciations": "Telaffuzlar"
+      "pronunciations": "Telaffuzlar",
+      "flashcardGame": "Kelime Kartları Oyunu"
     }
   },
   "SigninForm": {
@@ -1445,5 +1448,27 @@
     "downloading": "Arama öneri verileri indiriliyor. Öneriler birkaç saniye görünmeyebilir.",
     "success": "Arama öneri verileri hazır!",
     "error": "Arama öneri verileri güncellenemedi."
+  },
+  "FlashcardGame": {
+    "title": "Kelime Kartları Oyunu",
+    "description": "Etkileşimli kelime kartlarıyla kelime bilginizi test edin",
+    "flip": "Kartı Çevir",
+    "next": "Sonraki",
+    "previous": "Önceki",
+    "shuffle": "Karıştır",
+    "progress": "{total} karttan {current}. kart",
+    "settings": "Ayarlar",
+    "cardCount": "Kart Sayısı",
+    "source": "Kelime Kaynağı",
+    "sourceAll": "Tüm Kelimeler",
+    "sourceSaved": "Kayıtlı Kelimeler",
+    "signInForSaved": "Kayıtlı kelimeler için giriş yapın",
+    "startGame": "Oyunu Başlat",
+    "noWords": "Kelime bulunamadı",
+    "loading": "Kartlar yükleniyor...",
+    "word": "Kelime",
+    "meaning": "Anlam",
+    "clickToFlip": "Çevirmek için tıklayın",
+    "restart": "Yeniden Başlat"
   }
 }
