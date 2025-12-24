@@ -11,7 +11,7 @@ import {
   NavbarBrand,
   DropdownSection
 } from "@heroui/react";
-import { ChevronDown, GitPullRequestArrow, HandHeart, HeartHandshake, HistoryIcon, Languages, LogOut, Menu, Mic, Moon, Sparkle, Sparkles, StarIcon, Sun, UserIcon } from "lucide-react";
+import { ChevronDown, GitPullRequestArrow, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, LogOut, Menu, Mic, Moon, Sparkle, Sparkles, StarIcon, Sun, UserIcon } from "lucide-react";
 // import { signIn, signOut } from "next-auth/react"; // Removed
 import { authClient, type User } from "@/src/lib/auth-client"; // Added
 import { useTheme } from "next-themes";
@@ -31,7 +31,7 @@ import { Session } from "@/src/lib/auth-client";
 
 type NavbarProps = {
   session: Session | null;
-} & Record<"TitleIntl" | "WordListIntl" | "SignInIntl" | "HomeIntl" | "ProfileIntl" | "SavedWordsIntl" | "MyRequestsIntl" | "SearchHistoryIntl" | "LogoutIntl" | "AnnouncementsIntl" | "ContributeWordIntl" | "PronunciationsIntl" | "ariaAvatar" | "ariaMenu" | "ariaLanguages" | "ariaSwitchTheme" | "ariaBlur" | "ContributeIntl" | "FeedbackIntl", string>;
+} & Record<"TitleIntl" | "WordListIntl" | "SignInIntl" | "HomeIntl" | "ProfileIntl" | "SavedWordsIntl" | "MyRequestsIntl" | "SearchHistoryIntl" | "LogoutIntl" | "AnnouncementsIntl" | "ContributeWordIntl" | "PronunciationsIntl" | "ariaAvatar" | "ariaMenu" | "ariaLanguages" | "ariaSwitchTheme" | "ariaBlur" | "ContributeIntl" | "FeedbackIntl" | "LearnIntl" | "FlashcardGameIntl", string>;
 
 export default function Navbar({
   session,
@@ -54,7 +54,9 @@ export default function Navbar({
   ariaSwitchTheme,
   ariaBlur,
   ContributeIntl,
-  FeedbackIntl
+  FeedbackIntl,
+  LearnIntl,
+  FlashcardGameIntl
 }: NavbarProps & { setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>> }) { // Merged props type
   const { theme, setTheme } = useTheme();
   const pathName = usePathname();
@@ -162,6 +164,28 @@ export default function Navbar({
             <DropdownItem key={'feedback'} startContent={<HandHeart aria-label={FeedbackIntl} className="w-4 h-4" />} className="py-0 pr-0">
               <NextIntlLink href="/feedback" className="flex items-center gap-2 py-1.5">
                 {FeedbackIntl}
+              </NextIntlLink>
+            </DropdownItem>
+          </DropdownMenu>
+        </CustomDropdown>
+        <CustomDropdown>
+          <NavbarItem className="hidden md:flex">
+            <DropdownTrigger>
+              <Button color="primary" disableRipple className="capitalize p-0 bg-transparent data-[hover=true]:bg-transparent text-base max-h-6 font-bold" radius="sm" variant="flat" endContent={<ChevronDown aria-label={LearnIntl} className="w-4 h-4" />}>
+                {LearnIntl}
+              </Button>
+            </DropdownTrigger>
+          </NavbarItem>
+          <DropdownMenu aria-label={LearnIntl}
+            itemClasses={{
+              base: [
+                "data-[hover=true]:bg-primary/30",
+                "dark:data-[hover=true]:bg-primary/30",
+              ]
+            }}>
+            <DropdownItem key="flashcard-game" startContent={<Layers aria-label={FlashcardGameIntl} className="w-4 h-4" />} className="py-0 pr-0">
+              <NextIntlLink href="/flashcard-game" className="flex items-center gap-2 py-1.5">
+                {FlashcardGameIntl}
               </NextIntlLink>
             </DropdownItem>
           </DropdownMenu>

@@ -1,4 +1,4 @@
-import { BellIcon, GitPullRequestArrow, HandHeart, HeartHandshake, HistoryIcon, HomeIcon, LayoutDashboard, ListTree, LogIn, MicIcon, StarIcon, UserIcon, WifiOff, Sun, Moon, Sparkles, Sparkle, Languages, LogOut } from 'lucide-react'
+import { BellIcon, GitPullRequestArrow, HandHeart, HeartHandshake, HistoryIcon, HomeIcon, LayoutDashboard, Layers, ListTree, LogIn, MicIcon, StarIcon, UserIcon, WifiOff, Sun, Moon, Sparkles, Sparkle, Languages, LogOut } from 'lucide-react'
 import React from 'react'
 import { Link as NextIntlLink, usePathname, useRouter } from "@/src/i18n/routing";
 import {
@@ -78,6 +78,11 @@ export default function Sidebar(
                             <li>
                                 <NextIntlLink className='flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 rounded-sm' href={'/offline-dictionary'} onClick={() => setIsSidebarOpen(false)}>
                                     <WifiOff className="h-6 w-6" /> <span className={`text-nowrap`}>{t("Navbar.OfflineDictionary")}</span>
+                                </NextIntlLink>
+                            </li>
+                            <li>
+                                <NextIntlLink className='flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 rounded-sm' href={'/flashcard-game'} onClick={() => setIsSidebarOpen(false)}>
+                                    <Layers className="h-6 w-6" /> <span className={`text-nowrap`}>{t("Navbar.FlashcardGame")}</span>
                                 </NextIntlLink>
                             </li>
                             <Separator />

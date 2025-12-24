@@ -49,6 +49,7 @@ import { voteRouter } from "./routers/vote";
 import { searchRouter } from "./routers/search";
 import { extrasRouter } from "./routers/extras";
 import { badgeRouter } from "./routers/badge";
+import { gameRouter } from "./routers/game";
 import { foreignTermSuggestionRouter } from "./routers/foreign-term-suggestion";
 
 /**
@@ -69,6 +70,7 @@ export const appRouter = createTRPCRouter({
   search: searchRouter,
   extras: extrasRouter,
   badge: badgeRouter,
+  game: gameRouter,
   foreignTermSuggestion: foreignTermSuggestionRouter,
 });
 
