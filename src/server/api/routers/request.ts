@@ -18,7 +18,7 @@ import { CreateWordRequestSchema } from "../schemas/requests";
 import { contributionLogs } from "@/db/schema/contribution_logs";
 import { request_votes } from "@/db/schema/request_votes";
 import { badges, usersToBadges } from "@/db/schema/gamification";
-import { POINT_ECONOMY } from "@/src/lib/gamification-rules";
+import { getPointsForRequest } from "@/src/lib/gamification-rules";
 import { notInArray } from "drizzle-orm";
 
 export const requestRouter = createTRPCRouter({
@@ -1158,29 +1158,8 @@ export const requestRouter = createTRPCRouter({
                 // Process the request with the handler
                 await handler.handle({ tx, request });
 
-                // Calculate points to award
-                let pointsToAward = 0;
-                if (request.action === "create") {
-                    switch (request.entityType) {
-                        case "words":
-                            pointsToAward = POINT_ECONOMY.CREATE_WORD;
-                            break;
-                        case "meanings":
-                            pointsToAward = POINT_ECONOMY.CREATE_MEANING;
-                            break;
-                        case "pronunciations":
-                            pointsToAward = POINT_ECONOMY.CREATE_PRONUNCIATION;
-                            break;
-                        case "meaning_attributes":
-                        case "word_attributes":
-                            pointsToAward = POINT_ECONOMY.CREATE_MEANING_ATTRIBUTE;
-                            break;
-                        case "related_words":
-                        case "related_phrases":
-                            pointsToAward = POINT_ECONOMY.CREATE_RELATED_WORD;
-                            break;
-                    }
-                }
+                // Calculate points to award using the helper function
+                const pointsToAward = getPointsForRequest(request.action, request.entityType);
 
                 // Award contribution points
                 if (pointsToAward > 0) {
