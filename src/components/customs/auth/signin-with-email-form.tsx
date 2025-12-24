@@ -13,9 +13,11 @@ export default function SigninWithEmailForm({ SigninWithEmailIntl, EnterYourEmai
     const [step, setStep] = useState<"email" | "otp">("email")
     const [email, setEmail] = useState("")
     const searchParams = useSearchParams()
-    // Decode the backTo param to prevent double-encoding issues with special chars
+    // The backTo param may be double-encoded - decode fully then re-encode properly
     const rawBackTo = searchParams.get("backTo") ?? "/"
-    const backTo = decodeURIComponent(rawBackTo)
+    const decodedUrl = decodeURIComponent(rawBackTo)
+    // Re-encode for URL safety (spaces -> %20)
+    const backTo = encodeURI(decodedUrl)
 
     const { control, handleSubmit, reset } = useForm({
         resolver: zodResolver(z.object({

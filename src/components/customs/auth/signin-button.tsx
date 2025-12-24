@@ -1,13 +1,19 @@
 "use client"
 import { Button } from "@heroui/button";
-import { authClient } from "@/src/lib/auth-client"; // Added
-export default function SigninButton({ provider, IntlMessage, startContent, redirectUrl }: { provider: "google" | "discord" | "github", IntlMessage: string, startContent: React.ReactNode, redirectUrl?: string }) {
+import { authClient } from "@/src/lib/auth-client";
+
+export default function SigninButton({ provider, IntlMessage, startContent, redirectPath }: { provider: "google" | "discord" | "github", IntlMessage: string, startContent: React.ReactNode, redirectPath?: string }) {
     return (
         <Button
             onPress={async () => {
+                // better-auth requires absolute URLs (with full origin) for callback URLs
+                // Construct the absolute URL from the path
+                const absoluteUrl = redirectPath
+                    ? `${window.location.origin}${redirectPath.startsWith('/') ? '' : '/'}${redirectPath}`
+                    : undefined;
                 await authClient.signIn.social({
                     provider: provider,
-                    callbackURL: redirectUrl
+                    callbackURL: absoluteUrl
                 });
             }}
             className="rounded-sm w-full"
@@ -17,4 +23,4 @@ export default function SigninButton({ provider, IntlMessage, startContent, redi
             startContent={startContent}
         > {IntlMessage} </Button>
     )
-} 
+}

@@ -28,17 +28,19 @@ export default function SigninForm({
   InvalidEmailIntl,
 }: IntlProps) {
   const searchParams = useSearchParams()
-  // Decode the backTo param to prevent double-encoding issues with special chars
-  // e.g., /tr/arama/adli%20polislik -> /tr/arama/adli polislik
+  // The backTo param may be double-encoded - decode fully then re-encode properly
   const rawBackTo = searchParams.get("backTo") ?? "/"
-  const backToUrl = decodeURIComponent(rawBackTo)
+  const decodedUrl = decodeURIComponent(rawBackTo)
+  // Re-encode for URL safety (spaces -> %20)
+  const encodedPath = encodeURI(decodedUrl)
+
   return (
     <div
       className="flex flex-col gap-2 w-11/12 sm:w-full max-w-2xl shadow-md bg-background/10 backdrop-saturate-150 p-6 sm:p-12 rounded-sm border-2 border-border"
     >
-      <SigninButton provider="google" IntlMessage={SignInWithGoogleIntl} startContent={<Image src={"/svg/providers/google.svg"} width={24} height={24} alt="google-icon" />} redirectUrl={backToUrl} />
-      <SigninButton provider="discord" IntlMessage={SignInWithDiscordIntl} startContent={<Image src={"/svg/providers/discord-blue.svg"} width={24} height={24} alt="discord-icon" />} redirectUrl={backToUrl} />
-      <SigninButton provider="github" IntlMessage={SignInWithGitHubIntl} startContent={<GithubIcon className="text-foreground" size={24} />} redirectUrl={backToUrl} />
+      <SigninButton provider="google" IntlMessage={SignInWithGoogleIntl} startContent={<Image src={"/svg/providers/google.svg"} width={24} height={24} alt="google-icon" />} redirectPath={encodedPath} />
+      <SigninButton provider="discord" IntlMessage={SignInWithDiscordIntl} startContent={<Image src={"/svg/providers/discord-blue.svg"} width={24} height={24} alt="discord-icon" />} redirectPath={encodedPath} />
+      <SigninButton provider="github" IntlMessage={SignInWithGitHubIntl} startContent={<GithubIcon className="text-foreground" size={24} />} redirectPath={encodedPath} />
       <Divider></Divider>
       <SigninWithEmailForm SigninWithEmailIntl={SigninWithEmailIntl} EnterYourEmailIntl={EnterYourEmailIntl} EmailSigninLabelIntl={EmailSigninLabelIntl} MagicLinkIntl={MagicLinkIntl} InvalidEmailIntl={InvalidEmailIntl} />
     </div>
