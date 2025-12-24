@@ -28,7 +28,10 @@ export default function SigninForm({
   InvalidEmailIntl,
 }: IntlProps) {
   const searchParams = useSearchParams()
-  const backToUrl = searchParams.get("backTo") ?? "/"
+  // Decode the backTo param to prevent double-encoding issues with special chars
+  // e.g., /tr/arama/adli%20polislik -> /tr/arama/adli polislik
+  const rawBackTo = searchParams.get("backTo") ?? "/"
+  const backToUrl = decodeURIComponent(rawBackTo)
   return (
     <div
       className="flex flex-col gap-2 w-11/12 sm:w-full max-w-2xl shadow-md bg-background/10 backdrop-saturate-150 p-6 sm:p-12 rounded-sm border-2 border-border"
