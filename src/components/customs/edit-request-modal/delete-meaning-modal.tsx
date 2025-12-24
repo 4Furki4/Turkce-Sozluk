@@ -96,7 +96,7 @@ export default function DeleteMeaningModal({ isOpen, onClose, onConfirm, meaning
                     <ModalFooter>
                         <Button variant="bordered" onPress={onClose} type="button">{t("Cancel")}</Button>
                         <Button color="danger" type="submit">
-                            {t("Requests.submitRequest")}
+                            {t("Requests.SubmitRequest")}
                         </Button>
                     </ModalFooter>
                 </form>

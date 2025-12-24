@@ -234,7 +234,7 @@ const RelatedWordCreateRequestModal: React.FC<RelatedWordCreateRequestModalProps
             <Button variant="light" onPress={() => { reset(); onClose(); }}>
               {tActions('Cancel')}
             </Button>
-            <Button type="submit" color="primary" isLoading={createRequestMutation.isPending}>{t('submitRequest')}</Button>
+            <Button type="submit" color="primary" isLoading={createRequestMutation.isPending}>{t('SubmitRequest')}</Button>
           </ModalFooter>
         </form>
       </ModalContent>

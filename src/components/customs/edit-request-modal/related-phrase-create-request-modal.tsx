@@ -177,7 +177,7 @@ const RelatedPhraseCreateRequestModal: React.FC<RelatedPhraseCreateRequestModalP
                 {tActions('Cancel')}
               </Button>
               <Button type="submit" color="primary" isLoading={createRequestMutation.isPending}>
-                {t('submitRequest')}
+                {t('SubmitRequest')}
               </Button>
             </ModalFooter>
           </form>

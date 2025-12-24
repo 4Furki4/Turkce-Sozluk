@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, useDisclosure } from "@heroui/react";
 import { Card, CardBody } from "@heroui/card";
-import { Plus, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Session } from '@/src/lib/auth-client';
@@ -43,7 +43,7 @@ const RelatedPhrasesEditTabContent: React.FC<RelatedPhrasesEditTabContentProps> 
   return (
     <div>
       <div className="flex justify-end mb-4">
-        <Button onPress={onCreateOpen} color="primary" startContent={<Plus size={16} />}>
+        <Button onPress={onCreateOpen} color="primary" startContent={<PlusCircle className="w-4 h-4" />}>
           {tActions('SuggestNewPhrase')}
         </Button>
       </div>
