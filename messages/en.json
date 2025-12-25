@@ -23,7 +23,8 @@
     "Search": "Search",
     "OfflineDictionary": "Offline Dictionary",
     "FlashcardGame": "Flashcard Game",
-    "Learn": "Learn"
+    "Learn": "Learn",
+    "WordMatchingGame": "Word Matching"
   },
   "Footer": {
     "description": "Community-driven, open source and modern Turkish dictionary.",
@@ -44,7 +45,8 @@
       "pronunciations": "Pronunciations",
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
-      "flashcardGame": "Flashcard Game"
+      "flashcardGame": "Flashcard Game",
+      "wordMatchingGame": "Word Matching"
     }
   },
   "SigninForm": {
@@ -1504,5 +1506,32 @@
     "meaning": "Meaning",
     "clickToFlip": "Click to flip",
     "restart": "Restart"
+  },
+  "WordMatchingGame": {
+    "title": "Word Matching",
+    "description": "Match Turkish words with their meanings",
+    "settings": "Settings",
+    "pairCount": "Number of Pairs",
+    "pairs": "pairs",
+    "mode": "Game Mode",
+    "relaxedMode": "Relaxed (No Timer)",
+    "timedMode": "Timed (60 seconds)",
+    "source": "Word Source",
+    "sourceAll": "All Words",
+    "sourceSaved": "Saved Words",
+    "signInForSaved": "Sign in to use saved words",
+    "startGame": "Start Game",
+    "loading": "Loading game...",
+    "words": "Words",
+    "meanings": "Meanings",
+    "instructions": "Click a word, then click its matching meaning",
+    "restart": "Restart",
+    "congratulations": "Congratulations!",
+    "timeUp": "Time's Up!",
+    "matchedPairs": "Matched Pairs",
+    "score": "Score",
+    "mistakes": "Mistakes",
+    "time": "Time",
+    "playAgain": "Play Again"
   }
 }

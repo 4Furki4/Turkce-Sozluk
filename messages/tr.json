@@ -23,7 +23,8 @@
     "Search": "Ara",
     "OfflineDictionary": "Çevrim Dışı Sözlük",
     "FlashcardGame": "Kelime Kartları",
-    "Learn": "Öğren"
+    "Learn": "Öğren",
+    "WordMatchingGame": "Kelime Eşleştirme"
   },
   "Footer": {
     "description": "Topluluk ile gelişen, açık kaynak ve modern Türkçe sözlüğü.",
@@ -44,7 +45,8 @@
       "terms": "Kullanım Şartları",
       "contributeWord": "Kelime Katkısı",
       "pronunciations": "Telaffuzlar",
-      "flashcardGame": "Kelime Kartları Oyunu"
+      "flashcardGame": "Kelime Kartları Oyunu",
+      "wordMatchingGame": "Kelime Eşleştirme"
     }
   },
   "SigninForm": {
@@ -1470,5 +1472,32 @@
     "meaning": "Anlam",
     "clickToFlip": "Çevirmek için tıklayın",
     "restart": "Yeniden Başlat"
+  },
+  "WordMatchingGame": {
+    "title": "Kelime Eşleştirme",
+    "description": "Türkçe kelimeleri anlamlarıyla eşleştirin",
+    "settings": "Ayarlar",
+    "pairCount": "Çift Sayısı",
+    "pairs": "çift",
+    "mode": "Oyun Modu",
+    "relaxedMode": "Rahat (Zamansız)",
+    "timedMode": "Zamanlı (60 saniye)",
+    "source": "Kelime Kaynağı",
+    "sourceAll": "Tüm Kelimeler",
+    "sourceSaved": "Kayıtlı Kelimeler",
+    "signInForSaved": "Kayıtlı kelimeler için giriş yapın",
+    "startGame": "Oyunu Başlat",
+    "loading": "Oyun yükleniyor...",
+    "words": "Kelimeler",
+    "meanings": "Anlamlar",
+    "instructions": "Bir kelimeye tıklayın, sonra eşleşen anlama tıklayın",
+    "restart": "Yeniden Başlat",
+    "congratulations": "Tebrikler!",
+    "timeUp": "Süre Doldu!",
+    "matchedPairs": "Eşleşen Çiftler",
+    "score": "Puan",
+    "mistakes": "Hatalar",
+    "time": "Süre",
+    "playAgain": "Tekrar Oyna"
   }
 }
