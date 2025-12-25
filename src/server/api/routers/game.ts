@@ -115,5 +115,104 @@ export const gameRouter = createTRPCRouter({
                 error: null,
             };
         }),
+
+    /**
+     * Get words for matching game (pairs of word-meaning)
+     */
+    getWordsForMatching: publicProcedure
+        .input(
+            z.object({
+                pairCount: z.number().min(4).max(10).default(6),
+                source: z.enum(["all", "saved"]).default("all"),
+            })
+        )
+        .query(async ({ input, ctx: { db, session } }) => {
+            const { pairCount, source } = input;
+
+            // If source is "saved", user must be authenticated
+            if (source === "saved") {
+                if (!session?.user?.id) {
+                    return { pairs: [], error: "authRequired" };
+                }
+
+                // Get saved words for the user
+                const savedWordIds = await db
+                    .select({ wordId: savedWords.wordId })
+                    .from(savedWords)
+                    .where(eq(savedWords.userId, session.user.id));
+
+                if (savedWordIds.length === 0) {
+                    return { pairs: [], error: "noSavedWords" };
+                }
+
+                const wordIds = savedWordIds.map((sw) => sw.wordId);
+
+                // Get words with their first meaning
+                const result = await db
+                    .select({
+                        id: words.id,
+                        name: words.name,
+                        meaning: meanings.meaning,
+                    })
+                    .from(words)
+                    .innerJoin(meanings, eq(meanings.wordId, words.id))
+                    .where(inArray(words.id, wordIds))
+                    .orderBy(asc(meanings.order))
+                    .limit(pairCount * 2);
+
+                // Deduplicate by word id
+                const seenIds = new Set<number>();
+                const uniqueWords = result.filter((row) => {
+                    if (seenIds.has(row.id)) return false;
+                    seenIds.add(row.id);
+                    return true;
+                });
+
+                // Shuffle and take pairCount
+                const shuffled = [...uniqueWords].sort(() => Math.random() - 0.5).slice(0, pairCount);
+
+                return {
+                    pairs: shuffled.map((row) => ({
+                        id: row.id,
+                        word: row.name,
+                        meaning: row.meaning,
+                    })),
+                    error: null,
+                };
+            }
+
+            // Get random words from all words
+            const result = await db
+                .select({
+                    id: words.id,
+                    name: words.name,
+                    meaning: meanings.meaning,
+                })
+                .from(words)
+                .innerJoin(meanings, eq(meanings.wordId, words.id))
+                .where(isNotNull(meanings.meaning))
+                .orderBy(sql`RANDOM()`)
+                .limit(pairCount * 3);
+
+            // Deduplicate by word id
+            const seenIds = new Set<number>();
+            const uniqueWords = result.filter((row) => {
+                if (seenIds.has(row.id)) return false;
+                seenIds.add(row.id);
+                return true;
+            });
+
+            // Take pairCount words
+            const finalPairs = uniqueWords.slice(0, pairCount);
+
+            return {
+                pairs: finalPairs.map((row) => ({
+                    id: row.id,
+                    word: row.name,
+                    meaning: row.meaning,
+                })),
+                error: null,
+            };
+        }),
 });
 
