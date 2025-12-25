@@ -191,6 +191,10 @@ export const routing = defineRouting({
       "en": "/flashcard-game",
       "tr": "/kelime-kartlari",
     },
+    "/word-matching": {
+      "en": "/word-matching",
+      "tr": "/kelime-eslestirme",
+    },
   }
 
 })
