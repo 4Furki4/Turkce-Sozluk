@@ -4,7 +4,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "@/src/trpc/react";
 import { useTranslations } from "next-intl";
-import { Button, Card, CardBody, Select, SelectItem, Spinner, Chip } from "@heroui/react";
+import { Button, CardBody, Select, SelectItem, Spinner, Chip } from "@heroui/react";
 import {
     ChevronLeft,
     ChevronRight,
@@ -14,6 +14,7 @@ import {
     Settings,
 } from "lucide-react";
 import { Session } from "@/src/lib/auth-client";
+import CustomCard from "./heroui/custom-card";
 
 
 interface FlashcardGameProps {
@@ -29,7 +30,7 @@ interface FlashcardWord {
     partOfSpeech: string | null;
 }
 
-type GameState = "setup" | "playing" | "finished";
+type GameState = "setup" | "loading" | "playing" | "finished";
 
 export default function FlashcardGame({ session, locale }: FlashcardGameProps) {
     const t = useTranslations("FlashcardGame");
@@ -45,21 +46,30 @@ export default function FlashcardGame({ session, locale }: FlashcardGameProps) {
     const [words, setWords] = useState<FlashcardWord[]>([]);
 
     // API query
-    const { data, isLoading, refetch } = api.game.getRandomWordsForFlashcards.useQuery(
+    const { data, refetch, isLoading } = api.game.getRandomWordsForFlashcards.useQuery(
         { count: cardCount, source },
-        { enabled: gameState === "playing" || gameState === "setup" }
+        { enabled: gameState === "playing" || gameState === "setup" || gameState === "loading" }
     );
 
-    // Start game
-    const startGame = useCallback(() => {
-        refetch().then((result) => {
-            if (result.data?.words && result.data.words.length > 0) {
-                setWords(result.data.words);
-                setCurrentIndex(0);
-                setIsFlipped(false);
-                setGameState("playing");
-            }
-        });
+    // Start game - go to loading state and fetch fresh data
+    const startGame = useCallback(async () => {
+        // Clear previous words
+        setWords([]);
+        setCurrentIndex(0);
+        setIsFlipped(false);
+
+        // Go to loading state first
+        setGameState("loading");
+
+        // Fetch fresh data
+        const result = await refetch();
+        if (result.data?.words && result.data.words.length > 0) {
+            setWords(result.data.words);
+            setGameState("playing");
+        } else {
+            // If no data, go back to setup
+            setGameState("setup");
+        }
     }, [refetch]);
 
     // Navigation
@@ -133,7 +143,7 @@ export default function FlashcardGame({ session, locale }: FlashcardGameProps) {
                     <p className="text-default-500">{t("description")}</p>
                 </div>
 
-                <Card className="shadow-lg">
+                <CustomCard className="shadow-lg">
                     <CardBody className="p-6 space-y-6">
                         <div className="flex items-center gap-2 mb-4">
                             <Settings className="w-5 h-5 text-primary" />
@@ -187,21 +197,21 @@ export default function FlashcardGame({ session, locale }: FlashcardGameProps) {
                             className="w-full mt-4"
                             onPress={startGame}
                             startContent={<Play className="w-5 h-5" />}
-                            isLoading={isLoading}
+
                         >
                             {t("startGame")}
                         </Button>
                     </CardBody>
-                </Card>
+                </CustomCard>
             </div>
         );
     }
 
-    // Loading state
-    if (isLoading || words.length === 0) {
+    // Loading state - show while fetching fresh data
+    if (gameState === "loading") {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-                <Spinner size="lg" />
+            <div className="flex flex-col items-center justify-center mx-auto min-h-[50vh] gap-4">
+                <Spinner size="lg" color="primary" />
                 <p className="text-default-500">{t("loading")}</p>
             </div>
         );
@@ -273,7 +283,7 @@ export default function FlashcardGame({ session, locale }: FlashcardGameProps) {
                             transition={{ duration: 0.3, ease: "easeInOut" }}
                             className="absolute inset-0"
                         >
-                            <Card
+                            <CustomCard
                                 className={`w-full h-full shadow-xl ${isFlipped
                                     ? "bg-gradient-to-br from-success-100 to-success-200 dark:from-success-900/30 dark:to-success-800/30"
                                     : "bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30"
@@ -318,7 +328,7 @@ export default function FlashcardGame({ session, locale }: FlashcardGameProps) {
                                         </>
                                     )}
                                 </CardBody>
-                            </Card>
+                            </CustomCard>
                         </motion.div>
                     </AnimatePresence>
                 </motion.div>
