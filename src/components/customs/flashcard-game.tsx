@@ -38,6 +38,7 @@ export default function FlashcardGame({ session, locale }: FlashcardGameProps) {
     // Game settings
     const [cardCount, setCardCount] = useState<number>(10);
     const [source, setSource] = useState<"all" | "saved">("all");
+    const [defaultSide, setDefaultSide] = useState<"word" | "meaning">("word");
 
     // Game state
     const [gameState, setGameState] = useState<GameState>("setup");
@@ -56,7 +57,7 @@ export default function FlashcardGame({ session, locale }: FlashcardGameProps) {
         // Clear previous words
         setWords([]);
         setCurrentIndex(0);
-        setIsFlipped(false);
+        setIsFlipped(defaultSide === "meaning");
 
         // Go to loading state first
         setGameState("loading");
@@ -70,24 +71,24 @@ export default function FlashcardGame({ session, locale }: FlashcardGameProps) {
             // If no data, go back to setup
             setGameState("setup");
         }
-    }, [refetch]);
+    }, [refetch, defaultSide]);
 
     // Navigation
     const goNext = useCallback(() => {
         if (currentIndex < words.length - 1) {
-            setIsFlipped(false);
+            setIsFlipped(defaultSide === "meaning");
             setTimeout(() => setCurrentIndex((prev) => prev + 1), 100);
         } else {
             setGameState("finished");
         }
-    }, [currentIndex, words.length]);
+    }, [currentIndex, words.length, defaultSide]);
 
     const goPrevious = useCallback(() => {
         if (currentIndex > 0) {
-            setIsFlipped(false);
+            setIsFlipped(defaultSide === "meaning");
             setTimeout(() => setCurrentIndex((prev) => prev - 1), 100);
         }
-    }, [currentIndex]);
+    }, [currentIndex, defaultSide]);
 
     const flipCard = useCallback(() => {
         setIsFlipped((prev) => !prev);
@@ -97,8 +98,8 @@ export default function FlashcardGame({ session, locale }: FlashcardGameProps) {
         const shuffled = [...words].sort(() => Math.random() - 0.5);
         setWords(shuffled);
         setCurrentIndex(0);
-        setIsFlipped(false);
-    }, [words]);
+        setIsFlipped(defaultSide === "meaning");
+    }, [words, defaultSide]);
 
     const restartGame = useCallback(() => {
         setGameState("setup");
@@ -188,6 +189,24 @@ export default function FlashcardGame({ session, locale }: FlashcardGameProps) {
                                     {t("sourceSaved")}
                                     {!session && ` (${t("signInForSaved")})`}
                                 </SelectItem>
+                            </Select>
+                        </div>
+
+                        {/* Default Side Selection */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                {t("defaultSide")}
+                            </label>
+                            <Select
+                                selectedKeys={[defaultSide]}
+                                onSelectionChange={(keys) => {
+                                    const value = Array.from(keys)[0] as "word" | "meaning";
+                                    if (value) setDefaultSide(value);
+                                }}
+                                aria-label={t("defaultSide")}
+                            >
+                                <SelectItem key="word">{t("showWordFirst")}</SelectItem>
+                                <SelectItem key="meaning">{t("showMeaningFirst")}</SelectItem>
                             </Select>
                         </div>
 

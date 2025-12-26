@@ -1505,7 +1505,10 @@
     "word": "Word",
     "meaning": "Meaning",
     "clickToFlip": "Click to flip",
-    "restart": "Restart"
+    "restart": "Restart",
+    "defaultSide": "Show First",
+    "showWordFirst": "Word Side",
+    "showMeaningFirst": "Meaning Side"
   },
   "WordMatchingGame": {
     "title": "Word Matching",

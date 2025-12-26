@@ -1471,7 +1471,10 @@
     "word": "Kelime",
     "meaning": "Anlam",
     "clickToFlip": "Çevirmek için tıklayın",
-    "restart": "Yeniden Başlat"
+    "restart": "Yeniden Başlat",
+    "defaultSide": "Önce Göster",
+    "showWordFirst": "Kelime Yüzü",
+    "showMeaningFirst": "Anlam Yüzü"
   },
   "WordMatchingGame": {
     "title": "Kelime Eşleştirme",
