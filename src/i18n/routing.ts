@@ -195,6 +195,10 @@ export const routing = defineRouting({
       "en": "/word-matching",
       "tr": "/kelime-eslestirme",
     },
+    "/speed-round": {
+      "en": "/speed-round",
+      "tr": "/hizli-tur",
+    },
   }
 
 })

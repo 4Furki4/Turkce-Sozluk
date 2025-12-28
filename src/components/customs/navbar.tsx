@@ -11,7 +11,7 @@ import {
   NavbarBrand,
   DropdownSection
 } from "@heroui/react";
-import { ChevronDown, GitPullRequestArrow, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, Link2, LogOut, Menu, Mic, Moon, Sparkle, Sparkles, StarIcon, Sun, UserIcon } from "lucide-react";
+import { ChevronDown, GitPullRequestArrow, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, Link2, LogOut, Menu, Mic, Moon, Sparkle, Sparkles, StarIcon, Sun, UserIcon, Zap } from "lucide-react";
 // import { signIn, signOut } from "next-auth/react"; // Removed
 import { authClient, type User } from "@/src/lib/auth-client"; // Added
 import { useTheme } from "next-themes";
@@ -31,7 +31,7 @@ import { Session } from "@/src/lib/auth-client";
 
 type NavbarProps = {
   session: Session | null;
-} & Record<"TitleIntl" | "WordListIntl" | "SignInIntl" | "HomeIntl" | "ProfileIntl" | "SavedWordsIntl" | "MyRequestsIntl" | "SearchHistoryIntl" | "LogoutIntl" | "AnnouncementsIntl" | "ContributeWordIntl" | "PronunciationsIntl" | "ariaAvatar" | "ariaMenu" | "ariaLanguages" | "ariaSwitchTheme" | "ariaBlur" | "ContributeIntl" | "FeedbackIntl" | "LearnIntl" | "FlashcardGameIntl" | "WordMatchingGameIntl", string>;
+} & Record<"TitleIntl" | "WordListIntl" | "SignInIntl" | "HomeIntl" | "ProfileIntl" | "SavedWordsIntl" | "MyRequestsIntl" | "SearchHistoryIntl" | "LogoutIntl" | "AnnouncementsIntl" | "ContributeWordIntl" | "PronunciationsIntl" | "ariaAvatar" | "ariaMenu" | "ariaLanguages" | "ariaSwitchTheme" | "ariaBlur" | "ContributeIntl" | "FeedbackIntl" | "LearnIntl" | "FlashcardGameIntl" | "WordMatchingGameIntl" | "SpeedRoundGameIntl", string>;
 
 export default function Navbar({
   session,
@@ -57,7 +57,8 @@ export default function Navbar({
   FeedbackIntl,
   LearnIntl,
   FlashcardGameIntl,
-  WordMatchingGameIntl
+  WordMatchingGameIntl,
+  SpeedRoundGameIntl
 }: NavbarProps & { setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>> }) { // Merged props type
   const { theme, setTheme } = useTheme();
   const pathName = usePathname();
@@ -192,6 +193,11 @@ export default function Navbar({
             <DropdownItem key="word-matching" startContent={<Link2 aria-label={WordMatchingGameIntl} className="w-4 h-4" />} className="py-0 pr-0">
               <NextIntlLink href="/word-matching" className="flex items-center gap-2 py-1.5">
                 {WordMatchingGameIntl}
+              </NextIntlLink>
+            </DropdownItem>
+            <DropdownItem key="speed-round" startContent={<Zap aria-label={SpeedRoundGameIntl} className="w-4 h-4" />} className="py-0 pr-0">
+              <NextIntlLink href="/speed-round" className="flex items-center gap-2 py-1.5">
+                {SpeedRoundGameIntl}
               </NextIntlLink>
             </DropdownItem>
           </DropdownMenu>
