@@ -32,7 +32,8 @@ export default function NavbarAndSidebar({
     SearchIntl,
     LearnIntl,
     FlashcardGameIntl,
-    WordMatchingGameIntl
+    WordMatchingGameIntl,
+    SpeedRoundGameIntl
 }: {
     session: Session | null
     HomeIntl: string
@@ -57,7 +58,8 @@ export default function NavbarAndSidebar({
     SearchIntl: string,
     LearnIntl: string,
     FlashcardGameIntl: string,
-    WordMatchingGameIntl: string
+    WordMatchingGameIntl: string,
+    SpeedRoundGameIntl: string
 }) {
     // Render children if on client side, otherwise return null
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -90,6 +92,7 @@ export default function NavbarAndSidebar({
                 LearnIntl={LearnIntl}
                 FlashcardGameIntl={FlashcardGameIntl}
                 WordMatchingGameIntl={WordMatchingGameIntl}
+                SpeedRoundGameIntl={SpeedRoundGameIntl}
             />
             <Sidebar session={session} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
             <MobileBottomNav
