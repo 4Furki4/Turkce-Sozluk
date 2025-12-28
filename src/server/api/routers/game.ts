@@ -214,5 +214,136 @@ export const gameRouter = createTRPCRouter({
                 error: null,
             };
         }),
+
+    /**
+     * Get words for speed round game (word with correct meaning + decoys)
+     */
+    getWordsForSpeedRound: publicProcedure
+        .input(
+            z.object({
+                questionCount: z.number().min(5).max(30).default(10),
+                source: z.enum(["all", "saved"]).default("all"),
+            })
+        )
+        .query(async ({ input, ctx: { db, session } }) => {
+            const { questionCount, source } = input;
+
+            // Get all meanings for decoys (we need a pool of random meanings)
+            const allMeanings = await db
+                .select({ meaning: meanings.meaning })
+                .from(meanings)
+                .where(isNotNull(meanings.meaning))
+                .orderBy(sql`RANDOM()`)
+                .limit(200);
+
+            const meaningPool = allMeanings.map((m) => m.meaning).filter(Boolean) as string[];
+
+            // If source is "saved", user must be authenticated
+            if (source === "saved") {
+                if (!session?.user?.id) {
+                    return { questions: [], error: "authRequired" };
+                }
+
+                const savedWordIds = await db
+                    .select({ wordId: savedWords.wordId })
+                    .from(savedWords)
+                    .where(eq(savedWords.userId, session.user.id));
+
+                if (savedWordIds.length === 0) {
+                    return { questions: [], error: "noSavedWords" };
+                }
+
+                const wordIds = savedWordIds.map((sw) => sw.wordId);
+
+                const result = await db
+                    .select({
+                        id: words.id,
+                        name: words.name,
+                        meaning: meanings.meaning,
+                    })
+                    .from(words)
+                    .innerJoin(meanings, eq(meanings.wordId, words.id))
+                    .where(inArray(words.id, wordIds))
+                    .orderBy(asc(meanings.order))
+                    .limit(questionCount * 2);
+
+                // Deduplicate by word id
+                const seenIds = new Set<number>();
+                const uniqueWords = result.filter((row) => {
+                    if (seenIds.has(row.id)) return false;
+                    seenIds.add(row.id);
+                    return true;
+                });
+
+                const shuffled = [...uniqueWords].sort(() => Math.random() - 0.5).slice(0, questionCount);
+
+                return {
+                    questions: shuffled.map((row) => {
+                        const correctMeaning = row.meaning;
+                        // Get 3 random decoy meanings (not the correct one)
+                        const decoys = meaningPool
+                            .filter((m) => m !== correctMeaning)
+                            .sort(() => Math.random() - 0.5)
+                            .slice(0, 3);
+
+                        // Shuffle all 4 options
+                        const options = [correctMeaning, ...decoys].sort(() => Math.random() - 0.5);
+
+                        return {
+                            id: row.id,
+                            word: row.name,
+                            correctMeaning,
+                            options,
+                        };
+                    }),
+                    error: null,
+                };
+            }
+
+            // Get random words from all words
+            const result = await db
+                .select({
+                    id: words.id,
+                    name: words.name,
+                    meaning: meanings.meaning,
+                })
+                .from(words)
+                .innerJoin(meanings, eq(meanings.wordId, words.id))
+                .where(isNotNull(meanings.meaning))
+                .orderBy(sql`RANDOM()`)
+                .limit(questionCount * 3);
+
+            // Deduplicate by word id
+            const seenIds = new Set<number>();
+            const uniqueWords = result.filter((row) => {
+                if (seenIds.has(row.id)) return false;
+                seenIds.add(row.id);
+                return true;
+            });
+
+            const finalQuestions = uniqueWords.slice(0, questionCount);
+
+            return {
+                questions: finalQuestions.map((row) => {
+                    const correctMeaning = row.meaning;
+                    // Get 3 random decoy meanings (not the correct one)
+                    const decoys = meaningPool
+                        .filter((m) => m !== correctMeaning)
+                        .sort(() => Math.random() - 0.5)
+                        .slice(0, 3);
+
+                    // Shuffle all 4 options
+                    const options = [correctMeaning, ...decoys].sort(() => Math.random() - 0.5);
+
+                    return {
+                        id: row.id,
+                        word: row.name,
+                        correctMeaning,
+                        options,
+                    };
+                }),
+                error: null,
+            };
+        }),
 });
 

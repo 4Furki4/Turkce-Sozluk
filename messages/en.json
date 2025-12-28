@@ -24,7 +24,8 @@
     "OfflineDictionary": "Offline Dictionary",
     "FlashcardGame": "Flashcard Game",
     "Learn": "Learn",
-    "WordMatchingGame": "Word Matching"
+    "WordMatchingGame": "Word Matching",
+    "SpeedRoundGame": "Speed Round"
   },
   "Footer": {
     "description": "Community-driven, open source and modern Turkish dictionary.",
@@ -46,7 +47,8 @@
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
       "flashcardGame": "Flashcard Game",
-      "wordMatchingGame": "Word Matching"
+      "wordMatchingGame": "Word Matching",
+      "speedRoundGame": "Speed Round"
     }
   },
   "SigninForm": {
@@ -1536,5 +1538,32 @@
     "mistakes": "Mistakes",
     "time": "Time",
     "playAgain": "Play Again"
+  },
+  "SpeedRoundGame": {
+    "title": "Speed Round",
+    "description": "Test your vocabulary knowledge with rapid-fire questions",
+    "settings": "Settings",
+    "questionCount": "Number of Questions",
+    "timePerQuestion": "Time Per Question",
+    "seconds": "{count} seconds",
+    "source": "Word Source",
+    "sourceAll": "All Words",
+    "sourceSaved": "Saved Words",
+    "signInForSaved": "Sign in to use saved words",
+    "startGame": "Start Game",
+    "loading": "Loading questions...",
+    "whatMeans": "What does this word mean?",
+    "fasterBonus": "Answer faster for bonus points!",
+    "gameOver": "Game Over!",
+    "points": "points",
+    "correct": "Correct",
+    "accuracy": "Accuracy",
+    "maxStreak": "Best Streak",
+    "avgTime": "Avg. Time",
+    "playAgain": "Play Again",
+    "wordReview": "Word Review",
+    "saveWord": "Save Word",
+    "saved": "Saved",
+    "signInToSave": "Sign in"
   }
 }

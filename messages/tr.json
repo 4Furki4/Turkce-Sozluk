@@ -24,7 +24,8 @@
     "OfflineDictionary": "Çevrim Dışı Sözlük",
     "FlashcardGame": "Kelime Kartları",
     "Learn": "Öğren",
-    "WordMatchingGame": "Kelime Eşleştirme"
+    "WordMatchingGame": "Kelime Eşleştirme",
+    "SpeedRoundGame": "Hızlı Tur"
   },
   "Footer": {
     "description": "Topluluk ile gelişen, açık kaynak ve modern Türkçe sözlüğü.",
@@ -46,7 +47,8 @@
       "contributeWord": "Kelime Katkısı",
       "pronunciations": "Telaffuzlar",
       "flashcardGame": "Kelime Kartları Oyunu",
-      "wordMatchingGame": "Kelime Eşleştirme"
+      "wordMatchingGame": "Kelime Eşleştirme",
+      "speedRoundGame": "Hızlı Tur"
     }
   },
   "SigninForm": {
@@ -1502,5 +1504,32 @@
     "mistakes": "Hatalar",
     "time": "Süre",
     "playAgain": "Tekrar Oyna"
+  },
+  "SpeedRoundGame": {
+    "title": "Hızlı Tur",
+    "description": "Hızlı sorularla kelime bilginizi test edin",
+    "settings": "Ayarlar",
+    "questionCount": "Soru Sayısı",
+    "timePerQuestion": "Soru Başına Süre",
+    "seconds": "{count} saniye",
+    "source": "Kelime Kaynağı",
+    "sourceAll": "Tüm Kelimeler",
+    "sourceSaved": "Kayıtlı Kelimeler",
+    "signInForSaved": "Kayıtlı kelimeler için giriş yapın",
+    "startGame": "Oyunu Başlat",
+    "loading": "Sorular yükleniyor...",
+    "whatMeans": "Bu kelimenin anlamı nedir?",
+    "fasterBonus": "Daha hızlı cevap vererek bonus puan kazanın!",
+    "gameOver": "Oyun Bitti!",
+    "points": "puan",
+    "correct": "Doğru",
+    "accuracy": "Doğruluk",
+    "maxStreak": "En İyi Seri",
+    "avgTime": "Ort. Süre",
+    "playAgain": "Tekrar Oyna",
+    "wordReview": "Kelime İnceleme",
+    "saveWord": "Kelimeyi Kaydet",
+    "saved": "Kaydedildi",
+    "signInToSave": "Giriş yap"
   }
 }
