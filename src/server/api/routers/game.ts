@@ -345,5 +345,158 @@ export const gameRouter = createTRPCRouter({
                 error: null,
             };
         }),
+
+    /**
+     * Submit a game score for leaderboard
+     */
+    submitScore: publicProcedure
+        .input(
+            z.object({
+                gameType: z.enum(["speed_round", "word_matching", "flashcard"]),
+                score: z.number().min(0),
+                accuracy: z.number().min(0).max(100),
+                maxStreak: z.number().min(0).default(0),
+                questionCount: z.number().min(1),
+                timeTaken: z.number().min(0), // seconds
+            })
+        )
+        .mutation(async ({ input, ctx: { db, session } }) => {
+            // Require authentication
+            if (!session?.user?.id) {
+                return { success: false, error: "authRequired", rank: null };
+            }
+
+            const { gameType, score, accuracy, maxStreak, questionCount, timeTaken } = input;
+
+            // Import gameScores table
+            const { gameScores } = await import("@/db/schema/game_scores");
+
+            // Insert the score
+            await db.insert(gameScores).values({
+                userId: session.user.id,
+                gameType,
+                score,
+                accuracy,
+                maxStreak,
+                questionCount,
+                timeTaken,
+            });
+
+            // Get user's rank for this game type
+            const rankResult = await db.execute(sql`
+                WITH ranked_scores AS (
+                    SELECT 
+                        user_id,
+                        MAX(score) as best_score,
+                        RANK() OVER (ORDER BY MAX(score) DESC) as rank
+                    FROM game_scores
+                    WHERE game_type = ${gameType}
+                    GROUP BY user_id
+                )
+                SELECT rank FROM ranked_scores WHERE user_id = ${session.user.id}
+            `);
+
+            const rank = rankResult[0]?.rank ?? null;
+
+            return { success: true, error: null, rank: Number(rank) };
+        }),
+
+    /**
+     * Get leaderboard for a specific game type
+     */
+    getLeaderboard: publicProcedure
+        .input(
+            z.object({
+                gameType: z.enum(["speed_round", "word_matching", "flashcard"]),
+                limit: z.number().min(1).max(50).default(10),
+            })
+        )
+        .query(async ({ input, ctx: { db } }) => {
+            const { gameType, limit } = input;
+
+            // Import tables
+            const { gameScores } = await import("@/db/schema/game_scores");
+            const { users } = await import("@/db/schema/users");
+
+            // Get top scores with user info (best score per user)
+            const result = await db.execute(sql`
+                SELECT 
+                    gs.user_id,
+                    u.name as user_name,
+                    u.image as user_image,
+                    MAX(gs.score) as best_score,
+                    MAX(gs.accuracy) as best_accuracy,
+                    MAX(gs.max_streak) as best_streak,
+                    COUNT(gs.id) as games_played
+                FROM game_scores gs
+                JOIN users u ON gs.user_id = u.id
+                WHERE gs.game_type = ${gameType}
+                GROUP BY gs.user_id, u.name, u.image
+                ORDER BY best_score DESC
+                LIMIT ${limit}
+            `);
+
+            return {
+                leaderboard: result.map((row: any, index: number) => ({
+                    rank: index + 1,
+                    userId: row.user_id,
+                    userName: row.user_name,
+                    userImage: row.user_image,
+                    bestScore: Number(row.best_score),
+                    bestAccuracy: Number(row.best_accuracy),
+                    bestStreak: Number(row.best_streak),
+                    gamesPlayed: Number(row.games_played),
+                })),
+            };
+        }),
+
+    /**
+     * Get current user's rank and stats for a game type
+     */
+    getUserGameStats: publicProcedure
+        .input(
+            z.object({
+                gameType: z.enum(["speed_round", "word_matching", "flashcard"]),
+            })
+        )
+        .query(async ({ input, ctx: { db, session } }) => {
+            if (!session?.user?.id) {
+                return { rank: null, stats: null };
+            }
+
+            const { gameType } = input;
+
+            // Get user's best score and rank
+            const result = await db.execute(sql`
+                WITH ranked_scores AS (
+                    SELECT 
+                        user_id,
+                        MAX(score) as best_score,
+                        MAX(accuracy) as best_accuracy,
+                        MAX(max_streak) as best_streak,
+                        COUNT(id) as games_played,
+                        RANK() OVER (ORDER BY MAX(score) DESC) as rank
+                    FROM game_scores
+                    WHERE game_type = ${gameType}
+                    GROUP BY user_id
+                )
+                SELECT * FROM ranked_scores WHERE user_id = ${session.user.id}
+            `);
+
+            if (result.length === 0) {
+                return { rank: null, stats: null };
+            }
+
+            const row: any = result[0];
+            return {
+                rank: Number(row.rank),
+                stats: {
+                    bestScore: Number(row.best_score),
+                    bestAccuracy: Number(row.best_accuracy),
+                    bestStreak: Number(row.best_streak),
+                    gamesPlayed: Number(row.games_played),
+                },
+            };
+        }),
 });
 

@@ -281,6 +281,13 @@
       "when": 1765285047076,
       "tag": "0039_same_millenium_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1766930952028,
+      "tag": "0040_nice_blob",
+      "breakpoints": true
     }
   ]
 }

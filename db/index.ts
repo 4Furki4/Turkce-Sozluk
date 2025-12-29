@@ -30,6 +30,7 @@ import { badges, badgesRelations, usersToBadges, usersToBadgesRelations } from "
 import { accounts } from "./schema/accounts";
 import { sessions } from "./schema/session";
 import { verification } from "./schema/verification";
+import { gameScores, gameScoresRelations } from "./schema/game_scores";
 
 export const schema = {
   accounts,
@@ -78,7 +79,9 @@ export const schema = {
   badges,
   badgesRelations,
   usersToBadges,
-  usersToBadgesRelations
+  usersToBadgesRelations,
+  gameScores,
+  gameScoresRelations,
 };
 
 const globalForDb = globalThis as unknown as {

@@ -199,6 +199,10 @@ export const routing = defineRouting({
       "en": "/speed-round",
       "tr": "/hizli-tur",
     },
+    "/leaderboards": {
+      "en": "/leaderboards",
+      "tr": "/siralama-tablolari",
+    },
   }
 
 })

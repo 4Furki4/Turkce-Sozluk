@@ -17,9 +17,12 @@ export default async function Footer({ session }: { session: Session | null }) {
             { href: "/word-list", label: t("links.wordList") },
             { href: "/announcements", label: t("links.announcements") },
             { href: "/offline-dictionary", label: t("links.offlineDictionary") },
+        ],
+        games: [
             { href: "/flashcard-game", label: t("links.flashcardGame") },
             { href: "/word-matching", label: t("links.wordMatchingGame") },
             { href: "/speed-round", label: t("links.speedRoundGame") },
+            { href: "/leaderboards", label: t("links.leaderboards") },
         ],
         community: [
             { href: "/contribute-word", label: t("links.contributeWord") },
@@ -61,7 +64,7 @@ export default async function Footer({ session }: { session: Session | null }) {
                     </div>
 
                     {/* Links Section */}
-                    <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-8">
+                    <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-8">
                         {/* Dictionary Column */}
                         <div>
                             <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase mb-4">
@@ -69,6 +72,22 @@ export default async function Footer({ session }: { session: Session | null }) {
                             </h3>
                             <ul className="space-y-3">
                                 {footerLinks.dictionary.map(link => (
+                                    <li key={link.href}>
+                                        <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                                            {link.label}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Games Column */}
+                        <div>
+                            <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase mb-4">
+                                {t("headings.games")}
+                            </h3>
+                            <ul className="space-y-3">
+                                {footerLinks.games.map(link => (
                                     <li key={link.href}>
                                         <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
                                             {link.label}
