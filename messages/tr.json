@@ -35,7 +35,8 @@
       "dictionary": "Sözlük",
       "community": "Topluluk",
       "legal": "Yasal",
-      "social": "Sosyal"
+      "social": "Sosyal",
+      "games": "Oyunlar"
     },
     "links": {
       "offlineDictionary": "Çevrim Dışı Sözlük",
@@ -48,7 +49,8 @@
       "pronunciations": "Telaffuzlar",
       "flashcardGame": "Kelime Kartları Oyunu",
       "wordMatchingGame": "Kelime Eşleştirme",
-      "speedRoundGame": "Hızlı Tur"
+      "speedRoundGame": "Hızlı Tur",
+      "leaderboards": "Sıralama Tabloları"
     }
   },
   "SigninForm": {
@@ -1530,7 +1532,36 @@
     "wordReview": "Kelime İnceleme",
     "saveWord": "Kelimeyi Kaydet",
     "saved": "Kaydedildi",
-    "signInToSave": "Giriş yap"
+    "signInToSave": "Giriş yap",
+    "submitScore": "Skor Gönder",
+    "yourRank": "Sıralamanız",
+    "leaderboard": "En İyi Oyuncular",
+    "anonymous": "Anonim"
+  },
+  "Leaderboards": {
+    "title": "Sıralama Tabloları",
+    "description": "Tüm oyunlardaki en iyi oyuncuları görün",
+    "subtitle": "Diğer oyuncularla yarışın ve sıralamalarda yükselin!",
+    "gameNames": {
+      "speedRound": "Hızlı Tur",
+      "wordMatching": "Kelime Eşleştirme",
+      "flashcard": "Kelime Kartları"
+    },
+    "yourStats": "İstatistikleriniz",
+    "rank": "Sıra",
+    "bestScore": "En İyi Skor",
+    "bestAccuracy": "En İyi Doğruluk",
+    "gamesPlayed": "Oynanan Oyun",
+    "playNow": "Şimdi Oyna",
+    "noScores": "Henüz skor yok. İlk oynayan siz olun!",
+    "beFirst": "İlk Sen Ol!",
+    "signInPrompt": "Skorlarınızı takip etmek ve sıralama tablosunda yarışmak için giriş yapın!",
+    "signIn": "Giriş Yap",
+    "you": "Sen",
+    "gamesLabel": "oyun",
+    "accuracy": "doğruluk",
+    "points": "puan",
+    "anonymous": "Anonim"
   },
   "ForeignTermSuggestions": {
     "title": "Yabancı Terim Önerileri",

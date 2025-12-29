@@ -35,7 +35,8 @@
       "dictionary": "Dictionary",
       "community": "Community",
       "legal": "Legal",
-      "social": "Social"
+      "social": "Social",
+      "games": "Games"
     },
     "links": {
       "wordList": "Word List",
@@ -48,7 +49,8 @@
       "terms": "Terms of Service",
       "flashcardGame": "Flashcard Game",
       "wordMatchingGame": "Word Matching",
-      "speedRoundGame": "Speed Round"
+      "speedRoundGame": "Speed Round",
+      "leaderboards": "Leaderboards"
     }
   },
   "SigninForm": {
@@ -1564,7 +1566,36 @@
     "wordReview": "Word Review",
     "saveWord": "Save Word",
     "saved": "Saved",
-    "signInToSave": "Sign in"
+    "signInToSave": "Sign in",
+    "submitScore": "Submit Score to Leaderboard",
+    "yourRank": "Your Rank",
+    "leaderboard": "Top Players",
+    "anonymous": "Anonymous"
+  },
+  "Leaderboards": {
+    "title": "Leaderboards",
+    "description": "See top players across all games",
+    "subtitle": "Compete with other players and climb the rankings!",
+    "gameNames": {
+      "speedRound": "Speed Round",
+      "wordMatching": "Word Matching",
+      "flashcard": "Flashcard"
+    },
+    "yourStats": "Your Statistics",
+    "rank": "Rank",
+    "bestScore": "Best Score",
+    "bestAccuracy": "Best Accuracy",
+    "gamesPlayed": "Games Played",
+    "playNow": "Play Now",
+    "noScores": "No scores yet. Be the first to play!",
+    "beFirst": "Be the First!",
+    "signInPrompt": "Sign in to track your scores and compete on the leaderboard!",
+    "signIn": "Sign In",
+    "you": "You",
+    "gamesLabel": "games",
+    "accuracy": "accuracy",
+    "points": "pts",
+    "anonymous": "Anonymous"
   },
   "ForeignTermSuggestions": {
     "title": "Foreign Term Suggestions",
