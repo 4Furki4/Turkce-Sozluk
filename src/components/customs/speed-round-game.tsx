@@ -18,6 +18,7 @@ import {
     BookOpen,
     Heart,
     ExternalLink,
+    Crown,
 } from "lucide-react";
 import { Session } from "@/src/lib/auth-client";
 import CustomCard from "./heroui/custom-card";
@@ -142,11 +143,33 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
     const [showFeedback, setShowFeedback] = useState<"correct" | "incorrect" | null>(null);
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
+    // Leaderboard state
+    const [userRank, setUserRank] = useState<number | null>(null);
+    const [scoreSubmitted, setScoreSubmitted] = useState(false);
+
     // Data fetching
     const { refetch } = api.game.getWordsForSpeedRound.useQuery(
         { questionCount: questionCountNum, source },
         { enabled: false }
     );
+
+    // Leaderboard query
+    const { data: leaderboardData, refetch: refetchLeaderboard } = api.game.getLeaderboard.useQuery(
+        { gameType: "speed_round", limit: 10 },
+        { enabled: gameState === "finished" }
+    );
+
+    // Submit score mutation
+    const submitScoreMutation = api.game.submitScore.useMutation({
+        onSuccess: (data) => {
+            if (data.success && data.rank) {
+                setUserRank(data.rank);
+            }
+            setScoreSubmitted(true);
+            refetchLeaderboard();
+        },
+    });
+
 
     // Timer effect
     useEffect(() => {
@@ -229,6 +252,8 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
         setTimeLeft(timePerQuestionNum);
         setShowFeedback(null);
         setSelectedAnswer(null);
+        setUserRank(null);
+        setScoreSubmitted(false);
 
         setGameState("loading");
 
@@ -249,6 +274,8 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
         setResults([]);
         setStreak(0);
         setMaxStreak(0);
+        setUserRank(null);
+        setScoreSubmitted(false);
     }, []);
 
     // Calculate final stats
@@ -410,6 +437,85 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
                                     <p className="text-2xl font-bold">{stats.avgTime}s</p>
                                 </div>
                             </div>
+
+                            {/* Submit Score Section */}
+                            {session && !scoreSubmitted && (
+                                <div className="mt-6">
+                                    <Button
+                                        color="success"
+                                        size="lg"
+                                        className="w-full"
+                                        onPress={() => {
+                                            const totalTime = results.reduce((sum, r) => sum + r.timeSpent, 0);
+                                            submitScoreMutation.mutate({
+                                                gameType: "speed_round",
+                                                score: stats.totalScore,
+                                                accuracy: stats.accuracy,
+                                                maxStreak: maxStreak,
+                                                questionCount: results.length,
+                                                timeTaken: totalTime,
+                                            });
+                                        }}
+                                        isLoading={submitScoreMutation.isPending}
+                                        startContent={<Trophy className="w-5 h-5" />}
+                                    >
+                                        {t("submitScore")}
+                                    </Button>
+                                </div>
+                            )}
+
+                            {/* Submitted Rank Display */}
+                            {scoreSubmitted && userRank && (
+                                <motion.div
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    className="mt-6 p-4 bg-primary/10 rounded-lg"
+                                >
+                                    <p className="text-sm text-default-500">{t("yourRank")}</p>
+                                    <p className="text-3xl font-bold text-primary">#{userRank}</p>
+                                </motion.div>
+                            )}
+
+                            {/* Leaderboard Section */}
+                            {leaderboardData && leaderboardData.leaderboard.length > 0 && (
+                                <div className="mt-6 text-left">
+                                    <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                                        <Crown className="w-5 h-5 text-warning" />
+                                        {t("leaderboard")}
+                                    </h3>
+                                    <div className="space-y-2">
+                                        {leaderboardData.leaderboard.slice(0, 5).map((entry) => (
+                                            <div
+                                                key={entry.userId}
+                                                className={`flex items-center gap-3 p-2 rounded-lg ${entry.userId === session?.user?.id ? "bg-primary/20" : "bg-default-100"
+                                                    }`}
+                                            >
+                                                <span className={`w-6 text-center font-bold ${entry.rank === 1 ? "text-warning" :
+                                                    entry.rank === 2 ? "text-default-400" :
+                                                        entry.rank === 3 ? "text-orange-400" : "text-default-500"
+                                                    }`}>
+                                                    {entry.rank}
+                                                </span>
+                                                {entry.userImage ? (
+                                                    <img
+                                                        src={entry.userImage}
+                                                        alt={entry.userName || ""}
+                                                        className="w-6 h-6 rounded-full"
+                                                    />
+                                                ) : (
+                                                    <div className="w-6 h-6 rounded-full bg-default-300" />
+                                                )}
+                                                <span className="flex-1 truncate text-sm">
+                                                    {entry.userName || t("anonymous")}
+                                                </span>
+                                                <span className="font-semibold text-sm">
+                                                    {entry.bestScore.toLocaleString()}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="flex gap-4 justify-center mt-6">
                                 <Button

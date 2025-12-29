@@ -30,6 +30,7 @@ import { badges, badgesRelations, usersToBadges, usersToBadgesRelations } from "
 import { accounts } from "./schema/accounts";
 import { sessions } from "./schema/session";
 import { verification } from "./schema/verification";
+import { gameScores, gameScoresRelations } from "./schema/game_scores";
 import { wordSources, wordSourcesRelations } from "./schema/word_sources";
 import { foreignTermSuggestions, foreignTermSuggestionsRelations } from "./schema/foreign_term_suggestions";
 import { foreignTermSuggestionVotes, foreignTermSuggestionVotesRelations } from "./schema/foreign_term_suggestion_votes";
@@ -82,6 +83,8 @@ export const schema = {
   badgesRelations,
   usersToBadges,
   usersToBadgesRelations,
+  gameScores,
+  gameScoresRelations,
   wordSources,
   wordSourcesRelations,
   foreignTermSuggestions,
