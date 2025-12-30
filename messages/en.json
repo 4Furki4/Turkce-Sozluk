@@ -1479,5 +1479,62 @@
     "downloading": "Word suggestions data is being downloaded. Suggestions may not appear for a few seconds.",
     "success": "Word suggestions data is ready!",
     "error": "Failed to update word suggestions data."
+  },
+  "ForeignTermSuggestions": {
+    "title": "Foreign Term Suggestions",
+    "subtitle": "Suggest Turkish equivalents for foreign terms that don't have a translation",
+    "submitSuggestion": "Suggest a Term",
+    "noSuggestions": "No suggestions found. Be the first to suggest a Turkish equivalent!",
+    "loading": "Loading...",
+    "loadMore": "Load More",
+    "form": {
+      "title": "Suggest Turkish Equivalent",
+      "description": "Help enrich the Turkish language by suggesting Turkish words for foreign terms.",
+      "foreignTerm": "Foreign Term",
+      "foreignTermPlaceholder": "e.g., serendipity, zeitgeist",
+      "language": "Source Language",
+      "selectLanguage": "Select a language",
+      "meaning": "What does it mean?",
+      "meaningPlaceholder": "Explain what this foreign term means...",
+      "turkishWord": "Suggested Turkish Word",
+      "turkishWordPlaceholder": "Your suggested Turkish equivalent",
+      "isNewWord": "This is a new/invented word",
+      "isNewWordDescription": "Check this if you're suggesting a newly coined Turkish word rather than an existing one",
+      "reason": "Reason/Explanation (Optional)",
+      "reasonPlaceholder": "Why do you think this Turkish word fits?",
+      "submit": "Submit Suggestion",
+      "cancel": "Cancel",
+      "submitSuccess": "Your suggestion has been submitted!",
+      "authRequiredTitle": "Sign in required",
+      "authRequiredDescription": "You need to sign in to submit suggestions."
+    },
+    "card": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "newWord": "New Word",
+      "foreignTerm": "Foreign Term",
+      "meaning": "Meaning",
+      "suggestedWord": "Suggested Turkish Word",
+      "reason": "Reason",
+      "suggestedBy": "Suggested by",
+      "anonymous": "Anonymous"
+    },
+    "filters": {
+      "status": "Status",
+      "allStatuses": "All Statuses",
+      "sortBy": "Sort By",
+      "sortByVotes": "Most Votes",
+      "sortByDate": "Most Recent",
+      "sortOrder": "Order",
+      "ascending": "Ascending",
+      "descending": "Descending",
+      "clear": "Clear Filters"
+    },
+    "errors": {
+      "suggestionNotFound": "Suggestion not found",
+      "loginRequired": "Please sign in to vote",
+      "suggestionAlreadyResolved": "This suggestion has already been resolved"
+    }
   }
 }
