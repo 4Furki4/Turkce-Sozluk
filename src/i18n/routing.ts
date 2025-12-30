@@ -203,6 +203,11 @@ export const routing = defineRouting({
       "en": "/leaderboards",
       "tr": "/siralama-tablolari",
     },
+    "/foreign-term-suggestions": {
+      "en": "/foreign-term-suggestions",
+      "tr": "/yabanci-kelimelere-karsiliklar",
+    },
+
   }
 
 })

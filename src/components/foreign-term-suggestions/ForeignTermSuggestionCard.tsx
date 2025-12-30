@@ -68,11 +68,6 @@ export function ForeignTermSuggestionCard({
                                 {languageName}
                             </Chip>
                         )}
-                        {suggestion.isNewWord && (
-                            <Chip size="sm" color="secondary" variant="flat">
-                                {t("newWord")}
-                            </Chip>
-                        )}
                     </div>
                     <span className="text-sm text-muted-foreground">
                         {formatDistanceToNow(new Date(suggestion.createdAt), {
@@ -94,12 +89,25 @@ export function ForeignTermSuggestionCard({
                     </div>
                     <div className="flex items-center gap-2 bg-primary/10 p-3 rounded-lg">
                         <span className="text-muted-foreground text-sm">{t("suggestedWord")}:</span>
-                        <Link
-                            href={{ pathname: "/search/[word]", params: { word: suggestion.suggestedTurkishWord } }}
-                            className="font-bold text-xl text-primary hover:underline"
-                        >
-                            {suggestion.suggestedTurkishWord}
-                        </Link>
+                        {suggestion.isNewWord ? (
+                            // New word: show plain text with badge
+                            <div className="flex items-center gap-2">
+                                <span className="font-bold text-xl text-primary">
+                                    {suggestion.suggestedTurkishWord}
+                                </span>
+                                <Chip size="sm" color="secondary" variant="flat">
+                                    {t("newWord")}
+                                </Chip>
+                            </div>
+                        ) : (
+                            // Existing word: show as link
+                            <Link
+                                href={{ pathname: "/search/[word]", params: { word: suggestion.suggestedTurkishWord } }}
+                                className="font-bold text-xl text-primary hover:underline"
+                            >
+                                {suggestion.suggestedTurkishWord}
+                            </Link>
+                        )}
                     </div>
                     {suggestion.reason && (
                         <div>

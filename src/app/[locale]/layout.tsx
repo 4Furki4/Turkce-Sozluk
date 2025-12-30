@@ -210,6 +210,7 @@ export default async function RootLayout({
                     FlashcardGameIntl={t("FlashcardGame")}
                     WordMatchingGameIntl={t("WordMatchingGame")}
                     SpeedRoundGameIntl={t("SpeedRoundGame")}
+                    ForeignTermSuggestionsIntl={t("ForeignTermSuggestions")}
                   />
                   <main className="relative w-full flex-grow flex min-h-[calc(100vh-var(--navbar-height))]">
                     {/* ✨ Moved BackgroundGradient here */}

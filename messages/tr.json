@@ -25,7 +25,8 @@
     "FlashcardGame": "Kelime Kartları",
     "Learn": "Öğren",
     "WordMatchingGame": "Kelime Eşleştirme",
-    "SpeedRoundGame": "Hızlı Tur"
+    "SpeedRoundGame": "Hızlı Tur",
+    "ForeignTermSuggestions": "Yabancı Terim Önerileri"
   },
   "Footer": {
     "description": "Topluluk ile gelişen, açık kaynak ve modern Türkçe sözlüğü.",
@@ -1581,6 +1582,7 @@
       "meaningPlaceholder": "Bu yabancı terimin ne anlama geldiğini açıklayın...",
       "turkishWord": "Önerilen Türkçe Kelime",
       "turkishWordPlaceholder": "Önerdiğiniz Türkçe karşılık",
+      "existingWordPlaceholder": "Mevcut bir kelime arayın...",
       "isNewWord": "Bu yeni/uydurulmuş bir kelime",
       "isNewWordDescription": "Var olan bir kelime yerine yeni türetilmiş bir Türkçe kelime öneriyorsanız bunu işaretleyin",
       "reason": "Neden/Açıklama (İsteğe bağlı)",
