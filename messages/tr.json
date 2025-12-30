@@ -51,7 +51,8 @@
       "flashcardGame": "Kelime Kartları Oyunu",
       "wordMatchingGame": "Kelime Eşleştirme",
       "speedRoundGame": "Hızlı Tur",
-      "leaderboards": "Sıralama Tabloları"
+      "leaderboards": "Sıralama Tabloları",
+      "foreignTermSuggestions": "Yabancı Terim Önerileri"
     }
   },
   "SigninForm": {

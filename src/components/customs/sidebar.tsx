@@ -1,4 +1,4 @@
-import { BellIcon, GitPullRequestArrow, HandHeart, HeartHandshake, HistoryIcon, HomeIcon, LayoutDashboard, Layers, Link2, ListTree, LogIn, MicIcon, StarIcon, UserIcon, WifiOff, Sun, Moon, Sparkles, Sparkle, Languages, LogOut, Zap } from 'lucide-react'
+import { BellIcon, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, HomeIcon, LayoutDashboard, Layers, Link2, ListTree, LogIn, MicIcon, StarIcon, UserIcon, WifiOff, Sun, Moon, Sparkles, Sparkle, Languages, LogOut, Zap } from 'lucide-react'
 import React from 'react'
 import { Link as NextIntlLink, usePathname, useRouter } from "@/src/i18n/routing";
 import {
@@ -109,6 +109,11 @@ export default function Sidebar(
                             <li>
                                 <NextIntlLink className='flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 rounded-sm' href={'/feedback'} onClick={() => setIsSidebarOpen(false)}>
                                     <HandHeart className="h-6 w-6" /> <span className={`text-nowrap`}>{t("Navbar.Feedback")}</span>
+                                </NextIntlLink>
+                            </li>
+                            <li>
+                                <NextIntlLink className='flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 rounded-sm' href={'/foreign-term-suggestions'} onClick={() => setIsSidebarOpen(false)}>
+                                    <Globe className="h-6 w-6" /> <span className={`text-nowrap`}>{t("Navbar.ForeignTermSuggestions")}</span>
                                 </NextIntlLink>
                             </li>
                             <Separator />
