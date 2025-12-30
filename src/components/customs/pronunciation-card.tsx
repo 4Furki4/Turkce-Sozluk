@@ -13,7 +13,7 @@ import {
     CardBody,
 
 } from "@heroui/react";
-import { ArrowUpIcon, ArrowDownIcon } from "lucide-react";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { api } from "@/src/trpc/react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -180,7 +180,7 @@ export const PronunciationCard: FC<PronunciationCardProps> = ({ wordId, session 
                                 <CustomAudioPlayer src={pronunciation.audioUrl} />
                                 {/* Voting Section */}
                                 <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-1">
+                                    <div className="flex items-center gap-2">
                                         <Button
                                             isIconOnly
                                             size="sm"
@@ -188,10 +188,13 @@ export const PronunciationCard: FC<PronunciationCardProps> = ({ wordId, session 
                                             color={pronunciation.userVote === 1 ? "success" : "default"}
                                             onPress={() => handleVote(pronunciation.id, 'up')}
                                             isDisabled={!session}
+                                            className={`rounded-full ${pronunciation.userVote === 1 ? "bg-success/20 text-success" : ""}`}
                                         >
-                                            <ArrowUpIcon className="w-4 h-4" />
+                                            <ThumbsUp className="w-4 h-4" />
                                         </Button>
-                                        <span className="font-semibold text-sm px-2">{pronunciation.voteCount}</span>
+                                        <span className={`font-semibold min-w-[2rem] text-center ${Number(pronunciation.voteCount) > 0 ? "text-success" :
+                                                Number(pronunciation.voteCount) < 0 ? "text-danger" : "text-muted-foreground"
+                                            }`}>{pronunciation.voteCount}</span>
                                         <Button
                                             isIconOnly
                                             size="sm"
@@ -199,8 +202,9 @@ export const PronunciationCard: FC<PronunciationCardProps> = ({ wordId, session 
                                             color={pronunciation.userVote === -1 ? "danger" : "default"}
                                             onPress={() => handleVote(pronunciation.id, 'down')}
                                             isDisabled={!session}
+                                            className={`rounded-full ${pronunciation.userVote === -1 ? "bg-danger/20 text-danger" : ""}`}
                                         >
-                                            <ArrowDownIcon className="w-4 h-4" />
+                                            <ThumbsDown className="w-4 h-4" />
                                         </Button>
                                     </div>
 

@@ -15,7 +15,7 @@ import {
     PopoverContent,
     Button,
 } from "@heroui/react";
-import { PlayIcon, ArrowUpIcon, ArrowDownIcon } from "lucide-react";
+import { PlayIcon, ThumbsUp, ThumbsDown } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -151,13 +151,29 @@ export const PronunciationCard: FC<PronunciationCardProps> = ({ request, user, w
                 </Link>
             </CardBody>
             <CardFooter className="gap-3">
-                <div className="flex gap-1 items-center">
-                    <Button isIconOnly size="sm" variant={userVote === 1 ? "solid" : "light"} color={userVote === 1 ? "primary" : "default"} onPress={() => handleVote('up')}>
-                        <ArrowUpIcon className="w-5 h-5" />
+                <div className="flex gap-2 items-center">
+                    <Button
+                        isIconOnly
+                        size="sm"
+                        variant={userVote === 1 ? "solid" : "light"}
+                        color={userVote === 1 ? "success" : "default"}
+                        onPress={() => handleVote('up')}
+                        className={`rounded-full ${userVote === 1 ? "bg-success/20 text-success" : ""}`}
+                    >
+                        <ThumbsUp className="w-4 h-4" />
                     </Button>
-                    <p className="font-semibold text-default-400 text-small">{voteCount}</p>
-                    <Button isIconOnly size="sm" variant={userVote === -1 ? "solid" : "light"} color={userVote === -1 ? "danger" : "default"} onPress={() => handleVote('down')}>
-                        <ArrowDownIcon className="w-5 h-5" />
+                    <span className={`font-semibold min-w-[2rem] text-center ${Number(voteCount) > 0 ? "text-success" :
+                            Number(voteCount) < 0 ? "text-danger" : "text-muted-foreground"
+                        }`}>{voteCount}</span>
+                    <Button
+                        isIconOnly
+                        size="sm"
+                        variant={userVote === -1 ? "solid" : "light"}
+                        color={userVote === -1 ? "danger" : "default"}
+                        onPress={() => handleVote('down')}
+                        className={`rounded-full ${userVote === -1 ? "bg-danger/20 text-danger" : ""}`}
+                    >
+                        <ThumbsDown className="w-4 h-4" />
                     </Button>
                 </div>
                 <div className="flex gap-1">
