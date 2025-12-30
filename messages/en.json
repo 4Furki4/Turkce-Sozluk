@@ -51,7 +51,8 @@
       "flashcardGame": "Flashcard Game",
       "wordMatchingGame": "Word Matching",
       "speedRoundGame": "Speed Round",
-      "leaderboards": "Leaderboards"
+      "leaderboards": "Leaderboards",
+      "foreignTermSuggestions": "Foreign Term Suggestions"
     }
   },
   "SigninForm": {

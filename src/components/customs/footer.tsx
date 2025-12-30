@@ -28,6 +28,7 @@ export default async function Footer({ session }: { session: Session | null }) {
             { href: "/contribute-word", label: t("links.contributeWord") },
             { href: "/pronunciation-voting", label: t("links.pronunciations") },
             { href: "/feedback", label: t("links.seeFeedback") },
+            { href: "/foreign-term-suggestions", label: t("links.foreignTermSuggestions") },
         ],
         legal: [
             { href: "/privacy-policy", label: t("links.privacy") },
