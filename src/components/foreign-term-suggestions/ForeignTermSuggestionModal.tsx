@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { api } from "@/src/trpc/react";
 import { toast } from "sonner";
 import {
@@ -15,8 +15,8 @@ import {
     ModalHeader,
     Input,
     Textarea,
-    Select,
-    SelectItem,
+    Autocomplete,
+    AutocompleteItem,
     Popover,
     PopoverTrigger,
     PopoverContent,
@@ -58,20 +58,33 @@ export function ForeignTermSuggestionModal({
     const tGlobal = useTranslations("Navbar");
     const utils = api.useUtils();
     const router = useRouter();
+    const locale = useLocale();
 
     const {
         register,
         handleSubmit,
         control,
         reset,
+        setValue,
         formState: { errors, isSubmitting },
     } = useForm<SuggestionFormValues>({
         resolver: zodResolver(suggestionSchema),
         defaultValues: { isNewWord: true },
     });
 
+    // Watch isNewWord to conditionally render input
+    const isNewWord = useWatch({ control, name: "isNewWord" });
+
+    // Word search state for existing words
+    const [wordSearchTerm, setWordSearchTerm] = useState("");
+    const { data: wordSearchResults, isLoading: wordSearchLoading } =
+        api.word.searchWordsSimple.useQuery(
+            { query: wordSearchTerm, limit: 20 },
+            { enabled: wordSearchTerm.length > 1 && !isNewWord }
+        );
+
     // Fetch languages for dropdown
-    const { data: languages } = api.foreignTermSuggestion.getLanguages.useQuery();
+    const { data: languages, isLoading: languagesLoading } = api.foreignTermSuggestion.getLanguages.useQuery();
 
     const createSuggestion = api.foreignTermSuggestion.create.useMutation({
         onSuccess: () => {
@@ -235,36 +248,37 @@ export function ForeignTermSuggestionModal({
 
                                     {/* Language */}
                                     <div>
-                                        <label htmlFor="languageId" className="font-semibold">
-                                            {t("language")}
-                                        </label>
                                         <Controller
                                             name="languageId"
                                             control={control}
-                                            render={({ field }) => (
-                                                <Select
-                                                    {...field}
-                                                    selectedKeys={field.value ? [field.value] : []}
-                                                    onSelectionChange={(keys) => {
-                                                        const selected = Array.from(keys)[0];
-                                                        field.onChange(selected?.toString() || "");
-                                                    }}
+                                            render={({ field, fieldState: { error } }) => (
+                                                <Autocomplete
+                                                    radius="sm"
+                                                    label={t("language")}
                                                     placeholder={t("selectLanguage")}
-                                                    className="mt-2"
+                                                    labelPlacement="outside"
+                                                    isLoading={languagesLoading}
+                                                    defaultItems={languages || []}
+                                                    selectedKey={field.value}
+                                                    onSelectionChange={(key) => {
+                                                        field.onChange(key?.toString() || "");
+                                                    }}
+                                                    classNames={{
+                                                        listboxWrapper: "rounded-sm",
+                                                        popoverContent: "rounded-sm",
+                                                        base: "rounded-sm mt-2",
+                                                    }}
+                                                    errorMessage={error?.message ? t(error.message as any) : ""}
+                                                    isInvalid={error !== undefined}
                                                 >
-                                                    {(languages || []).map((lang) => (
-                                                        <SelectItem key={lang.id.toString()}>
-                                                            {lang.language_tr}
-                                                        </SelectItem>
-                                                    ))}
-                                                </Select>
+                                                    {(item) => (
+                                                        <AutocompleteItem key={item.id.toString()}>
+                                                            {locale === "en" ? item.language_en : item.language_tr}
+                                                        </AutocompleteItem>
+                                                    )}
+                                                </Autocomplete>
                                             )}
                                         />
-                                        {errors.languageId && (
-                                            <p className="text-red-500 text-sm mt-1">
-                                                {t(errors.languageId.message as any)}
-                                            </p>
-                                        )}
                                     </div>
 
                                     {/* Meaning */}
@@ -286,25 +300,7 @@ export function ForeignTermSuggestionModal({
                                         )}
                                     </div>
 
-                                    {/* Turkish Word */}
-                                    <div>
-                                        <label htmlFor="suggestedTurkishWord" className="font-semibold">
-                                            {t("turkishWord")}
-                                        </label>
-                                        <Input
-                                            id="suggestedTurkishWord"
-                                            {...register("suggestedTurkishWord")}
-                                            placeholder={t("turkishWordPlaceholder")}
-                                            className="mt-2"
-                                        />
-                                        {errors.suggestedTurkishWord && (
-                                            <p className="text-red-500 text-sm mt-1">
-                                                {t(errors.suggestedTurkishWord.message as any)}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    {/* Is New Word Checkbox */}
+                                    {/* Is New Word Checkbox - moved before Turkish word input */}
                                     <div>
                                         <Controller
                                             name="isNewWord"
@@ -312,7 +308,12 @@ export function ForeignTermSuggestionModal({
                                             render={({ field }) => (
                                                 <Checkbox
                                                     isSelected={field.value}
-                                                    onValueChange={field.onChange}
+                                                    onValueChange={(checked) => {
+                                                        field.onChange(checked);
+                                                        // Clear the word field when switching
+                                                        setValue("suggestedTurkishWord", "");
+                                                        setWordSearchTerm("");
+                                                    }}
                                                 >
                                                     {t("isNewWord")}
                                                 </Checkbox>
@@ -321,6 +322,67 @@ export function ForeignTermSuggestionModal({
                                         <p className="text-muted-foreground text-sm mt-1">
                                             {t("isNewWordDescription")}
                                         </p>
+                                    </div>
+
+                                    {/* Turkish Word - conditional based on isNewWord */}
+                                    <div>
+                                        {isNewWord ? (
+                                            // New word: show regular input
+                                            <>
+                                                <label htmlFor="suggestedTurkishWord" className="font-semibold">
+                                                    {t("turkishWord")}
+                                                </label>
+                                                <Input
+                                                    id="suggestedTurkishWord"
+                                                    {...register("suggestedTurkishWord")}
+                                                    placeholder={t("turkishWordPlaceholder")}
+                                                    className="mt-2"
+                                                />
+                                            </>
+                                        ) : (
+                                            // Existing word: show autocomplete
+                                            <Controller
+                                                name="suggestedTurkishWord"
+                                                control={control}
+                                                render={({ field, fieldState: { error } }) => (
+                                                    <Autocomplete
+                                                        radius="sm"
+                                                        label={t("turkishWord")}
+                                                        placeholder={t("existingWordPlaceholder")}
+                                                        labelPlacement="outside"
+                                                        isLoading={wordSearchLoading}
+                                                        inputValue={wordSearchTerm}
+                                                        onInputChange={setWordSearchTerm}
+                                                        onSelectionChange={(key) => {
+                                                            const selectedWord = wordSearchResults?.words?.find(
+                                                                (w: any) => String(w.id) === String(key)
+                                                            );
+                                                            if (selectedWord) {
+                                                                field.onChange(selectedWord.word);
+                                                            }
+                                                        }}
+                                                        classNames={{
+                                                            listboxWrapper: "rounded-sm",
+                                                            popoverContent: "rounded-sm",
+                                                            base: "rounded-sm mt-2",
+                                                        }}
+                                                        errorMessage={error?.message ? t(error.message as any) : ""}
+                                                        isInvalid={error !== undefined}
+                                                    >
+                                                        {(wordSearchResults?.words || []).map((item: any) => (
+                                                            <AutocompleteItem key={item.id} textValue={String(item.word)}>
+                                                                {item.word}
+                                                            </AutocompleteItem>
+                                                        ))}
+                                                    </Autocomplete>
+                                                )}
+                                            />
+                                        )}
+                                        {errors.suggestedTurkishWord && (
+                                            <p className="text-red-500 text-sm mt-1">
+                                                {t(errors.suggestedTurkishWord.message as any)}
+                                            </p>
+                                        )}
                                     </div>
 
                                     {/* Reason */}

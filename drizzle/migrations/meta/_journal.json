@@ -288,6 +288,13 @@
       "when": 1766930952028,
       "tag": "0040_nice_blob",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1767098187281,
+      "tag": "0041_parched_gamora",
+      "breakpoints": true
     }
   ]
 }

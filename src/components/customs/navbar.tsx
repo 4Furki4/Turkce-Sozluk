@@ -11,7 +11,7 @@ import {
   NavbarBrand,
   DropdownSection
 } from "@heroui/react";
-import { ChevronDown, GitPullRequestArrow, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, Link2, LogOut, Menu, Mic, Moon, Sparkle, Sparkles, StarIcon, Sun, UserIcon, Zap } from "lucide-react";
+import { ChevronDown, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, Link2, LogOut, Menu, Mic, Moon, Sparkle, Sparkles, StarIcon, Sun, UserIcon, Zap } from "lucide-react";
 // import { signIn, signOut } from "next-auth/react"; // Removed
 import { authClient, type User } from "@/src/lib/auth-client"; // Added
 import { useTheme } from "next-themes";
@@ -31,7 +31,7 @@ import { Session } from "@/src/lib/auth-client";
 
 type NavbarProps = {
   session: Session | null;
-} & Record<"TitleIntl" | "WordListIntl" | "SignInIntl" | "HomeIntl" | "ProfileIntl" | "SavedWordsIntl" | "MyRequestsIntl" | "SearchHistoryIntl" | "LogoutIntl" | "AnnouncementsIntl" | "ContributeWordIntl" | "PronunciationsIntl" | "ariaAvatar" | "ariaMenu" | "ariaLanguages" | "ariaSwitchTheme" | "ariaBlur" | "ContributeIntl" | "FeedbackIntl" | "LearnIntl" | "FlashcardGameIntl" | "WordMatchingGameIntl" | "SpeedRoundGameIntl", string>;
+} & Record<"TitleIntl" | "WordListIntl" | "SignInIntl" | "HomeIntl" | "ProfileIntl" | "SavedWordsIntl" | "MyRequestsIntl" | "SearchHistoryIntl" | "LogoutIntl" | "AnnouncementsIntl" | "ContributeWordIntl" | "PronunciationsIntl" | "ariaAvatar" | "ariaMenu" | "ariaLanguages" | "ariaSwitchTheme" | "ariaBlur" | "ContributeIntl" | "FeedbackIntl" | "LearnIntl" | "FlashcardGameIntl" | "WordMatchingGameIntl" | "SpeedRoundGameIntl" | "ForeignTermSuggestionsIntl", string>;
 
 export default function Navbar({
   session,
@@ -58,7 +58,8 @@ export default function Navbar({
   LearnIntl,
   FlashcardGameIntl,
   WordMatchingGameIntl,
-  SpeedRoundGameIntl
+  SpeedRoundGameIntl,
+  ForeignTermSuggestionsIntl
 }: NavbarProps & { setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>> }) { // Merged props type
   const { theme, setTheme } = useTheme();
   const pathName = usePathname();
@@ -166,6 +167,11 @@ export default function Navbar({
             <DropdownItem key={'feedback'} startContent={<HandHeart aria-label={FeedbackIntl} className="w-4 h-4" />} className="py-0 pr-0">
               <NextIntlLink href="/feedback" className="flex items-center gap-2 py-1.5">
                 {FeedbackIntl}
+              </NextIntlLink>
+            </DropdownItem>
+            <DropdownItem key={'foreign-term-suggestions'} startContent={<Globe aria-label={ForeignTermSuggestionsIntl} className="w-4 h-4" />} className="py-0 pr-0">
+              <NextIntlLink href="/foreign-term-suggestions" className="flex items-center gap-2 py-1.5">
+                {ForeignTermSuggestionsIntl}
               </NextIntlLink>
             </DropdownItem>
           </DropdownMenu>

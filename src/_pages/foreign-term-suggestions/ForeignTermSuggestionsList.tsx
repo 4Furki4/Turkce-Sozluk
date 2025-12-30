@@ -2,7 +2,8 @@
 
 import { api } from "@/src/trpc/react";
 import { useTranslations } from "next-intl";
-import { Button, Select, SelectItem, Skeleton, Spinner } from "@heroui/react";
+import { Button, Skeleton, Spinner } from "@heroui/react";
+import { CustomSelect } from "@/src/components/customs/heroui/custom-select";
 import { useState, useMemo } from "react";
 import { useDebounce } from "@/src/hooks/use-debounce";
 import { suggestionStatusEnum } from "@/db/schema/foreign_term_suggestions";
@@ -47,58 +48,47 @@ export function ForeignTermSuggestionsList({ session }: ForeignTermSuggestionsLi
 
     const allItems = data?.pages.flatMap((page) => page.items) ?? [];
 
-    const handleClearFilters = () => {
-        setStatus([]);
-        setSortBy("votes");
-        setSortOrder("desc");
-    };
-
     return (
         <div className="space-y-6">
             {/* Filter Bar */}
-            <div className="flex flex-wrap gap-4 items-end">
-                <Select
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <CustomSelect
                     label={t("filters.status")}
                     placeholder={t("filters.allStatuses")}
                     selectionMode="multiple"
                     selectedKeys={new Set(status)}
                     onSelectionChange={(keys) => setStatus(Array.from(keys) as string[])}
-                    className="max-w-xs"
-                >
-                    {suggestionStatusEnum.enumValues.map((s) => (
-                        <SelectItem key={s}>{t(`card.${s}`)}</SelectItem>
-                    ))}
-                </Select>
+                    options={suggestionStatusEnum.enumValues.reduce(
+                        (acc, s) => ({ ...acc, [s]: t(`card.${s}`) }),
+                        {} as Record<string, string>
+                    )}
+                />
 
-                <Select
+                <CustomSelect
                     label={t("filters.sortBy")}
                     selectedKeys={new Set([sortBy])}
                     onSelectionChange={(keys) => {
                         const selected = Array.from(keys)[0] as SortBy;
                         if (selected) setSortBy(selected);
                     }}
-                    className="max-w-xs"
-                >
-                    <SelectItem key="votes">{t("filters.sortByVotes")}</SelectItem>
-                    <SelectItem key="createdAt">{t("filters.sortByDate")}</SelectItem>
-                </Select>
+                    options={{
+                        votes: t("filters.sortByVotes"),
+                        createdAt: t("filters.sortByDate"),
+                    }}
+                />
 
-                <Select
+                <CustomSelect
                     label={t("filters.sortOrder")}
                     selectedKeys={new Set([sortOrder])}
                     onSelectionChange={(keys) => {
                         const selected = Array.from(keys)[0] as SortOrder;
                         if (selected) setSortOrder(selected);
                     }}
-                    className="max-w-xs"
-                >
-                    <SelectItem key="desc">{t("filters.descending")}</SelectItem>
-                    <SelectItem key="asc">{t("filters.ascending")}</SelectItem>
-                </Select>
-
-                <Button variant="ghost" onPress={handleClearFilters}>
-                    {t("filters.clear")}
-                </Button>
+                    options={{
+                        desc: t("filters.descending"),
+                        asc: t("filters.ascending"),
+                    }}
+                />
             </div>
 
             {/* Suggestions List */}
