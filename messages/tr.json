@@ -1445,5 +1445,62 @@
     "downloading": "Arama öneri verileri indiriliyor. Öneriler birkaç saniye görünmeyebilir.",
     "success": "Arama öneri verileri hazır!",
     "error": "Arama öneri verileri güncellenemedi."
+  },
+  "ForeignTermSuggestions": {
+    "title": "Yabancı Terim Önerileri",
+    "subtitle": "Türkçe karşılığı olmayan yabancı terimler için Türkçe karşılık önerin",
+    "submitSuggestion": "Terim Öner",
+    "noSuggestions": "Henüz öneri bulunamadı. İlk Türkçe karşılığı önerinizi siz ekleyin!",
+    "loading": "Yükleniyor...",
+    "loadMore": "Daha Fazla Yükle",
+    "form": {
+      "title": "Türkçe Karşılık Önerisi",
+      "description": "Yabancı terimler için Türkçe kelimeler önererek Türk diline katkıda bulunun.",
+      "foreignTerm": "Yabancı Terim",
+      "foreignTermPlaceholder": "örn., serendipity, zeitgeist",
+      "language": "Kaynak Dil",
+      "selectLanguage": "Bir dil seçin",
+      "meaning": "Ne anlama geliyor?",
+      "meaningPlaceholder": "Bu yabancı terimin ne anlama geldiğini açıklayın...",
+      "turkishWord": "Önerilen Türkçe Kelime",
+      "turkishWordPlaceholder": "Önerdiğiniz Türkçe karşılık",
+      "isNewWord": "Bu yeni/uydurulmuş bir kelime",
+      "isNewWordDescription": "Var olan bir kelime yerine yeni türetilmiş bir Türkçe kelime öneriyorsanız bunu işaretleyin",
+      "reason": "Neden/Açıklama (İsteğe bağlı)",
+      "reasonPlaceholder": "Bu Türkçe kelimenin neden uygun olduğunu düşünüyorsunuz?",
+      "submit": "Öneriyi Gönder",
+      "cancel": "İptal",
+      "submitSuccess": "Öneriniz gönderildi!",
+      "authRequiredTitle": "Giriş gerekli",
+      "authRequiredDescription": "Öneri göndermek için giriş yapmanız gerekiyor."
+    },
+    "card": {
+      "pending": "Beklemede",
+      "approved": "Onaylandı",
+      "rejected": "Reddedildi",
+      "newWord": "Yeni Kelime",
+      "foreignTerm": "Yabancı Terim",
+      "meaning": "Anlam",
+      "suggestedWord": "Önerilen Türkçe Kelime",
+      "reason": "Neden",
+      "suggestedBy": "Öneren",
+      "anonymous": "Anonim"
+    },
+    "filters": {
+      "status": "Durum",
+      "allStatuses": "Tüm Durumlar",
+      "sortBy": "Sıralama",
+      "sortByVotes": "En Çok Oy",
+      "sortByDate": "En Yeni",
+      "sortOrder": "Sıra",
+      "ascending": "Artan",
+      "descending": "Azalan",
+      "clear": "Filtreleri Temizle"
+    },
+    "errors": {
+      "suggestionNotFound": "Öneri bulunamadı",
+      "loginRequired": "Oy vermek için lütfen giriş yapın",
+      "suggestionAlreadyResolved": "Bu öneri zaten çözümlenmiş"
+    }
   }
 }

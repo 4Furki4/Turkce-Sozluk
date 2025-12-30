@@ -30,6 +30,9 @@ import { badges, badgesRelations, usersToBadges, usersToBadgesRelations } from "
 import { accounts } from "./schema/accounts";
 import { sessions } from "./schema/session";
 import { verification } from "./schema/verification";
+import { wordSources, wordSourcesRelations } from "./schema/word_sources";
+import { foreignTermSuggestions, foreignTermSuggestionsRelations } from "./schema/foreign_term_suggestions";
+import { foreignTermSuggestionVotes, foreignTermSuggestionVotesRelations } from "./schema/foreign_term_suggestion_votes";
 
 export const schema = {
   accounts,
@@ -78,7 +81,13 @@ export const schema = {
   badges,
   badgesRelations,
   usersToBadges,
-  usersToBadgesRelations
+  usersToBadgesRelations,
+  wordSources,
+  wordSourcesRelations,
+  foreignTermSuggestions,
+  foreignTermSuggestionsRelations,
+  foreignTermSuggestionVotes,
+  foreignTermSuggestionVotesRelations
 };
 
 const globalForDb = globalThis as unknown as {

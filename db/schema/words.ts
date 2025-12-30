@@ -11,6 +11,8 @@ import { SelectMeaning, meanings } from "./meanings";
 import { pronunciations } from "./pronunciations";
 import { savedWords } from "./saved_words";
 import { roots } from "./roots";
+import { wordSources } from "./word_sources";
+
 export const words = pgTable("words", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
@@ -23,6 +25,7 @@ export const words = pgTable("words", {
   viewCount: integer("view_count").default(0),
   variant: integer("variant").default(0),
   requestType: varchar("request_type", { length: 255 }).default("word"),
+  sourceId: integer("source_id").references(() => wordSources.id),
 }, (t) => [
   index("name_idx").using('gin', sql`name gin_trgm_ops`)
 ]);
@@ -34,6 +37,10 @@ export const wordsRelations = relations(words, ({ many, one }) => ({
   root: one(roots, {
     fields: [words.rootId],
     references: [roots.id],
+  }),
+  source: one(wordSources, {
+    fields: [words.sourceId],
+    references: [wordSources.id],
   }),
 }));
 
