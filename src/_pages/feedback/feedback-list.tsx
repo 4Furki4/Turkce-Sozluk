@@ -15,7 +15,7 @@ import { useDebounce } from "@/src/hooks/use-debounce";
 import { feedbackTypeEnum, feedbackStatusEnum } from "@/db/schema/feedbacks";
 import { FeedbackSkeleton } from "./skeleton";
 
-import { ArrowUpIcon, ArrowDownIcon } from "lucide-react";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
 
 // Define the type for a single feedback item based on router output
 type RouterOutput = inferRouterOutputs<AppRouter>;
@@ -141,18 +141,21 @@ function FeedbackCard({ item, session, queryFilters }: { item: FeedbackItem, ses
                 <p className="text-default-600">{item.feedback.description}</p>
             </CardBody>
             <CardFooter className="gap-3">
-                <div className="flex gap-1 items-center">
+                <div className="flex gap-2 items-center">
                     <Button
                         isIconOnly
                         size="sm"
                         variant={item.userVote === 1 ? "solid" : "light"}
-                        color={item.userVote === 1 ? "primary" : "default"}
+                        color={item.userVote === 1 ? "success" : "default"}
                         onPress={() => handleVote('up')}
                         isDisabled={!session || isUpvoteDisabled(item.feedback.status)}
+                        className={`rounded-full ${item.userVote === 1 ? "bg-success/20 text-success" : ""}`}
                     >
-                        <ArrowUpIcon className="w-5 h-5" />
+                        <ThumbsUp className="w-4 h-4" />
                     </Button>
-                    <p className="font-semibold text-default-400 text-small">{item.voteCount}</p>
+                    <span className={`font-semibold min-w-[2rem] text-center ${Number(item.voteCount) > 0 ? "text-success" :
+                            Number(item.voteCount) < 0 ? "text-danger" : "text-muted-foreground"
+                        }`}>{item.voteCount}</span>
                     <Button
                         isIconOnly
                         size="sm"
@@ -160,8 +163,9 @@ function FeedbackCard({ item, session, queryFilters }: { item: FeedbackItem, ses
                         color={item.userVote === -1 ? "danger" : "default"}
                         onPress={() => handleVote('down')}
                         isDisabled={!session || isUpvoteDisabled(item.feedback.status)}
+                        className={`rounded-full ${item.userVote === -1 ? "bg-danger/20 text-danger" : ""}`}
                     >
-                        <ArrowDownIcon className="w-5 h-5" />
+                        <ThumbsDown className="w-4 h-4" />
                     </Button>
                 </div>
             </CardFooter>
