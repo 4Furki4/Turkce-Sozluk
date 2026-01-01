@@ -1597,7 +1597,8 @@
     "gamesLabel": "games",
     "accuracy": "accuracy",
     "points": "pts",
-    "anonymous": "Anonymous"
+    "anonymous": "Anonymous",
+    "comingSoon": "More Coming Soon"
   },
   "ForeignTermSuggestions": {
     "title": "Foreign Term Suggestions",

@@ -15,23 +15,13 @@ interface LeaderboardsPageProps {
     locale: "en" | "tr";
 }
 
-type GameType = "speed_round" | "word_matching" | "flashcard";
+type GameType = "speed_round";
 
 const gameConfig = {
     speed_round: {
         icon: Zap,
         color: "warning" as const,
         href: "/speed-round",
-    },
-    word_matching: {
-        icon: Link2,
-        color: "secondary" as const,
-        href: "/word-matching",
-    },
-    flashcard: {
-        icon: Layers,
-        color: "primary" as const,
-        href: "/flashcard-game",
     },
 };
 
@@ -78,36 +68,32 @@ export default function LeaderboardsPage({ session, locale }: LeaderboardsPagePr
             <div className="flex justify-center mb-8">
                 <Tabs
                     selectedKey={selectedGame}
-                    onSelectionChange={(key) => setSelectedGame(key as GameType)}
+                    onSelectionChange={(key) => {
+                        if (key === "speed_round") {
+                            setSelectedGame(key as GameType);
+                        }
+                    }}
                     color="primary"
                     variant="bordered"
                     size="lg"
+                    disabledKeys={["coming_soon"]}
                 >
                     <Tab
                         key="speed_round"
                         title={
-                            <div className="flex items-center gap-2">
+                            <span className="flex items-center gap-2">
                                 <Zap className="w-4 h-4" />
                                 <span className="hidden sm:inline">{t("gameNames.speedRound")}</span>
-                            </div>
+                            </span>
                         }
                     />
                     <Tab
-                        key="word_matching"
+                        key="coming_soon"
                         title={
-                            <div className="flex items-center gap-2">
-                                <Link2 className="w-4 h-4" />
-                                <span className="hidden sm:inline">{t("gameNames.wordMatching")}</span>
-                            </div>
-                        }
-                    />
-                    <Tab
-                        key="flashcard"
-                        title={
-                            <div className="flex items-center gap-2">
-                                <Layers className="w-4 h-4" />
-                                <span className="hidden sm:inline">{t("gameNames.flashcard")}</span>
-                            </div>
+                            <span className="flex items-center gap-2 opacity-50">
+                                <Trophy className="w-4 h-4" />
+                                <span className="hidden sm:inline">{t("comingSoon")}</span>
+                            </span>
                         }
                     />
                 </Tabs>
@@ -219,14 +205,14 @@ export default function LeaderboardsPage({ session, locale }: LeaderboardsPagePr
                                         size="sm"
                                     />
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-medium truncate">
+                                        <span className="font-medium truncate flex items-center">
                                             {entry.userName || t("anonymous")}
                                             {entry.userId === session?.user?.id && (
                                                 <Chip size="sm" color="primary" variant="flat" className="ml-2">
                                                     {t("you")}
                                                 </Chip>
                                             )}
-                                        </p>
+                                        </span>
                                         <p className="text-xs text-default-400">
                                             {entry.gamesPlayed} {t("gamesLabel")} • {entry.bestAccuracy}% {t("accuracy")}
                                         </p>
