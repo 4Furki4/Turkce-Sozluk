@@ -1563,7 +1563,8 @@
     "gamesLabel": "oyun",
     "accuracy": "doğruluk",
     "points": "puan",
-    "anonymous": "Anonim"
+    "anonymous": "Anonim",
+    "comingSoon": "Yakında Daha Fazlası"
   },
   "ForeignTermSuggestions": {
     "title": "Yabancı Terim Önerileri",
