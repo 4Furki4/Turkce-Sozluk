@@ -62,16 +62,46 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
   },
 });
 
-// Create a new ratelimiter that allows 20 requests per 10 seconds
+// Known search engine bot user-agent patterns
+const BOT_USER_AGENTS = [
+  'googlebot',
+  'bingbot',
+  'yandexbot',
+  'duckduckbot',
+  'slurp',        // Yahoo
+  'baiduspider',
+  'facebookexternalhit',
+  'twitterbot',
+  'linkedinbot',
+  'applebot',
+  'petalbot',     // Huawei/Petal Search
+];
+
+/**
+ * Check if the user-agent belongs to a known search engine bot
+ */
+function isSearchBot(userAgent: string | null): boolean {
+  if (!userAgent) return false;
+  const lowerUA = userAgent.toLowerCase();
+  return BOT_USER_AGENTS.some(bot => lowerUA.includes(bot));
+}
+
+// Create a new ratelimiter that allows 60 requests per 10 seconds
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(20, "10 s"),
+  limiter: Ratelimit.slidingWindow(60, "10 s"),
   analytics: true,
   prefix: "@upstash/ratelimit",
 });
 
 const rateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
   if (process.env.NODE_ENV === "development") {
+    return next();
+  }
+
+  // Allow search engine bots to bypass rate limiting for SEO
+  const userAgent = ctx.headers.get("user-agent");
+  if (isSearchBot(userAgent)) {
     return next();
   }
 
