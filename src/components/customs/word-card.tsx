@@ -8,7 +8,7 @@ import { Button, useDisclosure, Popover, PopoverTrigger, PopoverContent, Tabs, T
 import { Link as NextUILink } from "@heroui/react"
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/src/i18n/routing";
-import { Camera, Share2, Volume2, WifiOff, WifiSync } from "lucide-react";
+import { Camera, Eye, Share2, Volume2, WifiOff, WifiSync } from "lucide-react";
 import Image from "next/image";
 import { useRef, } from "react";
 import { captureElementScreenshot } from "../../utils/screenshot";
@@ -34,6 +34,13 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
   const router = useRouter();
   const pathname = usePathname();
   const isOffline = word_data.source === "offline";
+
+  // Helper function to format view counts (e.g., 1500 → "1.5K")
+  const formatViewCount = (count: number): string => {
+    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    return count.toString();
+  };
 
   const cardRef = useRef<HTMLDivElement>(null);
   const handleCameraPress = async () => {
@@ -82,7 +89,6 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
           <Button disableRipple isIconOnly className="bg-transparent" onPress={() => handleSharePress()}>
             <Share2 className="w-5 h-5 sm:w-6 sm:h-6" />
           </Button>
-
         </div>
         <div className="w-full flex items-center justify-between">
           <div className="w-full flex items-center gap-2">
@@ -125,6 +131,14 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                   </span>
                 )}
               </span>
+            </div>
+          )}
+
+          {/* View count indicator - elegant chip style */}
+          {word_data.view_count !== undefined && word_data.view_count > 0 && (
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+              <Eye className="w-3.5 h-3.5" />
+              <span>{formatViewCount(word_data.view_count)} {t("views")}</span>
             </div>
           )}
 
