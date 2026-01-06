@@ -2,6 +2,7 @@ import React from 'react'
 import { getTranslations } from 'next-intl/server'
 import { FeedbackModal } from "@/src/components/customs/modals/add-feedback";
 import { Link } from '@heroui/react';
+import { Link as NextIntlLink } from '@/src/i18n/routing';
 import { Github } from 'lucide-react';
 import { Session } from '@/src/lib/auth';
 import Image from "next/image";
@@ -14,25 +15,25 @@ export default async function Footer({ session }: { session: Session | null }) {
 
     const footerLinks = {
         dictionary: [
-            { href: "/word-list", label: t("links.wordList") },
-            { href: "/announcements", label: t("links.announcements") },
-            { href: "/offline-dictionary", label: t("links.offlineDictionary") },
+            { href: "/word-list" as const, label: t("links.wordList") },
+            { href: "/announcements" as const, label: t("links.announcements") },
+            { href: "/offline-dictionary" as const, label: t("links.offlineDictionary") },
         ],
         games: [
-            { href: "/flashcard-game", label: t("links.flashcardGame") },
-            { href: "/word-matching", label: t("links.wordMatchingGame") },
-            { href: "/speed-round", label: t("links.speedRoundGame") },
-            { href: "/leaderboards", label: t("links.leaderboards") },
+            { href: "/flashcard-game" as const, label: t("links.flashcardGame") },
+            { href: "/word-matching" as const, label: t("links.wordMatchingGame") },
+            { href: "/speed-round" as const, label: t("links.speedRoundGame") },
+            { href: "/leaderboards" as const, label: t("links.leaderboards") },
         ],
         community: [
-            { href: "/contribute-word", label: t("links.contributeWord") },
-            { href: "/pronunciation-voting", label: t("links.pronunciations") },
-            { href: "/feedback", label: t("links.seeFeedback") },
-            { href: "/foreign-term-suggestions", label: t("links.foreignTermSuggestions") },
+            { href: "/contribute-word" as const, label: t("links.contributeWord") },
+            { href: "/pronunciation-voting" as const, label: t("links.pronunciations") },
+            { href: "/feedback" as const, label: t("links.seeFeedback") },
+            { href: "/foreign-term-suggestions" as const, label: t("links.foreignTermSuggestions") },
         ],
         legal: [
-            { href: "/privacy-policy", label: t("links.privacy") },
-            { href: "/terms-of-service", label: t("links.terms") },
+            { href: "/privacy-policy" as const, label: t("links.privacy") },
+            { href: "/terms-of-service" as const, label: t("links.terms") },
         ]
     };
 
@@ -74,9 +75,9 @@ export default async function Footer({ session }: { session: Session | null }) {
                             <ul className="space-y-3">
                                 {footerLinks.dictionary.map(link => (
                                     <li key={link.href}>
-                                        <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                                        <NextIntlLink href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
                                             {link.label}
-                                        </Link>
+                                        </NextIntlLink>
                                     </li>
                                 ))}
                             </ul>
@@ -90,9 +91,9 @@ export default async function Footer({ session }: { session: Session | null }) {
                             <ul className="space-y-3">
                                 {footerLinks.games.map(link => (
                                     <li key={link.href}>
-                                        <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                                        <NextIntlLink href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
                                             {link.label}
-                                        </Link>
+                                        </NextIntlLink>
                                     </li>
                                 ))}
                             </ul>
@@ -106,9 +107,9 @@ export default async function Footer({ session }: { session: Session | null }) {
                             <ul className="space-y-3">
                                 {footerLinks.community.map(link => (
                                     <li key={link.href}>
-                                        <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                                        <NextIntlLink href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
                                             {link.label}
-                                        </Link>
+                                        </NextIntlLink>
                                     </li>
                                 ))}
                                 <li>
@@ -129,9 +130,9 @@ export default async function Footer({ session }: { session: Session | null }) {
                             <ul className="space-y-3">
                                 {footerLinks.legal.map(link => (
                                     <li key={link.href}>
-                                        <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                                        <NextIntlLink href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
                                             {link.label}
-                                        </Link>
+                                        </NextIntlLink>
                                     </li>
                                 ))}
                             </ul>
@@ -149,3 +150,4 @@ export default async function Footer({ session }: { session: Session | null }) {
         </footer>
     )
 }
+
