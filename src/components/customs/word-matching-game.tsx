@@ -277,27 +277,31 @@ export default function WordMatchingGame({ session, locale }: WordMatchingGamePr
     // Render setup screen
     if (gameState === "setup") {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] p-4 w-full">
-                <CustomCard className="w-full max-w-md">
+            <div className="container mx-auto px-4 py-8 max-w-2xl">
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
+                    <p className="text-default-500">{t("description")}</p>
+                </div>
+
+                <CustomCard className="shadow-lg">
                     <CardBody className="p-6 space-y-6">
-                        <div className="text-center">
-                            <h1 className="text-2xl font-bold text-primary mb-2">{t("title")}</h1>
-                            <p className="text-muted-foreground">{t("description")}</p>
+                        <div className="flex items-center gap-2 mb-4">
+                            <Settings className="w-5 h-5 text-primary" />
+                            <h2 className="text-lg font-semibold">{t("settings")}</h2>
                         </div>
 
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-2">
-                                <Settings className="w-5 h-5 text-primary" />
-                                <span className="font-medium">{t("settings")}</span>
-                            </div>
-
+                        {/* Pair Count Selection */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                {t("pairCount")}
+                            </label>
                             <Select
-                                label={t("pairCount")}
                                 selectedKeys={[pairCount]}
                                 onSelectionChange={(keys) => {
                                     const value = Array.from(keys)[0] as string;
                                     if (value) setPairCount(value);
                                 }}
+                                aria-label={t("pairCount")}
                             >
                                 {pairs.map((pair) => (
                                     <SelectItem key={pair.key.toString()} textValue={pair.label}>
@@ -305,14 +309,20 @@ export default function WordMatchingGame({ session, locale }: WordMatchingGamePr
                                     </SelectItem>
                                 ))}
                             </Select>
+                        </div>
 
+                        {/* Game Mode Selection */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                {t("mode")}
+                            </label>
                             <Select
-                                label={t("mode")}
                                 selectedKeys={[gameMode]}
                                 onSelectionChange={(keys) => {
                                     const value = Array.from(keys)[0];
                                     if (value) setGameMode(value as GameMode);
                                 }}
+                                aria-label={t("mode")}
                             >
                                 <SelectItem key="relaxed" startContent={<Clock className="w-4 h-4" />}>
                                     {t("relaxedMode")}
@@ -321,28 +331,35 @@ export default function WordMatchingGame({ session, locale }: WordMatchingGamePr
                                     {t("timedMode")}
                                 </SelectItem>
                             </Select>
+                        </div>
 
+                        {/* Source Selection */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                {t("source")}
+                            </label>
                             <Select
-                                label={t("source")}
                                 selectedKeys={[source]}
                                 onSelectionChange={(keys) => {
                                     const value = Array.from(keys)[0];
                                     if (value) setSource(value as "all" | "saved");
                                 }}
-                                isDisabled={!session}
-                                description={!session ? t("signInForSaved") : undefined}
+                                aria-label={t("source")}
                             >
                                 <SelectItem key="all">{t("sourceAll")}</SelectItem>
-                                <SelectItem key="saved">{t("sourceSaved")}</SelectItem>
+                                <SelectItem key="saved" isDisabled={!session}>
+                                    {t("sourceSaved")}
+                                    {!session && ` (${t("signInForSaved")})`}
+                                </SelectItem>
                             </Select>
                         </div>
 
                         <Button
                             color="primary"
                             size="lg"
-                            className="w-full font-bold"
-                            startContent={<Play className="w-5 h-5" />}
+                            className="w-full mt-4"
                             onPress={startGame}
+                            startContent={<Play className="w-5 h-5" />}
                         >
                             {t("startGame")}
                         </Button>
