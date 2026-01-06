@@ -29,8 +29,9 @@ export const feedbackRouter = createTRPCRouter({
 
             // Verify the token before proceeding
             const { success, score } = await verifyRecaptcha(captchaToken);
-            console.log(success, score);
-            if (!success) {
+
+            // Check if verification failed or score is too low (likely bot)
+            if (!success || (score !== undefined && score < 0.5)) {
                 throw new TRPCError({
                     code: 'FORBIDDEN',
                     message: 'Error.captchaFailed',

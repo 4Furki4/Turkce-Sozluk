@@ -9,23 +9,21 @@ const withNextIntl = createNextIntlPlugin();
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ["utfs.io", "bcpoot6w02.ufs.sh"],
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'utfs.io',
+            },
+            {
+                protocol: 'https',
+                hostname: 'bcpoot6w02.ufs.sh',
+            },
+        ],
     }
 };
 
-
-const config = withNextIntl(nextConfig);
-
 /** @type {(phase: string, defaultConfig: import("next").NextConfig) => Promise<import("next").NextConfig>} */
 module.exports = async (phase) => {
-    /** @type {import("next").NextConfig} */
-    /** @type {import('next').NextConfig} */
-    const nextConfig = {
-        images: {
-            domains: ["utfs.io", "bcpoot6w02.ufs.sh"],
-        }
-    };
-
     const revision = crypto.randomUUID();
     const nextIntlConfig = withNextIntl(nextConfig);
 
