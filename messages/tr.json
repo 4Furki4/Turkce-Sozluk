@@ -199,7 +199,8 @@
     "CreateRelatedWordRequestTitle": "Yeni İlgili Kelime Talebi Oluştur",
     "CreateRelatedPhraseRequestTitle": "Yeni İlgili Deyim Öner",
     "SignInToSuggestChanges": "Değişiklik önermek için lütfen giriş yapın.",
-    "RequestDeletion": "Silme Talep Et"
+    "RequestDeletion": "Silme Talep Et",
+    "views": "görüntüleme"
   },
   "Actions": {
     "SuggestNewWord": "Yeni Kelime Öner",

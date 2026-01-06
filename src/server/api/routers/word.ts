@@ -296,7 +296,7 @@ export const wordRouter = createTRPCRouter({
 
       const result = await db.execute(sql`
         WITH base_word AS (
-          SELECT w.id, w.name, w.phonetic, w.prefix, w.suffix
+          SELECT w.id, w.name, w.phonetic, w.prefix, w.suffix, w.view_count
           FROM words w
           WHERE w.name ILIKE ${purifiedName} -- 1. Find all possible matches (case-insensitive)
           ORDER BY
@@ -312,6 +312,7 @@ export const wordRouter = createTRPCRouter({
               'phonetic', w.phonetic,
               'prefix', w.prefix,
               'suffix', w.suffix,
+              'view_count', COALESCE(w.view_count, 0),
               'attributes', COALESCE(
                 (SELECT json_agg(json_build_object(
                   'attribute_id', wa.id, 

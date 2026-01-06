@@ -204,7 +204,8 @@
     "SignInToSuggestChanges": "Please sign in to suggest changes.",
     "RequestSubmittedSuccessfully": "Request submitted successfully!",
     "RequestSubmissionFailed": "Request submission failed: {error}",
-    "UserNotAuthenticated": "User not authenticated. Please sign in."
+    "UserNotAuthenticated": "User not authenticated. Please sign in.",
+    "views": "views"
   },
   "Actions": {
     "SuggestNewWord": "Suggest New Word",

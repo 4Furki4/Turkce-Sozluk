@@ -88,6 +88,7 @@ type WordSearchResult = {
     phonetic: string;
     prefix: string;
     suffix: string;
+    view_count?: number;
     attributes?: {
       attribute_id: number;
       attribute: string;
