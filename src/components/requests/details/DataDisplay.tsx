@@ -6,14 +6,28 @@ interface DataDisplayProps {
   isNested?: boolean;
 }
 
+// Keys that should have their values translated using RelationTypes
+const RELATION_TYPE_KEYS = ['relationType', 'newRelationType', 'originalRelationType'];
+
 const DataDisplay: React.FC<DataDisplayProps> = ({ data, title, isNested = false }) => {
   const tDb = useTranslations("DbFieldLabels");
   const tRequestDetails = useTranslations("RequestDetails");
+  const tRelationTypes = useTranslations("RelationTypes");
 
-  const renderValue = (value: any): React.ReactNode => {
+  const renderValue = (value: any, key?: string): React.ReactNode => {
     if (value === null || value === undefined || value === '') {
       return <span className="text-muted-foreground italic">{tRequestDetails("empty")}</span>;
     }
+
+    // Translate relation type values
+    if (key && RELATION_TYPE_KEYS.includes(key) && typeof value === 'string') {
+      try {
+        return tRelationTypes(value as any);
+      } catch {
+        return String(value);
+      }
+    }
+
     if (Array.isArray(value)) {
       if (value.length === 0) {
         return <span className="text-muted-foreground italic">{tRequestDetails("emptyArray")}</span>;
@@ -50,7 +64,7 @@ const DataDisplay: React.FC<DataDisplayProps> = ({ data, title, isNested = false
         {allKeys.map((key) => (
           <div key={key} className={`px-4 py-3 md:grid md:grid-cols-3 md:gap-4 text-sm ${isNested ? 'border-t border-border' : ''}`}>
             <div className="font-semibold md:font-medium text-foreground">{tDb(key as any)}</div>
-            <div className="mt-1 md:mt-0 md:col-span-2 text-muted-foreground">{renderValue(data[key])}</div>
+            <div className="mt-1 md:mt-0 md:col-span-2 text-muted-foreground">{renderValue(data[key], key)}</div>
           </div>
         ))}
       </div>
@@ -59,3 +73,4 @@ const DataDisplay: React.FC<DataDisplayProps> = ({ data, title, isNested = false
 };
 
 export { DataDisplay };
+
