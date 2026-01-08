@@ -160,7 +160,7 @@ export default function Sidebar(
                             )}
 
 
-                            {(session?.user as any)?.role === "admin" ? (
+                            {session?.user?.role === "admin" ? (
                                 <li>
                                     <NextIntlLink href={"/dashboard"} className='flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 rounded-sm' onClick={() => setIsSidebarOpen(false)}>
                                         <LayoutDashboard className='h-6 w-6' /> <span className={`text-nowrap`}>{t("Navbar.Dashboard")}</span>
