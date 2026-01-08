@@ -31,17 +31,12 @@ export function AutocompleteSync() {
             // 3. Get our local version
             const localVersion = await getLocalAutocompleteVersion();
 
-            console.log(`[AutocompleteSync] Server version: ${serverVersion}`);
-            console.log(`[AutocompleteSync] Local version: ${localVersion}`);
-
             // 4. Compare versions
             if (localVersion === serverVersion) {
-                console.log("[AutocompleteSync] Autocomplete data is up to date.");
                 return; // All good!
             }
 
             // 5. Versions are different. Fetch and update.
-            console.log("[AutocompleteSync] Stale data. Fetching new list...");
             toast.info(t("downloading"));
             try {
                 // Use the tRPC client for a one-off call
@@ -50,9 +45,6 @@ export function AutocompleteSync() {
                 // 6. Save new data
                 await updateLocalAutocompleteList(wordList, serverVersion);
 
-                console.log(
-                    `[AutocompleteSync] Synced ${wordList.length} words.`,
-                );
                 toast.success(t("success"));
             } catch (error) {
                 console.error("[AutocompleteSync] Failed to sync word list:", error);
