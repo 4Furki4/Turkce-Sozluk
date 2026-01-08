@@ -27,7 +27,7 @@ export default function AddAuthorModal({
     const paramsUtils = api.useUtils().params
     const addAuthorMutation = api.admin.addAuthor.useMutation({
         onError(error, variables, context) {
-            console.log(error)
+            console.error("[AddAuthor] Error:", error)
             toast.error(t("AnErrorOccuredPleaseTryAgain"))
         },
         onSuccess(data) {

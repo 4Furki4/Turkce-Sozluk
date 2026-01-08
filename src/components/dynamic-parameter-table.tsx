@@ -62,10 +62,6 @@ export default function DynamicParameterTable({
     }
     setIsDeleteModalOpen(false);
   };
-  console.log("itemsPerPage", itemsPerPage)
-  console.log("pageNumber", pageNumber)
-  console.log("data", data)
-  console.log("totalCount", totalCount)
 
   type Row = (typeof data)[0];
 

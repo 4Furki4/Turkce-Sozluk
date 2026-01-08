@@ -28,7 +28,7 @@ export default function AddWordAttributeModal({
     const paramsUtils = api.useUtils().params
     const addWordAttributeMutation = api.admin.addNewWordAttribute.useMutation({
         onError(error, variables, context) {
-            console.log(error)
+            console.error("[AddWordAttribute] Error:", error)
             toast.error(t("AnErrorOccuredPleaseTryAgain"))
         },
         onSuccess(data) {

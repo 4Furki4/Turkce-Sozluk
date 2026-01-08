@@ -13,7 +13,6 @@ interface RequestDetailsProps {
 }
 
 const RequestDetails: FC<RequestDetailsProps> = ({ entityType, action, newData, oldData, entityId }) => {
-  console.log(entityType, action, newData, oldData, entityId)
   const Component = getRequestDetailComponent(entityType, action);
 
   if (!Component) {

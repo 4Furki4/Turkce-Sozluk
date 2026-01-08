@@ -10,11 +10,6 @@ interface RelatedWordDisplayProps {
 export default function RelatedWordDisplay({ relatedWordId }: RelatedWordDisplayProps) {
   const locale = useLocale();
   const numericId = Number(relatedWordId);
-  // Add these console logs
-  console.log("[RelatedWordDisplay] relatedWordId prop:", relatedWordId);
-  console.log("[RelatedWordDisplay] numericId:", numericId);
-  console.log("[RelatedWordDisplay] isNaN(numericId):", isNaN(numericId));
-  console.log("[RelatedWordDisplay] Query enabled?:", !isNaN(numericId));
 
   const { data, isLoading, isError, error } = api.word.getWordById.useQuery(
     { id: numericId },

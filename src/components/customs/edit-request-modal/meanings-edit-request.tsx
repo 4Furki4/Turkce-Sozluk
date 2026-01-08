@@ -295,11 +295,9 @@ function MeaningEditRequestForm({
         return acc;
       }, {})
     }
-    console.log('preparedData.meaning', preparedData.meaning)
 
     onSubmit(preparedData);
   })
-  console.log('meaning', meaning.meaning)
   return (
     <Card isBlurred={isBlurEnabled} className="w-full border border-border" >
       <CardHeader className="flex flex-row justify-between items-center">

@@ -27,7 +27,7 @@ export default function AddMeaningAttributeModal({
     const paramsUtils = api.useUtils().params
     const addMeaningAttributeMutation = api.admin.addNewMeaningAttribute.useMutation({
         onError(error, variables, context) {
-            console.log(error)
+            console.error("[AddMeaningAttribute] Error:", error)
             toast.error(t("AnErrorOccuredPleaseTryAgain"))
         },
         onSuccess(data) {

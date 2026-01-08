@@ -36,14 +36,12 @@ export const PronunciationCard: FC<PronunciationCardProps> = ({ wordId, session 
     const { data: pronunciations, isLoading } = api.word.getPronunciationsForWord.useQuery({
         wordId
     });
-    console.log("pronunciation.voteCount", pronunciations)
 
     const utils = api.useUtils();
     const { mutate: toggleVote } = api.vote.togglePronunciationVote.useMutation({
         onMutate: async ({ pronunciationId, voteType }) => {
             await utils.word.getPronunciationsForWord.cancel();
             const previousData = utils.word.getPronunciationsForWord.getData({ wordId });
-            console.log('previousData', previousData)
             utils.word.getPronunciationsForWord.setData({ wordId }, (oldData) => {
                 if (!oldData) return oldData;
                 return oldData.map((pronunciation) => {
@@ -193,7 +191,7 @@ export const PronunciationCard: FC<PronunciationCardProps> = ({ wordId, session 
                                             <ThumbsUp className="w-4 h-4" />
                                         </Button>
                                         <span className={`font-semibold min-w-[2rem] text-center ${Number(pronunciation.voteCount) > 0 ? "text-success" :
-                                                Number(pronunciation.voteCount) < 0 ? "text-danger" : "text-muted-foreground"
+                                            Number(pronunciation.voteCount) < 0 ? "text-danger" : "text-muted-foreground"
                                             }`}>{pronunciation.voteCount}</span>
                                         <Button
                                             isIconOnly
