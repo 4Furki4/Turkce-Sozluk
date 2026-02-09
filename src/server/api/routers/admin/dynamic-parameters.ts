@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import { createTRPCRouter, adminProcedure } from "../../trpc";
 import { db } from "@/db";
 import { eq, like, sql } from "drizzle-orm";
 import { wordAttributes } from "@/db/schema/word_attributes";
@@ -17,7 +17,7 @@ const paginationSchema = z.object({
 
 export const dynamicParametersRouter = createTRPCRouter({
   // Word Attributes
-  getWordAttributes: protectedProcedure
+  getWordAttributes: adminProcedure
     .input(paginationSchema)
     .query(async ({ input }) => {
       const { take, skip, search } = input;
@@ -40,13 +40,13 @@ export const dynamicParametersRouter = createTRPCRouter({
       };
     }),
 
-  createWordAttribute: protectedProcedure
+  createWordAttribute: adminProcedure
     .input(z.object({ attribute: z.string() }))
     .mutation(async ({ input }) => {
       return await db.insert(wordAttributes).values(input);
     }),
 
-  updateWordAttribute: protectedProcedure
+  updateWordAttribute: adminProcedure
     .input(z.object({ id: z.number(), attribute: z.string() }))
     .mutation(async ({ input }) => {
       const { id, ...data } = input;
@@ -56,7 +56,7 @@ export const dynamicParametersRouter = createTRPCRouter({
         .where(eq(wordAttributes.id, id));
     }),
 
-  deleteWordAttribute: protectedProcedure
+  deleteWordAttribute: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       return await db
@@ -65,7 +65,7 @@ export const dynamicParametersRouter = createTRPCRouter({
     }),
 
   // Meaning Attributes
-  getMeaningAttributes: protectedProcedure
+  getMeaningAttributes: adminProcedure
     .input(paginationSchema)
     .query(async ({ input }) => {
       const { take, skip, search } = input;
@@ -88,13 +88,13 @@ export const dynamicParametersRouter = createTRPCRouter({
       };
     }),
 
-  createMeaningAttribute: protectedProcedure
+  createMeaningAttribute: adminProcedure
     .input(z.object({ attribute: z.string() }))
     .mutation(async ({ input }) => {
       return await db.insert(meaningAttributes).values(input);
     }),
 
-  updateMeaningAttribute: protectedProcedure
+  updateMeaningAttribute: adminProcedure
     .input(z.object({ id: z.number(), attribute: z.string() }))
     .mutation(async ({ input }) => {
       const { id, ...data } = input;
@@ -104,7 +104,7 @@ export const dynamicParametersRouter = createTRPCRouter({
         .where(eq(meaningAttributes.id, id));
     }),
 
-  deleteMeaningAttribute: protectedProcedure
+  deleteMeaningAttribute: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       return await db
@@ -113,7 +113,7 @@ export const dynamicParametersRouter = createTRPCRouter({
     }),
 
   // Authors
-  getAuthors: protectedProcedure
+  getAuthors: adminProcedure
     .input(paginationSchema)
     .query(async ({ input }) => {
       const { take, skip, search } = input;
@@ -136,27 +136,27 @@ export const dynamicParametersRouter = createTRPCRouter({
       };
     }),
 
-  createAuthor: protectedProcedure
+  createAuthor: adminProcedure
     .input(z.object({ name: z.string() }))
     .mutation(async ({ input }) => {
       return await db.insert(authors).values(input);
     }),
 
-  updateAuthor: protectedProcedure
+  updateAuthor: adminProcedure
     .input(z.object({ id: z.number(), name: z.string() }))
     .mutation(async ({ input }) => {
       const { id, ...data } = input;
       return await db.update(authors).set(data).where(eq(authors.id, id));
     }),
 
-  deleteAuthor: protectedProcedure
+  deleteAuthor: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       return await db.delete(authors).where(eq(authors.id, input.id));
     }),
 
   // Part of Speech
-  getPartOfSpeeches: protectedProcedure
+  getPartOfSpeeches: adminProcedure
     .input(paginationSchema)
     .query(async ({ input }) => {
       const { take, skip, search } = input;
@@ -179,13 +179,13 @@ export const dynamicParametersRouter = createTRPCRouter({
       };
     }),
 
-  createPartOfSpeech: protectedProcedure
+  createPartOfSpeech: adminProcedure
     .input(z.object({ partOfSpeech: z.string() }))
     .mutation(async ({ input }) => {
       return await db.insert(partOfSpeechs).values(input);
     }),
 
-  updatePartOfSpeech: protectedProcedure
+  updatePartOfSpeech: adminProcedure
     .input(z.object({ id: z.number(), partOfSpeech: z.string() }))
     .mutation(async ({ input }) => {
       const { id, ...data } = input;
@@ -195,7 +195,7 @@ export const dynamicParametersRouter = createTRPCRouter({
         .where(eq(partOfSpeechs.id, id));
     }),
 
-  deletePartOfSpeech: protectedProcedure
+  deletePartOfSpeech: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       return await db
@@ -204,7 +204,7 @@ export const dynamicParametersRouter = createTRPCRouter({
     }),
 
   // Languages
-  getLanguages: protectedProcedure
+  getLanguages: adminProcedure
     .input(paginationSchema)
     .query(async ({ input }) => {
       const { take, skip, search } = input;
@@ -237,7 +237,7 @@ export const dynamicParametersRouter = createTRPCRouter({
       };
     }),
 
-  createLanguage: protectedProcedure
+  createLanguage: adminProcedure
     .input(
       z.object({
         language_code: z.string(),
@@ -249,7 +249,7 @@ export const dynamicParametersRouter = createTRPCRouter({
       return await db.insert(languages).values(input);
     }),
 
-  updateLanguage: protectedProcedure
+  updateLanguage: adminProcedure
     .input(
       z.object({
         id: z.number(),
@@ -263,14 +263,14 @@ export const dynamicParametersRouter = createTRPCRouter({
       return await db.update(languages).set(data).where(eq(languages.id, id));
     }),
 
-  deleteLanguage: protectedProcedure
+  deleteLanguage: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       return await db.delete(languages).where(eq(languages.id, input.id));
     }),
 
   // Roots
-  getRoots: protectedProcedure
+  getRoots: adminProcedure
     .input(paginationSchema)
     .query(async ({ input }) => {
       const { take, skip, search } = input;
@@ -293,7 +293,7 @@ export const dynamicParametersRouter = createTRPCRouter({
       };
     }),
 
-  createRoot: protectedProcedure
+  createRoot: adminProcedure
     .input(
       z.object({
         root: z.string(),
@@ -309,7 +309,7 @@ export const dynamicParametersRouter = createTRPCRouter({
       });
     }),
 
-  updateRoot: protectedProcedure
+  updateRoot: adminProcedure
     .input(
       z.object({
         id: z.number(),
@@ -322,7 +322,7 @@ export const dynamicParametersRouter = createTRPCRouter({
       return await db.update(roots).set(data).where(eq(roots.id, id));
     }),
 
-  deleteRoot: protectedProcedure
+  deleteRoot: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       return await db.delete(roots).where(eq(roots.id, input.id));
