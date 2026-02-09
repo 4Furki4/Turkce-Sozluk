@@ -1,9 +1,19 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
+import { auth as authInstance } from "@/src/lib/auth";
 
 const f = createUploadthing();
 
-const auth = (req: Request) => ({ id: "fakeId" }); // Fake auth function
+const getUser = async (req: Request) => {
+  try {
+    const session = await authInstance.api.getSession({ headers: req.headers });
+    if (!session?.user?.id) return null;
+    return { id: session.user.id };
+  } catch (error) {
+    console.error("Upload auth check failed:", error);
+    return null;
+  }
+};
 
 // FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
@@ -21,7 +31,7 @@ export const ourFileRouter = {
     // Set permissions and file types for this FileRoute
     .middleware(async ({ req }) => {
       // This code runs on your server before upload
-      const user = await auth(req);
+      const user = await getUser(req);
 
       // If you throw, the user will not be able to upload
       if (!user) throw new UploadThingError("Unauthorized");
@@ -41,7 +51,7 @@ export const ourFileRouter = {
   audioUploader: f({ audio: { maxFileSize: "1MB", maxFileCount: 1 } })
     .middleware(async ({ req }) => {
       // This code runs on your server before upload
-      const user = await auth(req);
+      const user = await getUser(req);
 
       // If you throw, the user will not be able to upload
       if (!user) throw new UploadThingError("Unauthorized");
