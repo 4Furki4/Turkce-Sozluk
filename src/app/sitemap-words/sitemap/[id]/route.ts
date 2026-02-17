@@ -9,7 +9,11 @@ const getWordsForPage = unstable_cache(
     async (page: number) => {
         const offset = (page - 1) * PAGE_SIZE;
         return await db
-            .select({ name: words.name })
+            .select({
+                name: words.name,
+                updatedAt: words.updated_at,
+                createdAt: words.created_at,
+            })
             .from(words)
             .orderBy(words.id)
             .offset(offset)
@@ -42,9 +46,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n';
 
-    for (const { name } of rows) {
+    for (const { name, updatedAt, createdAt } of rows) {
         const encoded = encodeURIComponent(name);
-        const lastModified = new Date().toISOString();
+        const rawLastModified = updatedAt ?? createdAt;
+        const lastModified = rawLastModified
+            ? new Date(rawLastModified).toISOString()
+            : new Date().toISOString();
 
         // 1. Turkish (x-default)
         const trUrl = `${baseUrl}/arama/${encoded}`;

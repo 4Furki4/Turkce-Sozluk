@@ -17,8 +17,6 @@ export default function robots(): MetadataRoute.Robots {
         "/profil-tamamla",
         "/api/",
         "/api/*",
-        "/_next/",
-        "/_next/*",
       ],
     },
     {
