@@ -72,9 +72,14 @@ export default function SearchContainer({
     ]);
 
     const isSelecting = useRef(false);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     // Handle meaning search results from tRPC
     useEffect(() => {
+        if (isSelecting.current) {
+            isSelecting.current = false;
+            return;
+        }
         if (searchMode === "meaning") {
             if (meaningSearchData) {
                 setMeaningResults(meaningSearchData as MeaningResult[]);
@@ -121,11 +126,43 @@ export default function SearchContainer({
         setSelectedIndex(-1);
     }, [recommendations]);
 
+    // Global Escape key + click-outside handler
+    useEffect(() => {
+        if (!showRecommendations) return;
+
+        const handleGlobalEscape = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                setShowRecommendations(false);
+                setSelectedIndex(-1);
+            }
+        };
+
+        const handleClickOutside = (e: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                setShowRecommendations(false);
+                setSelectedIndex(-1);
+            }
+        };
+
+        document.addEventListener("keydown", handleGlobalEscape);
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("keydown", handleGlobalEscape);
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [showRecommendations]);
+
     const currentResults = searchMode === "meaning" ? meaningResults : recommendations;
     const currentResultsLength = searchMode === "meaning" ? meaningResults.length : recommendations.length;
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (!currentResultsLength) return;
+        if (e.key === "Escape") {
+            setShowRecommendations(false);
+            setSelectedIndex(-1);
+            return;
+        }
+
+        if (!currentResultsLength || !showRecommendations) return;
 
         switch (e.key) {
             case "ArrowDown":
@@ -149,10 +186,6 @@ export default function SearchContainer({
                 } else {
                     handleSearch(e as unknown as React.FormEvent);
                 }
-                break;
-            case "Escape":
-                setShowRecommendations(false);
-                setSelectedIndex(-1);
                 break;
         }
     };
@@ -187,7 +220,7 @@ export default function SearchContainer({
     };
 
     return (
-        <div className={cn("w-full", className)}>
+        <div className={cn("w-full", className)} ref={containerRef}>
             <form onSubmit={handleSearch}>
                 <div className="relative group">
                     {/* Search Glow Effect - Only show if not in custom container (implied by default wrapper) */}
@@ -349,6 +382,7 @@ export default function SearchContainer({
                     <button
                         type="button"
                         onClick={() => {
+                            isSelecting.current = true;
                             setSearchMode("word");
                             setShowRecommendations(false);
                             setMeaningResults([]);
@@ -367,6 +401,7 @@ export default function SearchContainer({
                     <button
                         type="button"
                         onClick={() => {
+                            isSelecting.current = true;
                             setSearchMode("meaning");
                             setShowRecommendations(false);
                             setRecommendations([]);
