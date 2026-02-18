@@ -94,6 +94,9 @@
       "popularSearches": "Popüler Aramalar",
       "searchError": "Lütfen aramak için bir kelime girin",
       "patternSearchTooltip": "Desen Arama: Bilinmeyen harfler için '_' kullanın. Örn: 'k_l_m' -> 'kalem'",
+      "searchByWord": "Kelime",
+      "searchByMeaning": "Anlam",
+      "searchByMeaningPlaceholder": "Anlam ile ara...",
       "feature1": {
         "title": "Katkıda Bulunun",
         "description": "Yeni kelimeler, anlamlar ve özellikler önererek ve telaffuzlar ekleyerek sözlüğe katkıda bulunabilirsiniz"
