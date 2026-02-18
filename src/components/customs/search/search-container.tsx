@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Search as SearchIcon, PuzzleIcon, KeyboardIcon, TrendingUpIcon } from "lucide-react";
+import { Search as SearchIcon, PuzzleIcon, KeyboardIcon, TrendingUpIcon, BookOpenIcon, TypeIcon } from "lucide-react";
 import { useRouter } from "@/src/i18n/routing";
 import { Input } from "@heroui/react";
 import { useEffect, useRef, useState } from "react";
@@ -12,6 +12,15 @@ import { TurkishKeyboard } from "@/src/components/customs/utils/TurkishKeyboard"
 import { searchAutocompleteOffline, searchByPattern } from "@/src/lib/offline-db";
 import { useTypewriter } from "@/src/hooks/use-typewriter";
 import { api } from "@/src/trpc/react";
+
+type SearchMode = "word" | "meaning";
+
+interface MeaningResult {
+    id: string;
+    name: string;
+    meaning: string;
+    formattedMeaning: string | undefined;
+}
 
 interface SearchContainerProps {
     className?: string;
@@ -34,6 +43,7 @@ export default function SearchContainer({
     const [inputError, setInputError] = useState<string>("");
     const [showRecommendations, setShowRecommendations] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(-1);
+    const [searchMode, setSearchMode] = useState<SearchMode>("word");
 
     const { data: trendingWords, isLoading: isTrendingLoading } = api.word.getPopularWords.useQuery({
         limit: 5,
@@ -45,7 +55,15 @@ export default function SearchContainer({
 
     const debouncedInput = useDebounce(wordInput, 300);
     const [recommendations, setRecommendations] = useState<string[]>([]);
+    const [meaningResults, setMeaningResults] = useState<MeaningResult[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+
+    const { data: meaningSearchData, isFetching: isMeaningFetching } = api.search.searchByMeaning.useQuery(
+        { query: debouncedInput },
+        {
+            enabled: searchMode === "meaning" && debouncedInput.length >= 3,
+        }
+    );
 
     const typeWriterText = useTypewriter([
         t("hero.searchPlaceholder"),
@@ -55,11 +73,24 @@ export default function SearchContainer({
 
     const isSelecting = useRef(false);
 
+    // Handle meaning search results from tRPC
+    useEffect(() => {
+        if (searchMode === "meaning") {
+            if (meaningSearchData) {
+                setMeaningResults(meaningSearchData as MeaningResult[]);
+                setShowRecommendations(meaningSearchData.length > 0);
+            }
+        }
+    }, [meaningSearchData, searchMode]);
+
+    // Handle word search (existing behavior)
     useEffect(() => {
         if (isSelecting.current) {
             isSelecting.current = false;
             return;
         }
+
+        if (searchMode === "meaning") return;
 
         if (debouncedInput.length < 2) {
             setRecommendations([]);
@@ -84,20 +115,23 @@ export default function SearchContainer({
         };
 
         fetchSuggestions();
-    }, [debouncedInput]);
+    }, [debouncedInput, searchMode]);
 
     useEffect(() => {
         setSelectedIndex(-1);
     }, [recommendations]);
 
+    const currentResults = searchMode === "meaning" ? meaningResults : recommendations;
+    const currentResultsLength = searchMode === "meaning" ? meaningResults.length : recommendations.length;
+
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (!recommendations?.length) return;
+        if (!currentResultsLength) return;
 
         switch (e.key) {
             case "ArrowDown":
                 e.preventDefault();
                 setSelectedIndex(prev =>
-                    prev < recommendations.length - 1 ? prev + 1 : prev
+                    prev < currentResultsLength - 1 ? prev + 1 : prev
                 );
                 break;
             case "ArrowUp":
@@ -107,7 +141,11 @@ export default function SearchContainer({
             case "Enter":
                 e.preventDefault();
                 if (selectedIndex >= 0) {
-                    handleRecommendationClick(recommendations[selectedIndex]);
+                    if (searchMode === "meaning") {
+                        handleRecommendationClick(meaningResults[selectedIndex].name);
+                    } else {
+                        handleRecommendationClick(recommendations[selectedIndex]);
+                    }
                 } else {
                     handleSearch(e as unknown as React.FormEvent);
                 }
@@ -236,7 +274,7 @@ export default function SearchContainer({
                         color="primary"
                         variant="flat"
                         name="search"
-                        placeholder={typeWriterText}
+                        placeholder={searchMode === "meaning" ? t("hero.searchByMeaningPlaceholder") : typeWriterText}
                         isInvalid={!!inputError}
                         errorMessage={inputError}
                         type="search"
@@ -244,13 +282,40 @@ export default function SearchContainer({
 
                     {/* Recommendations Dropdown */}
                     {showRecommendations && (
-                        <div className="absolute z-50 w-full mt-2 bg-background/95 backdrop-blur-xl border border-zinc-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                            {isLoading ? (
+                        <div className="absolute z-[999] w-full mt-2 bg-background/95 backdrop-blur-xl border border-zinc-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[400px] overflow-y-auto">
+                            {(isLoading || (searchMode === "meaning" && isMeaningFetching)) ? (
                                 <div className="p-2">
                                     {Array.from({ length: 3 }).map((_, idx) => (
                                         <div key={idx} className="h-10 mx-2 my-1 bg-white/5 rounded-lg animate-pulse" />
                                     ))}
                                 </div>
+                            ) : searchMode === "meaning" ? (
+                                meaningResults.length > 0 && (
+                                    <ul role="listbox" className="py-2">
+                                        {meaningResults.map((result, index) => (
+                                            <li
+                                                key={`${result.id}-${index}`}
+                                                role="option"
+                                                aria-selected={index === selectedIndex}
+                                                className={cn(
+                                                    "px-4 py-2.5 cursor-pointer transition-all duration-150 flex items-start gap-3 text-left",
+                                                    index === selectedIndex ? "bg-primary/10 text-primary" : "text-zinc-400 hover:bg-white/5 hover:text-foreground"
+                                                )}
+                                                onClick={() => handleRecommendationClick(result.name)}
+                                                onMouseEnter={() => setSelectedIndex(index)}
+                                            >
+                                                <BookOpenIcon className={cn("w-4 h-4 mt-1 shrink-0", index === selectedIndex ? "text-primary" : "text-zinc-600")} />
+                                                <div className="flex flex-col gap-0.5 min-w-0">
+                                                    <span className="font-medium text-foreground text-sm">{result.name}</span>
+                                                    <span
+                                                        className="text-xs text-zinc-500 line-clamp-1 [&>em]:text-primary [&>em]:font-semibold [&>em]:not-italic"
+                                                        dangerouslySetInnerHTML={{ __html: result.formattedMeaning ?? result.meaning }}
+                                                    />
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )
                             ) : (
                                 recommendations.length > 0 && (
                                     <ul role="listbox" className="py-2">
@@ -277,6 +342,48 @@ export default function SearchContainer({
                     )}
                 </div>
             </form>
+
+            {/* Search Mode Toggle */}
+            <div className="flex justify-center mt-3">
+                <div className="inline-flex items-center rounded-lg bg-background/50 backdrop-blur-md border border-zinc-800 p-0.5 gap-0.5">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setSearchMode("word");
+                            setShowRecommendations(false);
+                            setMeaningResults([]);
+                            setSelectedIndex(-1);
+                        }}
+                        className={cn(
+                            "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200",
+                            searchMode === "word"
+                                ? "bg-primary/15 text-primary shadow-sm"
+                                : "text-zinc-500 hover:text-zinc-300"
+                        )}
+                    >
+                        <TypeIcon className="w-3.5 h-3.5" />
+                        {t("hero.searchByWord")}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setSearchMode("meaning");
+                            setShowRecommendations(false);
+                            setRecommendations([]);
+                            setSelectedIndex(-1);
+                        }}
+                        className={cn(
+                            "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200",
+                            searchMode === "meaning"
+                                ? "bg-primary/15 text-primary shadow-sm"
+                                : "text-zinc-500 hover:text-zinc-300"
+                        )}
+                    >
+                        <BookOpenIcon className="w-3.5 h-3.5" />
+                        {t("hero.searchByMeaning")}
+                    </button>
+                </div>
+            </div>
 
             {/* Trending Tags */}
             {showTrending && (

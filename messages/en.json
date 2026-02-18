@@ -94,6 +94,9 @@
       "searchError": "Please enter a word to search",
       "turkishLetters": "Turkish letters",
       "patternSearchTooltip": "Pattern Search: Use '_' for unknown letters. Ex: 'k_l_m' -> 'kalem'",
+      "searchByWord": "Word",
+      "searchByMeaning": "Meaning",
+      "searchByMeaningPlaceholder": "Search by meaning...",
       "feature1": {
         "title": "Contribute",
         "description": "You can contribute to the dictionary by suggesting new words, meanings, and features, and by adding pronunciations."
