@@ -6,10 +6,17 @@ import { CardHeader, CardBody, CardFooter, Button, Skeleton } from "@heroui/reac
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { BookOpen } from "lucide-react";
+import { useOnlineStatus } from "@/src/hooks/use-online-status";
 
 export function GalatiMeshurCard() {
     const t = useTranslations("Home.HomeExtras");
-    const { data, isLoading } = api.extras.getGalatiMeshur.useQuery({ limit: 1 });
+    const isOnline = useOnlineStatus();
+    const { data, isLoading } = api.extras.getGalatiMeshur.useQuery(
+        { limit: 1 },
+        {
+            enabled: isOnline,
+        },
+    );
 
     if (isLoading) {
         return (

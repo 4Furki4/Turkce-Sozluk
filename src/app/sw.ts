@@ -13,79 +13,46 @@ declare global {
 }
 
 // Service Worker version for debugging
-const SW_VERSION = "v1.1.0";
+const SW_VERSION = "v1.2.0";
 console.log(`[SW] Service Worker ${SW_VERSION} starting...`);
 
 declare const self: ServiceWorkerGlobalScope;
 
-// --- 1. NEW CUSTOM HANDLER ---
-// This handler checks if the user is offline. If they are,
-// it redirects any request for a Turkish search page
-// to the equivalent English search page, which we know works offline.
-const offlineTrRedirectHandler = async ({ request }: { request: Request }) => {
-    // Check if we are online.
-    if (navigator.onLine) {
-        // We are online. Let the request proceed as normal.
-        // It will be handled by the default cache or network.
-        try {
-            return await fetch(request);
-        } catch (e) {
-            // If network fails (even if "online"), fall through to fallbacks
-            return new Response("", { status: 500 });
-        }
-    }
+const EN_SEARCH_DYNAMIC_PATH = /^\/en\/search\/.+/;
+const TR_SEARCH_DYNAMIC_PATH = /^\/tr\/(?:arama|search)\/.+/;
 
-    // We are OFFLINE.
-    // Construct the new URL.
-    const url = new URL(request.url);
-    // Get the word from the path, e.g., "ahlak" from "/tr/arama/ahlak"
-    const word = url.pathname.split("/").pop();
+const SEARCH_PREFIXES = ["/en/search", "/tr/arama", "/tr/search"];
+const OFFLINE_DICTIONARY_PREFIXES = [
+    "/en/offline-dictionary",
+    "/tr/offline-dictionary",
+    "/tr/%C3%A7evrim-d%C4%B1%C5%9F%C4%B1-s%C3%B6zl%C3%BCk",
+];
+const OFFLINE_PAGE_PREFIXES = [
+    "/~offline",
+    "/en/~offline",
+    "/tr/~%C3%A7evrim-d%C4%B1%C5%9F%C4%B1",
+];
 
-    // Handle base path /tr/arama as well, redirect to /en/search
-    if (!word) {
-        const newUrl = "/en/search";
-        console.warn(
-            `[SW] Offline TR base path. Redirecting ${url.pathname} to ${newUrl}`,
-        );
-        return Response.redirect(newUrl, 302);
-    }
+const isDocumentRequest = (request: Request) => request.destination === "document";
 
-    const newUrl = `/en/search/${word}`;
-
-    console.warn(
-        `[SW] Offline /tr request. Redirecting ${url.pathname} to ${newUrl}`,
-    );
-
-    // Return a Redirect Response.
-    // The browser will follow this and make a new request
-    // for /en/search/ahlak, which Fallback 1 will
-    // handle correctly.
-    return Response.redirect(newUrl, 302);
+const startsWithAny = (pathname: string, prefixes: readonly string[]) => {
+    const normalizedPathname = pathname.toLowerCase();
+    return prefixes.some((prefix) => normalizedPathname.startsWith(prefix.toLowerCase()));
 };
-// --- END NEW HANDLER ---
 
 const serwist = new Serwist({
     precacheEntries: self.__SW_MANIFEST,
     skipWaiting: true,
     clientsClaim: true,
     navigationPreload: true,
-    runtimeCaching: [
-        {
-            // This rule intercepts navigation requests to ANY Turkish search path.
-            matcher: ({ request, url }) =>
-                request.destination === "document" &&
-                url.pathname.startsWith("/tr/arama"),
-            handler: offlineTrRedirectHandler, // Use our new custom handler
-        },
-        ...defaultCache, // Include all the default caching rules
-    ],
+    runtimeCaching: [...defaultCache],
 
     fallbacks: {
         entries: [
             {
                 url: "/en/search",
                 matcher({ request }) {
-                    if (request.destination !== "document") {
+                    if (!isDocumentRequest(request)) {
                         return false;
                     }
 
@@ -95,8 +62,28 @@ const serwist = new Serwist({
                     console.log(`[SW] Checking search fallback for: ${pathname}`);
 
                     // Match English search pages with dynamic routes
-                    if (pathname.match(/^\/en\/search\/.+/)) {
+                    if (pathname.match(EN_SEARCH_DYNAMIC_PATH)) {
                         console.log(`[SW] Serving /en/search for: ${pathname}`);
+                        return true;
+                    }
+
+                    return false;
+                },
+            },
+            {
+                url: "/tr/arama",
+                matcher({ request }) {
+                    if (!isDocumentRequest(request)) {
+                        return false;
+                    }
+
+                    const url = new URL(request.url);
+                    const pathname = url.pathname;
+
+                    console.log(`[SW] Checking TR search fallback for: ${pathname}`);
+
+                    if (pathname.match(TR_SEARCH_DYNAMIC_PATH)) {
+                        console.log(`[SW] Serving /tr/arama for: ${pathname}`);
                         return true;
                     }
 
@@ -108,7 +95,7 @@ const serwist = new Serwist({
                 matcher({ request }) {
                     // Only redirect to offline page for document requests that are NOT search pages
                     // This allows search pages to load normally and use IndexedDB for offline queries
-                    if (request.destination !== "document") {
+                    if (!isDocumentRequest(request)) {
                         return false;
                     }
 
@@ -118,10 +105,7 @@ const serwist = new Serwist({
                     console.log(`[SW] Checking offline fallback for: ${pathname}`);
 
                     // Don't redirect search pages (they're handled above)
-                    if (
-                        pathname.includes("/tr/arama") ||
-                        pathname.includes("/en/search")
-                    ) {
+                    if (startsWithAny(pathname, SEARCH_PREFIXES)) {
                         console.log(
                             `[SW] Search page handled by other fallback: ${pathname}`,
                         );
@@ -129,8 +113,14 @@ const serwist = new Serwist({
                     }
 
                     // Allow offline dictionary page to load
-                    if (pathname.includes("/offline-dictionary")) {
+                    if (startsWithAny(pathname, OFFLINE_DICTIONARY_PREFIXES)) {
                         console.log(`[SW] Allowing offline dictionary: ${pathname}`);
+                        return false;
+                    }
+
+                    // Never fallback on the fallback page itself
+                    if (startsWithAny(pathname, OFFLINE_PAGE_PREFIXES)) {
+                        console.log(`[SW] Allowing offline page route: ${pathname}`);
                         return false;
                     }
 

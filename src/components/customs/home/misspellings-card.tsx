@@ -6,10 +6,17 @@ import { CardHeader, CardBody, Skeleton } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { XCircle, CheckCircle2, AlertTriangle } from "lucide-react";
 import Link from "next/link";
+import { useOnlineStatus } from "@/src/hooks/use-online-status";
 
 export function MisspellingsCard() {
     const t = useTranslations("Home.HomeExtras");
-    const { data: misspellings, isLoading } = api.extras.getMisspellings.useQuery({ limit: 5 });
+    const isOnline = useOnlineStatus();
+    const { data: misspellings, isLoading } = api.extras.getMisspellings.useQuery(
+        { limit: 5 },
+        {
+            enabled: isOnline,
+        },
+    );
 
     if (isLoading) {
         return (

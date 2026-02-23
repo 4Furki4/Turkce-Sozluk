@@ -14,6 +14,7 @@ import { preferencesState } from '@/src/store/preferences';
 // 1. --- IMPORT IDB HELPERS ---
 import { getCachedPopularData, setCachedPopularData } from '@/src/lib/offline-db';
 import PopularSearchesSkeleton from './popular-searches-skeleton';
+import { useOnlineStatus } from '@/src/hooks/use-online-status';
 
 
 interface PopularWord {
@@ -28,6 +29,7 @@ const cacheMaxAge = 24 * 60 * 60 * 1000; // 24 hours (in ms)
 export default function PopularSearches() {
     const t = useTranslations('Components.PopularSearches');
     const { isBlurEnabled } = useSnapshot(preferencesState);
+    const isOnline = useOnlineStatus();
 
     // 2. --- STATE FOR DISPLAYED DATA ---
     // This will hold data from cache OR fresh from network
@@ -63,6 +65,7 @@ export default function PopularSearches() {
             // `gcTime` (formerly cacheTime) controls how long data
             // stays in memory after being unused.
             gcTime: cacheMaxAge,
+            enabled: isOnline,
 
             // We'll handle success and error in effects.
         }

@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { TurkishKeyboard } from "./customs/utils/TurkishKeyboard"; // Keeping for reference if needed, but unused now
 import { searchAutocompleteOffline, searchByPattern } from "@/src/lib/offline-db"; // Keeping for reference if needed
 import { useTypewriter } from "../hooks/use-typewriter";
+import { useOnlineStatus } from "@/src/hooks/use-online-status";
 
 import { api } from "@/src/trpc/react";
 import CustomCard from "./customs/heroui/custom-card";
@@ -92,7 +93,10 @@ export default function Hero({ children }: {
 
 function BentoWordOfTheDay({ locale }: { locale: string }) {
   const t = useTranslations("Home");
-  const { data: wordOfTheDay, isLoading } = api.word.getWordOfTheDay.useQuery();
+  const isOnline = useOnlineStatus();
+  const { data: wordOfTheDay, isLoading } = api.word.getWordOfTheDay.useQuery(undefined, {
+    enabled: isOnline
+  });
 
   if (isLoading) {
     return (
@@ -182,7 +186,13 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
 function BentoCommonMistake() {
   const t = useTranslations("Home");
   const [offset, setOffset] = useState(0);
-  const { data, isLoading } = api.extras.getMisspellings.useQuery({ limit: 1, offset });
+  const isOnline = useOnlineStatus();
+  const { data, isLoading } = api.extras.getMisspellings.useQuery(
+    { limit: 1, offset },
+    {
+      enabled: isOnline,
+    },
+  );
 
   const handleNext = () => {
     if (data?.total && offset < data.total - 1) {
@@ -259,7 +269,13 @@ function BentoCommonMistake() {
 function BentoGalatiMeshur() {
   const t = useTranslations("Home");
   const [offset, setOffset] = useState(0);
-  const { data, isLoading } = api.extras.getGalatiMeshur.useQuery({ limit: 1, offset });
+  const isOnline = useOnlineStatus();
+  const { data, isLoading } = api.extras.getGalatiMeshur.useQuery(
+    { limit: 1, offset },
+    {
+      enabled: isOnline,
+    },
+  );
 
   const handleNext = () => {
     if (data?.total && offset < data.total - 1) {
