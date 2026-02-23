@@ -16,7 +16,6 @@ import { ChevronDown, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, His
 import { authClient, type User } from "@/src/lib/auth-client"; // Added
 import { useTheme } from "next-themes";
 import { useLocale } from "next-intl";
-import { useParams, useSearchParams } from "next/navigation";
 import { useRouter } from "@/src/i18n/routing";
 import { usePathname, Link as NextIntlLink } from "@/src/i18n/routing";
 // import { Session } from "@/src/lib/auth"; // Removed
@@ -27,6 +26,7 @@ import { preferencesState, toggleBlur } from "@/src/store/preferences";
 import { cn } from "@/lib/utils";
 import CustomDropdown from "./heroui/custom-dropdown";
 import { Session } from "@/src/lib/auth-client";
+import { useLocaleSwitchHref } from "@/src/hooks/useLocaleSwitchHref";
 
 type NavbarProps = {
   session: Session | null;
@@ -62,10 +62,9 @@ export default function Navbar({
 }: NavbarProps & { setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>> }) { // Merged props type
   const { theme, setTheme } = useTheme();
   const pathName = usePathname();
-  const searchParams = useSearchParams();
   const locale = useLocale();
-  const params = useParams();
   const router = useRouter();
+  const languageSwitchHref = useLocaleSwitchHref();
   const isAuthPage = ["/signup", "/signin", "/forgot-password"].includes(
     pathName
   );
@@ -211,15 +210,7 @@ export default function Navbar({
             <NextIntlLink
               className="w-full hidden md:block"
               // @ts-ignore
-              href={{
-                pathname: pathName,
-                query: searchParams.toString(),
-                params: {
-                  word: params.word as any,
-                  id: params.id as any,
-                  slug: params.slug as any,
-                },
-              }}
+              href={languageSwitchHref}
               locale="tr"
             >
               <span className="flex items-center gap-2">
@@ -230,15 +221,7 @@ export default function Navbar({
             <NextIntlLink
               className="w-full hidden md:block"
               // @ts-ignore
-              href={{
-                pathname: pathName,
-                query: searchParams.toString(),
-                params: {
-                  word: params.word as any,
-                  id: params.id as any,
-                  slug: params.slug as any,
-                },
-              }}
+              href={languageSwitchHref}
               locale="en"
             >
               <span className="flex items-center gap-2">
