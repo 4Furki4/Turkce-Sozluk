@@ -34,6 +34,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# local database backups
+/backups/postgres/
 
 # windsurf rules
 .windsurfrules
