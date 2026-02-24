@@ -191,6 +191,7 @@ export default async function RootLayout({
                     WordListIntl={t("Word List")}
                     TitleIntl={t("Title")}
                     ProfileIntl={t("Profile")}
+                    DashboardIntl={t("Dashboard")}
                     SavedWordsIntl={t("SavedWords")}
                     MyRequestsIntl={t("MyRequests")}
                     SearchHistoryIntl={t("SearchHistory")}

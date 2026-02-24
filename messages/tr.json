@@ -153,7 +153,10 @@
       "explanation": "Açıklama",
       "actually": "Doğrusu: {correctUsage}",
       "seeDetailedMeaning": "Detaylı kelime anlamına bakmak isterseniz:",
-      "seeInDictionary": "Sözlükte Gör"
+      "seeInDictionary": "Sözlükte Gör",
+      "readMore": "Devamını oku",
+      "noMisspellingsFound": "Henüz sık yapılan yanlış bulunmuyor.",
+      "noGalatiMeshurFound": "Henüz Galat-ı Meşhur kaydı bulunmuyor."
     }
   },
   "WordCard": {

@@ -183,6 +183,14 @@ export const routing = defineRouting({
       "en": "/offline-dictionary",
       "tr": "/çevrim-dışı-sözlük",
     },
+    "/sik-yapilan-yanlislar": {
+      "en": "/common-misspellings",
+      "tr": "/sik-yapilan-yanlislar",
+    },
+    "/galati-meshur": {
+      "en": "/galati-meshur",
+      "tr": "/galati-meshur",
+    },
     "/galati-meshur/[id]": {
       "en": "/galati-meshur/[id]",
       "tr": "/galati-meshur/[id]",

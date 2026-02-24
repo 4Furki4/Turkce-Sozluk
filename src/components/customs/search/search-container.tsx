@@ -23,13 +23,6 @@ interface MeaningResult {
     formattedMeaning: string | undefined;
 }
 
-interface MeaningResult {
-    id: string;
-    name: string;
-    meaning: string;
-    formattedMeaning: string | undefined;
-}
-
 interface SearchContainerProps {
     className?: string;
     inputWrapperClassName?: string;
@@ -79,6 +72,7 @@ export default function SearchContainer({
         t("hero.searchPlaceholderPhrase"),
         t("hero.searchPlaceholderProverb")
     ]);
+    const activePlaceholder = searchMode === "meaning" ? t("hero.searchByMeaningPlaceholder") : typeWriterText;
 
     const isSelecting = useRef(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -234,7 +228,7 @@ export default function SearchContainer({
                 <div className="relative group">
                     {/* Search Glow Effect - Only show if not in custom container (implied by default wrapper) */}
                     {!inputWrapperClassName && (
-                        <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 rounded-lg blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute -inset-1 bg-gradient-to-r from-primary/15 via-primary/8 to-primary/15 rounded-lg blur-lg opacity-0 group-focus-within:opacity-70 transition-opacity duration-500" />
                     )}
 
                     <Input
@@ -271,11 +265,11 @@ export default function SearchContainer({
                                 "h-14",
                                 "bg-background/50",
                                 "backdrop-blur-md",
-                                "border border-primary",
-                                "shadow-lg",
-                                "hover:border-zinc-700",
+                                "border border-primary/60",
+                                "shadow-[0_10px_30px_rgba(169,16,17,0.18)]",
+                                "hover:border-primary/70",
                                 "group-data-[focus=true]:border-primary/50",
-                                "group-data-[focus=true]:bg-zinc-900/60",
+                                "group-data-[focus=true]:bg-zinc-900/40",
                                 "group-data-[focus=true]:bg-background",
                                 "transition-all duration-300",
                                 "!cursor-text",
@@ -316,7 +310,7 @@ export default function SearchContainer({
                         color="primary"
                         variant="flat"
                         name="search"
-                        placeholder={searchMode === "meaning" ? t("hero.searchByMeaningPlaceholder") : typeWriterText}
+                        placeholder={activePlaceholder}
                         isInvalid={!!inputError}
                         errorMessage={inputError}
                         type="search"

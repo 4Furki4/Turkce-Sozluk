@@ -27,6 +27,7 @@ export default function NavbarAndSidebar({
     ariaLanguages,
     ariaSwitchTheme,
     ariaBlur,
+    DashboardIntl,
     ContributeIntl,
     FeedbackIntl,
     SearchIntl,
@@ -54,6 +55,7 @@ export default function NavbarAndSidebar({
     ariaLanguages: string,
     ariaSwitchTheme: string,
     ariaBlur: string,
+    DashboardIntl: string,
     ContributeIntl: string,
     FeedbackIntl: string,
     SearchIntl: string,
@@ -89,8 +91,10 @@ export default function NavbarAndSidebar({
                 ariaLanguages={ariaLanguages}
                 ariaSwitchTheme={ariaSwitchTheme}
                 ariaBlur={ariaBlur}
+                DashboardIntl={DashboardIntl}
                 ContributeIntl={ContributeIntl}
                 FeedbackIntl={FeedbackIntl}
+                SearchIntl={SearchIntl}
                 LearnIntl={LearnIntl}
                 FlashcardGameIntl={FlashcardGameIntl}
                 WordMatchingGameIntl={WordMatchingGameIntl}
@@ -110,4 +114,3 @@ export default function NavbarAndSidebar({
         </>
     )
 }
-

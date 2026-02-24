@@ -8,7 +8,13 @@ import { eq, sql } from "drizzle-orm";
 
 export const extrasRouter = createTRPCRouter({
     getGalatiMeshur: publicProcedure
-        .input(z.object({ limit: z.number().default(1), offset: z.number().default(0) }))
+        .input(
+            z.object({
+                limit: z.number().default(1),
+                offset: z.number().default(0),
+                randomSeed: z.string().optional(),
+            }),
+        )
         .query(async ({ input }) => {
             // Get total count
             const totalCount = await db
@@ -26,7 +32,11 @@ export const extrasRouter = createTRPCRouter({
                 })
                 .from(galatiMeshur)
                 .innerJoin(words, eq(galatiMeshur.wordId, words.id))
-                .orderBy(galatiMeshur.id) // Valid order for pagination
+                .orderBy(
+                    input.randomSeed
+                        ? sql`md5(${galatiMeshur.id}::text || ${input.randomSeed})`
+                        : galatiMeshur.id,
+                )
                 .limit(input.limit)
                 .offset(input.offset);
 
@@ -37,7 +47,13 @@ export const extrasRouter = createTRPCRouter({
         }),
 
     getMisspellings: publicProcedure
-        .input(z.object({ limit: z.number().default(1), offset: z.number().default(0) }))
+        .input(
+            z.object({
+                limit: z.number().default(1),
+                offset: z.number().default(0),
+                randomSeed: z.string().optional(),
+            }),
+        )
         .query(async ({ input }) => {
             // Get total count
             const totalCount = await db
@@ -54,7 +70,11 @@ export const extrasRouter = createTRPCRouter({
                 })
                 .from(misspellings)
                 .innerJoin(words, eq(misspellings.correctWordId, words.id))
-                .orderBy(misspellings.id) // Valid order for pagination
+                .orderBy(
+                    input.randomSeed
+                        ? sql`md5(${misspellings.id}::text || ${input.randomSeed})`
+                        : misspellings.id,
+                )
                 .limit(input.limit)
                 .offset(input.offset);
 

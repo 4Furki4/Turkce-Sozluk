@@ -32,12 +32,12 @@ export default function Hero({ children }: {
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[500px] pointer-events-none -z-10"
         style={{
-          background: `radial-gradient(circle at 50% 0%, rgba(169, 17, 1, 0.15) 0%, transparent 0%)`
+          background: `radial-gradient(circle at 50% 0%, rgba(169, 17, 1, 0.09) 0%, transparent 70%)`
         }}
       />
 
       {/* Dot Pattern Background */}
-      <div className="absolute inset-0 -z-20 h-full w-full bg-[radial-gradient(#e5e7eb_2px,transparent_2px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)] pointer-events-none opacity-50" />
+      <div className="absolute inset-0 -z-20 h-full w-full bg-[radial-gradient(#e5e7eb_2px,transparent_2px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)] pointer-events-none opacity-35" />
 
       <div className="mx-auto max-w-7xl px-4 pb-12 pt-10 sm:pb-16 lg:px-8 w-full">
         {/* --- Hero Header Section --- */}
@@ -186,9 +186,10 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
 function BentoCommonMistake() {
   const t = useTranslations("Home");
   const [offset, setOffset] = useState(0);
+  const [randomSeed] = useState(() => Math.random().toString(36).slice(2));
   const isOnline = useOnlineStatus();
   const { data, isLoading } = api.extras.getMisspellings.useQuery(
-    { limit: 1, offset },
+    { limit: 1, offset, randomSeed },
     {
       enabled: isOnline,
     },
@@ -214,10 +215,13 @@ function BentoCommonMistake() {
       <div className="absolute inset-0 dark:bg-gradient-to-b dark:from-transparent dark:from-10% dark:to-primary/20 bg-gradient-to-b from-transparent to-primary/20 pointer-events-none" />
 
       <CardHeader className="absolute top-0 left-0 pt-4 px-6 z-50 w-full flex flex-row justify-between items-center">
-        <span className="flex items-center gap-2 text-xs font-mono text-zinc-500 uppercase tracking-widest">
+        <Link
+          href="/sik-yapilan-yanlislar"
+          className="flex items-center gap-2 text-xs font-mono text-zinc-500 uppercase tracking-widest hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
+        >
           <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
           {t("HomeExtras.misspellingsTitle")}
-        </span>
+        </Link>
       </CardHeader>
 
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-4">
@@ -242,8 +246,8 @@ function BentoCommonMistake() {
           </div>
         ) : item ? (
           <>
-            <div className="flex flex-col items-center gap-2 group/wrong opacity-60">
-              <span className="text-2xl sm:text-3xl font-serif text-zinc-500 line-through decoration-danger decoration-2 text-center">
+            <div className="flex flex-col items-center gap-2 group/wrong opacity-75">
+              <span className="text-2xl sm:text-3xl font-serif text-zinc-400 line-through decoration-danger decoration-2 text-center">
                 {item.wrong}
               </span>
               <XCircle className="w-5 h-5 text-danger" />
@@ -252,7 +256,7 @@ function BentoCommonMistake() {
             <div className="w-px h-12 bg-zinc-800" />
 
             <div className="flex flex-col items-center gap-2">
-              <span className="text-2xl sm:text-3xl font-serif font-bold text-foreground text-center">
+              <span className="text-2xl sm:text-3xl font-serif font-semibold text-foreground text-center">
                 {item.correct}
               </span>
               <CheckCircle2 className="w-5 h-5 text-success" />
@@ -269,9 +273,10 @@ function BentoCommonMistake() {
 function BentoGalatiMeshur() {
   const t = useTranslations("Home");
   const [offset, setOffset] = useState(0);
+  const [randomSeed] = useState(() => Math.random().toString(36).slice(2));
   const isOnline = useOnlineStatus();
   const { data, isLoading } = api.extras.getGalatiMeshur.useQuery(
-    { limit: 1, offset },
+    { limit: 1, offset, randomSeed },
     {
       enabled: isOnline,
     },
@@ -292,66 +297,82 @@ function BentoGalatiMeshur() {
   const item = data?.data[0];
 
   return (
-    <CustomCard className="h-[200px] dark:bg-background/50 bg-background/50 group relative overflow-hidden flex flex-col">
+    <CustomCard className="h-[220px] dark:bg-background/50 bg-background/50 group relative overflow-hidden flex flex-col">
       <div className="absolute top-0 right-0 p-4 opacity-50 transition-opacity">
         <BookOpen className="w-16 h-16 text-amber-500" />
       </div>
 
       <CardHeader className="pt-4 px-6 z-10 flex flex-row justify-between items-center">
-        <span className="text-xs font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest flex items-center gap-2">
+        <Link
+          href="/galati-meshur"
+          className="text-xs font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest flex items-center gap-2 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+        >
           <BookOpen className="w-3 h-3" />
           {t("HomeExtras.galatiMeshurTitle")}
-        </span>
+        </Link>
       </CardHeader>
 
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-4">
-        <Button isIconOnly size="sm" variant="light" className="text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400" onPress={handlePrev} isDisabled={offset === 0}>
-          <ArrowRight className="w-4 h-4 rotate-180" />
-        </Button>
-        <Button isIconOnly size="sm" variant="light" className="text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400" onPress={handleNext} isDisabled={!data?.total || offset >= data.total - 1}>
-          <ArrowRight className="w-4 h-4" />
-        </Button>
-      </div>
-
-      <CardBody className="px-6 py-2 z-10 flex flex-col justify-center gap-2">
+      <CardBody className="px-6 py-2 z-10 flex-1 flex flex-col justify-center gap-3">
         {isLoading ? (
           <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2 w-full">
-              <div className="w-4 h-4 rounded-full bg-zinc-800/10 dark:bg-zinc-800/50 animate-pulse" />
+            <div className="flex items-center gap-2 w-full pr-10">
               <div className="h-6 w-3/4 bg-zinc-800/10 dark:bg-zinc-800/50 rounded animate-pulse" />
             </div>
-            <div className="flex items-center gap-2 w-full">
-              <div className="w-4 h-4 rounded-full bg-zinc-800/10 dark:bg-zinc-800/50 animate-pulse" />
-              <div className="h-6 w-1/2 bg-zinc-800/10 dark:bg-zinc-800/50 rounded animate-pulse" />
+            <div className="w-full pr-10 space-y-2">
+              <div className="h-4 w-full bg-zinc-800/10 dark:bg-zinc-800/50 rounded animate-pulse" />
+              <div className="h-4 w-5/6 bg-zinc-800/10 dark:bg-zinc-800/50 rounded animate-pulse" />
+              <div className="h-4 w-2/3 bg-zinc-800/10 dark:bg-zinc-800/50 rounded animate-pulse" />
             </div>
           </div>
         ) : item ? (
-          <Link href={{
-            pathname: '/galati-meshur/[id]',
-            params: {
-              id: item.id.toString()
-            }
-          }} className="block group/link">
-            {/* Wrong */}
-            <div className="flex items-center gap-2 opacity-60 mb-2">
-              <XCircle className="w-4 h-4 text-danger shrink-0" />
-              <span className="text-lg font-serif text-zinc-500 line-through decoration-danger/50 line-clamp-1 group-hover/link:text-zinc-400 transition-colors">
+          <>
+            <div className="rounded-md border border-amber-500/20 bg-amber-500/5 px-3 py-2 pr-10">
+              <p className="text-lg font-serif font-semibold text-foreground line-clamp-1 mb-2">
+                {item.word}
+              </p>
+              <p className="text-[11px] font-mono uppercase tracking-wide text-amber-600 dark:text-amber-500 mb-1">
+                {t("HomeExtras.explanation")}
+              </p>
+              <p className="text-[15px] leading-relaxed text-foreground/85 line-clamp-3">
                 {item.explanation}
-              </span>
+              </p>
             </div>
-
-            {/* Correct */}
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
-              <span className="text-lg font-serif font-bold text-foreground line-clamp-1 group-hover/link:text-primary transition-colors">
-                {item.correctUsage || item.word}
-              </span>
-            </div>
-          </Link>
+          </>
         ) : (
           <div className="text-muted-foreground text-sm">No data available</div>
         )}
       </CardBody>
+
+      <CardFooter className="pt-0 pb-3 px-6 z-10 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1">
+          <Button isIconOnly size="sm" variant="light" className="text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400" onPress={handlePrev} isDisabled={offset === 0}>
+            <ArrowRight className="w-4 h-4 rotate-180" />
+          </Button>
+          <Button isIconOnly size="sm" variant="light" className="text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400" onPress={handleNext} isDisabled={!data?.total || offset >= data.total - 1}>
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+        </div>
+
+        <span className="text-[11px] font-mono text-muted-foreground">
+          {data?.total ? `${offset + 1}/${data.total}` : "0/0"}
+        </span>
+
+        {item ? (
+          <Link
+            href={{
+              pathname: '/galati-meshur/[id]',
+              params: {
+                id: item.id.toString()
+              }
+            }}
+            className="text-sm font-medium text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+          >
+            {t("HomeExtras.readMore")}
+          </Link>
+        ) : (
+          <span className="text-xs text-muted-foreground">{t("HomeExtras.readMore")}</span>
+        )}
+      </CardFooter>
     </CustomCard>
   )
 }

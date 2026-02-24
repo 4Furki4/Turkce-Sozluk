@@ -153,7 +153,10 @@
       "explanation": "Explanation",
       "actually": "Actually: {correctUsage}",
       "seeDetailedMeaning": "If you want to check the detailed word meaning:",
-      "seeInDictionary": "See in Dictionary"
+      "seeInDictionary": "See in Dictionary",
+      "readMore": "Read More",
+      "noMisspellingsFound": "No common misspellings were found yet.",
+      "noGalatiMeshurFound": "No Galat-ı Meşhur entries were found yet."
     }
   },
   "WordCard": {
