@@ -9,6 +9,7 @@ import WordCardWrapper from "@/src/components/customs/word-card-wrapper";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/src/lib/auth-client";
+import { extractSearchWordFromPathname } from "@/src/lib/search-route";
 
 export default function SearchPageClient() {
     const pathname = usePathname();
@@ -18,12 +19,9 @@ export default function SearchPageClient() {
     const [wordName, setWordName] = useState<string | null>(null);
 
     useEffect(() => {
-        // Extract word from pathname like /en/search/deneme -> deneme
-        const pathSegments = pathname.split('/');
-        const searchIndex = pathSegments.indexOf('search');
+        const extractedWord = extractSearchWordFromPathname(pathname);
 
-        if (searchIndex !== -1 && pathSegments[searchIndex + 1]) {
-            const extractedWord = decodeURIComponent(pathSegments[searchIndex + 1]);
+        if (extractedWord) {
             console.log(`[SearchPageClient] Extracted word from path: ${extractedWord}`);
             setWordName(extractedWord);
         } else {

@@ -7,21 +7,31 @@ import { Link as NextIntlLink, usePathname, useRouter } from "@/src/i18n/routing
 import { Plus, Search, BookOpen } from "lucide-react";
 import SimpleWordRequestModal from "./modals/simple-word-request-modal";
 
-import { useParams } from "next/navigation";
+import { useParams, usePathname as useRawPathname } from "next/navigation";
 
 import { useSnapshot } from "valtio";
 import { preferencesState } from "@/src/store/preferences";
 import { Session } from "@/src/lib/auth-client";
+import {
+  decodePathSegment,
+  extractSearchWordFromPathname,
+  toSingleRouteParam,
+} from "@/src/lib/search-route";
 
 interface WordNotFoundCardProps {
   session: Session | null;
 }
 
 export default function WordNotFoundCard({ session }: WordNotFoundCardProps) {
-  const { word } = useParams<{ word: string }>();
+  const params = useParams<{ word?: string | string[] }>();
+  const rawPathname = useRawPathname();
   const t = useTranslations("WordNotFound");
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const wordName = word ? decodeURIComponent(word) : "Unknown";
+  const routeWord = toSingleRouteParam(params.word);
+  const pathWord = extractSearchWordFromPathname(rawPathname);
+  const wordName = routeWord
+    ? decodePathSegment(routeWord)
+    : (pathWord ?? "Unknown");
   const { isBlurEnabled } = useSnapshot(preferencesState)
   const router = useRouter();
   const pathname = usePathname();

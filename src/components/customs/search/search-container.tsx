@@ -11,9 +11,17 @@ import { cn } from "@/lib/utils";
 import { TurkishKeyboard } from "@/src/components/customs/utils/TurkishKeyboard";
 import { searchAutocompleteOffline, searchByPattern } from "@/src/lib/offline-db";
 import { useTypewriter } from "@/src/hooks/use-typewriter";
+import { useOnlineStatus } from "@/src/hooks/use-online-status";
 import { api } from "@/src/trpc/react";
 
 type SearchMode = "word" | "meaning";
+
+interface MeaningResult {
+    id: string;
+    name: string;
+    meaning: string;
+    formattedMeaning: string | undefined;
+}
 
 interface MeaningResult {
     id: string;
@@ -44,26 +52,27 @@ export default function SearchContainer({
     const [showRecommendations, setShowRecommendations] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const [searchMode, setSearchMode] = useState<SearchMode>("word");
+    const isOnline = useOnlineStatus();
 
     const { data: trendingWords, isLoading: isTrendingLoading } = api.word.getPopularWords.useQuery({
         limit: 5,
         period: 'last7Days'
     }, {
         staleTime: 1000 * 60 * 60 * 24, // 24 hours
-        enabled: showTrending
+        enabled: showTrending && isOnline
     });
 
     const debouncedInput = useDebounce(wordInput, 300);
     const [recommendations, setRecommendations] = useState<string[]>([]);
     const [meaningResults, setMeaningResults] = useState<MeaningResult[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-
     const { data: meaningSearchData, isFetching: isMeaningFetching } = api.search.searchByMeaning.useQuery(
         { query: debouncedInput },
         {
-            enabled: searchMode === "meaning" && debouncedInput.length >= 3,
+            enabled: isOnline && searchMode === "meaning" && debouncedInput.length >= 3,
         }
     );
+
 
     const typeWriterText = useTypewriter([
         t("hero.searchPlaceholder"),

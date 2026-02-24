@@ -35,15 +35,19 @@ module.exports = async (phase) => {
             reloadOnOnline: true,
             additionalPrecacheEntries: [
                 { url: "/~offline", revision },
+                { url: "/en/~offline", revision },
+                { url: "/tr/~%C3%A7evrim-d%C4%B1%C5%9F%C4%B1", revision },
                 // Precache the main entry points to avoid the redirect issue
                 { url: "/", revision },
                 { url: "/en", revision },
+                { url: "/tr", revision },
                 // Precache search pages for offline functionality
                 { url: "/en/search", revision },
                 { url: "/tr/arama", revision },
                 // Precache offline dictionary page
                 { url: "/en/offline-dictionary", revision },
                 { url: "/tr/offline-dictionary", revision },
+                { url: "/tr/%C3%A7evrim-d%C4%B1%C5%9F%C4%B1-s%C3%B6zl%C3%BCk", revision },
             ],
 
         });
@@ -52,4 +56,3 @@ module.exports = async (phase) => {
 
     return nextIntlConfig;
 };
-

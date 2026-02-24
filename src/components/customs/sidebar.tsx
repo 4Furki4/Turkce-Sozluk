@@ -1,6 +1,6 @@
 import { BellIcon, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, HomeIcon, LayoutDashboard, Layers, Link2, ListTree, LogIn, MicIcon, StarIcon, UserIcon, WifiOff, Sun, Moon, Sparkles, Sparkle, Languages, LogOut, Zap } from 'lucide-react'
 import React from 'react'
-import { Link as NextIntlLink, usePathname, useRouter } from "@/src/i18n/routing";
+import { Link as NextIntlLink, useRouter } from "@/src/i18n/routing";
 import {
     Sheet,
     SheetContent,
@@ -13,12 +13,12 @@ import Image from 'next/image';
 import logo from "@/public/logo.svg";
 import { authClient, Session } from '@/src/lib/auth-client';
 import { useTheme } from 'next-themes';
-import { useParams, useSearchParams } from 'next/navigation';
 import { useSnapshot } from 'valtio';
 import { preferencesState, toggleBlur } from '@/src/store/preferences';
 import { cn } from '@/lib/utils';
 import { Avatar } from '@heroui/react';
 import { Button } from '@heroui/react';
+import { useLocaleSwitchHref } from '@/src/hooks/useLocaleSwitchHref';
 export default function Sidebar(
     {
         session,
@@ -34,11 +34,9 @@ export default function Sidebar(
     const t = useTranslations()
     const { theme, setTheme } = useTheme();
     const locale = useLocale();
-    const params = useParams();
-    const searchParams = useSearchParams();
     const router = useRouter();
-    const pathName = usePathname();
     const snap = useSnapshot(preferencesState);
+    const languageSwitchHref = useLocaleSwitchHref();
 
     const handleSignOut = async () => {
         await authClient.signOut();
@@ -205,15 +203,7 @@ export default function Sidebar(
                             <NextIntlLink
                                 className="flex items-center justify-center gap-2 w-full rounded-medium p-2 bg-default-100 dark:bg-default-50 border border-default-200 hover:bg-default-200 transition-colors"
                                 // @ts-ignore
-                                href={{
-                                    pathname: pathName,
-                                    query: searchParams.toString(),
-                                    params: {
-                                        word: params.word as any,
-                                        id: params.id as any,
-                                        slug: params.slug as any,
-                                    },
-                                }}
+                                href={languageSwitchHref}
                                 locale={locale === "en" ? "tr" : "en"}
                             >
                                 <Languages className="w-5 h-5" />

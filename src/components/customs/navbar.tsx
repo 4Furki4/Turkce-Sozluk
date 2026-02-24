@@ -16,7 +16,6 @@ import { ChevronDown, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, His
 import { authClient, type User } from "@/src/lib/auth-client"; // Added
 import { useTheme } from "next-themes";
 import { useLocale } from "next-intl";
-import { useParams, useSearchParams } from "next/navigation";
 import { useRouter } from "@/src/i18n/routing";
 import { usePathname, Link as NextIntlLink } from "@/src/i18n/routing";
 // import { Session } from "@/src/lib/auth"; // Removed
@@ -26,8 +25,8 @@ import { useSnapshot } from "valtio";
 import { preferencesState, toggleBlur } from "@/src/store/preferences";
 import { cn } from "@/lib/utils";
 import CustomDropdown from "./heroui/custom-dropdown";
-import { useOnlineStatus } from "@/src/hooks/use-online-status";
 import { Session } from "@/src/lib/auth-client";
+import { useLocaleSwitchHref } from "@/src/hooks/useLocaleSwitchHref";
 
 type NavbarProps = {
   session: Session | null;
@@ -63,14 +62,12 @@ export default function Navbar({
 }: NavbarProps & { setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>> }) { // Merged props type
   const { theme, setTheme } = useTheme();
   const pathName = usePathname();
-  const searchParams = useSearchParams();
   const locale = useLocale();
-  const params = useParams();
   const router = useRouter();
+  const languageSwitchHref = useLocaleSwitchHref();
   const isAuthPage = ["/signup", "/signin", "/forgot-password"].includes(
     pathName
   );
-  const isOnline = useOnlineStatus()
   const snap = useSnapshot(preferencesState);
 
   const handleSignOut = async () => {
@@ -208,51 +205,31 @@ export default function Navbar({
             </DropdownItem>
           </DropdownMenu>
         </CustomDropdown>
-        <>
-          {isOnline ? <NavbarItem>
-            {locale === "en" ? (
-              <NextIntlLink
-                className="w-full hidden md:block"
-                // @ts-ignore
-                href={{
-                  pathname: pathName,
-                  query: searchParams.toString(),
-                  params: {
-                    word: params.word as any,
-                    id: params.id as any,
-                    slug: params.slug as any,
-                  },
-                }}
-                locale="tr"
-              >
-                <span className="flex items-center gap-2">
-                  <Languages aria-label="languages icon" className="w-5 h-5 xs:w-6 xs:h-6" /> TR
-                </span>
-              </NextIntlLink>
-            ) : (
-              <NextIntlLink
-                className="w-full hidden md:block"
-                // @ts-ignore
-                href={{
-                  pathname: pathName,
-                  query: searchParams.toString(),
-                  params: {
-                    word: params.word as any,
-                    id: params.id as any,
-                    slug: params.slug as any,
-                  },
-                }}
-                locale="en"
-              >
-                <span className="flex items-center gap-2">
-                  <Languages aria-label={ariaLanguages} className="w-5 h-5 xs:w-6 xs:h-6" /> EN
-                </span>
-              </NextIntlLink>
-            )}
-          </NavbarItem>
-            : null
-          }
-        </>
+        <NavbarItem>
+          {locale === "en" ? (
+            <NextIntlLink
+              className="w-full hidden md:block"
+              // @ts-ignore
+              href={languageSwitchHref}
+              locale="tr"
+            >
+              <span className="flex items-center gap-2">
+                <Languages aria-label={ariaLanguages} className="w-5 h-5 xs:w-6 xs:h-6" /> TR
+              </span>
+            </NextIntlLink>
+          ) : (
+            <NextIntlLink
+              className="w-full hidden md:block"
+              // @ts-ignore
+              href={languageSwitchHref}
+              locale="en"
+            >
+              <span className="flex items-center gap-2">
+                <Languages aria-label={ariaLanguages} className="w-5 h-5 xs:w-6 xs:h-6" /> EN
+              </span>
+            </NextIntlLink>
+          )}
+        </NavbarItem>
         <NavbarItem>
           {/* theme button */}
           <Button className="hidden md:inline-flex" aria-label={ariaSwitchTheme} variant="light" isIconOnly onPress={() => setTheme(theme === "dark" ? "light" : "dark")}>

@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 // 1. --- IMPORT IDB HELPERS ---
 import { getCachedPopularData, setCachedPopularData } from '@/src/lib/offline-db';
 import PopularSearchesSkeleton from './popular-searches-skeleton';
+import { useOnlineStatus } from '@/src/hooks/use-online-status';
 
 interface TrendingWord {
     id: number;
@@ -28,6 +29,7 @@ const cacheMaxAge = 24 * 60 * 60 * 1000; // 24 hours (in ms)
 export default function TrendingSearches({ period = '7days' }: TrendingSearchesProps) {
     const t = useTranslations('Components.TrendingSearches');
     const { isBlurEnabled } = useSnapshot(preferencesState);
+    const isOnline = useOnlineStatus();
 
     // 2. --- STATE FOR DISPLAYED DATA ---
     const [displayedWords, setDisplayedWords] = useState<TrendingWord[]>([]);
@@ -64,6 +66,7 @@ export default function TrendingSearches({ period = '7days' }: TrendingSearchesP
         {
             staleTime: cacheMaxAge,
             gcTime: cacheMaxAge,
+            enabled: isOnline,
         }
     );
 
