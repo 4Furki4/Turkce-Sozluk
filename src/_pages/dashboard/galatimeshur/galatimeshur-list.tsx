@@ -12,8 +12,10 @@ import { Edit, Trash2, Plus } from "lucide-react";
 import GalatiMeshurManagement from "./galatimeshur-management";
 import { CustomTable } from "@/src/components/customs/heroui/custom-table";
 import { CustomModal } from "@/src/components/customs/heroui/custom-modal";
+import { useTranslations } from "next-intl";
 
 export default function GalatiMeshurList() {
+    const t = useTranslations("Dashboard.GalatiMeshur");
     const [page, setPage] = useState(1);
     const limit = 10;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -36,7 +38,7 @@ export default function GalatiMeshurList() {
     });
 
     const handleDelete = (id: number) => {
-        if (confirm("Are you sure you want to delete this entry?")) {
+        if (confirm(t("toasts.deleteConfirm"))) {
             deleteMutation.mutate({ id });
         }
     };
@@ -61,23 +63,23 @@ export default function GalatiMeshurList() {
     return (
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">Galatımeşhur Management</h1>
+                <h1 className="text-2xl font-bold">{t("pageTitle")}</h1>
                 <Button color="primary" startContent={<Plus size={20} />} onPress={handleCreate}>
-                    Add Entry
+                    {t("addEntry")}
                 </Button>
             </div>
 
             <CustomTable
-                aria-label="Galatımeşhur Table"
+                aria-label={t("pageTitle")}
                 columns={[
-                    { key: "wordName", label: "WORD" },
-                    { key: "explanation", label: "EXPLANATION" },
-                    { key: "correctUsage", label: "CORRECT USAGE" },
-                    { key: "actions", label: "ACTIONS" },
+                    { key: "wordName", label: t("columns.word") },
+                    { key: "explanation", label: t("columns.explanation") },
+                    { key: "correctUsage", label: t("columns.correctUsage") },
+                    { key: "actions", label: t("columns.actions") },
                 ]}
                 items={data?.data ?? []}
                 loadingState={isLoading ? "loading" : "idle"}
-                emptyContent={"No entries found"}
+                emptyContent={t("emptyContent")}
                 renderCell={(item, columnKey) => {
                     switch (columnKey) {
                         case "wordName":

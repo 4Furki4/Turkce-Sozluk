@@ -207,6 +207,14 @@ export const routing = defineRouting({
       "en": "/foreign-term-suggestions",
       "tr": "/yabanci-kelimelere-karsiliklar",
     },
+    "/dashboard/galatimeshur": {
+      "en": "/dashboard/galatimeshur",
+      "tr": "/panel/galatimeshur",
+    },
+    "/dashboard/misspellings": {
+      "en": "/dashboard/misspellings",
+      "tr": "/panel/yazim-yanlislari",
+    },
 
   }
 
