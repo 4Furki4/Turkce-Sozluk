@@ -142,6 +142,74 @@ R2_BUCKET_NAME=
 NEXT_PUBLIC_R2_CUSTOM_URL=
 ```
 
+### Local Postgres Backups (Aiven / Weekly + Boot Catch-Up)
+
+If you're on a free Aiven tier without managed backups, this project includes a local backup automation for macOS:
+
+- Backs up every Sunday (LaunchAgent calendar trigger)
+- Also runs at every boot/login (`RunAtLoad`)
+- Before dumping, checks whether the most recent Sunday is already backed up and skips if yes
+
+#### 1. Ensure `pg_dump` is available
+
+```bash
+pg_dump --version
+```
+
+If needed on macOS:
+
+```bash
+brew install libpq
+brew link --force libpq
+```
+
+#### 2. Ensure database URL is configured
+
+The backup script reads `DATABASE_URL` (or `AIVEN_DATABASE_URL`) from:
+
+- current shell environment, or
+- `.env.production.local` by default
+
+You can override the env file:
+
+```bash
+ENV_FILE=/absolute/path/to/.env.production.local npm run db:backup
+```
+
+#### 3. Run a manual backup test
+
+```bash
+npm run db:backup
+```
+
+Output dumps are written under `backups/postgres/`.
+
+#### 4. Install weekly + boot automation (macOS)
+
+By default this schedules Sundays at `09:00` and runs on every boot/login:
+
+```bash
+npm run db:backup:install
+```
+
+Optional custom time:
+
+```bash
+BACKUP_HOUR=3 BACKUP_MINUTE=30 npm run db:backup:install
+```
+
+#### 5. Verify the LaunchAgent
+
+```bash
+launchctl print gui/$(id -u)/com.turkishdictionary.postgres.backup
+```
+
+#### 6. Disable automation later
+
+```bash
+npm run db:backup:uninstall
+```
+
 ### Contributing
 
 I welcome contributions! Please check my issues page for current tasks or bug reports. A detailed contribution guide will be added soon.
@@ -235,6 +303,5 @@ You can contact me at muhammedfurkancengiz@gmail.com
    docker-compose up -d    # PostgreSQL veritabanını başlatır
    npm install             # Bağımlılıkları kurar
    npm run dev             # Geliştirme sunucusunu çalıştırır
-
 
 
