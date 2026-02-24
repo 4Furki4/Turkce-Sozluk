@@ -209,15 +209,16 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                           ) : (
                             <p>
                               {locale === "en" ? "See Also: " : "Bakınız: "}
-                              <NextUILink
-                                href={`/search/${meaning.meaning.split('Bakınız: ')[1]}`}
-                                as={Link}
-                                size="lg"
-                                showAnchorIcon
-                                underline="always"
+                              <Link
+                                href={{
+                                  pathname: '/search/[word]',
+                                  params: { word: meaning.meaning.split('Bakınız: ')[1] }
+                                }}
+                                prefetch={false}
+                                className="text-lg underline underline-offset-4 text-primary decoration-primary flex items-center gap-1"
                               >
                                 {meaning.meaning.split('Bakınız: ')[1]}
-                              </NextUILink>
+                              </Link>
                             </p>
                           )}
                         </div>
@@ -248,11 +249,14 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                       <p className="text-fs-1">{t("NavigationWord")}</p>
                       <div className="flex flex-wrap gap-2">
                         {word_data.relatedWords.filter((related) => related.relation_type !== "relatedWord" && related.relation_type !== "compoundWord").map((related) => (
-                          <NextUILink
+                          <Link
                             key={related.related_word_id}
-                            as={Link}
-                            href={`/search/${related.related_word_name}`}
-                            className="px-3 py-1 bg-primary/10 hover:bg-primary/20 rounded-md transition-colors"
+                            href={{
+                              pathname: '/search/[word]',
+                              params: { word: related.related_word_name }
+                            }}
+                            className="text-primary px-3 py-1 bg-primary/10 hover:bg-primary/20 rounded-md transition-colors"
+                            prefetch={false}
                           >
                             {related.related_word_name}
                             {related.relation_type && (
@@ -260,7 +264,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                                 ({t(related.relation_type)})
                               </span>
                             )}
-                          </NextUILink>
+                          </Link>
                         ))}
                       </div>
                     </div>
@@ -281,10 +285,13 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                         base: "bg-background/10",
                       }}>
                         <CardBody className="flex flex-row items-center justify-between">
-                          <NextUILink
-                            underline="hover"
-                            as={Link}
-                            href={`/search/${related_word.related_word_name}`}
+                          <Link
+                            href={{
+                              pathname: '/search/[word]',
+                              params: { word: related_word.related_word_name }
+                            }}
+                            prefetch={false}
+                            className="text-primary hover:underline"
                           >
                             {related_word.related_word_name}
                             {related_word.relation_type && related_word.relation_type !== 'relatedWord' && (
@@ -292,7 +299,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                                 ({t(related_word.relation_type) || related_word.relation_type})
                               </span>
                             )}
-                          </NextUILink>
+                          </Link>
 
                         </CardBody>
                       </Card>
@@ -314,13 +321,16 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                         base: "bg-background/10",
                       }} key={related_phrase.related_phrase_id}>
                         <CardBody>
-                          <NextUILink
-                            underline="hover"
-                            as={Link}
-                            href={`/search/${related_phrase.related_phrase}`}
+                          <Link
+                            href={{
+                              pathname: '/search/[word]',
+                              params: { word: related_phrase.related_phrase }
+                            }}
+                            prefetch={false}
+                            className="text-primary hover:underline"
                           >
                             {related_phrase.related_phrase}
-                          </NextUILink>
+                          </Link>
                         </CardBody>
                       </Card>
                     ))}
