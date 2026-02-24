@@ -23,6 +23,15 @@ interface MeaningResult {
     formattedMeaning: string | undefined;
 }
 
+type SearchMode = "word" | "meaning";
+
+interface MeaningResult {
+    id: string;
+    name: string;
+    meaning: string;
+    formattedMeaning: string | undefined;
+}
+
 interface SearchContainerProps {
     className?: string;
     inputWrapperClassName?: string;
@@ -59,13 +68,13 @@ export default function SearchContainer({
     const [recommendations, setRecommendations] = useState<string[]>([]);
     const [meaningResults, setMeaningResults] = useState<MeaningResult[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-
     const { data: meaningSearchData, isFetching: isMeaningFetching } = api.search.searchByMeaning.useQuery(
         { query: debouncedInput },
         {
             enabled: isOnline && searchMode === "meaning" && debouncedInput.length >= 3,
         }
     );
+
 
     const typeWriterText = useTypewriter([
         t("hero.searchPlaceholder"),
