@@ -23,8 +23,6 @@ interface MeaningResult {
     formattedMeaning: string | undefined;
 }
 
-type SearchMode = "word" | "meaning";
-
 interface MeaningResult {
     id: string;
     name: string;
