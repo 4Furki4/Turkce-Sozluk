@@ -11,7 +11,8 @@ import {
   NavbarBrand,
   DropdownSection
 } from "@heroui/react";
-import { ChevronDown, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, Link2, LogOut, Menu, Mic, Moon, Sparkle, Sparkles, StarIcon, Sun, UserIcon, Zap } from "lucide-react";
+import { ChevronDown, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, Link2, LogOut, Mic, Moon, Search, Sparkle, Sparkles, StarIcon, Sun, UserIcon, Zap } from "lucide-react";
+import { Input } from "@heroui/input";
 // import { signIn, signOut } from "next-auth/react"; // Removed
 import { authClient, type User } from "@/src/lib/auth-client"; // Added
 import { useTheme } from "next-themes";
@@ -27,10 +28,11 @@ import { cn } from "@/lib/utils";
 import CustomDropdown from "./heroui/custom-dropdown";
 import { Session } from "@/src/lib/auth-client";
 import { useLocaleSwitchHref } from "@/src/hooks/useLocaleSwitchHref";
+import { useState } from "react";
 
 type NavbarProps = {
   session: Session | null;
-} & Record<"TitleIntl" | "WordListIntl" | "SignInIntl" | "HomeIntl" | "ProfileIntl" | "SavedWordsIntl" | "MyRequestsIntl" | "SearchHistoryIntl" | "LogoutIntl" | "AnnouncementsIntl" | "ContributeWordIntl" | "PronunciationsIntl" | "ariaAvatar" | "ariaMenu" | "ariaLanguages" | "ariaSwitchTheme" | "ariaBlur" | "ContributeIntl" | "FeedbackIntl" | "LearnIntl" | "FlashcardGameIntl" | "WordMatchingGameIntl" | "SpeedRoundGameIntl" | "ForeignTermSuggestionsIntl", string>;
+} & Record<"TitleIntl" | "WordListIntl" | "SignInIntl" | "HomeIntl" | "ProfileIntl" | "SavedWordsIntl" | "MyRequestsIntl" | "SearchHistoryIntl" | "LogoutIntl" | "AnnouncementsIntl" | "ContributeWordIntl" | "PronunciationsIntl" | "ariaAvatar" | "ariaMenu" | "ariaLanguages" | "ariaSwitchTheme" | "ariaBlur" | "ContributeIntl" | "FeedbackIntl" | "LearnIntl" | "FlashcardGameIntl" | "WordMatchingGameIntl" | "SpeedRoundGameIntl" | "ForeignTermSuggestionsIntl" | "SearchIntl" | "DashboardIntl", string>;
 
 export default function Navbar({
   session,
@@ -58,21 +60,43 @@ export default function Navbar({
   FlashcardGameIntl,
   WordMatchingGameIntl,
   SpeedRoundGameIntl,
-  ForeignTermSuggestionsIntl
+  ForeignTermSuggestionsIntl,
+  SearchIntl,
+  DashboardIntl
 }: NavbarProps & { setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>> }) { // Merged props type
   const { theme, setTheme } = useTheme();
   const pathName = usePathname();
   const locale = useLocale();
   const router = useRouter();
+  const [navbarSearchQuery, setNavbarSearchQuery] = useState("");
   const languageSwitchHref = useLocaleSwitchHref();
   const isAuthPage = ["/signup", "/signin", "/forgot-password"].includes(
     pathName
   );
   const snap = useSnapshot(preferencesState);
+  const isContributeActive = ["/contribute-word", "/pronunciation-voting", "/feedback", "/foreign-term-suggestions"].some((route) => pathName.startsWith(route));
+  const isLearnActive = ["/word-list", "/flashcard-game", "/word-matching", "/speed-round"].some((route) => pathName.startsWith(route));
+  const isHomeRoute = pathName === "/";
+  const isSearchRoute =
+    pathName === "/search" ||
+    pathName === "/search/[word]" ||
+    pathName.startsWith("/search/");
+  const shouldShowNavbarSearch = !isHomeRoute && !isSearchRoute;
 
   const handleSignOut = async () => {
     await authClient.signOut();
     router.refresh();
+  };
+
+  const handleNavbarSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const input = navbarSearchQuery.trim();
+    if (!input) return;
+    setNavbarSearchQuery("");
+    router.push({
+      pathname: "/search/[word]",
+      params: { word: encodeURIComponent(input) },
+    });
   };
 
   return (
@@ -87,6 +111,8 @@ export default function Navbar({
           "h-full",
           "items-center",
           "data-[active=true]",
+          "data-[active=true]:text-primary",
+          "data-[active=true]:font-semibold",
           // Active styles
           "data-[active=true]:after:content-['']",
           "data-[active=true]:after:absolute",
@@ -118,28 +144,21 @@ export default function Navbar({
           {/* Mobile menu button moved to bottom nav */}
         </NavbarBrand>
       </NavbarItem>
-      <NavbarContent justify="end" className="gap-2 md:gap-4 lg:gap-6">
-        {(session?.user as User & { role: string })?.role === "admin" ? (
-          <NavbarItem className="hidden md:flex" isActive={pathName === "/dashboard"} data-nav-link="true">
-            <NextIntlLink href={"/dashboard"} className='flex items-center gap-2 text-gray-900 dark:text-gray-50 rounded-sm'>
-              <span className={`text-nowrap`}>Dashboard</span>
-            </NextIntlLink>
-          </NavbarItem>
-        ) : null}
-        <NavbarItem className="hidden md:flex" isActive={pathName === "/announcements"} data-nav-link="true">
-          <NextIntlLink href={'/announcements'} as={Link as any} className='flex items-center gap-2 text-gray-900 dark:text-gray-50 rounded-sm'>
-            <span className={`text-nowrap`}>{AnnouncementsIntl}</span>
-          </NextIntlLink>
-        </NavbarItem>
-        <NavbarItem className="hidden md:flex" isActive={pathName === "/word-list"} data-nav-link="true">
-          <NextIntlLink href={"/word-list"} className='flex items-center gap-2 text-gray-900 dark:text-gray-50 rounded-sm'>
-            <span className={`text-nowrap`}>{WordListIntl}</span>
-          </NextIntlLink>
-        </NavbarItem>
+      <NavbarContent justify="end" className="gap-2 md:gap-3 lg:gap-4">
         <CustomDropdown>
-          <NavbarItem className="hidden md:flex">
+          <NavbarItem className="hidden md:flex" isActive={isContributeActive}>
             <DropdownTrigger>
-              <Button color="primary" disableRipple className="capitalize p-0 bg-transparent data-[hover=true]:bg-transparent text-base max-h-6 font-bold" radius="sm" variant="flat" endContent={<ChevronDown aria-label={ContributeIntl} className="w-4 h-4" />}>
+              <Button
+                color="primary"
+                disableRipple
+                className={cn(
+                  "capitalize p-0 bg-transparent data-[hover=true]:bg-transparent text-base max-h-6 font-semibold",
+                  isContributeActive ? "text-primary" : "text-foreground",
+                )}
+                radius="sm"
+                variant="flat"
+                endContent={<ChevronDown aria-label={ContributeIntl} className="w-4 h-4" />}
+              >
                 {ContributeIntl}
               </Button>
             </DropdownTrigger>
@@ -174,9 +193,19 @@ export default function Navbar({
           </DropdownMenu>
         </CustomDropdown>
         <CustomDropdown>
-          <NavbarItem className="hidden md:flex">
+          <NavbarItem className="hidden md:flex" isActive={isLearnActive}>
             <DropdownTrigger>
-              <Button color="primary" disableRipple className="capitalize p-0 bg-transparent data-[hover=true]:bg-transparent text-base max-h-6 font-bold" radius="sm" variant="flat" endContent={<ChevronDown aria-label={LearnIntl} className="w-4 h-4" />}>
+              <Button
+                color="primary"
+                disableRipple
+                className={cn(
+                  "capitalize p-0 bg-transparent data-[hover=true]:bg-transparent text-base max-h-6 font-semibold",
+                  isLearnActive ? "text-primary" : "text-foreground",
+                )}
+                radius="sm"
+                variant="flat"
+                endContent={<ChevronDown aria-label={LearnIntl} className="w-4 h-4" />}
+              >
                 {LearnIntl}
               </Button>
             </DropdownTrigger>
@@ -188,6 +217,11 @@ export default function Navbar({
                 "dark:data-[hover=true]:bg-primary/30",
               ]
             }}>
+            <DropdownItem key="word-list" startContent={<Layers aria-label={WordListIntl} className="w-4 h-4" />} className="py-0 pr-0">
+              <NextIntlLink href="/word-list" className="flex items-center gap-2 py-1.5">
+                {WordListIntl}
+              </NextIntlLink>
+            </DropdownItem>
             <DropdownItem key="flashcard-game" startContent={<Layers aria-label={FlashcardGameIntl} className="w-4 h-4" />} className="py-0 pr-0">
               <NextIntlLink href="/flashcard-game" className="flex items-center gap-2 py-1.5">
                 {FlashcardGameIntl}
@@ -205,10 +239,31 @@ export default function Navbar({
             </DropdownItem>
           </DropdownMenu>
         </CustomDropdown>
+        {shouldShowNavbarSearch ? (
+          <NavbarContent justify="center" className="hidden lg:flex max-w-md">
+            <NavbarItem className="w-full">
+              <form onSubmit={handleNavbarSearch} className="w-full">
+                <Input
+                  value={navbarSearchQuery}
+                  onValueChange={setNavbarSearchQuery}
+                  aria-label={SearchIntl}
+                  placeholder={`${SearchIntl}...`}
+                  startContent={<Search className="w-4 h-4 text-default-400" />}
+                  classNames={{
+                    inputWrapper: "h-8 bg-background/50 border border-border hover:border-primary/50 data-[focus=true]:border-primary/60 transition-colors",
+                    input: "text-sm",
+                  }}
+                  size="sm"
+                  type="search"
+                />
+              </form>
+            </NavbarItem>
+          </NavbarContent>
+        ) : null}
         <NavbarItem>
           {locale === "en" ? (
             <NextIntlLink
-              className="w-full hidden md:block"
+              className="w-full hidden md:block px-1 py-1"
               // @ts-ignore
               href={languageSwitchHref}
               locale="tr"
@@ -219,7 +274,7 @@ export default function Navbar({
             </NextIntlLink>
           ) : (
             <NextIntlLink
-              className="w-full hidden md:block"
+              className="w-full hidden md:block px-1 py-1"
               // @ts-ignore
               href={languageSwitchHref}
               locale="en"
@@ -237,13 +292,6 @@ export default function Navbar({
             <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           </Button>
 
-        </NavbarItem>
-        <NavbarItem>
-
-          <Button className="hidden md:inline-flex" aria-label={ariaBlur} variant="light" isIconOnly onPress={toggleBlur}>
-            <Sparkles className={cn("h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all", snap.isBlurEnabled ? "rotate-0 scale-100" : "rotate-90 scale-0")} />
-            <Sparkle className={cn("absolute h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all", snap.isBlurEnabled ? "rotate-90 scale-0" : "rotate-0 scale-100")} />
-          </Button>
         </NavbarItem>
         {!session?.user ? (
           <NavbarItem>
@@ -301,6 +349,13 @@ export default function Navbar({
                       {ProfileIntl}
                     </Link>
                   </DropdownItem>
+                  {(session?.user as User & { role: string })?.role === "admin" ? (
+                    <DropdownItem key={"dashboard"} className="rounded-sm py-0 pr-0" startContent={<Layers className="h-6 w-6" />}>
+                      <Link color="foreground" as={NextIntlLink} className="w-full py-1.5" href="/dashboard">
+                        {DashboardIntl}
+                      </Link>
+                    </DropdownItem>
+                  ) : null}
                 </DropdownSection>
                 <DropdownSection showDivider>
                   <DropdownItem key={"saved-words"} startContent={<StarIcon className="h-6 w-6" />} className="text-center rounded-sm py-0 pr-0">
