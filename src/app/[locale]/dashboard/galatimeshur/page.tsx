@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: PageProps) {
     const { locale } = await params;
     const t = await getTranslations({ locale, namespace: "Dashboard" });
     return {
-        title: "Galatımeşhur Management",
+        title: t("GalatiMeshur.pageTitle"),
     };
 }
 

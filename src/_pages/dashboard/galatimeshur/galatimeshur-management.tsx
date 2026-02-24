@@ -12,6 +12,7 @@ import {
 } from "@heroui/react";
 import { api } from "@/src/trpc/react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface GalatiMeshurManagementProps {
     onClose: () => void;
@@ -27,6 +28,7 @@ export default function GalatiMeshurManagement({
     onClose,
     initialData,
 }: GalatiMeshurManagementProps) {
+    const t = useTranslations("Dashboard.GalatiMeshur");
     const [explanation, setExplanation] = useState(initialData?.explanation || "");
     const [correctUsage, setCorrectUsage] = useState(initialData?.correctUsage || "");
     const [selectedWordId, setSelectedWordId] = useState<string | number | null>(
@@ -47,7 +49,7 @@ export default function GalatiMeshurManagement({
 
     const createMutation = api.admin.galatiMeshur.addGalatiMeshur.useMutation({
         onSuccess: () => {
-            toast.success("Entry added successfully");
+            toast.success(t("toasts.addedSuccess"));
             onClose();
         },
         onError: (error) => {
@@ -57,7 +59,7 @@ export default function GalatiMeshurManagement({
 
     const updateMutation = api.admin.galatiMeshur.updateGalatiMeshur.useMutation({
         onSuccess: () => {
-            toast.success("Entry updated successfully");
+            toast.success(t("toasts.updatedSuccess"));
             onClose();
         },
         onError: (error) => {
@@ -67,7 +69,7 @@ export default function GalatiMeshurManagement({
 
     const handleSubmit = () => {
         if (!explanation || !correctUsage || !selectedWordId) {
-            toast.error("Please fill in all fields");
+            toast.error(t("toasts.fillAllFields"));
             return;
         }
 
@@ -87,13 +89,13 @@ export default function GalatiMeshurManagement({
     return (
         <>
             <ModalHeader className="flex flex-col gap-1">
-                {initialData ? "Edit Galatımeşhur" : "Add Galatımeşhur"}
+                {initialData ? t("modalTitleEdit") : t("modalTitleAdd")}
             </ModalHeader>
             <ModalBody>
                 <div className="flex flex-col gap-4">
                     <Autocomplete
-                        label="Word"
-                        placeholder="Search for a word"
+                        label={t("wordLabel")}
+                        placeholder={t("wordPlaceholder")}
                         defaultSelectedKey={selectedWordId ? String(selectedWordId) : undefined}
                         inputValue={searchTerm}
                         onInputChange={setSearchTerm}
@@ -108,15 +110,15 @@ export default function GalatiMeshurManagement({
                         )) || []}
                     </Autocomplete>
                     <Textarea
-                        label="Explanation"
-                        placeholder="Enter explanation"
+                        label={t("explanationLabel")}
+                        placeholder={t("explanationPlaceholder")}
                         value={explanation}
                         onValueChange={setExplanation}
                         isRequired
                     />
                     <Textarea
-                        label="Correct Usage"
-                        placeholder="Enter correct usage"
+                        label={t("correctUsageLabel")}
+                        placeholder={t("correctUsagePlaceholder")}
                         value={correctUsage}
                         onValueChange={setCorrectUsage}
                         isRequired
@@ -125,14 +127,14 @@ export default function GalatiMeshurManagement({
             </ModalBody>
             <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
-                    Cancel
+                    {t("cancel")}
                 </Button>
                 <Button
                     color="primary"
                     onPress={handleSubmit}
                     isLoading={createMutation.isPending || updateMutation.isPending}
                 >
-                    Save
+                    {t("save")}
                 </Button>
             </ModalFooter>
         </>

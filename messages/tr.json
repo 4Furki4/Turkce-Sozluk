@@ -475,6 +475,59 @@
     },
     "sidebar": {
       "feedback": "Geri Bildirim"
+    },
+    "GalatiMeshur": {
+      "pageTitle": "Galatımeşhur Yönetimi",
+      "addEntry": "Giriş Ekle",
+      "columns": {
+        "word": "KELİME",
+        "explanation": "AÇIKLAMA",
+        "correctUsage": "DOĞRU KULLANIM",
+        "actions": "İŞLEMLER"
+      },
+      "emptyContent": "Giriş bulunamadı",
+      "modalTitleEdit": "Galatımeşhur Düzenle",
+      "modalTitleAdd": "Galatımeşhur Ekle",
+      "wordLabel": "Kelime",
+      "wordPlaceholder": "Kelime ara",
+      "explanationLabel": "Açıklama",
+      "explanationPlaceholder": "Açıklama girin",
+      "correctUsageLabel": "Doğru Kullanım",
+      "correctUsagePlaceholder": "Doğru kullanım girin",
+      "cancel": "İptal",
+      "save": "Kaydet",
+      "toasts": {
+        "addedSuccess": "Giriş başarıyla eklendi",
+        "updatedSuccess": "Giriş başarıyla güncellendi",
+        "deletedSuccess": "Giriş başarıyla silindi",
+        "fillAllFields": "Lütfen tüm alanları doldurun",
+        "deleteConfirm": "Bu girişi silmek istediğinizden emin misiniz?"
+      }
+    },
+    "Misspellings": {
+      "pageTitle": "Yazım Yanlışları Yönetimi",
+      "addMisspelling": "Yazım Yanlışı Ekle",
+      "columns": {
+        "incorrectSpelling": "YANLIŞ YAZI",
+        "correctWord": "DOĞRU KELİME",
+        "actions": "İŞLEMLER"
+      },
+      "emptyContent": "Yazım yanlışı bulunamadı",
+      "modalTitleEdit": "Yazım Yanlışını Düzenle",
+      "modalTitleAdd": "Yazım Yanlışı Ekle",
+      "incorrectSpellingLabel": "Yanlış Yazım",
+      "incorrectSpellingPlaceholder": "Yanlış yazımı girin",
+      "correctWordLabel": "Doğru Kelime",
+      "correctWordPlaceholder": "Doğru kelimeyi arayın",
+      "cancel": "İptal",
+      "save": "Kaydet",
+      "toasts": {
+        "addedSuccess": "Yazım yanlışı başarıyla eklendi",
+        "updatedSuccess": "Yazım yanlışı başarıyla güncellendi",
+        "deletedSuccess": "Yazım yanlışı başarıyla silindi",
+        "fillAllFields": "Lütfen tüm alanları doldurun",
+        "deleteConfirm": "Bu yazım yanlışını silmek istediğinizden emin misiniz?"
+      }
     }
   },
   "LanguageAndRootInput": {

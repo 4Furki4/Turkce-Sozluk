@@ -12,8 +12,10 @@ import { Edit, Trash2, Plus } from "lucide-react";
 import MisspellingsManagement from "./misspellings-management";
 import { CustomTable } from "@/src/components/customs/heroui/custom-table";
 import { CustomModal } from "@/src/components/customs/heroui/custom-modal";
+import { useTranslations } from "next-intl";
 
 export default function MisspellingsList() {
+    const t = useTranslations("Dashboard.Misspellings");
     const [page, setPage] = useState(1);
     const limit = 10;
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -35,7 +37,7 @@ export default function MisspellingsList() {
     });
 
     const handleDelete = (id: number) => {
-        if (confirm("Are you sure you want to delete this misspelling?")) {
+        if (confirm(t("toasts.deleteConfirm"))) {
             deleteMutation.mutate({ id });
         }
     };
@@ -59,22 +61,22 @@ export default function MisspellingsList() {
     return (
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">Misspellings Management</h1>
+                <h1 className="text-2xl font-bold">{t("pageTitle")}</h1>
                 <Button color="primary" startContent={<Plus size={20} />} onPress={handleCreate}>
-                    Add Misspelling
+                    {t("addMisspelling")}
                 </Button>
             </div>
 
             <CustomTable
-                aria-label="Misspellings Table"
+                aria-label={t("pageTitle")}
                 columns={[
-                    { key: "incorrectSpelling", label: "INCORRECT SPELLING" },
-                    { key: "correctWordName", label: "CORRECT WORD" },
-                    { key: "actions", label: "ACTIONS" },
+                    { key: "incorrectSpelling", label: t("columns.incorrectSpelling") },
+                    { key: "correctWordName", label: t("columns.correctWord") },
+                    { key: "actions", label: t("columns.actions") },
                 ]}
                 items={data?.data ?? []}
                 loadingState={isLoading ? "loading" : "idle"}
-                emptyContent={"No misspellings found"}
+                emptyContent={t("emptyContent")}
                 renderCell={(item, columnKey) => {
                     switch (columnKey) {
                         case "incorrectSpelling":

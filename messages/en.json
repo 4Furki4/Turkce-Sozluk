@@ -486,6 +486,59 @@
     },
     "sidebar": {
       "feedback": "Feedback"
+    },
+    "GalatiMeshur": {
+      "pageTitle": "Galatımeşhur Management",
+      "addEntry": "Add Entry",
+      "columns": {
+        "word": "WORD",
+        "explanation": "EXPLANATION",
+        "correctUsage": "CORRECT USAGE",
+        "actions": "ACTIONS"
+      },
+      "emptyContent": "No entries found",
+      "modalTitleEdit": "Edit Galatımeşhur",
+      "modalTitleAdd": "Add Galatımeşhur",
+      "wordLabel": "Word",
+      "wordPlaceholder": "Search for a word",
+      "explanationLabel": "Explanation",
+      "explanationPlaceholder": "Enter explanation",
+      "correctUsageLabel": "Correct Usage",
+      "correctUsagePlaceholder": "Enter correct usage",
+      "cancel": "Cancel",
+      "save": "Save",
+      "toasts": {
+        "addedSuccess": "Entry added successfully",
+        "updatedSuccess": "Entry updated successfully",
+        "deletedSuccess": "Entry deleted successfully",
+        "fillAllFields": "Please fill in all fields",
+        "deleteConfirm": "Are you sure you want to delete this entry?"
+      }
+    },
+    "Misspellings": {
+      "pageTitle": "Misspellings Management",
+      "addMisspelling": "Add Misspelling",
+      "columns": {
+        "incorrectSpelling": "INCORRECT SPELLING",
+        "correctWord": "CORRECT WORD",
+        "actions": "ACTIONS"
+      },
+      "emptyContent": "No misspellings found",
+      "modalTitleEdit": "Edit Misspelling",
+      "modalTitleAdd": "Add Misspelling",
+      "incorrectSpellingLabel": "Incorrect Spelling",
+      "incorrectSpellingPlaceholder": "Enter incorrect spelling",
+      "correctWordLabel": "Correct Word",
+      "correctWordPlaceholder": "Search for the correct word",
+      "cancel": "Cancel",
+      "save": "Save",
+      "toasts": {
+        "addedSuccess": "Misspelling added successfully",
+        "updatedSuccess": "Misspelling updated successfully",
+        "deletedSuccess": "Misspelling deleted successfully",
+        "fillAllFields": "Please fill in all fields",
+        "deleteConfirm": "Are you sure you want to delete this misspelling?"
+      }
     }
   },
   "LanguageAndRootInput": {

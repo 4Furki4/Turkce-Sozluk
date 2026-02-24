@@ -12,6 +12,7 @@ import {
 } from "@heroui/react";
 import { api } from "@/src/trpc/react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface MisspellingsManagementProps {
     onClose: () => void;
@@ -26,6 +27,7 @@ export default function MisspellingsManagement({
     onClose,
     initialData,
 }: MisspellingsManagementProps) {
+    const t = useTranslations("Dashboard.Misspellings");
     const [incorrectSpelling, setIncorrectSpelling] = useState(initialData?.incorrectSpelling || "");
     const [selectedWordId, setSelectedWordId] = useState<string | number | null>(
         initialData?.correctWordId ? String(initialData.correctWordId) : null
@@ -45,7 +47,7 @@ export default function MisspellingsManagement({
 
     const createMutation = api.admin.misspellings.addMisspelling.useMutation({
         onSuccess: () => {
-            toast.success("Misspelling added successfully");
+            toast.success(t("toasts.addedSuccess"));
             onClose();
         },
         onError: (error) => {
@@ -55,7 +57,7 @@ export default function MisspellingsManagement({
 
     const updateMutation = api.admin.misspellings.updateMisspelling.useMutation({
         onSuccess: () => {
-            toast.success("Misspelling updated successfully");
+            toast.success(t("toasts.updatedSuccess"));
             onClose();
         },
         onError: (error) => {
@@ -65,7 +67,7 @@ export default function MisspellingsManagement({
 
     const handleSubmit = () => {
         if (!incorrectSpelling || !selectedWordId) {
-            toast.error("Please fill in all fields");
+            toast.error(t("toasts.fillAllFields"));
             return;
         }
 
@@ -84,20 +86,20 @@ export default function MisspellingsManagement({
     return (
         <>
             <ModalHeader className="flex flex-col gap-1">
-                {initialData ? "Edit Misspelling" : "Add Misspelling"}
+                {initialData ? t("modalTitleEdit") : t("modalTitleAdd")}
             </ModalHeader>
             <ModalBody>
                 <div className="flex flex-col gap-4">
                     <Input
-                        label="Incorrect Spelling"
-                        placeholder="Enter incorrect spelling"
+                        label={t("incorrectSpellingLabel")}
+                        placeholder={t("incorrectSpellingPlaceholder")}
                         value={incorrectSpelling}
                         onValueChange={setIncorrectSpelling}
                         isRequired
                     />
                     <Autocomplete
-                        label="Correct Word"
-                        placeholder="Search for the correct word"
+                        label={t("correctWordLabel")}
+                        placeholder={t("correctWordPlaceholder")}
                         defaultSelectedKey={selectedWordId ? String(selectedWordId) : undefined}
                         inputValue={searchTerm}
                         onInputChange={setSearchTerm}
@@ -115,14 +117,14 @@ export default function MisspellingsManagement({
             </ModalBody>
             <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
-                    Cancel
+                    {t("cancel")}
                 </Button>
                 <Button
                     color="primary"
                     onPress={handleSubmit}
                     isLoading={createMutation.isPending || updateMutation.isPending}
                 >
-                    Save
+                    {t("save")}
                 </Button>
             </ModalFooter>
         </>
