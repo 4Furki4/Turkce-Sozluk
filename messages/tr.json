@@ -596,6 +596,16 @@
       "dateAsc": "Eklenme Tarihi (En Eski)",
       "lengthAsc": "Kelime Uzunluğu (Kısa)",
       "lengthDesc": "Kelime Uzunluğu (Uzun)"
+    },
+    "advancedFilters": {
+      "show": "Gelişmiş filtreler",
+      "hide": "Gelişmiş filtreleri gizle",
+      "selectedCount": "{count} aktif filtre"
+    },
+    "pagination": {
+      "summary": "{from}-{to} / {total} kelime gösteriliyor",
+      "jumpTo": "Sayfa",
+      "go": "Git"
     }
   },
   "SavedWords": {

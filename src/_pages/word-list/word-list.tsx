@@ -8,8 +8,6 @@ import { Controller, useForm } from "react-hook-form";
 import { useDebounce } from "@uidotdev/usehooks";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useSnapshot } from "valtio";
-import { preferencesState } from "@/src/store/preferences";
 import { CustomPagination } from "@/src/components/customs/heroui/custom-pagination";
 import { CustomTable } from "@/src/components/customs/heroui/custom-table";
 import { CustomInput } from "@/src/components/customs/heroui/custom-input";
@@ -17,7 +15,7 @@ import { CustomSelect, OptionsMap } from "@/src/components/customs/heroui/custom
 import { FilterBar } from "./filter-bar";
 import { AlphabetBar } from "./alphabet-bar";
 import { WordCard } from "./word-card";
-import { LayoutGrid, List } from "lucide-react";
+import { ChevronDown, ChevronUp, LayoutGrid, List, SlidersHorizontal } from "lucide-react";
 import { WordCardSkeleton } from "./word-card-skeleton";
 
 
@@ -52,7 +50,6 @@ export default function WordList() {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const { isBlurEnabled } = useSnapshot(preferencesState);
     // Get initial values from URL params
     const initialPage = Number(searchParams.get('page')) || 1;
     const initialPerPage = Number(searchParams.get('per_page')) || 10;
@@ -76,6 +73,10 @@ export default function WordList() {
     const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>(initialSortOrder);
     const [selectedLetter, setSelectedLetter] = React.useState<string | null>(initialLetter);
     const [viewMode, setViewMode] = React.useState<'list' | 'grid'>(initialViewMode);
+    const [showAdvancedFilters, setShowAdvancedFilters] = React.useState(
+        initialPos.length > 0 || initialLang.length > 0 || initialAttr.length > 0,
+    );
+    const [pageJumpInput, setPageJumpInput] = React.useState(initialPage.toString());
 
     const { control, watch, setValue } = useForm({
         defaultValues: {
@@ -166,7 +167,7 @@ export default function WordList() {
     })
 
     type Row = (typeof rows)[0];
-    const rows = wordsQuery.data?.map((word, idx) => {
+    const rows = wordsQuery.data?.map((word) => {
         return {
             name: word.name,
             key: word.word_id,
@@ -186,6 +187,29 @@ export default function WordList() {
             label: t('columns.meaning'),
         },
     ];
+
+    const sortOptions: OptionsMap = {
+        'alphabetical-asc': t('sorting.alphabeticalAsc'),
+        'alphabetical-desc': t('sorting.alphabeticalDesc'),
+        'date-desc': t('sorting.dateDesc'),
+        'date-asc': t('sorting.dateAsc'),
+        'length-asc': t('sorting.lengthAsc'),
+        'length-desc': t('sorting.lengthDesc'),
+    };
+
+    const wordsPerPageSelectOptions = wordPerPageOptions.reduce((acc, option) => {
+        acc[option.key] = option.label;
+        return acc;
+    }, {} as OptionsMap);
+
+    const totalWords = wordCount ?? 0;
+    const startWord = totalWords === 0 ? 0 : (pageNumber - 1) * wordsPerPage + 1;
+    const endWord = totalWords === 0 ? 0 : Math.min(pageNumber * wordsPerPage, totalWords);
+    const activeAdvancedFilterCount = selectedPos.length + selectedLang.length + selectedAttr.length;
+
+    useEffect(() => {
+        setPageJumpInput(pageNumber.toString());
+    }, [pageNumber]);
 
     const renderCell = useCallback((item: Row, columnKey: React.Key) => {
         const cellValue = item[columnKey as keyof Row];
@@ -210,6 +234,166 @@ export default function WordList() {
         }
     }, []);
 
+    const handlePageJump = (e: React.FormEvent) => {
+        e.preventDefault();
+        const rawPage = Number(pageJumpInput);
+        if (!Number.isFinite(rawPage)) return;
+        const boundedPage = Math.min(Math.max(1, Math.floor(rawPage)), totalPageNumber ?? 1);
+        setPageNumber(boundedPage);
+        setPageJumpInput(boundedPage.toString());
+    };
+
+    const viewModeControls = (isMobile = false) => (
+        <ButtonGroup className={isMobile ? "sm:hidden" : "hidden sm:flex"}>
+            <Button
+                isIconOnly
+                size={isMobile ? "md" : "lg"}
+                variant={viewMode === 'list' ? "solid" : "bordered"}
+                color={viewMode === 'list' ? "primary" : "default"}
+                onPress={() => setViewMode('list')}
+            >
+                <List size={20} />
+            </Button>
+            <Button
+                isIconOnly
+                size={isMobile ? "md" : "lg"}
+                variant={viewMode === 'grid' ? "solid" : "bordered"}
+                color={viewMode === 'grid' ? "primary" : "default"}
+                onPress={() => setViewMode('grid')}
+            >
+                <LayoutGrid size={20} />
+            </Button>
+        </ButtonGroup>
+    );
+
+    const toolbarSelectClassNames = {
+        base: "w-full max-w-none",
+        label: "whitespace-nowrap",
+        trigger: "min-h-14",
+        popoverContent: "min-w-[220px]",
+    };
+
+    const filterSection = (
+        <div className="flex flex-col gap-4 p-4 bg-background/10 rounded-large shadow-small">
+            <h1 className="text-fs-1">{t('title')}</h1>
+
+            <div className="flex flex-row gap-4">
+                <Controller
+                    name="search"
+                    control={control}
+                    render={({ field }) => (
+                        <CustomInput
+                            {...field}
+                            placeholder={t('searchPlaceholder')}
+                            size="lg"
+                        />
+                    )}
+                />
+                {viewModeControls(false)}
+            </div>
+
+            <div className="flex flex-col lg:flex-row gap-4 lg:items-end">
+                <div className="w-full lg:flex-1">
+                    <CustomSelect
+                        size="md"
+                        options={sortOptions}
+                        label={t('sorting.label')}
+                        classNames={toolbarSelectClassNames}
+                        selectedKeys={[`${sortBy}-${sortOrder}`]}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (!value) return;
+                            const [sort, order] = value.split('-');
+                            setSortBy(sort as 'alphabetical' | 'date' | 'length');
+                            setSortOrder(order as 'asc' | 'desc');
+                        }}
+                    />
+                </div>
+                <div className="w-full sm:max-w-[240px]">
+                    <CustomSelect
+                        size="md"
+                        options={wordsPerPageSelectOptions}
+                        label={t('wordsPerPage')}
+                        classNames={toolbarSelectClassNames}
+                        selectedKeys={[wordsPerPage.toString()]}
+                        onChange={(e) => {
+                            setWordsPerPage(parseInt(e.target.value));
+                        }}
+                    />
+                </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+                <Button
+                    variant="flat"
+                    color="primary"
+                    onPress={() => setShowAdvancedFilters((prev) => !prev)}
+                    startContent={<SlidersHorizontal size={16} />}
+                    endContent={showAdvancedFilters ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                >
+                    {showAdvancedFilters ? t('advancedFilters.hide') : t('advancedFilters.show')}
+                </Button>
+                <div className="flex justify-start lg:justify-end lg:ml-auto">
+                    {viewModeControls(true)}
+                </div>
+                {activeAdvancedFilterCount > 0 ? (
+                    <span className="text-xs text-primary font-medium">
+                        {t('advancedFilters.selectedCount', { count: activeAdvancedFilterCount })}
+                    </span>
+                ) : null}
+            </div>
+
+            {showAdvancedFilters ? (
+                <FilterBar
+                    selectedPos={selectedPos}
+                    selectedLang={selectedLang}
+                    selectedAttr={selectedAttr}
+                    onPosChange={setSelectedPos}
+                    onLangChange={setSelectedLang}
+                    onAttrChange={setSelectedAttr}
+                />
+            ) : null}
+
+            <AlphabetBar
+                selectedLetter={selectedLetter}
+                onLetterSelect={setSelectedLetter}
+            />
+        </div>
+    );
+
+    const paginationSection = (
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 py-2">
+            <p className="text-sm text-muted-foreground">
+                {t('pagination.summary', { from: startWord, to: endWord, total: totalWords })}
+            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+                <CustomPagination
+                    total={totalPageNumber ?? 1}
+                    initialPage={pageNumber}
+                    page={pageNumber}
+                    onChange={(page) => {
+                        setPageNumber(page);
+                    }}
+                />
+                <form onSubmit={handlePageJump} className="flex items-center gap-2">
+                    <CustomInput
+                        size="sm"
+                        type="number"
+                        min={1}
+                        max={totalPageNumber ?? 1}
+                        value={pageJumpInput}
+                        onValueChange={setPageJumpInput}
+                        placeholder={t('pagination.jumpTo')}
+                        className="w-28"
+                    />
+                    <Button type="submit" size="sm" color="primary" variant="flat">
+                        {t('pagination.go')}
+                    </Button>
+                </form>
+            </div>
+        </div>
+    );
+
     return (
         <section>
             {viewMode === 'list' ? (
@@ -217,235 +401,19 @@ export default function WordList() {
                     columns={columns}
                     items={rows}
                     renderCell={renderCell}
+                    isCompact={false}
                     loadingState={wordsQuery.isFetching ? 'loading' : 'idle'}
-                    bottomContent={
-                        <CustomPagination
-                            total={totalPageNumber ?? 1}
-                            initialPage={pageNumber}
-                            page={pageNumber}
-                            onChange={(page) => {
-                                setPageNumber(page);
-                            }}
-                        />
-                    }
-                    topContent={
-                        <div className="flex flex-col gap-4 p-4 bg-background/10 rounded-large shadow-small">
-                            <h1 className="text-fs-1">
-                                {t('title')}
-                            </h1>
-                            <div className="flex flex-col sm:flex-row gap-4">
-                                <Controller name="search" control={control} render={({ field }) => (
-                                    <CustomInput
-                                        {...field}
-                                        placeholder={t('searchPlaceholder')}
-                                        size="lg"
-                                    />
-                                )}
-                                />
-                                <ButtonGroup className="hidden sm:flex">
-                                    <Button
-                                        isIconOnly
-                                        size="lg"
-                                        variant="solid"
-                                        color="primary"
-                                        onPress={() => setViewMode('list')}
-                                    >
-                                        <List size={20} />
-                                    </Button>
-                                    <Button
-                                        isIconOnly
-                                        size="lg"
-                                        variant="bordered"
-                                        color="default"
-                                        onPress={() => setViewMode('grid')}
-                                    >
-                                        <LayoutGrid size={20} />
-                                    </Button>
-                                </ButtonGroup>
-                            </div>
-                            <div className="flex flex-col lg:flex-row gap-4 w-full">
-                                <FilterBar
-                                    selectedPos={selectedPos}
-                                    selectedLang={selectedLang}
-                                    selectedAttr={selectedAttr}
-                                    onPosChange={setSelectedPos}
-                                    onLangChange={setSelectedLang}
-                                    onAttrChange={setSelectedAttr}
-                                    sortBy={sortBy}
-                                    sortOrder={sortOrder}
-                                    onSortChange={(sort, order) => {
-                                        setSortBy(sort);
-                                        setSortOrder(order);
-                                    }}
-                                />
-                                <CustomSelect
-                                    size="md"
-                                    className="hidden sm:block lg:w-1/4"
-                                    options={wordPerPageOptions.reduce((acc, option) => {
-                                        acc[option.key] = option.label;
-                                        return acc;
-                                    }, {} as OptionsMap)}
-                                    label={t('wordsPerPage')}
-
-                                    selectedKeys={[wordsPerPage.toString()]}
-                                    onChange={(e) => {
-                                        setWordsPerPage(parseInt(e.target.value));
-                                    }}
-                                />
-                                <div className="flex items-center gap-2 sm:hidden">
-                                    <CustomSelect
-
-                                        options={wordPerPageOptions.reduce((acc, option) => {
-                                            acc[option.key] = option.label;
-                                            return acc;
-                                        }, {} as OptionsMap)}
-                                        label={t('wordsPerPage')}
-                                        selectedKeys={[wordsPerPage.toString()]}
-                                        onChange={(e) => {
-                                            setWordsPerPage(parseInt(e.target.value));
-                                        }}
-                                    />
-
-                                    <ButtonGroup>
-                                        <Button
-                                            isIconOnly
-                                            size="lg"
-                                            variant="solid"
-                                            color="primary"
-                                            onPress={() => setViewMode('list')}
-                                        >
-                                            <List size={20} />
-                                        </Button>
-                                        <Button
-                                            isIconOnly
-                                            size="lg"
-                                            variant="bordered"
-                                            color="default"
-                                            onPress={() => setViewMode('grid')}
-                                        >
-                                            <LayoutGrid size={20} />
-                                        </Button>
-                                    </ButtonGroup>
-                                </div>
-                            </div>
-
-                            <AlphabetBar
-                                selectedLetter={selectedLetter}
-                                onLetterSelect={setSelectedLetter}
-                            />
-                        </div>
-                    }
+                    classNames={{
+                        th: "bg-primary/15 text-foreground py-3 text-sm font-semibold",
+                        td: "py-3.5 text-sm leading-relaxed group-data-[odd=true]/tr:before:bg-primary/8",
+                    }}
+                    bottomContent={wordCount ? paginationSection : null}
+                    topContent={filterSection}
 
                 />
             ) : (
                 <div className="flex flex-col gap-6 shadow-medium p-2">
-                    <div className="flex flex-col gap-4 p-4 bg-background/10 rounded-large shadow-small">
-                        <h1 className="text-fs-1">
-                            {t('title')}
-                        </h1>
-
-                        <div className="flex gap-4">
-                            <Controller name="search" control={control} render={({ field }) => (
-                                <CustomInput
-                                    {...field}
-                                    placeholder={t('searchPlaceholder')}
-                                    size="lg"
-                                />
-                            )}
-                            />
-                            <ButtonGroup className="hidden sm:flex">
-                                <Button
-                                    isIconOnly
-                                    size="lg"
-                                    variant="bordered"
-                                    color="default"
-                                    onPress={() => setViewMode('list')}
-                                >
-                                    <List size={20} />
-                                </Button>
-                                <Button
-                                    isIconOnly
-                                    size="lg"
-                                    variant="solid"
-                                    color="primary"
-                                    onPress={() => setViewMode('grid')}
-                                >
-                                    <LayoutGrid size={20} />
-                                </Button>
-                            </ButtonGroup>
-                        </div>
-                        <div className="flex flex-col lg:flex-row gap-4 w-full">
-                            <FilterBar
-                                selectedPos={selectedPos}
-                                selectedLang={selectedLang}
-                                selectedAttr={selectedAttr}
-                                onPosChange={setSelectedPos}
-                                onLangChange={setSelectedLang}
-                                onAttrChange={setSelectedAttr}
-                                sortBy={sortBy}
-                                sortOrder={sortOrder}
-                                onSortChange={(sort, order) => {
-                                    setSortBy(sort);
-                                    setSortOrder(order);
-                                }}
-                            />
-                            <CustomSelect
-                                size="md"
-                                className="hidden sm:flex lg:w-1/4"
-                                options={wordPerPageOptions.reduce((acc, option) => {
-                                    acc[option.key] = option.label;
-                                    return acc;
-                                }, {} as OptionsMap)}
-                                label={t('wordsPerPage')}
-
-                                selectedKeys={[wordsPerPage.toString()]}
-                                onChange={(e) => {
-                                    setWordsPerPage(parseInt(e.target.value));
-                                }}
-                            />
-                            <div className="flex items-center gap-2 sm:hidden">
-                                <CustomSelect
-                                    options={wordPerPageOptions.reduce((acc, option) => {
-                                        acc[option.key] = option.label;
-                                        return acc;
-                                    }, {} as OptionsMap)}
-                                    label={t('wordsPerPage')}
-
-                                    selectedKeys={[wordsPerPage.toString()]}
-                                    onChange={(e) => {
-                                        setWordsPerPage(parseInt(e.target.value));
-                                    }}
-                                />
-                                <ButtonGroup>
-                                    <Button
-                                        isIconOnly
-                                        size="lg"
-                                        variant="bordered"
-                                        color="default"
-                                        onPress={() => setViewMode('list')}
-                                    >
-                                        <List size={20} />
-                                    </Button>
-                                    <Button
-                                        isIconOnly
-                                        size="lg"
-                                        variant="solid"
-                                        color="primary"
-                                        onPress={() => setViewMode('grid')}
-                                    >
-                                        <LayoutGrid size={20} />
-                                    </Button>
-                                </ButtonGroup>
-                            </div>
-                        </div>
-
-                        <AlphabetBar
-                            selectedLetter={selectedLetter}
-                            onLetterSelect={setSelectedLetter}
-                        />
-                    </div>
-
-
+                    {filterSection}
 
                     {wordsQuery.isFetching ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -468,18 +436,7 @@ export default function WordList() {
 
                                 ))}
                             </div>
-                            {wordCount ? (
-                                <div className="flex w-full justify-center mt-4">
-                                    <CustomPagination
-                                        total={totalPageNumber ?? 1}
-                                        initialPage={pageNumber}
-                                        page={pageNumber}
-                                        onChange={(page) => {
-                                            setPageNumber(page);
-                                        }}
-                                    />
-                                </div>
-                            ) : null}
+                            {wordCount ? paginationSection : null}
                         </>
                     )}
                 </div>

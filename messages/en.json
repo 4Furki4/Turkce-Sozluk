@@ -607,6 +607,16 @@
       "dateAsc": "Date Added (Oldest)",
       "lengthAsc": "Word Length (Shortest)",
       "lengthDesc": "Word Length (Longest)"
+    },
+    "advancedFilters": {
+      "show": "Advanced filters",
+      "hide": "Hide advanced filters",
+      "selectedCount": "{count} active filters"
+    },
+    "pagination": {
+      "summary": "Showing {from}-{to} of {total} words",
+      "jumpTo": "Page",
+      "go": "Go"
     }
   },
   "SavedWords": {
