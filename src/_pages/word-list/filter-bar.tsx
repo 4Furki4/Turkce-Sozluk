@@ -3,8 +3,8 @@
 import React from "react";
 import { api } from "@/src/trpc/react";
 import { CustomMultiSelect, OptionsMap } from "@/src/components/customs/heroui/custom-multi-select";
-import { CustomSelect } from "@/src/components/customs/heroui/custom-select";
 import { useTranslations, useLocale } from "next-intl";
+import { cn } from "@/lib/utils";
 
 interface FilterBarProps {
     selectedPos: string[];
@@ -13,9 +13,7 @@ interface FilterBarProps {
     onPosChange: (keys: string[]) => void;
     onLangChange: (keys: string[]) => void;
     onAttrChange: (keys: string[]) => void;
-    sortBy: 'alphabetical' | 'date' | 'length';
-    sortOrder: 'asc' | 'desc';
-    onSortChange: (sort: 'alphabetical' | 'date' | 'length', order: 'asc' | 'desc') => void;
+    className?: string;
 }
 
 export function FilterBar({
@@ -25,9 +23,7 @@ export function FilterBar({
     onPosChange,
     onLangChange,
     onAttrChange,
-    sortBy,
-    sortOrder,
-    onSortChange,
+    className,
 }: FilterBarProps) {
     const t = useTranslations('WordList');
     const locale = useLocale();
@@ -51,17 +47,8 @@ export function FilterBar({
         attrOptions[attr.id.toString()] = attr.attribute;
     });
 
-    const sortOptions: OptionsMap = {
-        'alphabetical-asc': t('sorting.alphabeticalAsc'),
-        'alphabetical-desc': t('sorting.alphabeticalDesc'),
-        'date-desc': t('sorting.dateDesc'),
-        'date-asc': t('sorting.dateAsc'),
-        'length-asc': t('sorting.lengthAsc'),
-        'length-desc': t('sorting.lengthDesc'),
-    };
-
     return (
-        <div className="flex flex-col lg:flex-row gap-4 w-full">
+        <div className={cn("grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 w-full", className)}>
             <CustomMultiSelect
                 isLoading={isLoading}
                 size="md"
@@ -91,20 +78,6 @@ export function FilterBar({
                 selectedKeys={selectedAttr}
                 onSelectionChange={onAttrChange}
                 onClear={() => onAttrChange([])}
-            />
-            <CustomSelect
-                isLoading={isLoading}
-                size="md"
-                placeholder={t('sorting.label')}
-                label={t('sorting.label')}
-                options={sortOptions}
-                selectedKeys={[`${sortBy}-${sortOrder}`]}
-                onChange={(e) => {
-                    const value = e.target.value;
-                    if (!value) return;
-                    const [sort, order] = value.split('-');
-                    onSortChange(sort as 'alphabetical' | 'date' | 'length', order as 'asc' | 'desc');
-                }}
             />
         </div>
     );
