@@ -295,6 +295,11 @@ function BentoGalatiMeshur() {
   };
 
   const item = data?.data[0];
+  const explanationPreview = item?.explanation
+    ? item.explanation.length > 120
+      ? `${item.explanation.slice(0, 120).trimEnd()}...`
+      : item.explanation
+    : "";
 
   return (
     <CustomCard className="h-[220px] dark:bg-background/50 bg-background/50 group relative overflow-hidden flex flex-col">
@@ -312,7 +317,7 @@ function BentoGalatiMeshur() {
         </Link>
       </CardHeader>
 
-      <CardBody className="px-6 py-2 z-10 flex-1 flex flex-col justify-center gap-3">
+      <CardBody className="px-6 py-2 z-10 flex-1 flex flex-col justify-center gap-3 overflow-hidden">
         {isLoading ? (
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2 w-full pr-10">
@@ -326,15 +331,15 @@ function BentoGalatiMeshur() {
           </div>
         ) : item ? (
           <>
-            <div className="rounded-md border border-amber-500/20 bg-amber-500/5 px-3 py-2 pr-10">
+            <div className="rounded-md border border-amber-500/20 bg-amber-500/5 px-3 py-2 pr-10 overflow-hidden">
               <p className="text-lg font-serif font-semibold text-foreground line-clamp-1 mb-2">
                 {item.word}
               </p>
               <p className="text-[11px] font-mono uppercase tracking-wide text-amber-600 dark:text-amber-500 mb-1">
                 {t("HomeExtras.explanation")}
               </p>
-              <p className="text-[15px] leading-relaxed text-foreground/85 line-clamp-3">
-                {item.explanation}
+              <p className="text-[15px] leading-relaxed text-foreground/85 line-clamp-2">
+                {explanationPreview}
               </p>
             </div>
           </>
