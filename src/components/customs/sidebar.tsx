@@ -48,14 +48,14 @@ export default function Sidebar(
             <Sheet open={isSidebarOpen} onOpenChange={(isOpen) => {
                 setIsSidebarOpen(isOpen)
             }}>
-                <SheetContent hideCloseButton={true} side={'left'} className="w-[240px] sm:w-[280px] max-sm:p-0 max-sm:pt-8 sidebar">
+                <SheetContent hideCloseButton={true} side={'left'} className="flex flex-col w-[240px] sm:w-[280px] max-sm:p-0 max-sm:pt-8 sidebar overflow-y-auto overflow-x-hidden">
                     <SheetHeader>
                         <SheetTitle className='flex items-center gap-2 justify-center text-center text-primary font-bold'>
                             <Image src={logo} alt="Turkish Dictionary Logo" className="h-6 w-6" />{t("Navbar.Title")}
                         </SheetTitle>
                     </SheetHeader>
-                    <nav className='p-5'>
-                        <ul className='sticky top-4 max-h-max space-y-4'>
+                    <nav className='flex flex-col flex-1 p-5'>
+                        <ul className='space-y-4'>
                             <Separator />
                             <li>
                                 <NextIntlLink className='flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 rounded-sm' href={'/'} onClick={() => setIsSidebarOpen(false)}>
