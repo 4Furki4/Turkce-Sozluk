@@ -48,13 +48,13 @@ export default function Sidebar(
             <Sheet open={isSidebarOpen} onOpenChange={(isOpen) => {
                 setIsSidebarOpen(isOpen)
             }}>
-                <SheetContent hideCloseButton={true} side={'left'} className="flex flex-col w-[240px] sm:w-[280px] max-sm:p-0 max-sm:pt-8 sidebar overflow-y-auto overflow-x-hidden">
+                <SheetContent hideCloseButton={true} side={'left'} className="flex flex-col w-[240px] sm:w-[280px] max-sm:pt-[calc(env(safe-area-inset-top,0px)+1.25rem)] max-sm:pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] sidebar overflow-y-auto overflow-x-hidden overscroll-contain">
                     <SheetHeader>
                         <SheetTitle className='flex items-center gap-2 justify-center text-center text-primary font-bold'>
                             <Image src={logo} alt="Turkish Dictionary Logo" className="h-6 w-6" />{t("Navbar.Title")}
                         </SheetTitle>
                     </SheetHeader>
-                    <nav className='flex flex-col flex-1 p-5'>
+                    <nav className='flex flex-col flex-1 pt-4'>
                         <ul className='space-y-4'>
                             <Separator />
                             <li>
@@ -166,7 +166,7 @@ export default function Sidebar(
                                 </li>
                             ) : null}
                         </ul>
-                        <div className="mt-auto px-1 py-4 space-y-4">
+                        <div className="mt-6 sm:mt-auto px-1 py-4 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] space-y-4">
                             <Separator />
                             <div className="flex items-center justify-between gap-2">
                                 {/* Theme Toggle */}
