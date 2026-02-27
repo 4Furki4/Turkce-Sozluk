@@ -23,7 +23,7 @@
 @layer base {
   :root {
     /* Fluid Typography Variables remain unchanged */
-    --navbar-height: 4rem;
+    --navbar-height: 0rem;
     --sidebar-width: 16rem;
     --sidebar-width-collapsed: 4rem;
     --step--2: clamp(0.7813rem, 0.7727rem + 0.0426vw, 0.8rem);
@@ -123,6 +123,12 @@
   button:focus-visible,
   li a:focus-visible {
     box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --navbar-height: 4rem;
   }
 }
 
