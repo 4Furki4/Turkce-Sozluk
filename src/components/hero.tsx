@@ -27,7 +27,7 @@ export default function Hero({ children }: {
   // State and logic moved to SearchContainer
 
   return (
-    <div className="relative isolate min-h-[calc(100vh-4rem)] flex flex-col justify-center">
+    <div className="relative isolate min-h-[calc(100vh-var(--navbar-height))] flex flex-col justify-center">
       {/* Background Radial Gradient Top */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[500px] pointer-events-none -z-10"
@@ -39,7 +39,7 @@ export default function Hero({ children }: {
       {/* Dot Pattern Background */}
       <div className="absolute inset-0 -z-20 h-full w-full bg-[radial-gradient(#e5e7eb_2px,transparent_2px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)] pointer-events-none opacity-35" />
 
-      <div className="mx-auto max-w-7xl px-4 pb-12 pt-10 sm:pb-16 lg:px-8 w-full">
+      <div className="mx-auto max-w-7xl px-4 pb-12 pt-6 sm:pt-10 sm:pb-16 lg:px-8 w-full">
         {/* --- Hero Header Section --- */}
         <div className="mx-auto text-center space-y-6 mb-16">
           <div className="mx-auto max-w-3xl space-y-4">

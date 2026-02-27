@@ -213,7 +213,7 @@ export default async function RootLayout({
                     SpeedRoundGameIntl={t("SpeedRoundGame")}
                     ForeignTermSuggestionsIntl={t("ForeignTermSuggestions")}
                   />
-                  <main className="relative w-full flex-grow flex min-h-[calc(100vh-var(--navbar-height))]">
+                  <main className="relative w-full flex-grow flex min-h-[calc(100vh-var(--navbar-height))] pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-0">
                     {/* ✨ Moved BackgroundGradient here */}
                     <BackgroundGradient />
                     {children}
