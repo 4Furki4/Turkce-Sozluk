@@ -11,7 +11,7 @@ import {
   NavbarBrand,
   DropdownSection
 } from "@heroui/react";
-import { ChevronDown, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, Link2, LogOut, Mic, Moon, Search, Sparkle, Sparkles, StarIcon, Sun, UserIcon, Zap } from "lucide-react";
+import { BookOpen, ChevronDown, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, Link2, LogOut, Mic, Moon, Search, Sparkle, Sparkles, StarIcon, Sun, UserIcon, Zap } from "lucide-react";
 import { Input } from "@heroui/input";
 // import { signIn, signOut } from "next-auth/react"; // Removed
 import { authClient, type User } from "@/src/lib/auth-client"; // Added
@@ -217,7 +217,7 @@ export default function Navbar({
                 "dark:data-[hover=true]:bg-primary/30",
               ]
             }}>
-            <DropdownItem key="word-list" startContent={<Layers aria-label={WordListIntl} className="w-4 h-4" />} className="py-0 pr-0">
+            <DropdownItem key="word-list" startContent={<BookOpen aria-label={WordListIntl} className="w-4 h-4" />} className="py-0 pr-0">
               <NextIntlLink href="/word-list" className="flex items-center gap-2 py-1.5">
                 {WordListIntl}
               </NextIntlLink>
@@ -248,10 +248,13 @@ export default function Navbar({
                   onValueChange={setNavbarSearchQuery}
                   aria-label={SearchIntl}
                   placeholder={`${SearchIntl}...`}
-                  startContent={<Search className="w-4 h-4 text-default-400" />}
+                  startContent={<Search className="w-4 h-4 text-primary/75 transition-colors group-data-[focus=true]:text-primary" />}
                   classNames={{
-                    inputWrapper: "h-8 bg-background/50 border border-border hover:border-primary/50 data-[focus=true]:border-primary/60 transition-colors",
-                    input: "text-sm",
+                    base: "group",
+                    mainWrapper: "rounded-medium transition-all duration-200 shadow-[0_0_0_1px_rgba(251,146,60,0.18)] group-data-[focus=true]:shadow-[0_0_0_1px_rgba(251,146,60,0.55),0_0_24px_rgba(194,65,12,0.28)]",
+                    inputWrapper: "h-10 bg-gradient-to-r from-background/95 to-background/75 backdrop-blur-sm border border-primary/25 hover:border-primary/50 data-[focus=true]:border-primary/70 data-[focus=true]:bg-background/95 transition-all duration-200",
+                    innerWrapper: "gap-2",
+                    input: "text-sm font-medium tracking-[0.01em] placeholder:text-foreground/45",
                   }}
                   size="sm"
                   type="search"
