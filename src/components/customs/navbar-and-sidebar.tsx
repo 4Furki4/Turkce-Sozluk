@@ -34,6 +34,7 @@ export default function NavbarAndSidebar({
     LearnIntl,
     FlashcardGameIntl,
     WordMatchingGameIntl,
+    WordBuilderIntl,
     SpeedRoundGameIntl,
     ForeignTermSuggestionsIntl
 }: {
@@ -62,6 +63,7 @@ export default function NavbarAndSidebar({
     LearnIntl: string,
     FlashcardGameIntl: string,
     WordMatchingGameIntl: string,
+    WordBuilderIntl: string,
     SpeedRoundGameIntl: string,
     ForeignTermSuggestionsIntl: string
 }) {
@@ -98,6 +100,7 @@ export default function NavbarAndSidebar({
                 LearnIntl={LearnIntl}
                 FlashcardGameIntl={FlashcardGameIntl}
                 WordMatchingGameIntl={WordMatchingGameIntl}
+                WordBuilderIntl={WordBuilderIntl}
                 SpeedRoundGameIntl={SpeedRoundGameIntl}
                 ForeignTermSuggestionsIntl={ForeignTermSuggestionsIntl}
             />
