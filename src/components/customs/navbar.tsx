@@ -32,7 +32,7 @@ import { useState } from "react";
 
 type NavbarProps = {
   session: Session | null;
-} & Record<"TitleIntl" | "WordListIntl" | "SignInIntl" | "HomeIntl" | "ProfileIntl" | "SavedWordsIntl" | "MyRequestsIntl" | "SearchHistoryIntl" | "LogoutIntl" | "AnnouncementsIntl" | "ContributeWordIntl" | "PronunciationsIntl" | "ariaAvatar" | "ariaMenu" | "ariaLanguages" | "ariaSwitchTheme" | "ariaBlur" | "ContributeIntl" | "FeedbackIntl" | "LearnIntl" | "FlashcardGameIntl" | "WordMatchingGameIntl" | "SpeedRoundGameIntl" | "ForeignTermSuggestionsIntl" | "SearchIntl" | "DashboardIntl", string>;
+} & Record<"TitleIntl" | "WordListIntl" | "SignInIntl" | "HomeIntl" | "ProfileIntl" | "SavedWordsIntl" | "MyRequestsIntl" | "SearchHistoryIntl" | "LogoutIntl" | "AnnouncementsIntl" | "ContributeWordIntl" | "PronunciationsIntl" | "ariaAvatar" | "ariaMenu" | "ariaLanguages" | "ariaSwitchTheme" | "ariaBlur" | "ContributeIntl" | "FeedbackIntl" | "LearnIntl" | "FlashcardGameIntl" | "WordMatchingGameIntl" | "WordBuilderIntl" | "SpeedRoundGameIntl" | "ForeignTermSuggestionsIntl" | "SearchIntl" | "DashboardIntl", string>;
 
 export default function Navbar({
   session,
@@ -59,6 +59,7 @@ export default function Navbar({
   LearnIntl,
   FlashcardGameIntl,
   WordMatchingGameIntl,
+  WordBuilderIntl,
   SpeedRoundGameIntl,
   ForeignTermSuggestionsIntl,
   SearchIntl,
@@ -75,7 +76,7 @@ export default function Navbar({
   );
   const snap = useSnapshot(preferencesState);
   const isContributeActive = ["/contribute-word", "/pronunciation-voting", "/feedback", "/foreign-term-suggestions"].some((route) => pathName.startsWith(route));
-  const isLearnActive = ["/word-list", "/flashcard-game", "/word-matching", "/speed-round"].some((route) => pathName.startsWith(route));
+  const isLearnActive = ["/word-list", "/flashcard-game", "/word-matching", "/word-builder", "/speed-round"].some((route) => pathName.startsWith(route));
   const isHomeRoute = pathName === "/";
   const isSearchRoute =
     pathName === "/search" ||
@@ -230,6 +231,11 @@ export default function Navbar({
             <DropdownItem key="word-matching" startContent={<Link2 aria-label={WordMatchingGameIntl} className="w-4 h-4" />} className="py-0 pr-0">
               <NextIntlLink href="/word-matching" className="flex items-center gap-2 py-1.5">
                 {WordMatchingGameIntl}
+              </NextIntlLink>
+            </DropdownItem>
+            <DropdownItem key="word-builder" startContent={<Sparkles aria-label={WordBuilderIntl} className="w-4 h-4" />} className="py-0 pr-0">
+              <NextIntlLink href="/word-builder" className="flex items-center gap-2 py-1.5">
+                {WordBuilderIntl}
               </NextIntlLink>
             </DropdownItem>
             <DropdownItem key="speed-round" startContent={<Zap aria-label={SpeedRoundGameIntl} className="w-4 h-4" />} className="py-0 pr-0">

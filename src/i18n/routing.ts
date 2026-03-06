@@ -203,6 +203,10 @@ export const routing = defineRouting({
       "en": "/word-matching",
       "tr": "/kelime-eslestirme",
     },
+    "/word-builder": {
+      "en": "/word-builder",
+      "tr": "/fiil-cekim-olusturucu",
+    },
     "/speed-round": {
       "en": "/speed-round",
       "tr": "/hizli-tur",

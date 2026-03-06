@@ -26,6 +26,7 @@
     "FlashcardGame": "Flashcard Game",
     "Learn": "Learn",
     "WordMatchingGame": "Word Matching",
+    "WordBuilder": "Verb Builder",
     "SpeedRoundGame": "Speed Round"
   },
   "Footer": {
@@ -1726,6 +1727,100 @@
       "suggestionNotFound": "Suggestion not found",
       "loginRequired": "Please sign in to vote",
       "suggestionAlreadyResolved": "This suggestion has already been resolved"
+    }
+  },
+  "VerbBuilder": {
+    "metaTitle": "Turkish Verb Conjugation Builder | Turkish Dictionary",
+    "metaDescription": "Build Turkish verb forms step by step and see vowel harmony, consonant changes, and person endings applied automatically.",
+    "badgeLive": "Live",
+    "title": "Turkish Verb Conjugation Builder",
+    "subtitle": "Build a verb one suffix at a time",
+    "autoRules": "Vowel harmony, softening, hardening, and buffer letters are applied automatically.",
+    "currentForm": "Current form",
+    "emptyResult": "Enter a verb root",
+    "emptyState": "Start by entering a root verb.",
+    "sections": {
+      "rootChoicesTitle": "Root and choices",
+      "rootChoicesSubtitle": "Set the stem, then refine the form.",
+      "wizardTitle": "Suffix wizard",
+      "wizardSubtitle": "Only the next valid choices are shown.",
+      "negationTitle": "Negation",
+      "negationSubtitle": "Optional and only available before tense.",
+      "tenseTitle": "Tense",
+      "tenseSubtitle": "Choose one tense. Aorist is disabled after negation in this MVP.",
+      "personTitle": "Person",
+      "personSubtitle": "Person endings unlock once a tense is selected.",
+      "questionTitle": "Question",
+      "questionSubtitle": "Adds a final yes/no particle after the built verb."
+    },
+    "field": {
+      "label": "Root verb",
+      "placeholder": "Gel",
+      "description": "Use a bare Turkish verb stem such as gel, yaz, ara."
+    },
+    "dictionary": {
+      "title": "Dictionary roots",
+      "subtitle": "Matching verb roots from your database",
+      "typeMore": "Type at least 2 letters to search your dictionary.",
+      "loading": "Searching dictionary verbs...",
+      "empty": "No matching verb roots found.",
+      "connected": "Matched dictionary entry: {word}",
+      "wordName": "Dictionary form: {word}"
+    },
+    "active": {
+      "negation": "Negation",
+      "question": "Question",
+      "none": "No suffixes selected yet."
+    },
+    "nextStepTitle": "Next step",
+    "nextSteps": {
+      "start": "Add negation first if you need it, or jump straight to a tense.",
+      "afterNegation": "Negation is locked in. The next valid step is choosing a tense.",
+      "afterTense": "Now add a person ending, a final question particle, or both.",
+      "afterPerson": "The verb is finite now. You can optionally turn it into a yes/no question.",
+      "afterQuestion": "You can still add a person ending. The question particle will stay at the end.",
+      "complete": "The form is complete. Adjust any step or reset to build another one."
+    },
+    "personEndings": {
+      "label": "Person endings: {set}",
+      "type1": "Regular set (-yim, -sin, -yiz)",
+      "type2": "Past set (-m, -n, -k)"
+    },
+    "phonology": {
+      "softening": "Softening",
+      "hardening": "Hardening",
+      "twoWay": "2-way harmony",
+      "fourWay": "4-way harmony",
+      "buffer": "Buffer y"
+    },
+    "finish": "Finish and jump to result",
+    "reset": "Reset / Start Over",
+    "enterRootPrompt": "Enter a root to start building.",
+    "common": {
+      "noSuffix": "No suffix",
+      "unavailableAfterNegation": "Unavailable after negation"
+    },
+    "categories": {
+      "root": "Root",
+      "negation": "Negation",
+      "tense": "Tense",
+      "person": "Person",
+      "question": "Question"
+    },
+    "options": {
+      "negation": "Negation",
+      "future": "Future",
+      "pastSeen": "Past (Seen)",
+      "pastHeard": "Past (Heard)",
+      "presentContinuous": "Continuous",
+      "aorist": "Aorist",
+      "ben": "Ben",
+      "sen": "Sen",
+      "o": "O",
+      "biz": "Biz",
+      "siz": "Siz",
+      "onlar": "Onlar",
+      "question": "Question"
     }
   }
 }
