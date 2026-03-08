@@ -1,7 +1,7 @@
 export const CATEGORY_ORDER = ["negation", "tense", "person", "question"] as const;
 
 export type SuffixCategory = (typeof CATEGORY_ORDER)[number];
-export type PersonEndingType = "type1" | "type2";
+export type PersonEndingType = "type1" | "type2" | "imperative";
 
 export type NegationId = "negation";
 export type TenseId =
@@ -9,7 +9,8 @@ export type TenseId =
     | "pastSeen"
     | "pastHeard"
     | "presentContinuous"
-    | "aorist";
+    | "aorist"
+    | "imperative";
 export type PersonId = "ben" | "sen" | "o" | "biz" | "siz" | "onlar";
 export type QuestionId = "question";
 
@@ -122,6 +123,16 @@ export const TENSE_SUFFIXES: readonly TenseSuffixDefinition[] = [
         personEndingType: "type1",
         supportsNegation: true,
     },
+    {
+        id: "imperative",
+        category: "tense",
+        label: "Imperative",
+        description: "Commands, requests, and exhortations.",
+        abstractDisplay: "no tense suffix",
+        formula: "",
+        personEndingType: "imperative",
+        supportsNegation: true,
+    },
 ] as const;
 
 export const PERSON_SUFFIXES: readonly PersonSuffixDefinition[] = [
@@ -134,6 +145,7 @@ export const PERSON_SUFFIXES: readonly PersonSuffixDefinition[] = [
         formulas: {
             type1: "yIm",
             type2: "m",
+            imperative: "",
         },
     },
     {
@@ -145,6 +157,7 @@ export const PERSON_SUFFIXES: readonly PersonSuffixDefinition[] = [
         formulas: {
             type1: "sIn",
             type2: "n",
+            imperative: "",
         },
     },
     {
@@ -152,10 +165,11 @@ export const PERSON_SUFFIXES: readonly PersonSuffixDefinition[] = [
         category: "person",
         label: "O",
         description: "3rd person singular.",
-        abstractDisplay: "no suffix",
+        abstractDisplay: "no suffix / -sIn",
         formulas: {
             type1: "",
             type2: "",
+            imperative: "sIn",
         },
     },
     {
@@ -163,10 +177,11 @@ export const PERSON_SUFFIXES: readonly PersonSuffixDefinition[] = [
         category: "person",
         label: "Biz",
         description: "1st person plural.",
-        abstractDisplay: "-yIz / -k",
+        abstractDisplay: "-yIz / -k / -(y)AlIm",
         formulas: {
             type1: "yIz",
             type2: "k",
+            imperative: "yAlIm",
         },
     },
     {
@@ -174,10 +189,11 @@ export const PERSON_SUFFIXES: readonly PersonSuffixDefinition[] = [
         category: "person",
         label: "Siz",
         description: "2nd person plural.",
-        abstractDisplay: "-sInIz / -nIz",
+        abstractDisplay: "-sInIz / -nIz / -(y)In",
         formulas: {
             type1: "sInIz",
             type2: "nIz",
+            imperative: "yIn",
         },
     },
     {
@@ -185,10 +201,11 @@ export const PERSON_SUFFIXES: readonly PersonSuffixDefinition[] = [
         category: "person",
         label: "Onlar",
         description: "3rd person plural.",
-        abstractDisplay: "-lAr",
+        abstractDisplay: "-lAr / -sInlAr",
         formulas: {
             type1: "lAr",
             type2: "lAr",
+            imperative: "sInlAr",
         },
     },
 ] as const;

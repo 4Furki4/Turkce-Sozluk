@@ -1,4 +1,8 @@
 import {
+    isNegativeAoristWithoutZ,
+    selectAoristFormula as selectAoristSurfaceFormula,
+} from "./aorist";
+import {
     CATEGORY_LABELS,
     DEFAULT_SELECTION,
     NEGATION_SUFFIXES,
@@ -26,21 +30,14 @@ const SOFTENING_MAP: Record<string, string> = {
     k: "ğ",
 };
 const SOFTENING_EXCEPTIONS = new Set(["et", "git", "tat"]);
-const AORIST_I_TYPE_EXCEPTIONS = new Set([
-    "al",
-    "bil",
-    "bul",
-    "dur",
-    "gel",
-    "gör",
-    "kal",
-    "ol",
-    "öl",
-    "san",
-    "var",
-    "ver",
-    "vur",
-]);
+const ROOT_PATTERN = /^[a-zçğıöşü]+$/;
+
+export type ConjugationErrorCode = "EMPTY_ROOT" | "INVALID_CHARACTERS";
+
+export interface ConjugationError {
+    code: ConjugationErrorCode;
+    defaultMessage: string;
+}
 
 export interface ConjugationPart {
     category: "root" | "negation" | "tense" | "person" | "question";
@@ -56,6 +53,8 @@ export interface ConjugationResult {
     word: string;
     normalizedRoot: string;
     parts: ConjugationPart[];
+    isValid: boolean;
+    error: ConjugationError | null;
 }
 
 interface AppliedSurface {
@@ -69,7 +68,15 @@ export function normalizeVerbRoot(input: string): string {
 }
 
 export function getPersonEndingType(tenseId: TenseId | null): PersonEndingType {
-    return tenseId === PAST_SEEN_TENSE_ID ? "type2" : "type1";
+    if (tenseId === PAST_SEEN_TENSE_ID) {
+        return "type2";
+    }
+
+    if (tenseId === "imperative") {
+        return "imperative";
+    }
+
+    return "type1";
 }
 
 export function buildVerbConjugation(
@@ -81,16 +88,19 @@ export function buildVerbConjugation(
         ...selection,
     };
     const normalizedRoot = normalizeVerbRoot(rootInput);
+    const baseWord = toTurkishLower(normalizedRoot);
+    const error = validateVerbRoot(normalizedRoot, baseWord);
 
-    if (!normalizedRoot) {
+    if (error) {
         return {
             word: "",
-            normalizedRoot: "",
+            normalizedRoot,
             parts: [],
+            isValid: false,
+            error,
         };
     }
 
-    const baseWord = toTurkishLower(normalizedRoot);
     const parts: ConjugationPart[] = [
         {
             category: "root",
@@ -180,6 +190,8 @@ export function buildVerbConjugation(
         word: preserveInputCase(normalizedRoot, currentWord),
         normalizedRoot,
         parts,
+        isValid: true,
+        error: null,
     };
 }
 
@@ -206,7 +218,7 @@ function selectTenseFormula(
     selection: BuilderSelection,
 ): string {
     if (tense.id === "aorist") {
-        return selectAoristFormula(word, selection, tense);
+        return selectAoristSurfaceFormula(word, selection, tense);
     }
 
     return tense.formula;
@@ -246,35 +258,6 @@ function applyQuestionParticle(
         surface: particle,
         displaySurface: particle,
     };
-}
-
-function selectAoristFormula(
-    word: string,
-    selection: BuilderSelection,
-    tense: TenseSuffixDefinition,
-): string {
-    if (selection.negation === "negation") {
-        return isNegativeAoristWithoutZ(selection) ? "" : "z";
-    }
-
-    if (endsWithVowel(word)) {
-        return tense.formula;
-    }
-
-    return usesITypeAorist(word) ? tense.alternateFormula ?? tense.formula : "Ar";
-}
-
-function isNegativeAoristWithoutZ(selection: BuilderSelection): boolean {
-    if (selection.tense !== "aorist" || selection.negation !== "negation" || selection.question) {
-        return false;
-    }
-
-    return selection.person === "ben" || selection.person === "biz";
-}
-
-function usesITypeAorist(word: string): boolean {
-    const lowerWord = toTurkishLower(word);
-    return countSyllables(lowerWord) > 1 || AORIST_I_TYPE_EXCEPTIONS.has(lowerWord);
 }
 
 function applyAttachedSuffix(
@@ -449,6 +432,24 @@ function countSyllables(word: string): number {
     }
 
     return total;
+}
+
+function validateVerbRoot(normalizedRoot: string, baseWord: string): ConjugationError | null {
+    if (!normalizedRoot) {
+        return {
+            code: "EMPTY_ROOT",
+            defaultMessage: "Enter a verb root.",
+        };
+    }
+
+    if (!ROOT_PATTERN.test(baseWord)) {
+        return {
+            code: "INVALID_CHARACTERS",
+            defaultMessage: "Use only Turkish letters in a bare verb stem.",
+        };
+    }
+
+    return null;
 }
 
 function toTurkishLower(value: string): string {
