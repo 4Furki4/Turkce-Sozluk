@@ -1713,11 +1713,11 @@
       "negationTitle": "Olumsuzluk",
       "negationSubtitle": "İsteğe bağlıdır ve sadece zamandan önce eklenebilir.",
       "tenseTitle": "Zaman",
-      "tenseSubtitle": "Bir zaman seçin. Bu MVP'de olumsuzluktan sonra geniş zaman kapalıdır.",
+      "tenseSubtitle": "Bir zaman seçin. Uyum ve kök kuralları biçimi otomatik günceller.",
       "personTitle": "Kişi",
       "personSubtitle": "Kişi ekleri ancak zaman seçildikten sonra açılır.",
       "questionTitle": "Soru",
-      "questionSubtitle": "Kurulan fiilin sonuna evet/hayır soru parçacığı ekler."
+      "questionSubtitle": "Kurulan fiilin sonuna, emir biçimleri dahil, evet/hayır soru parçacığı ekler."
     },
     "field": {
       "label": "Fiil kökü",
@@ -1741,16 +1741,22 @@
     "nextStepTitle": "Sıradaki adım",
     "nextSteps": {
       "start": "İsterseniz önce olumsuzluk ekleyin ya da doğrudan bir zaman seçin.",
+      "invalidRoot": "Önce kökü düzeltin. Yalın fiil kökünde yalnızca Türkçe harfler kullanın.",
       "afterNegation": "Olumsuzluk seçildi. Sıradaki geçerli adım bir zaman seçmek.",
       "afterTense": "Şimdi bir kişi eki, son soru parçacığı ya da ikisini birden ekleyin.",
       "afterPerson": "Fiil artık çekimli. İsterseniz bunu evet/hayır sorusuna çevirebilirsiniz.",
       "afterQuestion": "Hâlâ bir kişi eki ekleyebilirsiniz. Soru parçacığı sonda kalır.",
       "complete": "Biçim tamamlandı. İsterseniz adımları değiştirin ya da sıfırlayın."
     },
+    "validation": {
+      "emptyRoot": "Bir fiil kökü girin.",
+      "invalidCharacters": "Yalın fiil kökünde yalnızca Türkçe harfler kullanın."
+    },
     "personEndings": {
       "label": "Kişi ekleri: {set}",
       "type1": "Düzenli set (-yim, -sin, -yiz)",
-      "type2": "Geçmiş zaman seti (-m, -n, -k)"
+      "type2": "Geçmiş zaman seti (-m, -n, -k)",
+      "imperative": "Emir seti (yalın kök, -sin, -elim, -in)"
     },
     "phonology": {
       "softening": "Yumuşama",
@@ -1764,7 +1770,8 @@
     "enterRootPrompt": "Kurmak için bir kök girin.",
     "common": {
       "noSuffix": "Ek yok",
-      "unavailableAfterNegation": "Olumsuzluktan sonra kullanılamaz"
+      "unavailableAfterNegation": "Olumsuzluktan sonra kullanılamaz",
+      "unavailableInImperative": "Bu kişi emir kipinde kullanılmaz."
     },
     "categories": {
       "root": "Kök",
@@ -1780,6 +1787,7 @@
       "pastHeard": "Duyulan Geçmiş",
       "presentContinuous": "Şimdiki Zaman",
       "aorist": "Geniş Zaman",
+      "imperative": "Emir Kipi",
       "ben": "Ben",
       "sen": "Sen",
       "o": "O",

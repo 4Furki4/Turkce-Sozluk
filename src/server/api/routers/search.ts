@@ -80,7 +80,10 @@ export const searchRouter = createTRPCRouter({
         LEFT JOIN roots r ON r.word_id = w.id
         LEFT JOIN meanings m ON m.word_id = w.id
         LEFT JOIN part_of_speechs p ON p.id = m.part_of_speech_id
-        WHERE ${rootExpression} ILIKE ${`%${query}%`}
+        WHERE (
+            ${rootExpression} ILIKE ${`%${query}%`}
+            OR w.name ILIKE ${`%${query}%`}
+          )
           AND (
             LOWER(COALESCE(p.part_of_speech, '')) LIKE '%fiil%'
             OR LOWER(COALESCE(p.part_of_speech, '')) LIKE '%verb%'

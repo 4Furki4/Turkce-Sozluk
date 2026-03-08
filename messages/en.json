@@ -1747,11 +1747,11 @@
       "negationTitle": "Negation",
       "negationSubtitle": "Optional and only available before tense.",
       "tenseTitle": "Tense",
-      "tenseSubtitle": "Choose one tense. Aorist is disabled after negation in this MVP.",
+      "tenseSubtitle": "Choose one tense. Harmony and stem rules update the form automatically.",
       "personTitle": "Person",
       "personSubtitle": "Person endings unlock once a tense is selected.",
       "questionTitle": "Question",
-      "questionSubtitle": "Adds a final yes/no particle after the built verb."
+      "questionSubtitle": "Adds a final yes/no particle after the built verb, including imperative forms."
     },
     "field": {
       "label": "Root verb",
@@ -1775,16 +1775,22 @@
     "nextStepTitle": "Next step",
     "nextSteps": {
       "start": "Add negation first if you need it, or jump straight to a tense.",
+      "invalidRoot": "Fix the root first. Use only Turkish letters in the bare verb stem.",
       "afterNegation": "Negation is locked in. The next valid step is choosing a tense.",
       "afterTense": "Now add a person ending, a final question particle, or both.",
       "afterPerson": "The verb is finite now. You can optionally turn it into a yes/no question.",
       "afterQuestion": "You can still add a person ending. The question particle will stay at the end.",
       "complete": "The form is complete. Adjust any step or reset to build another one."
     },
+    "validation": {
+      "emptyRoot": "Enter a verb root.",
+      "invalidCharacters": "Use only Turkish letters in a bare verb stem."
+    },
     "personEndings": {
       "label": "Person endings: {set}",
       "type1": "Regular set (-yim, -sin, -yiz)",
-      "type2": "Past set (-m, -n, -k)"
+      "type2": "Past set (-m, -n, -k)",
+      "imperative": "Imperative set (stem, -sin, -elim, -in)"
     },
     "phonology": {
       "softening": "Softening",
@@ -1798,7 +1804,8 @@
     "enterRootPrompt": "Enter a root to start building.",
     "common": {
       "noSuffix": "No suffix",
-      "unavailableAfterNegation": "Unavailable after negation"
+      "unavailableAfterNegation": "Unavailable after negation",
+      "unavailableInImperative": "This person is not used in the imperative."
     },
     "categories": {
       "root": "Root",
@@ -1814,6 +1821,7 @@
       "pastHeard": "Past (Heard)",
       "presentContinuous": "Continuous",
       "aorist": "Aorist",
+      "imperative": "Imperative",
       "ben": "Ben",
       "sen": "Sen",
       "o": "O",

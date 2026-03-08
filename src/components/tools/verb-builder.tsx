@@ -27,6 +27,7 @@ import {
     buildVerbConjugation,
     getPersonEndingType,
     normalizeVerbRoot,
+    type ConjugationErrorCode,
 } from "@/src/lib/morphology/engine";
 import {
     DEFAULT_SELECTION,
@@ -50,7 +51,11 @@ export default function VerbBuilder() {
     const resultSectionRef = useRef<HTMLDivElement>(null);
 
     const result = buildVerbConjugation(root, selection);
-    const normalizedRoot = normalizeVerbRoot(root);
+    const normalizedRoot = result.normalizedRoot;
+    const hasRootError = Boolean(result.error && result.error.code !== "EMPTY_ROOT");
+    const validationMessage = hasRootError && result.error
+        ? getValidationMessage(result.error.code, t)
+        : null;
     const debouncedRoot = useDebounce(normalizedRoot, 250);
     const activeTense = selection.tense
         ? TENSE_SUFFIXES.find((item) => item.id === selection.tense) ?? null
@@ -60,7 +65,7 @@ export default function VerbBuilder() {
     const { data: verbSuggestions = [], isFetching: isVerbSuggestionsLoading } =
         api.search.searchVerbRoots.useQuery(
             { query: debouncedRoot, limit: 8 },
-            { enabled: debouncedRoot.length >= 2 },
+            { enabled: debouncedRoot.length >= 2 && !hasRootError },
         );
 
     const optionLabels = {
@@ -70,6 +75,7 @@ export default function VerbBuilder() {
         pastHeard: t("options.pastHeard"),
         presentContinuous: t("options.presentContinuous"),
         aorist: t("options.aorist"),
+        imperative: t("options.imperative"),
         ben: t("options.ben"),
         sen: t("options.sen"),
         o: t("options.o"),
@@ -119,7 +125,10 @@ export default function VerbBuilder() {
             return;
         }
 
-        updateSelection({ tense: tenseId });
+        updateSelection({
+            tense: tenseId,
+            person: tenseId === "imperative" && selection.person === "ben" ? null : selection.person,
+        });
     };
 
     const togglePerson = (personId: PersonId) => {
@@ -247,7 +256,9 @@ export default function VerbBuilder() {
                             onValueChange={setRoot}
                             placeholder={t("field.placeholder")}
                             variant="bordered"
-                            description={t("field.description")}
+                            description={validationMessage ? undefined : t("field.description")}
+                            isInvalid={hasRootError}
+                            errorMessage={validationMessage}
                             startContent={<ArrowRight className="h-4 w-4 text-foreground/40" />}
                         />
 
@@ -272,6 +283,10 @@ export default function VerbBuilder() {
                                 {normalizedRoot.length < 2 ? (
                                     <Chip color="default" variant="flat">
                                         {t("dictionary.typeMore")}
+                                    </Chip>
+                                ) : hasRootError ? (
+                                    <Chip color="danger" variant="flat">
+                                        {validationMessage}
                                     </Chip>
                                 ) : isVerbSuggestionsLoading ? (
                                     <Chip color="secondary" variant="flat">
@@ -347,13 +362,17 @@ export default function VerbBuilder() {
                             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary/80">
                                 {t("nextStepTitle")}
                             </p>
-                            <p className="mt-2 text-sm leading-6 text-foreground/80">{nextStepLabel}</p>
+                            <p className="mt-2 text-sm leading-6 text-foreground/80">
+                                {hasRootError ? t("nextSteps.invalidRoot") : nextStepLabel}
+                            </p>
                             {activeTense && (
                                 <Chip className="mt-3" color="primary" variant="flat">
                                     {t("personEndings.label", {
                                         set:
                                             personEndingType === "type2"
                                                 ? t("personEndings.type2")
+                                                : personEndingType === "imperative"
+                                                  ? t("personEndings.imperative")
                                                 : t("personEndings.type1"),
                                     })}
                                 </Chip>
@@ -402,7 +421,13 @@ export default function VerbBuilder() {
                             </div>
                         )}
 
-                        {normalizedRoot && !selection.tense && (
+                        {hasRootError && normalizedRoot && (
+                            <div className="rounded-2xl border border-danger/20 bg-danger/5 p-6 text-center text-sm text-danger">
+                                {validationMessage}
+                            </div>
+                        )}
+
+                        {!hasRootError && normalizedRoot && !selection.tense && (
                             <BuilderSection
                                 icon={<CircleSlash className="h-4 w-4" />}
                                 title={t("sections.negationTitle")}
@@ -427,7 +452,7 @@ export default function VerbBuilder() {
                             </BuilderSection>
                         )}
 
-                        {normalizedRoot && (
+                        {!hasRootError && normalizedRoot && (
                             <BuilderSection
                                 icon={<Clock3 className="h-4 w-4" />}
                                 title={t("sections.tenseTitle")}
@@ -435,9 +460,7 @@ export default function VerbBuilder() {
                             >
                                 {TENSE_SUFFIXES.map((option) => {
                                     const preview = getPreview({ tense: option.id });
-                                    const isDisabled =
-                                        selection.negation === "negation" &&
-                                        option.supportsNegation === false;
+                                    const isDisabled = selection.negation === "negation" && option.supportsNegation === false;
 
                                     return (
                                         <OptionButton
@@ -454,7 +477,7 @@ export default function VerbBuilder() {
                             </BuilderSection>
                         )}
 
-                        {normalizedRoot && selection.tense && (
+                        {!hasRootError && normalizedRoot && selection.tense && (
                             <BuilderSection
                                 icon={<Users className="h-4 w-4" />}
                                 title={t("sections.personTitle")}
@@ -462,14 +485,17 @@ export default function VerbBuilder() {
                             >
                                 {PERSON_SUFFIXES.map((option) => {
                                     const preview = getPreview({ person: option.id });
+                                    const isDisabled =
+                                        activeTense?.id === "imperative" && option.id === "ben";
 
                                     return (
                                         <OptionButton
                                             key={option.id}
                                             title={optionLabels[option.id]}
                                             detail={option.abstractDisplay}
-                                            preview={preview.word}
+                                            preview={isDisabled ? t("common.unavailableInImperative") : preview.word}
                                             selected={selection.person === option.id}
+                                            disabled={isDisabled}
                                             onPress={() => togglePerson(option.id)}
                                         />
                                     );
@@ -477,7 +503,7 @@ export default function VerbBuilder() {
                             </BuilderSection>
                         )}
 
-                        {normalizedRoot && selection.tense && (
+                        {!hasRootError && normalizedRoot && selection.tense && (
                             <BuilderSection
                                 icon={<MessageCircleQuestion className="h-4 w-4" />}
                                 title={t("sections.questionTitle")}
@@ -500,7 +526,7 @@ export default function VerbBuilder() {
                             </BuilderSection>
                         )}
 
-                        {normalizedRoot && (
+                        {!hasRootError && normalizedRoot && (
                             <Button
                                 color="primary"
                                 variant="shadow"
@@ -607,6 +633,20 @@ function getNextStepLabel(
     }
 
     return t("nextSteps.complete");
+}
+
+function getValidationMessage(
+    code: ConjugationErrorCode,
+    t: ReturnType<typeof useTranslations>,
+): string {
+    switch (code) {
+        case "INVALID_CHARACTERS":
+            return t("validation.invalidCharacters");
+        case "EMPTY_ROOT":
+            return t("validation.emptyRoot");
+        default:
+            return t("validation.invalidCharacters");
+    }
 }
 
 function getChipColor(category: "root" | "negation" | "tense" | "person" | "question") {
