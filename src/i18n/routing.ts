@@ -31,6 +31,10 @@ export const routing = defineRouting({
       "en": "/word-list",
       "tr": "/kelime-listesi",
     },
+    "/word-builder": {
+      "en": "/word-builder",
+      "tr": "/kelime-insa",
+    },
     "/saved-words": {
       "en": "/saved-words",
       "tr": "/kaydedilen-kelimeler",

@@ -189,6 +189,7 @@ export default async function RootLayout({
                     HomeIntl={t("Home")}
                     SignInIntl={t("Sign In")}
                     WordListIntl={t("Word List")}
+                    WordBuilderIntl={t("WordBuilder")}
                     TitleIntl={t("Title")}
                     ProfileIntl={t("Profile")}
                     DashboardIntl={t("Dashboard")}

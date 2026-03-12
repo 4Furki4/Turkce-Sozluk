@@ -13,6 +13,7 @@ export default function NavbarAndSidebar({
     HomeIntl,
     SignInIntl,
     WordListIntl,
+    WordBuilderIntl,
     TitleIntl,
     ProfileIntl,
     SavedWordsIntl,
@@ -41,6 +42,7 @@ export default function NavbarAndSidebar({
     HomeIntl: string
     SignInIntl: string
     WordListIntl: string
+    WordBuilderIntl: string
     TitleIntl: string
     ProfileIntl: string
     SavedWordsIntl: string
@@ -76,6 +78,7 @@ export default function NavbarAndSidebar({
                 HomeIntl={HomeIntl}
                 SignInIntl={SignInIntl}
                 WordListIntl={WordListIntl}
+                WordBuilderIntl={WordBuilderIntl}
                 TitleIntl={TitleIntl}
                 ProfileIntl={ProfileIntl}
                 SavedWordsIntl={SavedWordsIntl}
