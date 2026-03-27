@@ -30,6 +30,7 @@ import { toast } from "sonner";
 import RequestDetails from "@/src/components/requests/details/RequestDetails";
 import DisplayWordBeingModified from "@/src/components/shared/DisplayWordBeingModified";
 import CustomCard from "@/src/components/customs/heroui/custom-card";
+import { startNavigationProgress } from "@/src/lib/navigation-progress";
 
 export interface AdminRequestDetailProps {
   requestId: number;
@@ -145,7 +146,10 @@ export default function AdminRequestDetail({ requestId }: AdminRequestDetailProp
         <Button
           color="primary"
           variant="flat"
-          onPress={() => router.push("/dashboard/requests")}
+          onPress={() => {
+            startNavigationProgress();
+            router.push("/dashboard/requests");
+          }}
           className="mt-4"
         >
           Back to Requests
@@ -178,7 +182,10 @@ export default function AdminRequestDetail({ requestId }: AdminRequestDetailProp
         <Button
           color="default"
           variant="flat"
-          onPress={() => router.push("/dashboard/requests")}
+          onPress={() => {
+            startNavigationProgress();
+            router.push("/dashboard/requests");
+          }}
           startContent={<ArrowLeft className="h-4 w-4" />}
         >
           Back to Requests

@@ -19,7 +19,7 @@ import {
   useDisclosure,
 } from "@heroui/react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft, Check, X } from "lucide-react";
 import { toast } from "sonner";

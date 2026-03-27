@@ -29,6 +29,7 @@ import CustomDropdown from "./heroui/custom-dropdown";
 import { Session } from "@/src/lib/auth-client";
 import { useLocaleSwitchHref } from "@/src/hooks/useLocaleSwitchHref";
 import { useState } from "react";
+import { startNavigationProgress } from "@/src/lib/navigation-progress";
 
 type NavbarProps = {
   session: Session | null;
@@ -94,6 +95,7 @@ export default function Navbar({
     const input = navbarSearchQuery.trim();
     if (!input) return;
     setNavbarSearchQuery("");
+    startNavigationProgress();
     router.push({
       pathname: "/search/[word]",
       params: { word: encodeURIComponent(input) },
@@ -276,6 +278,7 @@ export default function Navbar({
               // @ts-ignore
               href={languageSwitchHref}
               locale="tr"
+              data-skip-navigation-progress
             >
               <span className="flex items-center gap-2">
                 <Languages aria-label={ariaLanguages} className="w-5 h-5 xs:w-6 xs:h-6" /> TR
@@ -287,6 +290,7 @@ export default function Navbar({
               // @ts-ignore
               href={languageSwitchHref}
               locale="en"
+              data-skip-navigation-progress
             >
               <span className="flex items-center gap-2">
                 <Languages aria-label={ariaLanguages} className="w-5 h-5 xs:w-6 xs:h-6" /> EN

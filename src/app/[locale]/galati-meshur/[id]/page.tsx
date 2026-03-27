@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/src/i18n/routing";
 import { Button, Card, CardBody, CardFooter, CardHeader, Skeleton } from "@heroui/react";
 import { ArrowLeft, BookOpen, CheckCircle2, ChevronRight, Share2 } from "lucide-react";
-import { notFound, useParams } from "next/navigation"; // Correct import for params in Next.js 15
+import { notFound } from "next/navigation";
 import { useLayoutEffect, useState, use } from "react"; // Added use for promise unravelingx"
 import CustomCard from "@/src/components/customs/heroui/custom-card";
 
@@ -38,8 +38,8 @@ function LoadingState() {
     );
 }
 
-export default function GalatiMeshurDetailPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = use(params);
+export default function GalatiMeshurDetailPage({ params }: { params: Promise<{ id: string, locale: string }> }) {
+    const { id, locale } = use(params);
     const t = useTranslations("Home.HomeExtras"); // Reusing existing translations if possible, or fallback
     // We might need to add specific translations for this page, but for now we'll use generic or hardcoded ones and fix later.
 
@@ -115,7 +115,9 @@ export default function GalatiMeshurDetailPage({ params }: { params: Promise<{ i
                     </span>
                     <Button
                         as={Link}
-                        href={`/search/${item.word}`}
+                        href={locale === "en"
+                            ? `/en/search/${encodeURIComponent(item.word)}`
+                            : `/arama/${encodeURIComponent(item.word)}`}
                         color="primary"
                         variant="flat"
                         endContent={<ChevronRight className="w-4 h-4" />}

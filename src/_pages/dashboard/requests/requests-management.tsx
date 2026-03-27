@@ -13,7 +13,8 @@ import {
   SelectItem, User
 } from "@heroui/react";
 import { useState, useCallback, useEffect } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
 import { formatDistanceToNow } from "date-fns";
 import { EntityTypes, Actions } from "@/db/schema/requests";
 import { Link } from "@/src/i18n/routing";

@@ -2,7 +2,8 @@
 import { Button, InputOtp } from "@heroui/react";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
 import React, { useEffect, useState } from "react";
 import { authClient } from "@/src/lib/auth-client";
 import { toast } from "sonner";

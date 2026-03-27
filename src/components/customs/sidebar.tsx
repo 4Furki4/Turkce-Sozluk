@@ -1,6 +1,7 @@
 import { BellIcon, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, HomeIcon, LayoutDashboard, Layers, Link2, ListTree, LogIn, MicIcon, StarIcon, UserIcon, WifiOff, Sun, Moon, Sparkles, Sparkle, Languages, LogOut, Zap } from 'lucide-react'
 import React from 'react'
-import { Link as NextIntlLink, useRouter } from "@/src/i18n/routing";
+import { Link as NextIntlLink } from "@/src/i18n/routing";
+import { useRouter } from "@/src/i18n/routing";
 import {
     Sheet,
     SheetContent,
@@ -210,6 +211,7 @@ export default function Sidebar(
                                 // @ts-ignore
                                 href={languageSwitchHref}
                                 locale={locale === "en" ? "tr" : "en"}
+                                data-skip-navigation-progress
                             >
                                 <Languages className="w-5 h-5" />
                                 <span className="font-medium">{locale === "en" ? "Türkçe'ye Geç" : "Switch to English"}</span>

@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { useSnapshot } from "valtio";
 import { preferencesState } from "@/src/store/preferences";
 import { useRouter } from "@/src/i18n/routing";
+import { startNavigationProgress } from "@/src/lib/navigation-progress";
 
 // Zod schema for form validation
 const suggestionSchema = z.object({
@@ -145,14 +146,15 @@ export function ForeignTermSuggestionModal({
                             <Button
                                 color="primary"
                                 variant="light"
-                                onPress={() =>
+                                onPress={() => {
+                                    startNavigationProgress();
                                     router.push({
                                         pathname: "/signin",
                                         query: {
                                             backTo: window.location.pathname,
                                         },
-                                    })
-                                }
+                                    });
+                                }}
                                 className="p-0 m-0 h-max text-base font-semibold data-[hover]:dark:bg-transparent data-[hover]:bg-transparent data-[hover]:text-primary data-[hover]:underline data-[hover]:underline-offset-2 text-primary underline underline-offset-2"
                                 disableAnimation
                                 disableRipple

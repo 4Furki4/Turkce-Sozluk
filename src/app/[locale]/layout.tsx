@@ -19,6 +19,7 @@ import NavbarAndSidebar from "@/src/components/customs/navbar-and-sidebar";
 import { BackgroundGradient } from "@/src/components/customs/background-gradient";
 import { CaptchaProvider } from "@/src/components/customs/captcha-provider";
 import { PreferencesInitializer } from "@/src/components/customs/preferences-initializer";
+import NavigationProgressBar from "@/src/components/customs/navigation-progress-bar";
 // import { SessionProvider } from "next-auth/react"; // Removed
 import { AutocompleteSync } from "@/src/components/customs/complete-sync";
 import ProfileGuard from "@/src/components/customs/profile-guard";
@@ -180,6 +181,7 @@ export default async function RootLayout({
           <NextIntlClientProvider messages={messages}>
             <CaptchaProvider>
               <Providers>
+                <NavigationProgressBar />
                 <AutocompleteSync />
                 <ProfileGuard />
                 <div className="flex flex-col min-h-screen">

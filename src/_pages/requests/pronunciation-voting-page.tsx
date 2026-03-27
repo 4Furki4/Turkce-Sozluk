@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
 import { api } from "@/src/trpc/react";
 import { useDebounce } from "@/src/hooks/use-debounce";
 import { useTranslations } from "next-intl";

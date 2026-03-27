@@ -14,7 +14,8 @@ import {
 import { Edit3, MoreVertical, Plus, Trash2 } from "lucide-react";
 import { api } from "@/src/trpc/react";
 import { Link as NextUILink } from "@heroui/react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
 import { Link } from "@/src/i18n/routing";
 import WordListDeleteModal from "./word-list-delete-modal";
 import EditWordModal from "./edit-modal/edit-word-modal";

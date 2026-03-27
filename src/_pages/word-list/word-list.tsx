@@ -1,12 +1,13 @@
 "use client";
 import React, { useCallback, useEffect, useRef } from "react";
 import { api } from "@/src/trpc/react";
-import { Link as NextUILink, Button, ButtonGroup } from "@heroui/react";
+import { Button, ButtonGroup } from "@heroui/react";
 import { Link } from "@/src/i18n/routing";
 import { keepPreviousData } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
 import { useDebounce } from "@uidotdev/usehooks";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
 import { useTranslations } from "next-intl";
 import { CustomPagination } from "@/src/components/customs/heroui/custom-pagination";
 import { CustomTable } from "@/src/components/customs/heroui/custom-table";
@@ -216,15 +217,19 @@ export default function WordList() {
         switch (columnKey) {
             case "name":
                 return (
-                    <NextUILink target="_blank" color="primary" underline="hover" as={Link} href={`/search/${encodeURIComponent(item.name)}`}>
+                    <Link
+                        target="_blank"
+                        className="text-primary hover:underline"
+                        href={{ pathname: '/search/[word]', params: { word: item.name } }}
+                    >
                         {cellValue}
-                    </NextUILink>
+                    </Link>
                 );
             case "meaning":
                 if (!cellValue && item.relatedWord) {
                     return (
                         <span className="text-muted-foreground italic">
-                            {item.relationType === 'turkish_equivalent' ? 'Türkçe karşılığı:' : 'Bakınız:'} <NextUILink as={Link} href={`/search/${encodeURIComponent(item.relatedWord)}`} className="ml-1 text-primary">{item.relatedWord}</NextUILink>
+                            {item.relationType === 'turkish_equivalent' ? 'Türkçe karşılığı:' : 'Bakınız:'} <Link href={{ pathname: '/search/[word]', params: { word: item.relatedWord } }} className="ml-1 text-primary hover:underline">{item.relatedWord}</Link>
                         </span>
                     );
                 }

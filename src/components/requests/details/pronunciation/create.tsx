@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
+import { Link } from "@/src/i18n/routing";
 import { RequestDetailComponentProps } from "../registry";
 import { api } from "@/src/trpc/react";
 import { Alert, Spinner } from "@heroui/react";
@@ -29,7 +29,12 @@ export const CreatePronunciation: FC<RequestDetailComponentProps> = ({ newData, 
                     <p className="text-sm text-gray-500">{t("Pronunciation.relatedWord")}</p>
                     {wordData?.name ? (
                         <Link
-                            href={`/search/${encodeURIComponent(wordData?.name ?? '') || encodeURIComponent(oldData?.name)}`}
+                            href={{
+                                pathname: "/search/[word]",
+                                params: {
+                                    word: wordData?.name || oldData?.name || "",
+                                },
+                            }}
                             className="text-primary hover:underline font-medium text-lg"
                         >
                             {wordData?.name || oldData?.name || 'Unknown Word'}

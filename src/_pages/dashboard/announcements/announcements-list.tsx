@@ -20,7 +20,8 @@ import {
 import { Edit3, Plus, Trash2, Search } from "lucide-react";
 import { api } from "@/src/trpc/react";
 import { Link } from "@/src/i18n/routing";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
 import { useTranslations } from "next-intl";
 import { keepPreviousData } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";

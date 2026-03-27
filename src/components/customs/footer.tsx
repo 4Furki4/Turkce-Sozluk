@@ -2,7 +2,7 @@ import React from 'react'
 import { getTranslations } from 'next-intl/server'
 import { FeedbackModal } from "@/src/components/customs/modals/add-feedback";
 import { Link } from '@heroui/react';
-import { Link as NextIntlLink } from '@/src/i18n/routing';
+import { Link as NextIntlLink } from "@/src/i18n/routing";
 import { Github } from 'lucide-react';
 import { Session } from '@/src/lib/auth';
 import Image from "next/image";
