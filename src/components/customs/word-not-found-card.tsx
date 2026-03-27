@@ -3,7 +3,8 @@
 import React from "react";
 import { Card, CardBody, Button, useDisclosure, Tooltip } from "@heroui/react";
 import { useTranslations } from "next-intl";
-import { Link as NextIntlLink, usePathname, useRouter } from "@/src/i18n/routing";
+import { Link as NextIntlLink, usePathname } from "@/src/i18n/routing";
+import { useRouter } from "@/src/i18n/routing";
 import { Plus, Search, BookOpen } from "lucide-react";
 import SimpleWordRequestModal from "./modals/simple-word-request-modal";
 
@@ -17,6 +18,7 @@ import {
   extractSearchWordFromPathname,
   toSingleRouteParam,
 } from "@/src/lib/search-route";
+import { startNavigationProgress } from "@/src/lib/navigation-progress";
 
 interface WordNotFoundCardProps {
   session: Session | null;
@@ -70,12 +72,15 @@ export default function WordNotFoundCard({ session }: WordNotFoundCardProps) {
               </Button>
             ) : (
               <Tooltip content={t("signInToRequestWord")}>
-                <Button color="primary" variant="solid" size="lg" onPress={() => router.push({
-                  pathname: "/signin",
-                  query: {
-                    backTo: pathname
-                  }
-                })}>
+                <Button color="primary" variant="solid" size="lg" onPress={() => {
+                  startNavigationProgress();
+                  router.push({
+                    pathname: "/signin",
+                    query: {
+                      backTo: pathname
+                    }
+                  });
+                }}>
                   {t("signIn")}
                 </Button>
               </Tooltip>

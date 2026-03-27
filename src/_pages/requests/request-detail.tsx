@@ -29,6 +29,7 @@ import { toast } from "sonner";
 import RequestDetails from "@/src/components/requests/details/RequestDetails";
 import DisplayWordBeingModified from "@/src/components/shared/DisplayWordBeingModified";
 import CustomCard from "@/src/components/customs/heroui/custom-card";
+import { startNavigationProgress } from "@/src/lib/navigation-progress";
 
 
 export interface RequestDetailProps {
@@ -92,6 +93,7 @@ export default function RequestDetail({ requestId }: RequestDetailProps) {
   // Cancel request mutation
   const cancelRequestMutation = api.request.cancelRequest.useMutation({
     onSuccess: () => {
+      startNavigationProgress();
       router.push("/my-requests");
     },
   });
@@ -99,6 +101,7 @@ export default function RequestDetail({ requestId }: RequestDetailProps) {
   // Update request mutation
   const updateRequestMutation = api.request.updateRequest.useMutation({
     onSuccess: () => {
+      startNavigationProgress();
       router.push("/my-requests");
     },
   });
@@ -157,7 +160,10 @@ export default function RequestDetail({ requestId }: RequestDetailProps) {
         <Button
           color="primary"
           variant="flat"
-          onPress={() => router.push("/my-requests")}
+          onPress={() => {
+            startNavigationProgress();
+            router.push("/my-requests");
+          }}
           className="mt-4"
         >
           {t("buttons.backToRequests")}
@@ -192,7 +198,10 @@ export default function RequestDetail({ requestId }: RequestDetailProps) {
         <Button
           color="default"
           variant="flat"
-          onPress={() => router.push("/my-requests")}
+          onPress={() => {
+            startNavigationProgress();
+            router.push("/my-requests");
+          }}
           startContent={<ArrowLeft className="h-4 w-4" />}
         >
           {t("buttons.back")}

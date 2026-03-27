@@ -1,7 +1,8 @@
 "use client";
 
 import { authClient } from "@/src/lib/auth-client";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
 import { useEffect } from "react";
 
 export default function ProfileGuard() {

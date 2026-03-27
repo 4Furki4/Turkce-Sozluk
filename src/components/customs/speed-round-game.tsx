@@ -91,15 +91,18 @@ function WordReviewItem({
                 )}
             </div>
             <div className="flex-1 min-w-0">
-                <a
-                    href={`/${locale}/search/${encodeURIComponent(question.word)}`}
+                <NextIntlLink
+                    href={{
+                        pathname: "/search/[word]",
+                        params: { word: question.word },
+                    }}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-semibold text-primary hover:underline inline-flex items-center gap-1"
                 >
                     {question.word}
                     <ExternalLink className="w-3 h-3" />
-                </a>
+                </NextIntlLink>
                 <p className="text-sm text-default-600 mt-1 break-words">
                     {question.correctMeaning}
                 </p>

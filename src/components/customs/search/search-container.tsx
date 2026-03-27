@@ -13,6 +13,7 @@ import { searchAutocompleteOffline, searchByPattern } from "@/src/lib/offline-db
 import { useTypewriter } from "@/src/hooks/use-typewriter";
 import { useOnlineStatus } from "@/src/hooks/use-online-status";
 import { api } from "@/src/trpc/react";
+import { startNavigationProgress } from "@/src/lib/navigation-progress";
 
 type SearchMode = "word" | "meaning";
 
@@ -205,6 +206,7 @@ export default function SearchContainer({
         setInputError("");
         setShowRecommendations(false);
         onSearchComplete?.();
+        startNavigationProgress();
         router.push({
             pathname: "/search/[word]",
             params: { word: encodeURIComponent(input) },
@@ -216,6 +218,7 @@ export default function SearchContainer({
         setWordInput(word);
         setShowRecommendations(false);
         onSearchComplete?.();
+        startNavigationProgress();
         router.push({
             pathname: "/search/[word]",
             params: { word: encodeURIComponent(word) },

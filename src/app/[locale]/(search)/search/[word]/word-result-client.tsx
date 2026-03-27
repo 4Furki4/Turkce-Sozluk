@@ -1,7 +1,7 @@
 "use client";
 
 import { useWordSearch } from "@/src/hooks/useWordSearch";
-import Loading from "../_loading";
+import WordLoadingSkeleton from "../_components/word-loading-skeleton";
 import WordNotFoundCard from "@/src/components/customs/word-not-found-card";
 import { Session } from "@/src/lib/auth";
 import WordCardWrapper from "@/src/components/customs/word-card-wrapper";
@@ -20,7 +20,7 @@ export default function WordResultClient({ session, wordName }: WordResultClient
 
     // The loading skeleton will only be shown on subsequent client-side navigation.
     if (isLoading) {
-        return <Loading />;
+        return <WordLoadingSkeleton />;
     }
 
     // Show the "Not Found" component if there's an error or no data

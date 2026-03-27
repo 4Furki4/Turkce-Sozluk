@@ -12,7 +12,7 @@ import {
 import { useTranslations } from "next-intl";
 import { api } from "@/src/trpc/react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
 
 interface DeleteAnnouncementModalProps {
   isOpen: boolean;

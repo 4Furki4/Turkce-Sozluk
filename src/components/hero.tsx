@@ -1,7 +1,7 @@
 "use client";
 import { useLocale, useTranslations } from "next-intl";
 import { Search as SearchIcon, PuzzleIcon, KeyboardIcon, ArrowRight, XCircle, CheckCircle2, BookOpen, TrendingUpIcon, Download, Wifi, HeartHandshake } from "lucide-react";
-import { Link, useRouter } from "@/src/i18n/routing";
+import { Link } from "@/src/i18n/routing";
 import { Input } from "@heroui/input";
 import { useEffect, useRef, useState } from "react";
 import { Button, Card, CardBody, CardFooter, CardHeader, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@heroui/react";
@@ -23,7 +23,6 @@ export default function Hero({ children }: {
 }) {
   const t = useTranslations("Home");
   const locale = useLocale()
-  const router = useRouter();
   // State and logic moved to SearchContainer
 
   return (
