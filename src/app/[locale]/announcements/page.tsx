@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { api } from "@/src/trpc/server";
-import { Pagination } from "@heroui/react";
 import Announcement from "@/src/_pages/announcements/announcements-card";
 
 interface AnnouncementsPageProps {
@@ -63,13 +62,27 @@ export default async function AnnouncementsPage({
 
       {meta.totalPages > 1 && (
         <div className="mt-8 flex justify-center">
-          <Pagination
-            total={meta.totalPages}
-            initialPage={pageNumber}
-            onChange={(newPage) => {
-              window.location.href = `/${locale}/announcements?page=${newPage}`;
-            }}
-          />
+          <nav className="flex flex-wrap items-center justify-center gap-2">
+            {Array.from({ length: meta.totalPages }, (_, index) => {
+              const targetPage = index + 1;
+              const isCurrentPage = targetPage === pageNumber;
+
+              return (
+                <a
+                  key={targetPage}
+                  href={`/${locale}/announcements?page=${targetPage}`}
+                  aria-current={isCurrentPage ? "page" : undefined}
+                  className={`inline-flex min-w-10 items-center justify-center rounded-md border px-3 py-2 text-sm transition-colors ${
+                    isCurrentPage
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background/40 hover:bg-background/60"
+                  }`}
+                >
+                  {targetPage}
+                </a>
+              );
+            })}
+          </nav>
         </div>
       )}
     </div>

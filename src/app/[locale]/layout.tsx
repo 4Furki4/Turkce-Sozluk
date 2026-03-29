@@ -23,6 +23,7 @@ import NavigationProgressBar from "@/src/components/customs/navigation-progress-
 // import { SessionProvider } from "next-auth/react"; // Removed
 import { AutocompleteSync } from "@/src/components/customs/complete-sync";
 import ProfileGuard from "@/src/components/customs/profile-guard";
+import { getBaseUrl, getCanonicalPathname } from "@/src/lib/seo-utils";
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -48,6 +49,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const isEnglish = locale === 'en';
+  const requestHeaders = await headers();
+  const currentPath = requestHeaders.get("x-current-path") ?? (isEnglish ? "/en" : "/tr");
+  const canonicalPath = getCanonicalPathname(currentPath);
 
   // --- Unified, SEO-friendly Description ---
   // Using a single, strong description ensures a consistent message.
@@ -59,17 +63,9 @@ export async function generateMetadata({
   // --- Homepage-specific Keywords ---
   // While not used by Google for ranking, this can be useful for other tools.
   const keywords = isEnglish
-    ? ['turkish', 'dictionary', 'turkish language', 'online dictionary', 'learn turkish', 'sozluk', 'modern', 'open source', 'community driven']
+        ? ['turkish', 'dictionary', 'turkish language', 'online dictionary', 'learn turkish', 'sozluk', 'modern', 'open source', 'community driven']
     : ['türkçe', 'sözlük', 'türkçe sözlük', 'online sözlük', 'türkçe öğren', 'kelime anlamları', 'tdk', 'çağdaş türkçe sözlük', 'modern', 'açık kaynak', 'toplulukla gelişen'];
-  // --- Dynamic URL Logic ---
-  let siteUrl;
-  if (process.env.VERCEL_ENV === 'production') {
-    siteUrl = 'https://turkce-sozluk.com'; // canonical production URL
-  } else if (process.env.VERCEL_URL) {
-    siteUrl = `https://${process.env.VERCEL_URL}`; // Preview URLs
-  } else {
-    siteUrl = 'http://localhost:3000'; // Local development
-  }
+
   return {
     applicationName: isEnglish ? "Turkish Dictionary" : "Türkçe Sözlük",
 
@@ -105,7 +101,7 @@ export async function generateMetadata({
     formatDetection: {
       telephone: false,
     },
-    metadataBase: new URL(siteUrl),
+    metadataBase: new URL(getBaseUrl()),
     manifest: '/manifest.json',
     // --- Title ---
     // The title structure is excellent. No changes needed.
@@ -135,15 +131,22 @@ export async function generateMetadata({
       description, // Using the unified description
       // The twitter:image is also automatically added
     },
-    // --- Alternates ---
-    // Your alternates configuration is perfect for i18n. No changes needed.
     alternates: {
-      canonical: `/${locale}`,
-      languages: {
-        'en-US': '/en',
-        'tr-TR': '/tr',
-      },
+      canonical: canonicalPath,
     },
+    robots: isEnglish
+      ? {
+        index: false,
+        follow: true,
+        googleBot: {
+          index: false,
+          follow: true,
+          'max-video-preview': -1,
+          'max-image-preview': 'large',
+          'max-snippet': -1,
+        },
+      }
+      : undefined,
   };
 }
 

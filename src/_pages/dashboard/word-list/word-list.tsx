@@ -28,6 +28,7 @@ import { CustomTable } from "@/src/components/customs/heroui/custom-table";
 import { CustomPagination } from '@/src/components/customs/heroui/custom-pagination'
 import { CustomSelect, OptionsMap } from '@/src/components/customs/heroui/custom-select'
 import { CustomInput } from '@/src/components/customs/heroui/custom-input'
+import { getWordCanonicalPath } from "@/src/lib/seo-utils";
 
 
 const wordPerPageOptions = [
@@ -206,13 +207,13 @@ export default function WordList() {
           return <span>{item.meaning}</span>;
         }
         return (
-          <NextUILink target='_blank' as={Link} href={`/arama/${item.name}`}>
+          <NextUILink target='_blank' as={Link} href={getWordCanonicalPath(item.name, "tr")}>
             {t("Dashboard.NavigationWordLink")}
           </NextUILink>
         );
       case "name":
         return (
-          <NextUILink target='_blank' as={Link} href={`/arama/${item.name}`}>
+          <NextUILink target='_blank' as={Link} href={getWordCanonicalPath(item.name, "tr")}>
             {cellValue}
           </NextUILink>
         );

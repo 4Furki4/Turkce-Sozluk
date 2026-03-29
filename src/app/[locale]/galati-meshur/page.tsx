@@ -1,7 +1,6 @@
 import CustomCard from "@/src/components/customs/heroui/custom-card";
 import { Link } from "@/src/i18n/routing";
 import { api } from "@/src/trpc/server";
-import { CardBody, CardFooter, CardHeader } from "@heroui/react";
 import { BookOpen, CheckCircle2, ChevronLeft, XCircle } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -39,11 +38,11 @@ export default async function GalatiMeshurListPage({ params }: Props) {
             <div className="grid grid-cols-1 gap-4">
                 {galatiMeshurResponse.data.map((item) => (
                     <CustomCard key={item.id} className="p-0">
-                        <CardHeader className="px-5 pt-5 pb-2">
+                        <div className="px-5 pt-5 pb-2">
                             <h2 className="text-xl font-semibold">{item.word}</h2>
-                        </CardHeader>
+                        </div>
 
-                        <CardBody className="px-5 py-2 space-y-3">
+                        <div className="px-5 py-2 space-y-3">
                             <div className="flex items-start gap-2 text-default-500">
                                 <XCircle className="w-4 h-4 mt-1 text-danger shrink-0" />
                                 <p className="line-through decoration-danger/60">
@@ -56,9 +55,9 @@ export default async function GalatiMeshurListPage({ params }: Props) {
                                     {item.correctUsage || item.word}
                                 </p>
                             </div>
-                        </CardBody>
+                        </div>
 
-                        <CardFooter className="px-5 pb-5 pt-1">
+                        <div className="px-5 pb-5 pt-1">
                             <Link
                                 href={{
                                     pathname: "/galati-meshur/[id]",
@@ -68,15 +67,15 @@ export default async function GalatiMeshurListPage({ params }: Props) {
                             >
                                 {t("seeDetails")}
                             </Link>
-                        </CardFooter>
+                        </div>
                     </CustomCard>
                 ))}
 
                 {galatiMeshurResponse.data.length === 0 && (
                     <CustomCard>
-                        <CardBody className="p-6 text-sm text-muted-foreground">
+                        <div className="p-6 text-sm text-muted-foreground">
                             {t("noGalatiMeshurFound")}
-                        </CardBody>
+                        </div>
                     </CustomCard>
                 )}
             </div>

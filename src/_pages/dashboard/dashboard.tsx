@@ -1,4 +1,3 @@
-import { Card, CardBody, CardHeader } from "@heroui/react";
 import React from "react";
 import DashboardLinks from "./dashboard-links";
 
@@ -12,13 +11,13 @@ export default function Dashboard({
 }) {
 
   return (
-    <Card isBlurred className="max-w-7xl w-full mx-auto my-4 max-lg:mx-4 h-max border-2 border-border" radius="sm">
-      <CardHeader className="gap-2">
+    <div className="max-w-7xl w-full mx-auto my-4 max-lg:mx-4 h-max rounded-sm border-2 border-border bg-background/40 p-4">
+      <div className="gap-2">
         <DashboardLinks />
-      </CardHeader>
-      <CardBody>
+      </div>
+      <div>
         {children}
-      </CardBody>
-    </Card>
+      </div>
+    </div>
   );
 }
