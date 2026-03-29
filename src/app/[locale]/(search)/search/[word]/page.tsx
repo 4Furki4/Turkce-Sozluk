@@ -3,8 +3,36 @@ import { api, HydrateClient } from '@/src/trpc/server';
 import { Metadata } from 'next';
 import { auth } from "@/src/lib/auth";
 import WordResultClient from './word-result-client';
-import { getWordCanonicalUrl, getWordHreflangUrls } from '@/src/lib/seo-utils';
+import { getWordCanonicalUrl } from '@/src/lib/seo-utils';
 import { headers } from 'next/headers';
+
+function buildWordJsonLd(wordData: any, locale: string) {
+    const relatedWords = wordData?.relatedWords?.map((word: { related_word_name: string }) => word.related_word_name) || [];
+    const firstMeaning = wordData.meanings[0]?.meaning || "";
+    const canonicalLocale = locale === "en" ? "en" : "tr";
+
+    return {
+        "@context": "https://schema.org",
+        "@type": "DefinedTerm",
+        "name": wordData.word_name,
+        "description": firstMeaning,
+        "inLanguage": canonicalLocale,
+        "url": getWordCanonicalUrl(wordData.word_name, canonicalLocale),
+        "isPartOf": {
+            "@type": "Dictionary",
+            "name": locale === "en" ? "Turkish Dictionary" : "Türkçe Sözlük",
+            "description": locale === "en"
+                ? "Community-driven, modern, and open-source Turkish Dictionary"
+                : "Toplulukla gelişen, çağdaş ve açık kaynak Türkçe Sözlük",
+            "url": locale === "en"
+                ? "https://turkce-sozluk.com/en"
+                : "https://turkce-sozluk.com/tr",
+            "inLanguage": locale === "en" ? ["en"] : ["tr"],
+        },
+        "alternateName": relatedWords.slice(0, 5),
+        "additionalType": "https://schema.org/LexicalEntry",
+    };
+}
 
 // This is the updated metadata generation function
 export async function generateMetadata({
@@ -13,6 +41,7 @@ export async function generateMetadata({
     params: Promise<{ word: string, locale: string }>
 }): Promise<Metadata> {
     const { word, locale } = await params;
+    const seoLocale = locale === "en" ? "en" : "tr";
     const wordName = decodeURIComponent(word);
     const [result] = await api.word.getWord({ name: wordName, skipLogging: true });
 
@@ -58,27 +87,6 @@ export async function generateMetadata({
 
     const keywords = [word_data.word_name, ...baseKeywords, ...relatedWords, ...relatedPhrases];
 
-    // Generate JSON-LD structured data for better SEO
-    const jsonLd = {
-        "@context": "https://schema.org",
-        "@type": "DefinedTerm",
-        "name": word_data.word_name,
-        "description": firstMeaning,
-        "inLanguage": "tr",
-        "url": getWordCanonicalUrl(wordName, locale),
-        "isPartOf": {
-            "@type": "Dictionary",
-            "name": isEnglish ? "Turkish Dictionary" : "Türkçe Sözlük",
-            "description": isEnglish
-                ? "Community-driven, modern, and open-source Turkish Dictionary"
-                : "Toplulukla gelişen, çağdaş ve açık kaynak Türkçe Sözlük",
-            "url": isEnglish ? "https://turkce-sozluk.com/en" : "https://turkce-sozluk.com",
-            "inLanguage": ["tr", "en"]
-        },
-        "alternateName": relatedWords.slice(0, 5), // Limit to avoid bloating
-        "additionalType": "https://schema.org/LexicalEntry"
-    };
-
     return {
         title,
         description,
@@ -97,17 +105,13 @@ export async function generateMetadata({
             // Twitter will also use the opengraph-image by default
         },
         alternates: {
-            canonical: getWordCanonicalUrl(wordName, locale),
-            languages: getWordHreflangUrls(wordName),
-        },
-        other: {
-            'application/ld+json': JSON.stringify(jsonLd),
+            canonical: getWordCanonicalUrl(wordName, seoLocale),
         },
         robots: {
-            index: true,
+            index: !isEnglish,
             follow: true,
             googleBot: {
-                index: true,
+                index: !isEnglish,
                 follow: true,
                 'max-video-preview': -1,
                 'max-image-preview': 'large',
@@ -145,6 +149,8 @@ export default async function SearchResultPage(
     const session = await auth.api.getSession({
         headers: await headers()
     });
+    const [serverResult] = await api.word.getWord({ name: decodedWordName, skipLogging: true });
+    const jsonLd = serverResult ? buildWordJsonLd(serverResult.word_data, locale) : null;
 
     // 1. Fetch data on the server for SEO and initial load.
     try {
@@ -157,6 +163,12 @@ export default async function SearchResultPage(
     // 3. Pass the server-fetched data to the new Client Component.
     return (
         <HydrateClient>
+            {jsonLd ? (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+                />
+            ) : null}
             <WordResultClient session={session} wordName={decodedWordName} />
         </HydrateClient>
     )

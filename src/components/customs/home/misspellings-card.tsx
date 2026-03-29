@@ -5,8 +5,9 @@ import CustomCard from "@/src/components/customs/heroui/custom-card";
 import { CardHeader, CardBody, Skeleton } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { XCircle, CheckCircle2, AlertTriangle } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/src/i18n/routing";
 import { useOnlineStatus } from "@/src/hooks/use-online-status";
+import { getWordRoute } from "@/src/lib/seo-utils";
 
 export function MisspellingsCard() {
     const t = useTranslations("Home.HomeExtras");
@@ -87,7 +88,7 @@ export function MisspellingsCard() {
                             <div className="text-default-300 px-2">→</div>
 
                             {/* Correct Side */}
-                            <Link href={`/arama/${item.correct}`} className="flex items-center gap-2 text-success w-1/2 justify-end hover:underline">
+                            <Link href={getWordRoute(item.correct)} className="flex items-center gap-2 text-success w-1/2 justify-end hover:underline">
                                 <span className="text-sm font-medium truncate">{item.correct}</span>
                                 <CheckCircle2 className="w-3 h-3 shrink-0" />
                             </Link>

@@ -1,7 +1,6 @@
 import CustomCard from "@/src/components/customs/heroui/custom-card";
 import { Link } from "@/src/i18n/routing";
 import { api } from "@/src/trpc/server";
-import { CardBody } from "@heroui/react";
 import { CheckCircle2, ChevronLeft, XCircle } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -38,7 +37,7 @@ export default async function CommonMisspellingsPage({ params }: Props) {
             <div className="grid grid-cols-1 gap-3">
                 {misspellingsResponse.data.map((item) => (
                     <CustomCard key={item.id} className="p-0">
-                        <CardBody className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <div className="flex items-center gap-2 text-danger">
                                 <XCircle className="w-4 h-4 shrink-0" />
                                 <span className="line-through decoration-danger/60">
@@ -55,15 +54,15 @@ export default async function CommonMisspellingsPage({ params }: Props) {
                                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                                 <span className="font-medium">{item.correct}</span>
                             </Link>
-                        </CardBody>
+                        </div>
                     </CustomCard>
                 ))}
 
                 {misspellingsResponse.data.length === 0 && (
                     <CustomCard>
-                        <CardBody className="p-6 text-sm text-muted-foreground">
+                        <div className="p-6 text-sm text-muted-foreground">
                             {t("noMisspellingsFound")}
-                        </CardBody>
+                        </div>
                     </CustomCard>
                 )}
             </div>

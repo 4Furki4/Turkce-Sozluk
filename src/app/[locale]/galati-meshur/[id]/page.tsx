@@ -8,6 +8,7 @@ import { ArrowLeft, BookOpen, CheckCircle2, ChevronRight, Share2 } from "lucide-
 import { notFound } from "next/navigation";
 import { useLayoutEffect, useState, use } from "react"; // Added use for promise unravelingx"
 import CustomCard from "@/src/components/customs/heroui/custom-card";
+import { getWordCanonicalPath } from "@/src/lib/seo-utils";
 
 // Helper component for loading state
 function LoadingState() {
@@ -115,9 +116,7 @@ export default function GalatiMeshurDetailPage({ params }: { params: Promise<{ i
                     </span>
                     <Button
                         as={Link}
-                        href={locale === "en"
-                            ? `/en/search/${encodeURIComponent(item.word)}`
-                            : `/arama/${encodeURIComponent(item.word)}`}
+                        href={getWordCanonicalPath(item.word, locale === "en" ? "en" : "tr")}
                         color="primary"
                         variant="flat"
                         endContent={<ChevronRight className="w-4 h-4" />}

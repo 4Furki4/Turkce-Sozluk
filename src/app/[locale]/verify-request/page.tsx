@@ -1,4 +1,4 @@
-import { Card, CardBody, CardHeader } from '@heroui/react';
+import CustomCard from '@/src/components/customs/heroui/custom-card';
 import { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import React from 'react'
@@ -30,14 +30,14 @@ export default async function VerifyRequest({ params }: { params: Promise<{ loca
     const t = await getTranslations("VerifyRequest");
     return (
         <div className="flex items-center justify-center mx-auto p-4">
-            <Card isBlurred className='border-2 border-border max-w-4xl h-max p-2 sm:p-8 flex items-center justify-center'>
-                <CardHeader>
+            <CustomCard className='border-2 border-border max-w-4xl h-max p-2 sm:p-8 flex items-center justify-center'>
+                <div className="pb-3">
                     <h1>{t("title")}</h1>
-                </CardHeader>
-                <CardBody>
+                </div>
+                <div>
                     <p>{t("description")}</p>
-                </CardBody>
-            </Card>
+                </div>
+            </CustomCard>
         </div>
     )
 }

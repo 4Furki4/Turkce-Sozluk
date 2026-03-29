@@ -4,9 +4,10 @@
 import { api } from "@/src/trpc/react";
 import CustomCard from "@/src/components/customs/heroui/custom-card";
 import { CardHeader, CardBody, CardFooter, Button, Skeleton, Tooltip } from "@heroui/react";
-import Link from "next/link";
+import { Link } from "@/src/i18n/routing";
 import { useLocale, useTranslations } from "next-intl";
 import { formatDate } from "@/src/utils/date";
+import { getWordCanonicalPath, getWordRoute } from "@/src/lib/seo-utils";
 
 export function WordOfTheDayCard() {
     const { data: dailyWord, isLoading } = api.word.getWordOfTheDay.useQuery();
@@ -53,7 +54,7 @@ export function WordOfTheDayCard() {
 
             <CardBody className="flex flex-col items-center justify-center text-center py-6 overflow-hidden">
                 <Link
-                    href={`/arama/${word.name}`}
+                    href={getWordRoute(word.name)}
                     className="group transition-opacity hover:opacity-80"
                 >
                     <h2 className="text-4xl font-bold mb-2 underline text-foreground tracking-tight group-hover:text-primary transition-colors">
@@ -85,7 +86,7 @@ export function WordOfTheDayCard() {
                                         // @ts-ignore
                                         key={related.relatedWord.id}
                                         // @ts-ignore
-                                        href={`/arama/${related.relatedWord.name}`}
+                                        href={getWordRoute(related.relatedWord.name)}
                                         className="px-3 py-1 bg-primary/10 hover:bg-primary/20 rounded-md transition-colors text-primary"
                                     >
                                         {/* @ts-ignore */}
@@ -105,7 +106,7 @@ export function WordOfTheDayCard() {
             <CardFooter className="flex justify-center gap-3 pt-0 pb-6">
                 <Button
                     as={Link}
-                    href={`/arama/${word.name}`}
+                    href={getWordCanonicalPath(word.name, "tr")}
                     variant="bordered"
                     color="primary"
                     size="sm"

@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { words } from "@/db/schema/words";
-import { getBaseUrl } from '@/src/lib/seo-utils';
+import { escapeXml, getWordCanonicalUrl } from '@/src/lib/seo-utils';
 import { unstable_cache } from "next/cache";
 
 const PAGE_SIZE = 5000;
@@ -42,34 +42,23 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     // Fetch this page's words from cache
     const rows = await getWordsForPage(page);
 
-    const baseUrl = getBaseUrl();
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
     for (const { name, updatedAt, createdAt } of rows) {
-        const encoded = encodeURIComponent(name);
         const rawLastModified = updatedAt ?? createdAt;
         const lastModified = rawLastModified
             ? new Date(rawLastModified).toISOString()
             : new Date().toISOString();
-
-        // 1. Turkish (x-default)
-        const trUrl = `${baseUrl}/arama/${encoded}`;
-        const enUrl = `${baseUrl}/en/search/${encoded}`;
-
-        // Turkish Entry
-        xml += `<url><loc>${trUrl}</loc><lastmod>${lastModified}</lastmod><changefreq>daily</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="en" href="${enUrl}" /><xhtml:link rel="alternate" hreflang="tr" href="${trUrl}" /><xhtml:link rel="alternate" hreflang="x-default" href="${trUrl}" /></url>\n`;
-
-        // English Entry
-        xml += `<url><loc>${enUrl}</loc><lastmod>${lastModified}</lastmod><changefreq>daily</changefreq><priority>0.8</priority><xhtml:link rel="alternate" hreflang="en" href="${enUrl}" /><xhtml:link rel="alternate" hreflang="tr" href="${trUrl}" /><xhtml:link rel="alternate" hreflang="x-default" href="${trUrl}" /></url>\n`;
+        const url = getWordCanonicalUrl(name, "tr");
+        xml += `<url><loc>${escapeXml(url)}</loc><lastmod>${lastModified}</lastmod></url>\n`;
     }
 
     xml += '</urlset>';
 
     return new Response(xml, {
         headers: {
-            'Content-Type': 'application/xml',
-            // Keep browser caching but reduce s-maxage to rely on next/cache revalidation
+            'Content-Type': 'application/xml; charset=utf-8',
             'Cache-Control': 'public, max-age=86400'
         },
     });

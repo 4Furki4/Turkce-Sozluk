@@ -1,7 +1,6 @@
 import React from 'react'
 import { getTranslations } from 'next-intl/server'
 import { FeedbackModal } from "@/src/components/customs/modals/add-feedback";
-import { Link } from '@heroui/react';
 import { Link as NextIntlLink } from "@/src/i18n/routing";
 import { Github } from 'lucide-react';
 import { Session } from '@/src/lib/auth';
@@ -53,7 +52,7 @@ export default async function Footer({ session }: { session: Session | null }) {
                             {t("description")}
                         </p>
                         <div className="pt-2">
-                            <Link
+                            <a
                                 href="https://github.com/4furki4/Turkish-Dictionary"
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -61,7 +60,7 @@ export default async function Footer({ session }: { session: Session | null }) {
                             >
                                 <Github size={18} />
                                 <span className="font-medium">GitHub</span>
-                            </Link>
+                            </a>
                         </div>
                     </div>
 

@@ -6,11 +6,11 @@ import superjson from "superjson";
 import { db } from "@/db";
 import { Link } from "@/src/i18n/routing";
 import Image from "next/image";
-import { Button, Card, CardBody, CardHeader } from "@heroui/react";
 import { formatDate } from "@/src/utils/date";
 import { MarkdownRenderer } from "@/src/components/markdown-renderer";
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
+import CustomCard from "@/src/components/customs/heroui/custom-card";
 interface AnnouncementDetailPageProps {
   params: Promise<{
     locale: string;
@@ -114,8 +114,10 @@ export default async function AnnouncementDetailPage({
     return (
       <div className="container mx-auto py-8 px-4">
         <div className="mb-6">
-          <Link href={{ pathname: "/announcements" }}>
-            <Button variant="solid" color="primary" className="flex items-center gap-2">
+          <Link
+            href={{ pathname: "/announcements" }}
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+          >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -130,21 +132,18 @@ export default async function AnnouncementDetailPage({
                 <path d="M19 12H5M12 19l-7-7 7-7" />
               </svg>
               {t("backToAnnouncements")}
-            </Button>
           </Link>
         </div>
 
-        <Card classNames={{
-          base: "bg-background/10",
-        }} className="border-2 border-border rounded-sm px-2 py-4 w-full" isBlurred>
-          <CardHeader>
+        <CustomCard className="border-2 border-border rounded-sm px-2 py-4 w-full">
+          <div className="px-4 pb-4">
             <div className="flex flex-col gap-2">
               <h1 className="text-3xl font-bold">{announcement.title}</h1>
               <p className="text-sm text-gray-500">
                 {formatDate(announcement.publishedAt, locale)}
               </p>
             </div>
-          </CardHeader>
+          </div>
 
           {announcement.imageUrl && (
             <div className="px-6 mb-6 relative w-full h-64">
@@ -157,7 +156,7 @@ export default async function AnnouncementDetailPage({
             </div>
           )}
 
-          <CardBody>
+          <div className="px-4">
             <div className="prose max-w-none">
               {announcement.content ? (
                 <MarkdownRenderer content={announcement.content} />
@@ -172,17 +171,16 @@ export default async function AnnouncementDetailPage({
                   href={announcement.actionUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="inline-flex items-center rounded-md bg-primary px-5 py-3 text-sm font-medium text-primary-foreground"
                 >
-                  <Button color="primary" size="lg">
-                    {announcement.actionTextKey
-                      ? t(announcement.actionTextKey)
-                      : t("learnMore")}
-                  </Button>
+                  {announcement.actionTextKey
+                    ? t(announcement.actionTextKey)
+                    : t("learnMore")}
                 </a>
               </div>
             )}
-          </CardBody>
-        </Card>
+          </div>
+        </CustomCard>
       </div>
     );
   } catch (error) {
