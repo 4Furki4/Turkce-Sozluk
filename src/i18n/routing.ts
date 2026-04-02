@@ -5,6 +5,7 @@ import { locales, pathnames } from './pathnames';
 export const routing = defineRouting({
   locales: [...locales],
   defaultLocale: 'tr',
+  alternateLinks: false,
   localePrefix: {
     mode: 'always',
     prefixes: {
