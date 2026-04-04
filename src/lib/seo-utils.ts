@@ -170,17 +170,38 @@ type RedirectCandidate = {
     target: string;
 };
 
+type ExtraRedirectMap = Partial<Record<RouteKey, readonly string[]>>;
+
+const EXTRA_TURKISH_DASHBOARD_REDIRECTS: ExtraRedirectMap = {
+    "/dashboard/announcements": ["/dashboard/duyurular", "/tr/dashboard/duyurular"],
+    "/dashboard/announcements/new": ["/dashboard/duyurular/yeni", "/tr/dashboard/duyurular/yeni"],
+    "/dashboard/announcements/[id]/edit": [
+        "/dashboard/duyurular/[id]/duzenle",
+        "/tr/dashboard/duyurular/[id]/duzenle",
+    ],
+    "/dashboard/daily-words": ["/dashboard/gundelik-kelimeler", "/tr/dashboard/gundelik-kelimeler"],
+    "/dashboard/daily-words/[id]/edit": [
+        "/dashboard/gundelik-kelimeler/[id]/duzenle",
+        "/tr/dashboard/gundelik-kelimeler/[id]/duzenle",
+    ],
+};
+
 function getRedirectCandidates(routeKey: RouteKey): RedirectCandidate[] {
     const trTemplate = getExternalPathTemplate(routeKey, "tr");
     const enTemplate = getExternalPathTemplate(routeKey, "en");
     const canonicalTrTemplate = prefixLocalePath("tr", trTemplate);
     const canonicalEnTemplate = prefixLocalePath("en", enTemplate);
+    const extraTurkishTemplates: readonly string[] = EXTRA_TURKISH_DASHBOARD_REDIRECTS[routeKey] ?? [];
 
     return [
         { template: trTemplate, target: canonicalTrTemplate },
         { template: enTemplate, target: canonicalTrTemplate },
         { template: prefixLocalePath("tr", enTemplate), target: canonicalTrTemplate },
         { template: prefixLocalePath("en", trTemplate), target: canonicalEnTemplate },
+        ...extraTurkishTemplates.map((template) => ({
+            template,
+            target: canonicalTrTemplate,
+        })),
     ];
 }
 

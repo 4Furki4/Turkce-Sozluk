@@ -29,7 +29,16 @@ describe("seo-utils", () => {
   it("builds Turkish canonical paths for static and word pages", () => {
     expect(getStaticRouteCanonicalPath("/", "tr")).toBe("/tr");
     expect(getStaticRouteCanonicalPath("/word-list", "tr")).toBe("/tr/kelime-listesi");
+    expect(getStaticRouteCanonicalPath("/dashboard/announcements", "tr")).toBe("/tr/panel/duyurular");
     expect(getWordCanonicalPath("boncukluk", "tr")).toBe("/tr/arama/boncukluk");
+  });
+
+  it("redirects the mistaken Turkish dashboard aliases added by the SEO routing refactor", () => {
+    expect(getCanonicalPathname("/dashboard/duyurular")).toBe("/tr/panel/duyurular");
+    expect(getCanonicalPathname("/tr/dashboard/duyurular")).toBe("/tr/panel/duyurular");
+    expect(getCanonicalPathname("/tr/dashboard/gundelik-kelimeler/42/duzenle")).toBe(
+      "/tr/panel/gundelik-kelimeler/42/duzenle",
+    );
   });
 
   it("matches and interpolates route templates", () => {

@@ -113,23 +113,23 @@ export const pathnames = {
   },
   "/dashboard/announcements": {
     en: "/dashboard/announcements",
-    tr: "/dashboard/duyurular",
+    tr: "/panel/duyurular",
   },
   "/dashboard/announcements/new": {
     en: "/dashboard/announcements/new",
-    tr: "/dashboard/duyurular/yeni",
+    tr: "/panel/duyurular/yeni",
   },
   "/dashboard/announcements/[id]/edit": {
     en: "/dashboard/announcements/[id]/edit",
-    tr: "/dashboard/duyurular/[id]/duzenle",
+    tr: "/panel/duyurular/[id]/duzenle",
   },
   "/dashboard/daily-words": {
     en: "/dashboard/daily-words",
-    tr: "/dashboard/gundelik-kelimeler",
+    tr: "/panel/gundelik-kelimeler",
   },
   "/dashboard/daily-words/[id]/edit": {
     en: "/dashboard/daily-words/[id]/edit",
-    tr: "/dashboard/gundelik-kelimeler/[id]/duzenle",
+    tr: "/panel/gundelik-kelimeler/[id]/duzenle",
   },
   "/dashboard/badges": {
     en: "/dashboard/badges",
