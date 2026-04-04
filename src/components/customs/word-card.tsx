@@ -5,13 +5,12 @@ import { Chip } from "@heroui/chip";
 import { WordSearchResult } from "@/types";
 import SaveWord from "./save-word";
 import { Button, useDisclosure, Popover, PopoverTrigger, PopoverContent, Tabs, Tab } from "@heroui/react";
-import { Link as NextUILink } from "@heroui/react"
 import { useTranslations } from "next-intl";
-import { Link, usePathname } from "@/src/i18n/routing";
+import { Link } from "@/src/i18n/routing";
 import { useRouter } from "@/src/i18n/routing";
 import { Camera, Eye, Share2, Volume2, WifiOff, WifiSync } from "lucide-react";
 import Image from "next/image";
-import { useRef, } from "react";
+import { useEffect, useRef, useState } from "react";
 import { captureElementScreenshot } from "../../utils/screenshot";
 import { copyPageUrl } from "../../utils/clipboard";
 import clsx from "clsx";
@@ -20,6 +19,8 @@ import CustomCard from "./heroui/custom-card";
 import PronunciationCard from "./pronunciation-card";
 import { Session } from '@/src/lib/auth-client';
 import { startNavigationProgress } from "@/src/lib/navigation-progress";
+import { api } from "@/src/trpc/react";
+import { toast } from "sonner";
 
 type WordCardProps = {
   word_data: WordSearchResult["word_data"] & { source?: "online" | "offline" };
@@ -34,8 +35,19 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
   const { isOpen, onOpenChange, onClose } = useDisclosure()
   const t = useTranslations("WordCard");
   const router = useRouter();
-  const pathname = usePathname();
   const isOffline = word_data.source === "offline";
+  const [isPronunciationPlaying, setIsPronunciationPlaying] = useState(false);
+  const pronunciationAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const { data: bestPronunciation } = api.word.getPronunciationsForWord.useQuery(
+    { wordId: word_data.word_id },
+    {
+      enabled: !isOffline,
+      staleTime: 1000 * 60 * 5,
+      retry: 1,
+      select: (pronunciations) => pronunciations.find((pronunciation) => Boolean(pronunciation.audioUrl)) ?? null,
+    }
+  );
 
   // Helper function to format view counts (e.g., 1500 → "1.5K")
   const formatViewCount = (count: number): string => {
@@ -62,6 +74,60 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
       successMessage: t("urlCopiedDescription") || "URL copied to clipboard!"
     });
   };
+
+  useEffect(() => {
+    return () => {
+      pronunciationAudioRef.current?.pause();
+      pronunciationAudioRef.current = null;
+    };
+  }, []);
+
+  const handlePronunciationPress = async () => {
+    if (!bestPronunciation?.audioUrl) {
+      return;
+    }
+
+    const normalizedAudioUrl = new URL(bestPronunciation.audioUrl, window.location.href).href;
+    const currentAudio = pronunciationAudioRef.current;
+
+    if (currentAudio && currentAudio.src === normalizedAudioUrl) {
+      if (currentAudio.paused) {
+        try {
+          await currentAudio.play();
+          setIsPronunciationPlaying(true);
+        } catch {
+          setIsPronunciationPlaying(false);
+          toast.error(t("pronunciationPlaybackFailed") || "Pronunciation could not be played.");
+        }
+      } else {
+        currentAudio.pause();
+      }
+      return;
+    }
+
+    currentAudio?.pause();
+
+    const audio = new Audio(bestPronunciation.audioUrl);
+    audio.onplay = () => setIsPronunciationPlaying(true);
+    audio.onpause = () => setIsPronunciationPlaying(false);
+    audio.onended = () => setIsPronunciationPlaying(false);
+    audio.onerror = () => {
+      setIsPronunciationPlaying(false);
+      toast.error(t("pronunciationPlaybackFailed") || "Pronunciation could not be played.");
+    };
+
+    pronunciationAudioRef.current = audio;
+
+    try {
+      await audio.play();
+      setIsPronunciationPlaying(true);
+    } catch {
+      setIsPronunciationPlaying(false);
+      toast.error(t("pronunciationPlaybackFailed") || "Pronunciation could not be played.");
+    }
+  };
+
+  const hasPlayablePronunciation = Boolean(bestPronunciation?.audioUrl);
   return (
     <CustomCard
       ref={cardRef}
@@ -71,8 +137,22 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
     >
       <CardHeader className="w-full flex flex-col items-start">
         <div className="flex w-full items-center gap-4">
-          <Button className="bg-transparent mr-auto" isIconOnly isDisabled> {/* TODO: add voice to word */}
-            <Volume2 className="w-5 h-5 sm:w-6 sm:h-6" />
+          <Button
+            className="bg-transparent mr-auto"
+            isIconOnly
+            isDisabled={!hasPlayablePronunciation}
+            onPress={handlePronunciationPress}
+            aria-label={
+              hasPlayablePronunciation
+                ? t("playTopPronunciation") || "Play pronunciation"
+                : t("noPronunciationAvailable") || "No pronunciation available"
+            }
+          >
+            <Volume2
+              className={clsx("w-5 h-5 sm:w-6 sm:h-6", {
+                "text-primary animate-pulse": isPronunciationPlaying,
+              })}
+            />
           </Button>
           {isWordFetching ? (
             <WifiSync className="text-green-400 w-5 h-5 sm:w-6 sm:h-6 animate-pulse" />
