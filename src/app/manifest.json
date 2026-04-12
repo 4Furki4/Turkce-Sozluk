@@ -2,8 +2,14 @@
     "name": "Çağdaş Türkçe Sözlük",
     "short_name": "Türkçe Sözlük",
     "description": "Topluluk ile gelişen, açık kaynak ve çağdaş Türkçe sözlüğü.",
+    "id": "/",
+    "scope": "/",
     "start_url": "/",
     "display": "standalone",
+    "handle_links": "preferred",
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    },
     "orientation": "portrait",
     "background_color": "#000000",
     "theme_color": "#a91011",
