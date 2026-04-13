@@ -23,6 +23,7 @@ import {
 import { useTranslations } from "next-intl";
 import { Link as NextIntlLink } from "@/src/i18n/routing";
 import { useDebounce } from "@/src/hooks/use-debounce";
+import { sortDictionarySuggestions } from "@/src/lib/search-suggestions";
 import { api, type RouterOutputs } from "@/src/trpc/react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -157,6 +158,7 @@ function getActionSections(actions: MorphologicalAction[]): BuilderSection[] {
   const analyticGroups = new Map<string, MorphologicalAction[]>();
   const nonfiniteGroups = new Map<string, MorphologicalAction[]>();
   const inflectionGroups = new Map<string, MorphologicalAction[]>();
+  const postfiniteGroups = new Map<string, MorphologicalAction[]>();
 
   actions.forEach((action) => {
     const groupMap =
@@ -166,6 +168,8 @@ function getActionSections(actions: MorphologicalAction[]): BuilderSection[] {
           ? analyticGroups
         : action.kind === "nonfinite"
           ? nonfiniteGroups
+          : action.kind === "postfinite"
+            ? postfiniteGroups
           : inflectionGroups;
     const key = action.kind === "inflectional" ? action.slot : action.group;
     const currentActions = groupMap.get(key) ?? [];
@@ -192,6 +196,12 @@ function getActionSections(actions: MorphologicalAction[]): BuilderSection[] {
       kind: "nonfinite" as const,
       actions: groupedActions,
     })),
+    ...Array.from(postfiniteGroups.entries()).map(([key, groupedActions]) => ({
+      key,
+      titleKey: `groups.${key}`,
+      kind: "postfinite" as const,
+      actions: groupedActions,
+    })),
     ...Array.from(inflectionGroups.entries()).map(([key, groupedActions]) => ({
       key,
       titleKey: getSlotTranslationKey(key as MorphologicalAction["slot"]),
@@ -216,6 +226,8 @@ function getLocalizedCategory(
       return t("categoryParticiple");
     case "Converb":
       return t("categoryConverb");
+    case "Predicative":
+      return t("categoryPredicative");
     default:
       return getLocalizedPos(t, category as PartOfSpeech);
   }
@@ -253,6 +265,12 @@ function getEventMessage(
   }
 
   if (event.code === "analytic_applied") {
+    return t(event.i18nKey, {
+      action: t(event.params.actionKey),
+    });
+  }
+
+  if (event.code === "postfinite_applied") {
     return t(event.i18nKey, {
       action: t(event.params.actionKey),
     });
@@ -298,6 +316,8 @@ function buildAttestationEvent(
     morphemeId:
       action.kind === "analytic"
         ? `${action.constructionId}#${step}`
+        : action.kind === "postfinite"
+          ? `${action.overlayId}#${step}`
         : `${action.morphemeId}#${step}`,
   };
 }
@@ -386,6 +406,14 @@ export default function WordBuilder() {
   const dictionarySuggestionsQuery = api.search.getWords.useQuery(
     { query: debouncedDictionaryQuery },
     { enabled: debouncedDictionaryQuery.trim().length >= 2 },
+  );
+  const dictionarySuggestions = useMemo(
+    () =>
+      sortDictionarySuggestions(
+        dictionarySuggestionsQuery.data ?? [],
+        dictionaryQuery,
+      ),
+    [dictionaryQuery, dictionarySuggestionsQuery.data],
   );
   const selectedDictionaryWordQuery = api.word.getWord.useQuery(
     {
@@ -683,7 +711,7 @@ export default function WordBuilder() {
               selectedKey={selectedDictionaryWord ? String(selectedDictionaryWord.id) : null}
               onSelectionChange={(key) => {
                 const nextWord =
-                  dictionarySuggestionsQuery.data?.find(
+                  dictionarySuggestions.find(
                     (item) => String(item.id) === String(key),
                   ) ?? null;
 
@@ -695,7 +723,7 @@ export default function WordBuilder() {
                 dictionarySuggestionsQuery.isLoading ||
                 dictionarySuggestionsQuery.isFetching
               }
-              defaultItems={dictionarySuggestionsQuery.data ?? []}
+              items={dictionarySuggestions}
               variant="bordered"
             >
               {(item) => (
@@ -925,6 +953,8 @@ export default function WordBuilder() {
                               ? "border-sky-200 bg-sky-50 text-sky-700"
                             : step.action.kind === "nonfinite"
                               ? "border-amber-200 bg-amber-50 text-amber-700"
+                            : step.action.kind === "postfinite"
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                             : "border-border/70 bg-background/70 text-foreground/80",
                         )}
                       >
@@ -1175,6 +1205,64 @@ export default function WordBuilder() {
                                       </span>
                                       <span className="rounded-full border border-border/70 px-2.5 py-1">
                                         {t("phaseInflection")}
+                                      </span>
+                                    </div>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    ) : null}
+
+                    {actionSections.some((section) => section.kind === "postfinite") ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="rounded-full px-3 py-1">
+                            {t("availablePostfinite")}
+                          </Badge>
+                        </div>
+                        {actionSections
+                          .filter((section) => section.kind === "postfinite")
+                          .map((section) => (
+                            <div key={section.key} className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="rounded-full px-3 py-1">
+                                  {t(section.titleKey)}
+                                </Badge>
+                              </div>
+                              <div className="grid gap-3 sm:grid-cols-2">
+                                {section.actions.map((action) => (
+                                  <button
+                                    key={action.id}
+                                    type="button"
+                                    onClick={() =>
+                                      setBuilderState((current) =>
+                                        engine.applyAction(current, action.id),
+                                      )
+                                    }
+                                    className="group rounded-2xl border border-border/70 bg-background/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/6"
+                                  >
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div>
+                                        <div className="text-base font-semibold text-foreground">
+                                          {t(action.labelKey)}
+                                        </div>
+                                        <div className="mt-1 font-mono text-xs text-foreground/50">
+                                          {action.preview}
+                                        </div>
+                                      </div>
+                                      <ArrowRight className="mt-1 h-4 w-4 text-foreground/35 transition-colors group-hover:text-primary" />
+                                    </div>
+                                    <div className="mt-4 flex flex-wrap gap-2 text-xs text-foreground/60">
+                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
+                                        {getLocalizedPos(t, action.sourcePos)}
+                                      </span>
+                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
+                                        {t("phasePostFinite")}
+                                      </span>
+                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
+                                        {t("postfiniteKind")}
                                       </span>
                                     </div>
                                   </button>

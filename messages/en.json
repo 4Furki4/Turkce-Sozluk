@@ -81,6 +81,7 @@
     "availableAnalytics": "Available analytic constructions",
     "availableNonfinite": "Available non-finite forms",
     "availableInflections": "Available inflections",
+    "availablePostfinite": "Available post-finite overlays",
     "noAvailableSuffixes": "No suffix can be added in the current state.",
     "logsTitle": "Transformation log",
     "logsHint": "Each step shows the surface diff, the realized piece, and every structured event emitted by the engine.",
@@ -97,11 +98,13 @@
     "phasePostFinite": "Post-finite",
     "analyticKind": "Analytic",
     "nonfiniteKind": "Non-finite",
+    "postfiniteKind": "Overlay",
     "posNoun": "Noun",
     "posVerb": "Verb",
     "categoryVerbalNoun": "Verbal noun",
     "categoryParticiple": "Participle",
     "categoryConverb": "Converb",
+    "categoryPredicative": "Predicative",
     "originNative": "Native",
     "originForeign": "Foreign",
     "mutationAuto": "Auto",
@@ -171,6 +174,21 @@
           "ipKal": "Resultative (-(y)Ip kal)"
         }
       },
+      "postfinite": {
+        "question": {
+          "mI": "Question particle (mI)"
+        },
+        "copula": {
+          "idi": "Copular past (idi)",
+          "imiş": "Copular evidential (imiş)"
+        },
+        "conditional": {
+          "ise": "Conditional overlay (ise)"
+        },
+        "while": {
+          "iken": "While overlay (iken)"
+        }
+      },
       "nonfinite": {
         "verbalNoun": {
           "mA": "-ma",
@@ -231,6 +249,7 @@
       "actionApplied": "Selected morpheme",
       "derivationApplied": "Applied {action}: {before} -> {after}.",
       "analyticApplied": "Added analytic construction {action}.",
+      "postfiniteApplied": "Added post-finite overlay {action}.",
       "phaseChange": "Morphology phase updated: {before} -> {after}.",
       "posChange": "Part of speech updated: {before} -> {after}.",
       "vowelHarmonyFourWay": "Applied 4-way vowel harmony: /{archiphoneme}/ -> {resolved}.",
@@ -257,6 +276,10 @@
       "AnalyticSerialContinuative": "Continuative",
       "AnalyticSerialProgressive": "Carry-on",
       "AnalyticSerialResultative": "Resultative",
+      "PostfiniteQuestion": "Question",
+      "PostfiniteCopula": "Copula",
+      "PostfiniteConditional": "Conditional",
+      "PostfiniteWhile": "While",
       "VerbalNoun": "Verbal noun",
       "Participle": "Participle",
       "Converb": "Converb",

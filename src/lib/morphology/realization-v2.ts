@@ -1,5 +1,6 @@
 import { ANALYTIC_CONSTRUCTION_CATALOG } from "./analytic-catalog";
 import { MORPHEME_CATALOG } from "./morpheme-catalog";
+import { POSTFINITE_OVERLAY_CATALOG } from "./postfinite-catalog";
 import {
   buildHighlightDiff,
   countSyllables,
@@ -10,6 +11,7 @@ import {
   type MorphemeDefinition,
   type MorphologicalStateV2,
   type MorphologyEvent,
+  type PostfiniteOverlayDefinition,
   type RealizationResult,
   type RealizationTrace,
   type AnalyticConstructionDefinition,
@@ -56,6 +58,17 @@ function getAnalyticConstruction(
   }
 
   return construction;
+}
+
+function getPostfiniteOverlay(
+  overlayId: string,
+): PostfiniteOverlayDefinition {
+  const overlay = POSTFINITE_OVERLAY_CATALOG.find((entry) => entry.id === overlayId);
+  if (!overlay) {
+    throw new Error(`Unknown postfinite overlay: ${overlayId}`);
+  }
+
+  return overlay;
 }
 
 function createPhonologyState(
@@ -234,6 +247,44 @@ function resolveVerbAgreementPattern(state: MorphologicalStateV2) {
   }
 }
 
+function resolvePostfiniteRecipe(
+  overlay: PostfiniteOverlayDefinition,
+  currentSurface: string,
+) {
+  const vowelFinal = endsWithVowel(currentSurface);
+
+  switch (overlay.overlayType) {
+    case "question":
+      return { pattern: "/mI/", rules: [] as const, separator: " " };
+    case "copula_past":
+      return {
+        pattern: vowelFinal ? "/yDI/" : "/DI/",
+        rules: ["consonant_assimilation"] as const,
+        separator: "",
+      };
+    case "copula_evidential":
+      return {
+        pattern: vowelFinal ? "/ymIş/" : "/mIş/",
+        rules: [] as const,
+        separator: "",
+      };
+    case "conditional":
+      return {
+        pattern: vowelFinal ? "/ysA/" : "/sA/",
+        rules: [] as const,
+        separator: "",
+      };
+    case "while":
+      return {
+        pattern: vowelFinal ? "/yken/" : "/ken/",
+        rules: [] as const,
+        separator: "",
+      };
+    default:
+      return { pattern: "", rules: [] as const, separator: "" };
+  }
+}
+
 function resolveTokenRecipe(
   state: MorphologicalStateV2,
   morpheme: MorphemeDefinition,
@@ -396,6 +447,39 @@ export function realizeMorphologicalState(
       return;
     }
 
+    if (token.kind === "postfinite") {
+      const overlay = getPostfiniteOverlay(token.overlayId);
+      const recipe = resolvePostfiniteRecipe(overlay, currentSurface);
+      const phonologyState = createPhonologyState(
+        state,
+        currentSurface,
+        state.currentPos,
+      );
+      const realizedOverlay = realizeAffix(
+        phonologyState,
+        recipe.pattern,
+        [...recipe.rules],
+        { slot: "postfinite", morphemeId: overlay.id },
+      );
+      const overlaySurface = `${recipe.separator}${realizedOverlay.surfaceSuffix}`;
+      const afterSurface = `${realizedOverlay.stem}${overlaySurface}`;
+
+      traces.push({
+        tokenId: token.id,
+        overlayId: overlay.id,
+        slot: "postfinite",
+        labelKey: overlay.labelKey,
+        pattern: recipe.pattern,
+        beforeSurface: currentSurface,
+        afterSurface,
+        surface: overlaySurface,
+        events: realizedOverlay.events,
+      });
+
+      currentSurface = afterSurface;
+      return;
+    }
+
     const morpheme = getMorpheme(token.morphemeId);
     const recipe = resolveTokenRecipe(state, morpheme, currentSurface);
     const overridePattern =
@@ -450,6 +534,7 @@ export function realizeMorphologicalState(
       tokenId: trace.tokenId,
       morphemeId: trace.morphemeId,
       constructionId: trace.constructionId,
+      overlayId: trace.overlayId,
       slot: trace.slot,
       labelKey: trace.labelKey,
       pattern: trace.pattern,

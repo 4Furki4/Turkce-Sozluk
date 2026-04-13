@@ -1,5 +1,6 @@
 import { ANALYTIC_CONSTRUCTION_CATALOG } from "./analytic-catalog";
 import { MORPHEME_CATALOG } from "./morpheme-catalog";
+import { POSTFINITE_OVERLAY_CATALOG } from "./postfinite-catalog";
 import {
   type AnalyticConstructionDefinition,
   type MorphemeDefinition,
@@ -7,6 +8,7 @@ import {
   type MorphologicalAction,
   type MorphologicalStateV2,
   type PartOfSpeech,
+  type PostfiniteOverlayDefinition,
 } from "./types";
 
 const SLOT_ORDER: Record<PartOfSpeech, MorphemeSlot[]> = {
@@ -45,6 +47,39 @@ function canExposeSlot(state: MorphologicalStateV2, slot: MorphemeSlot): boolean
   return state.features.tam !== "bare";
 }
 
+function canExposePostfinite(state: MorphologicalStateV2): boolean {
+  if (state.currentCategory === "Converb") {
+    return false;
+  }
+
+  if (state.currentCategory === "Verb") {
+    return state.features.tam !== "bare";
+  }
+
+  return true;
+}
+
+function canChainPostfiniteOverlay(
+  overlay: PostfiniteOverlayDefinition,
+  postfiniteOverlays: PostfiniteOverlayDefinition[],
+): boolean {
+  if (postfiniteOverlays.length === 0) {
+    return overlay.allowAsFirst;
+  }
+
+  if (postfiniteOverlays.length === 1) {
+    const [firstOverlay] = postfiniteOverlays;
+
+    if (!firstOverlay || firstOverlay.overlayType !== "question") {
+      return false;
+    }
+
+    return overlay.allowAfterQuestion === true;
+  }
+
+  return false;
+}
+
 function toAction(morpheme: MorphemeDefinition): MorphologicalAction {
   return {
     id: morpheme.id,
@@ -79,6 +114,24 @@ function toAnalyticAction(
   };
 }
 
+function toPostfiniteAction(
+  overlay: PostfiniteOverlayDefinition,
+  state: MorphologicalStateV2,
+): MorphologicalAction {
+  return {
+    id: overlay.id,
+    slot: "postfinite",
+    kind: "postfinite",
+    group: overlay.group,
+    labelKey: overlay.labelKey,
+    preview: overlay.preview,
+    overlayId: overlay.id,
+    enabled: true,
+    sourcePos: state.currentPos,
+    targetPos: state.currentPos,
+  };
+}
+
 export function getSlotOrder(pos: PartOfSpeech): MorphemeSlot[] {
   return SLOT_ORDER[pos];
 }
@@ -93,7 +146,8 @@ export function getAvailableMorphologyActions(
   if (
     !state.continuation.allowInflection &&
     !state.continuation.allowDerivation &&
-    !state.continuation.allowNonfinite
+    !state.continuation.allowNonfinite &&
+    !state.continuation.allowPostFinite
   ) {
     return [];
   }
@@ -101,6 +155,14 @@ export function getAvailableMorphologyActions(
   const slotOrder = SLOT_ORDER[state.currentPos];
   const inflectionTokens = state.tokens.filter((token) => token.kind === "inflectional");
   const hasAnalyticConstruction = state.tokens.some((token) => token.kind === "analytic");
+  const postfiniteOverlayIds = state.tokens
+    .filter((token): token is Extract<(typeof state.tokens)[number], { kind: "postfinite" }> => token.kind === "postfinite")
+    .map((token) => token.overlayId);
+  const chosenPostfiniteOverlays = postfiniteOverlayIds
+    .map((overlayId) =>
+      POSTFINITE_OVERLAY_CATALOG.find((overlay) => overlay.id === overlayId),
+    )
+    .filter((overlay): overlay is PostfiniteOverlayDefinition => Boolean(overlay));
   const chosenSlots = new Set(inflectionTokens.map((token) => token.slot));
   const chosenIndices = inflectionTokens
     .map((token) => slotOrder.indexOf(token.slot))
@@ -179,10 +241,25 @@ export function getAvailableMorphologyActions(
     })
     .map(toAction);
 
+  const postfiniteActions =
+    state.continuation.allowPostFinite &&
+    canExposePostfinite(state)
+      ? POSTFINITE_OVERLAY_CATALOG.filter((overlay) =>
+          overlay.sourceCategories.includes(
+            state.currentCategory as PostfiniteOverlayDefinition["sourceCategories"][number],
+          ),
+        )
+          .filter((overlay) =>
+            canChainPostfiniteOverlay(overlay, chosenPostfiniteOverlays),
+          )
+          .map((overlay) => toPostfiniteAction(overlay, state))
+      : [];
+
   return [
     ...derivationalActions,
     ...analyticActions,
     ...nonfiniteActions,
     ...inflectionalActions,
+    ...postfiniteActions,
   ];
 }

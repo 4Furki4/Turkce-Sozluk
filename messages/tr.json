@@ -81,6 +81,7 @@
     "availableAnalytics": "Kullanılabilir tasvir yapıları",
     "availableNonfinite": "Kullanılabilir fiilimsi ekleri",
     "availableInflections": "Kullanılabilir çekim ekleri",
+    "availablePostfinite": "Kullanılabilir sonlu üst katmanlar",
     "noAvailableSuffixes": "Bu durumda eklenebilecek bir ek kalmadı.",
     "logsTitle": "Dönüşüm günlüğü",
     "logsHint": "Her adım yüzey farkını, gerçekleşen parçayı ve motorun ürettiği yapılandırılmış olay açıklamalarını gösterir.",
@@ -97,11 +98,13 @@
     "phasePostFinite": "Sonlu üst katman",
     "analyticKind": "Tasvir",
     "nonfiniteKind": "Fiilimsi",
+    "postfiniteKind": "Üst katman",
     "posNoun": "İsim",
     "posVerb": "Fiil",
     "categoryVerbalNoun": "İsim-fiil",
     "categoryParticiple": "Sıfat-fiil",
     "categoryConverb": "Zarf-fiil",
+    "categoryPredicative": "Yüklemsi",
     "originNative": "Yerli",
     "originForeign": "Yabancı",
     "mutationAuto": "Otomatik",
@@ -171,6 +174,21 @@
           "ipKal": "Sonuçta kalma (-(y)Ip kal)"
         }
       },
+      "postfinite": {
+        "question": {
+          "mI": "Soru parçacığı (mI)"
+        },
+        "copula": {
+          "idi": "Ek-fiil geçmişi (idi)",
+          "imiş": "Ek-fiil rivayeti (imiş)"
+        },
+        "conditional": {
+          "ise": "Şart üst katmanı (ise)"
+        },
+        "while": {
+          "iken": "Zarf-fiil üst katmanı (iken)"
+        }
+      },
       "nonfinite": {
         "verbalNoun": {
           "mA": "-ma",
@@ -231,6 +249,7 @@
       "actionApplied": "Morfem seçildi",
       "derivationApplied": "{action} uygulandı: {before} -> {after}.",
       "analyticApplied": "{action} tasvir yapısı eklendi.",
+      "postfiniteApplied": "{action} sonlu üst katmanı eklendi.",
       "phaseChange": "Morfolojik aşama güncellendi: {before} -> {after}.",
       "posChange": "Kelime türü güncellendi: {before} -> {after}.",
       "vowelHarmonyFourWay": "4 yönlü ünlü uyumu uygulandı: /{archiphoneme}/ -> {resolved}.",
@@ -257,6 +276,10 @@
       "AnalyticSerialContinuative": "Süreklilik",
       "AnalyticSerialProgressive": "Sürüp gitme",
       "AnalyticSerialResultative": "Sonuçta kalma",
+      "PostfiniteQuestion": "Soru",
+      "PostfiniteCopula": "Ek-fiil",
+      "PostfiniteConditional": "Şart",
+      "PostfiniteWhile": "İken",
       "VerbalNoun": "İsim-fiil",
       "Participle": "Sıfat-fiil",
       "Converb": "Zarf-fiil",

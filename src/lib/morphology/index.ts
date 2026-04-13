@@ -3,6 +3,7 @@ export { TurkishMorphologyEngineV2 } from "./engine-v2";
 export { ANALYTIC_CONSTRUCTION_CATALOG } from "./analytic-catalog";
 export { createDefaultFeatureBundle, createLexemeEntryFromRoot } from "./lexicon";
 export { MORPHEME_CATALOG } from "./morpheme-catalog";
+export { POSTFINITE_OVERLAY_CATALOG } from "./postfinite-catalog";
 export { getAvailableMorphologyActions, getSlotTranslationKey } from "./morphotactics";
 export { buildTraceDiff, realizeMorphologicalState } from "./realization-v2";
 export {
@@ -59,6 +60,10 @@ export type {
   PhonologyEventType,
   PolarityFeature,
   PossessiveFeature,
+  PostfiniteOverlayAction,
+  PostfiniteOverlayDefinition,
+  PostfiniteOverlayToken,
+  PostfiniteOverlayType,
   RealizationResult,
   RealizationSegment,
   RealizationTrace,

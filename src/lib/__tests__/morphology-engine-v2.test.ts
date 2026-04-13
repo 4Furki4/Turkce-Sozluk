@@ -34,7 +34,9 @@ describe("TurkishMorphologyEngine V2 core", () => {
 
     state = engine.applyAction(state, "noun.case.loc");
 
-    expect(engine.getAvailableActions(state)).toHaveLength(0);
+    expect(
+      engine.getAvailableActions(state).every((action) => action.kind === "postfinite"),
+    ).toBe(true);
     expect(engine.realize(state).surface).toBe("evde");
   });
 
@@ -53,6 +55,7 @@ describe("TurkishMorphologyEngine V2 core", () => {
     expect(state.currentCategory).toBe("Verb");
     expect(state.continuation.allowAnalyticConstructions).toBe(true);
     expect(state.continuation.allowFiniteVerbInflection).toBe(true);
+    expect(actions.some((action) => action.kind === "postfinite")).toBe(false);
   });
 
   it("offers analytic constructions from the initial verb state", () => {
@@ -521,6 +524,178 @@ describe("TurkishMorphologyEngine V2 core", () => {
 
     expect(
       engine.getAvailableActions(state).some((action) => action.kind === "analytic"),
+    ).toBe(false);
+  });
+
+  it("exposes post-finite overlays after finite verb inflection starts", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "gel",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.tam.prog");
+
+    const actions = engine.getAvailableActions(state);
+
+    expect(actions.some((action) => action.id === "postfinite.question.mI")).toBe(true);
+    expect(actions.some((action) => action.id === "postfinite.copula.idi")).toBe(true);
+    expect(actions.some((action) => action.id === "postfinite.copula.imiş")).toBe(true);
+    expect(actions.some((action) => action.id === "postfinite.conditional.ise")).toBe(true);
+    expect(actions.some((action) => action.id === "postfinite.while.iken")).toBe(true);
+  });
+
+  it("supports question and copular post-finite overlays on finite verbs", () => {
+    let questionState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "gel",
+        pos: "Verb",
+      }),
+    );
+
+    questionState = engine.applyAction(questionState, "verb.tam.prog");
+    questionState = engine.applyAction(questionState, "postfinite.question.mI");
+
+    expect(questionState.phase).toBe("postfinite");
+    expect(engine.realize(questionState).surface).toBe("geliyor mu");
+    expect(
+      questionState.history[1]?.log.events.some(
+        (event) => event.code === "postfinite_applied",
+      ),
+    ).toBe(true);
+
+    let pastOverlayState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "gel",
+        pos: "Verb",
+      }),
+    );
+
+    pastOverlayState = engine.applyAction(pastOverlayState, "verb.tam.fut");
+    pastOverlayState = engine.applyAction(pastOverlayState, "postfinite.copula.idi");
+
+    expect(engine.realize(pastOverlayState).surface).toBe("gelecekti");
+  });
+
+  it("supports evidential, conditional, and while overlays", () => {
+    let evidentialState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "gel",
+        pos: "Verb",
+      }),
+    );
+
+    evidentialState = engine.applyAction(evidentialState, "verb.tam.prog");
+    evidentialState = engine.applyAction(evidentialState, "postfinite.copula.imiş");
+
+    expect(engine.realize(evidentialState).surface).toBe("geliyormuş");
+
+    let conditionalState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "gel",
+        pos: "Verb",
+      }),
+    );
+
+    conditionalState = engine.applyAction(conditionalState, "verb.tam.fut");
+    conditionalState = engine.applyAction(conditionalState, "postfinite.conditional.ise");
+
+    expect(engine.realize(conditionalState).surface).toBe("gelecekse");
+
+    let whileState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "ev",
+        pos: "Noun",
+      }),
+    );
+
+    whileState = engine.applyAction(whileState, "noun.case.loc");
+    whileState = engine.applyAction(whileState, "postfinite.while.iken");
+
+    expect(engine.realize(whileState).surface).toBe("evdeyken");
+  });
+
+  it("exposes a second post-finite overlay after question particle selection", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "gel",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.tam.prog");
+    state = engine.applyAction(state, "postfinite.question.mI");
+
+    const actions = engine.getAvailableActions(state);
+
+    expect(actions.some((action) => action.id === "postfinite.copula.idi")).toBe(true);
+    expect(actions.some((action) => action.id === "postfinite.copula.imiş")).toBe(true);
+    expect(actions.some((action) => action.id === "postfinite.conditional.ise")).toBe(true);
+    expect(
+      actions.some((action) => action.id === "postfinite.question.mI"),
+    ).toBe(false);
+    expect(actions.some((action) => action.id === "postfinite.while.iken")).toBe(false);
+  });
+
+  it("supports chained question plus copular and conditional post-finite overlays", () => {
+    let pastState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "gel",
+        pos: "Verb",
+      }),
+    );
+
+    pastState = engine.applyAction(pastState, "verb.tam.prog");
+    pastState = engine.applyAction(pastState, "postfinite.question.mI");
+    pastState = engine.applyAction(pastState, "postfinite.copula.idi");
+
+    expect(engine.realize(pastState).surface).toBe("geliyor muydu");
+
+    let evidentialState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "gel",
+        pos: "Verb",
+      }),
+    );
+
+    evidentialState = engine.applyAction(evidentialState, "verb.tam.prog");
+    evidentialState = engine.applyAction(evidentialState, "postfinite.question.mI");
+    evidentialState = engine.applyAction(evidentialState, "postfinite.copula.imiş");
+
+    expect(engine.realize(evidentialState).surface).toBe("geliyor muymuş");
+
+    let conditionalState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "gel",
+        pos: "Verb",
+      }),
+    );
+
+    conditionalState = engine.applyAction(conditionalState, "verb.tam.fut");
+    conditionalState = engine.applyAction(conditionalState, "postfinite.question.mI");
+    conditionalState = engine.applyAction(
+      conditionalState,
+      "postfinite.conditional.ise",
+    );
+
+    expect(engine.realize(conditionalState).surface).toBe("gelecek miyse");
+  });
+
+  it("closes the post-finite chain after a second overlay has been selected", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "gel",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.tam.prog");
+    state = engine.applyAction(state, "postfinite.question.mI");
+    state = engine.applyAction(state, "postfinite.copula.idi");
+
+    expect(
+      engine.getAvailableActions(state).some((action) => action.kind === "postfinite"),
     ).toBe(false);
   });
 });

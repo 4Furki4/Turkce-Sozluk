@@ -2,6 +2,7 @@ import { ANALYTIC_CONSTRUCTION_CATALOG } from "./analytic-catalog";
 import { createDefaultFeatureBundle } from "./lexicon";
 import { MORPHEME_CATALOG } from "./morpheme-catalog";
 import { getAvailableMorphologyActions } from "./morphotactics";
+import { POSTFINITE_OVERLAY_CATALOG } from "./postfinite-catalog";
 import {
   buildTraceDiff,
   realizeMorphologicalState,
@@ -19,6 +20,7 @@ import {
   type MorphologyHistoryEntry,
   type MorphToken,
   type MorphemeDefinition,
+  type PostfiniteOverlayDefinition,
   type RealizationResult,
 } from "./types";
 
@@ -42,6 +44,17 @@ function getAnalyticConstructionById(
   }
 
   return construction;
+}
+
+function getPostfiniteOverlayById(
+  overlayId: string,
+): PostfiniteOverlayDefinition {
+  const overlay = POSTFINITE_OVERLAY_CATALOG.find((entry) => entry.id === overlayId);
+  if (!overlay) {
+    throw new Error(`Unknown postfinite overlay: ${overlayId}`);
+  }
+
+  return overlay;
 }
 
 function snapshotState(state: MorphologicalStateV2, surface: string): MorphologicalStateV2 {
@@ -72,7 +85,11 @@ function createEvent(
     stage: "morphotactics",
     slot: action.slot,
     morphemeId:
-      action.kind === "analytic" ? action.constructionId : action.morphemeId,
+      action.kind === "analytic"
+        ? action.constructionId
+        : action.kind === "postfinite"
+          ? action.overlayId
+          : action.morphemeId,
   };
 }
 
@@ -129,6 +146,16 @@ export class TurkishMorphologyEngineV2 {
         construction.targetCategory,
         "analytic",
       );
+    } else if (action.kind === "postfinite") {
+      const overlay = getPostfiniteOverlayById(action.overlayId);
+      token = {
+        id: `${overlay.id}#${nextStep}`,
+        overlayId: overlay.id,
+        kind: "postfinite",
+        slot: "postfinite",
+        selectedAtStep: nextStep,
+      };
+      nextPhase = "postfinite";
     } else {
       const morpheme = getMorphemeById(action.morphemeId);
       token = {
@@ -205,6 +232,19 @@ export class TurkishMorphologyEngineV2 {
       );
     }
 
+    if (action.kind === "postfinite") {
+      events.push(
+        createEvent(
+          "postfinite_applied",
+          "events.postfiniteApplied",
+          {
+            actionKey: action.labelKey,
+          },
+          action,
+        ),
+      );
+    }
+
     if (derivationApplied) {
       events.push(
         createEvent(
@@ -264,7 +304,9 @@ export class TurkishMorphologyEngineV2 {
       log: {
         step: nextStep,
         suffixId:
-          action.kind === "analytic" ? undefined : action.legacySuffixId,
+          action.kind === "analytic" || action.kind === "postfinite"
+            ? undefined
+            : action.legacySuffixId,
         suffixArchiphoneme: trace?.pattern,
         suffixSurface: trace?.surface ?? "",
         sourcePos: beforeSnapshot.currentPos,
@@ -304,6 +346,11 @@ export class TurkishMorphologyEngineV2 {
           construction.targetCategory,
           "analytic",
         );
+        return;
+      }
+
+      if (token.kind === "postfinite") {
+        phase = "postfinite";
         return;
       }
 

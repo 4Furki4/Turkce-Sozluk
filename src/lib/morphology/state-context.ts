@@ -50,7 +50,7 @@ export function createContinuationPolicy({
         allowNominalInflection: true,
         allowNonfinite: false,
         allowAnalyticConstructions: false,
-        allowPostFinite: phase === "postfinite",
+        allowPostFinite: true,
       };
     case "Verb":
       return {
@@ -60,7 +60,7 @@ export function createContinuationPolicy({
         allowNominalInflection: false,
         allowNonfinite: phase === "derivation",
         allowAnalyticConstructions: phase === "derivation",
-        allowPostFinite: phase !== "derivation",
+        allowPostFinite: true,
       };
     case "VerbalNoun":
       return {
@@ -70,7 +70,7 @@ export function createContinuationPolicy({
         allowNominalInflection: true,
         allowNonfinite: false,
         allowAnalyticConstructions: false,
-        allowPostFinite: false,
+        allowPostFinite: true,
       };
     case "Participle":
       return {
@@ -80,7 +80,7 @@ export function createContinuationPolicy({
         allowNominalInflection: true,
         allowNonfinite: false,
         allowAnalyticConstructions: false,
-        allowPostFinite: false,
+        allowPostFinite: true,
       };
     case "Converb":
       return {

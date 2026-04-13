@@ -16,7 +16,8 @@ export type SuffixKind =
   | "derivational"
   | "inflectional"
   | "nonfinite"
-  | "analytic";
+  | "analytic"
+  | "postfinite";
 
 export type RuleId =
   | "consonant_mutation_trigger"
@@ -32,6 +33,7 @@ export type MutationPolicy = "auto" | "always" | "never";
 
 export type MorphemeSlot =
   | "analytic"
+  | "postfinite"
   | "derivation"
   | "verb_nonfinite"
   | "noun_number"
@@ -113,7 +115,7 @@ export interface MorphemeDefinition {
   id: string;
   category: MorphemeCategory;
   slot: MorphemeSlot;
-  kind: Exclude<SuffixKind, "analytic">;
+  kind: Exclude<SuffixKind, "analytic" | "postfinite">;
   sourcePos: PartOfSpeech;
   targetPos: PartOfSpeech;
   sourceCategories: MorphCategory[];
@@ -159,10 +161,30 @@ export interface AnalyticConstructionDefinition {
   auxiliarySurface: string;
 }
 
+export type PostfiniteOverlayType =
+  | "question"
+  | "copula_past"
+  | "copula_evidential"
+  | "conditional"
+  | "while";
+
+export interface PostfiniteOverlayDefinition {
+  id: string;
+  kind: "postfinite";
+  slot: "postfinite";
+  sourceCategories: Array<Exclude<MorphCategory, "Converb">>;
+  group: string;
+  overlayType: PostfiniteOverlayType;
+  labelKey: string;
+  preview: string;
+  allowAsFirst: boolean;
+  allowAfterQuestion?: boolean;
+}
+
 export interface MorphemeToken {
   id: string;
   morphemeId: string;
-  kind: Exclude<SuffixKind, "analytic">;
+  kind: Exclude<SuffixKind, "analytic" | "postfinite">;
   slot: MorphemeSlot;
   selectedAtStep: number;
 }
@@ -175,7 +197,18 @@ export interface AnalyticConstructionToken {
   selectedAtStep: number;
 }
 
-export type MorphToken = MorphemeToken | AnalyticConstructionToken;
+export interface PostfiniteOverlayToken {
+  id: string;
+  overlayId: string;
+  kind: "postfinite";
+  slot: "postfinite";
+  selectedAtStep: number;
+}
+
+export type MorphToken =
+  | MorphemeToken
+  | AnalyticConstructionToken
+  | PostfiniteOverlayToken;
 
 export type MorphologyStage = "morphotactics" | "realization" | "lexicon";
 
@@ -183,6 +216,7 @@ export type MorphologyEventCode =
   | "action_applied"
   | "derivation_applied"
   | "analytic_applied"
+  | "postfinite_applied"
   | "vowel_harmony_2_way"
   | "vowel_harmony_4_way"
   | "consonant_assimilation"
@@ -209,7 +243,7 @@ export interface MorphologyEvent {
 export interface MorphemeAction {
   id: string;
   slot: MorphemeSlot;
-  kind: Exclude<SuffixKind, "analytic">;
+  kind: Exclude<SuffixKind, "analytic" | "postfinite">;
   group: string;
   labelKey: string;
   preview: string;
@@ -236,12 +270,30 @@ export interface AnalyticConstructionAction {
   targetPos: "Verb";
 }
 
-export type MorphologicalAction = MorphemeAction | AnalyticConstructionAction;
+export interface PostfiniteOverlayAction {
+  id: string;
+  slot: "postfinite";
+  kind: "postfinite";
+  group: string;
+  labelKey: string;
+  preview: string;
+  overlayId: string;
+  enabled: boolean;
+  reasonIfDisabled?: string;
+  sourcePos: PartOfSpeech;
+  targetPos: PartOfSpeech;
+}
+
+export type MorphologicalAction =
+  | MorphemeAction
+  | AnalyticConstructionAction
+  | PostfiniteOverlayAction;
 
 export interface RealizationSegment {
   tokenId: string;
   morphemeId?: string;
   constructionId?: string;
+  overlayId?: string;
   slot: MorphemeSlot;
   labelKey: string;
   pattern: string;
@@ -252,6 +304,7 @@ export interface RealizationTrace {
   tokenId: string;
   morphemeId?: string;
   constructionId?: string;
+  overlayId?: string;
   slot: MorphemeSlot;
   labelKey: string;
   pattern: string;
