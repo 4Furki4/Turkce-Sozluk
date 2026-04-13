@@ -31,22 +31,30 @@
   },
   "WordBuilder": {
     "metaTitle": "Turkish Word Builder",
-    "metaDescription": "Build Turkish words step by step with derivational and inflectional suffixes, phonology rules, and live part-of-speech updates.",
+    "metaDescription": "Build Turkish words with a morpheme- and feature-driven engine while tracking slot flow and phonology in real time.",
     "titleBadge": "Morphology Lab",
-    "phaseAware": "POS-aware suffix filtering",
-    "title": "Build Turkish words one suffix at a time",
-    "description": "Choose a root, add derivational or inflectional suffixes step by step, and inspect vowel harmony, consonant mutation, consonant assimilation, buffer letters, and part-of-speech changes as they happen.",
+    "phaseAware": "Feature-driven morphotactics",
+    "title": "Build Turkish words one morpheme at a time",
+    "description": "Choose a root, then select number, possession, case, polarity, tense, and agreement step by step while the engine explains phonology and surface changes.",
     "featureHarmonyTitle": "Harmony",
-    "featureHarmonyBody": "2-way and 4-way vowel harmony are resolved from archiphonemes in real time.",
+    "featureHarmonyBody": "2-way and 4-way vowel harmony are resolved from abstract morpheme patterns in real time.",
     "featurePhonologyTitle": "Phonology",
-    "featurePhonologyBody": "Softening, hardening, and buffer letters are applied and explained at each step.",
-    "featurePosTitle": "POS Tracking",
-    "featurePosBody": "The active part of speech changes with derivation and filters the next suffixes.",
+    "featurePhonologyBody": "Softening, hardening, buffer letters, and progressive vowel loss are applied and explained at each step.",
+    "featurePosTitle": "Slot Flow",
+    "featurePosBody": "The engine manages number, possession, case, TAM, and agreement slots instead of a flat suffix list.",
     "featureLogTitle": "Step Logs",
-    "featureLogBody": "Every transformation records the before/after form and the triggered rules.",
+    "featureLogBody": "Each transformation records the chosen morpheme, the surface diff, and the triggered structured events.",
     "samples": "Quick roots",
     "rootSetup": "Root setup",
     "rootSetupHint": "Pick a root profile and start a fresh build chain whenever you want to test another pattern.",
+    "dictionarySearchLabel": "Search dictionary",
+    "dictionarySearchPlaceholder": "Type a word and pick it from the dictionary...",
+    "dictionarySelectionActive": "Dictionary selection is active",
+    "clearDictionarySelection": "Clear selection",
+    "dictionaryPosLabel": "Dictionary POS",
+    "dictionaryPosPlaceholder": "Choose the starting POS",
+    "dictionaryPosRequired": "This dictionary entry appears with more than one part of speech. Choose the starting POS before launching the builder.",
+    "dictionaryPosLoading": "Loading POS data",
     "rootLabel": "Root",
     "rootPlaceholder": "kitap, yaz, aile...",
     "posLabel": "Word class",
@@ -55,7 +63,7 @@
     "mutationHint": "Use auto for default Turkish behavior, force for lexical exceptions, or disable it for foreign and frozen forms.",
     "startBuilder": "Start builder",
     "stateTitle": "Current state",
-    "stateHint": "The engine keeps the live surface form, part of speech, and morphology phase in sync.",
+    "stateHint": "The engine keeps the root, selected morphemes, feature bundle, and live surface form in sync.",
     "currentWord": "Current word",
     "currentPos": "Current POS",
     "currentPhase": "Current phase",
@@ -63,14 +71,17 @@
     "resetSteps": "Reset steps",
     "stepCount": "Step count",
     "selectedChain": "Suffix chain",
+    "attestedBadge": "Found in dictionary",
     "availableNow": "available now",
     "chainEmpty": "No suffix has been added yet.",
     "lockedInflection": "Inflection phase is active. Only inflectional suffixes remain available from this point on.",
     "availableSuffixes": "Available suffixes",
     "availableSuffixesHint": "Buttons below are already filtered by the current part of speech and phase.",
+    "availableDerivations": "Available derivations",
+    "availableInflections": "Available inflections",
     "noAvailableSuffixes": "No suffix can be added in the current state.",
     "logsTitle": "Transformation log",
-    "logsHint": "Each step shows the surface diff, realized suffix, and every phonological explanation returned by the engine.",
+    "logsHint": "Each step shows the surface diff, the realized piece, and every structured event emitted by the engine.",
     "noSteps": "Choose a suffix from the list to begin the build.",
     "stepLabel": "Step {step}",
     "before": "Before",
@@ -78,6 +89,7 @@
     "appliedRules": "Triggered rules",
     "surfaceSuffix": "Surface suffix",
     "archiphoneme": "Archiphoneme",
+    "zeroMorpheme": "(zero)",
     "phaseDerivation": "Derivation",
     "phaseInflection": "Inflection",
     "posNoun": "Noun",
@@ -87,12 +99,105 @@
     "mutationAuto": "Auto",
     "mutationAlways": "Always soften",
     "mutationNever": "Never soften",
+    "slots": {
+      "derivation": "Derivation",
+      "noun_number": "Number",
+      "noun_possessive": "Possessive",
+      "noun_case": "Case",
+      "verb_polarity": "Polarity",
+      "verb_tam": "Tense/Aspect/Mood",
+      "verb_agreement": "Agreement"
+    },
+    "actions": {
+      "derivation": {
+        "noun": {
+          "lIk": "-lık",
+          "lI": "-lı",
+          "sIz": "-sız",
+          "CI": "-cı",
+          "DAş": "-daş",
+          "lA": "-la",
+          "lAş": "-laş",
+          "lAn": "-lan",
+          "Al": "-al",
+          "sA": "-sa"
+        },
+        "verb": {
+          "GI": "-gı",
+          "ICI": "-ıcı",
+          "mA": "-ma",
+          "Iş": "-ış",
+          "Ak": "-ak",
+          "Im": "-ım"
+        },
+        "voice": {
+          "DIr": "-dır",
+          "Il": "-ıl",
+          "In": "-ın",
+          "Iş": "-ış"
+        }
+      },
+      "noun": {
+        "number": {
+          "pl": "Plural"
+        },
+        "possessive": {
+          "p1sg": "1st singular possessive",
+          "p2sg": "2nd singular possessive",
+          "p3sg": "3rd singular possessive",
+          "p1pl": "1st plural possessive",
+          "p2pl": "2nd plural possessive",
+          "p3pl": "3rd plural possessive"
+        },
+        "case": {
+          "acc": "Accusative",
+          "dat": "Dative",
+          "loc": "Locative",
+          "abl": "Ablative",
+          "gen": "Genitive"
+        }
+      },
+      "verb": {
+        "polarity": {
+          "neg": "Negative"
+        },
+        "tam": {
+          "aor": "Aorist",
+          "prog": "Progressive",
+          "past": "Past",
+          "future": "Future"
+        },
+        "agreement": {
+          "1sg": "1st singular",
+          "2sg": "2nd singular",
+          "1pl": "1st plural",
+          "2pl": "2nd plural",
+          "3pl": "3rd plural"
+        }
+      }
+    },
+    "events": {
+      "actionApplied": "Selected morpheme",
+      "derivationApplied": "Applied {action}: {before} -> {after}.",
+      "phaseChange": "Morphology phase updated: {before} -> {after}.",
+      "posChange": "Part of speech updated: {before} -> {after}.",
+      "vowelHarmonyFourWay": "Applied 4-way vowel harmony: /{archiphoneme}/ -> {resolved}.",
+      "vowelHarmonyTwoWay": "Applied 2-way vowel harmony: /{archiphoneme}/ -> {resolved}.",
+      "consonantAssimilation": "Applied consonant assimilation: {before} -> {after}.",
+      "bufferLetter": "Inserted buffer letter: {letter}.",
+      "consonantMutation": "Applied consonant mutation: {before} -> {after}.",
+      "progressiveVowelDrop": "Dropped the final stem vowel before the progressive marker.",
+      "lexemeOverrideApplied": "Applied lexical allomorph override",
+      "attestationMatchFound": "Found \"{word}\" in the dictionary.",
+      "attestationMatchMissing": "No dictionary match found for \"{word}\"."
+    },
     "groups": {
       "NounToNoun": "Noun to noun",
       "NounToVerb": "Noun to verb",
       "VerbToNoun": "Verb to noun",
       "VerbToVerb": "Verb to verb",
-      "NounInflection": "Noun inflection"
+      "NounInflection": "Noun inflection",
+      "VerbInflection": "Verb inflection"
     }
   },
   "Footer": {

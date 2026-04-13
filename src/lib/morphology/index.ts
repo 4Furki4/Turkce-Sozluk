@@ -1,21 +1,58 @@
 export { TurkishMorphologyEngine } from "./engine";
-export { buildHighlightDiff, countSyllables, findLastVowel, realizeSuffix } from "./phonology";
+export { TurkishMorphologyEngineV2 } from "./engine-v2";
+export { createDefaultFeatureBundle, createLexemeEntryFromRoot } from "./lexicon";
+export { MORPHEME_CATALOG } from "./morpheme-catalog";
+export { getAvailableMorphologyActions, getSlotTranslationKey } from "./morphotactics";
+export { buildTraceDiff, realizeMorphologicalState } from "./realization-v2";
+export {
+  buildHighlightDiff,
+  countSyllables,
+  endsWithVowel,
+  findLastVowel,
+  realizeAffix,
+  realizeSuffix,
+  resolveFourWayHarmony,
+  resolveTwoWayHarmony,
+} from "./phonology";
 export { DEFAULT_SUFFIX_CATALOG } from "./suffix-catalog";
 export type {
+  AgreementFeature,
   BuildResult,
   BuildStep,
+  CaseFeature,
   DiffSegment,
+  FeatureBundle,
   HarmonyType,
   HighlightDiff,
+  LexemeEntry,
+  LexemeOrigin,
+  MorphemeCategory,
+  MorphemeDefinition,
+  MorphemeSlot,
+  MorphemeToken,
+  MorphologicalAction,
   MorphologicalPhase,
   MorphologicalState,
+  MorphologicalStateV2,
+  MorphologyAttestation,
+  MorphologyEvent,
+  MorphologyEventCode,
+  MorphologyHistoryEntry,
+  MorphologyStage,
+  MutationPolicy,
+  NounNumberFeature,
   PartOfSpeech,
   PhonologyEvent,
   PhonologyEventType,
+  PolarityFeature,
+  PossessiveFeature,
+  RealizationResult,
+  RealizationSegment,
+  RealizationTrace,
   RootLexeme,
   RuleId,
   SuffixDefinition,
   SuffixKind,
+  TamFeature,
   TransformationLog,
 } from "./types";
-

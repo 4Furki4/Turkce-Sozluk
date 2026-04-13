@@ -13,8 +13,8 @@ describe("TurkishMorphologyEngine", () => {
     );
 
     expect(result.finalSurface).toBe("kitabı");
-    expect(result.steps[0]?.log.explanationArray).toContain(
-      "Ünsüz yumuşaması uygulandı: p -> b.",
+    expect(result.steps[0]?.log.events.some((event) => event.code === "consonant_mutation")).toBe(
+      true,
     );
     expect(result.steps[0]?.log.diff.afterHighlighted).toBe("kita[bı]");
   });
@@ -29,8 +29,8 @@ describe("TurkishMorphologyEngine", () => {
     );
 
     expect(result.finalSurface).toBe("aileyi");
-    expect(result.steps[0]?.log.explanationArray).toContain(
-      "Tampon harf eklendi: y.",
+    expect(result.steps[0]?.log.events.some((event) => event.code === "buffer_letter")).toBe(
+      true,
     );
   });
 
@@ -44,8 +44,8 @@ describe("TurkishMorphologyEngine", () => {
     );
 
     expect(result.finalSurface).toBe("kitapçı");
-    expect(result.steps[0]?.log.explanationArray).toContain(
-      "Ünsüz sertleşmesi uygulandı: C -> ç.",
+    expect(result.steps[0]?.log.events.some((event) => event.code === "consonant_assimilation")).toBe(
+      true,
     );
   });
 
@@ -61,8 +61,8 @@ describe("TurkishMorphologyEngine", () => {
     expect(result.finalSurface).toBe("kitaplaş");
     expect(result.finalPos).toBe("Verb");
     expect(result.availableSuffixes.every((suffix) => suffix.sourcePos === "Verb")).toBe(true);
-    expect(result.steps[0]?.log.explanationArray).toContain(
-      "Kelime türü güncellendi: Noun -> Verb.",
+    expect(result.steps[0]?.log.events.some((event) => event.code === "pos_change")).toBe(
+      true,
     );
   });
 
@@ -92,9 +92,7 @@ describe("TurkishMorphologyEngine", () => {
 
     expect(result.finalSurface).toBe("linki");
     expect(
-      result.steps[0]?.log.explanationArray.some((message) =>
-        message.includes("Ünsüz yumuşaması"),
-      ),
+      result.steps[0]?.log.events.some((event) => event.code === "consonant_mutation"),
     ).toBe(false);
   });
 
@@ -111,5 +109,103 @@ describe("TurkishMorphologyEngine", () => {
     expect(result.steps).toHaveLength(2);
     expect(result.steps[0]?.log.afterSurface).toBe("yurttaş");
     expect(result.steps[1]?.log.beforeSurface).toBe("yurttaş");
+  });
+
+  it("supports noun possessive plus genitive through the adapter", () => {
+    const result = engine.buildWord(
+      {
+        surface: "kitap",
+        pos: "Noun",
+      },
+      ["noun.inflection.possessive1sg", "noun.inflection.genitive"],
+    );
+
+    expect(result.finalSurface).toBe("kitabımın");
+    expect(result.steps).toHaveLength(2);
+    expect(result.steps[0]?.action?.id).toBe("noun.possessive.p1sg");
+  });
+
+  it("keeps first-person possessive case forms without extra n in the adapter", () => {
+    const accusative = engine.buildWord(
+      {
+        surface: "aile",
+        pos: "Noun",
+      },
+      ["noun.inflection.possessive1sg", "noun.inflection.accusative"],
+    );
+    const dative = engine.buildWord(
+      {
+        surface: "aile",
+        pos: "Noun",
+      },
+      ["noun.inflection.possessive1sg", "noun.inflection.dative"],
+    );
+    const ablative = engine.buildWord(
+      {
+        surface: "aile",
+        pos: "Noun",
+      },
+      ["noun.inflection.possessive1sg", "noun.inflection.ablative"],
+    );
+
+    expect(accusative.finalSurface).toBe("ailemi");
+    expect(dative.finalSurface).toBe("aileme");
+    expect(ablative.finalSurface).toBe("ailemden");
+  });
+
+  it("keeps pronominal n after third-person possessive in the adapter", () => {
+    const result = engine.buildWord(
+      {
+        surface: "ev",
+        pos: "Noun",
+      },
+      ["noun.inflection.possessive3sg", "noun.inflection.accusative"],
+    );
+
+    expect(result.finalSurface).toBe("evini");
+  });
+
+  it("supports future tense verb agreement through the adapter", () => {
+    const result = engine.buildWord(
+      {
+        surface: "gör",
+        pos: "Verb",
+      },
+      ["verb.inflection.future", "verb.inflection.1sg"],
+    );
+
+    expect(result.finalSurface).toBe("göreceğim");
+    expect(result.steps[1]?.log.events.some((event) => event.code === "consonant_mutation")).toBe(
+      true,
+    );
+  });
+
+  it("supports derivation followed by verb inflection through the adapter", () => {
+    const result = engine.buildWord(
+      {
+        surface: "kitap",
+        pos: "Noun",
+      },
+      ["noun.deriv.lAş", "verb.inflection.past", "verb.inflection.1sg"],
+    );
+
+    expect(result.finalSurface).toBe("kitaplaştım");
+    expect(result.finalPos).toBe("Verb");
+    expect(result.steps[0]?.log.events.some((event) => event.code === "pos_change")).toBe(
+      true,
+    );
+  });
+
+  it("supports multiple derivations before noun inflection through the adapter", () => {
+    const result = engine.buildWord(
+      {
+        surface: "kitap",
+        pos: "Noun",
+      },
+      ["noun.deriv.lAş", "verb.deriv.mA", "noun.inflection.locative"],
+    );
+
+    expect(result.finalSurface).toBe("kitaplaşmada");
+    expect(result.finalPos).toBe("Noun");
   });
 });

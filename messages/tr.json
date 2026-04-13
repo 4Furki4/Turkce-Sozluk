@@ -31,22 +31,30 @@
   },
   "WordBuilder": {
     "metaTitle": "Türkçe Kelime İnşa Motoru",
-    "metaDescription": "Türkçe kelimeleri yapım ve çekim ekleriyle adım adım kurun; ses olaylarını ve tür değişimlerini canlı olarak izleyin.",
+    "metaDescription": "Türkçe kelimeleri morfem ve özellik tabanlı bir motorla adım adım kurun; çekim akışını ve ses olaylarını canlı olarak izleyin.",
     "titleBadge": "Morfoloji Laboratuvarı",
-    "phaseAware": "Tür odaklı ek filtreleme",
-    "title": "Türkçe kelimeleri ek ek inşa edin",
-    "description": "Bir kök seçin, üzerine yapım veya çekim eklerini adım adım ekleyin; ünlü uyumu, ünsüz yumuşaması, ünsüz sertleşmesi, tampon harfler ve tür değişimlerini her adımda görün.",
+    "phaseAware": "Özellik odaklı morfotaktik",
+    "title": "Türkçe kelimeleri morfem morfem inşa edin",
+    "description": "Bir kök seçin, sonra sayı, iyelik, hal, kutupluluk, zaman ve kişi seçimlerini adım adım yapın; motor her adımda ses olaylarını ve yüzey değişimini açıklasın.",
     "featureHarmonyTitle": "Uyum",
-    "featureHarmonyBody": "2 yönlü ve 4 yönlü ünlü uyumu arşifonemlerden anlık olarak çözülür.",
+    "featureHarmonyBody": "2 yönlü ve 4 yönlü ünlü uyumu soyut morfem örüntülerinden anlık olarak çözülür.",
     "featurePhonologyTitle": "Ses Olayı",
-    "featurePhonologyBody": "Yumuşama, sertleşme ve tampon harf kuralları her adımda uygulanır ve açıklanır.",
-    "featurePosTitle": "Tür Takibi",
-    "featurePosBody": "Yapım ekleriyle kelime türü güncellenir ve bir sonraki ek havuzu buna göre daralır.",
+    "featurePhonologyBody": "Yumuşama, sertleşme, kaynaştırma ve ilerleyen zaman ünlü düşmesi gibi kurallar her adımda uygulanır ve açıklanır.",
+    "featurePosTitle": "Slot Akışı",
+    "featurePosBody": "Motor serbest bir ek listesi yerine sayı, iyelik, hal, kip ve kişi slotlarını yönetir.",
     "featureLogTitle": "Adım Günlüğü",
-    "featureLogBody": "Her dönüşüm eski-yeni biçimi ve tetiklenen kuralları birlikte kaydeder.",
+    "featureLogBody": "Her dönüşüm seçilen morfemi, yüzey farkını ve yapılandırılmış olayları birlikte kaydeder.",
     "samples": "Hızlı kökler",
     "rootSetup": "Kök ayarları",
     "rootSetupHint": "Farklı örüntüleri test etmek için kök profilini değiştirip yeni bir zincir başlatabilirsiniz.",
+    "dictionarySearchLabel": "Sözlükten ara",
+    "dictionarySearchPlaceholder": "Kelime yazıp sözlükten seçin...",
+    "dictionarySelectionActive": "Sözlük seçimi aktif",
+    "clearDictionarySelection": "Seçimi temizle",
+    "dictionaryPosLabel": "Sözlük türü",
+    "dictionaryPosPlaceholder": "Başlangıç türünü seçin",
+    "dictionaryPosRequired": "Bu sözlük girdisi birden fazla türde kullanılıyor. İnşaya başlamadan önce başlangıç türünü seçin.",
+    "dictionaryPosLoading": "Tür bilgisi yükleniyor",
     "rootLabel": "Kök",
     "rootPlaceholder": "kitap, yaz, aile...",
     "posLabel": "Kelime türü",
@@ -55,7 +63,7 @@
     "mutationHint": "Varsayılan Türkçe davranışı için otomatik kullanın; sözlüksel istisnalar için zorlayın, yabancı ve donmuş biçimler için kapatın.",
     "startBuilder": "İnşayı başlat",
     "stateTitle": "Güncel durum",
-    "stateHint": "Motor, yüzey biçimi, kelime türü ve morfolojik aşamayı canlı olarak birlikte takip eder.",
+    "stateHint": "Motor, kökü, seçilen morfemleri, özellik paketini ve yüzey biçimini birlikte takip eder.",
     "currentWord": "Güncel kelime",
     "currentPos": "Güncel tür",
     "currentPhase": "Güncel aşama",
@@ -63,14 +71,17 @@
     "resetSteps": "Adımları sıfırla",
     "stepCount": "Adım sayısı",
     "selectedChain": "Ek zinciri",
+    "attestedBadge": "Sözlükte mevcut",
     "availableNow": "şu an kullanılabilir",
     "chainEmpty": "Henüz hiç ek eklenmedi.",
     "lockedInflection": "Çekim aşaması aktif. Bu noktadan sonra yalnızca çekim ekleri kullanılabilir.",
     "availableSuffixes": "Kullanılabilir ekler",
     "availableSuffixesHint": "Aşağıdaki butonlar güncel kelime türü ve aşamaya göre zaten filtrelenmiştir.",
+    "availableDerivations": "Kullanılabilir yapım ekleri",
+    "availableInflections": "Kullanılabilir çekim ekleri",
     "noAvailableSuffixes": "Bu durumda eklenebilecek bir ek kalmadı.",
     "logsTitle": "Dönüşüm günlüğü",
-    "logsHint": "Her adım yüzey farkını, gerçekleşen eki ve motorun ürettiği bütün ses olayı açıklamalarını gösterir.",
+    "logsHint": "Her adım yüzey farkını, gerçekleşen parçayı ve motorun ürettiği yapılandırılmış olay açıklamalarını gösterir.",
     "noSteps": "İnşaya başlamak için listeden bir ek seçin.",
     "stepLabel": "Adım {step}",
     "before": "Önce",
@@ -78,6 +89,7 @@
     "appliedRules": "Tetiklenen kurallar",
     "surfaceSuffix": "Yüzey eki",
     "archiphoneme": "Arşifonem",
+    "zeroMorpheme": "(sıfır)",
     "phaseDerivation": "Yapım",
     "phaseInflection": "Çekim",
     "posNoun": "İsim",
@@ -87,12 +99,105 @@
     "mutationAuto": "Otomatik",
     "mutationAlways": "Her zaman yumuşat",
     "mutationNever": "Asla yumuşatma",
+    "slots": {
+      "derivation": "Yapım",
+      "noun_number": "Sayı",
+      "noun_possessive": "İyelik",
+      "noun_case": "Hal",
+      "verb_polarity": "Kutupluluk",
+      "verb_tam": "Zaman/Kip",
+      "verb_agreement": "Kişi"
+    },
+    "actions": {
+      "derivation": {
+        "noun": {
+          "lIk": "-lık",
+          "lI": "-lı",
+          "sIz": "-sız",
+          "CI": "-cı",
+          "DAş": "-daş",
+          "lA": "-la",
+          "lAş": "-laş",
+          "lAn": "-lan",
+          "Al": "-al",
+          "sA": "-sa"
+        },
+        "verb": {
+          "GI": "-gı",
+          "ICI": "-ıcı",
+          "mA": "-ma",
+          "Iş": "-ış",
+          "Ak": "-ak",
+          "Im": "-ım"
+        },
+        "voice": {
+          "DIr": "-dır",
+          "Il": "-ıl",
+          "In": "-ın",
+          "Iş": "-ış"
+        }
+      },
+      "noun": {
+        "number": {
+          "pl": "Çoğul"
+        },
+        "possessive": {
+          "p1sg": "1. tekil iyelik",
+          "p2sg": "2. tekil iyelik",
+          "p3sg": "3. tekil iyelik",
+          "p1pl": "1. çoğul iyelik",
+          "p2pl": "2. çoğul iyelik",
+          "p3pl": "3. çoğul iyelik"
+        },
+        "case": {
+          "acc": "Belirtme hali",
+          "dat": "Yönelme hali",
+          "loc": "Bulunma hali",
+          "abl": "Ayrılma hali",
+          "gen": "İlgi hali"
+        }
+      },
+      "verb": {
+        "polarity": {
+          "neg": "Olumsuzluk"
+        },
+        "tam": {
+          "aor": "Geniş zaman",
+          "prog": "Şimdiki zaman",
+          "past": "Görülen geçmiş zaman",
+          "future": "Gelecek zaman"
+        },
+        "agreement": {
+          "1sg": "1. tekil kişi",
+          "2sg": "2. tekil kişi",
+          "1pl": "1. çoğul kişi",
+          "2pl": "2. çoğul kişi",
+          "3pl": "3. çoğul kişi"
+        }
+      }
+    },
+    "events": {
+      "actionApplied": "Morfem seçildi",
+      "derivationApplied": "{action} uygulandı: {before} -> {after}.",
+      "phaseChange": "Morfolojik aşama güncellendi: {before} -> {after}.",
+      "posChange": "Kelime türü güncellendi: {before} -> {after}.",
+      "vowelHarmonyFourWay": "4 yönlü ünlü uyumu uygulandı: /{archiphoneme}/ -> {resolved}.",
+      "vowelHarmonyTwoWay": "2 yönlü ünlü uyumu uygulandı: /{archiphoneme}/ -> {resolved}.",
+      "consonantAssimilation": "Ünsüz sertleşmesi uygulandı: {before} -> {after}.",
+      "bufferLetter": "Tampon harf eklendi: {letter}.",
+      "consonantMutation": "Ünsüz yumuşaması uygulandı: {before} -> {after}.",
+      "progressiveVowelDrop": "Şimdiki zaman öncesi son ünlü düşürüldü.",
+      "lexemeOverrideApplied": "Sözlüksel allomorf geçersiz kıldı",
+      "attestationMatchFound": "\"{word}\" sözlükte bulundu.",
+      "attestationMatchMissing": "\"{word}\" için sözlük eşleşmesi bulunamadı."
+    },
     "groups": {
       "NounToNoun": "İsimden isim",
       "NounToVerb": "İsimden fiil",
       "VerbToNoun": "Fiilden isim",
       "VerbToVerb": "Fiilden fiil",
-      "NounInflection": "İsim çekimi"
+      "NounInflection": "İsim çekimi",
+      "VerbInflection": "Fiil çekimi"
     }
   },
   "Footer": {

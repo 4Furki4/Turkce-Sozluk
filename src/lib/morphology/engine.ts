@@ -1,151 +1,91 @@
-import { buildHighlightDiff, realizeSuffix } from "./phonology";
+import { TurkishMorphologyEngineV2 } from "./engine-v2";
+import { LegacyTurkishMorphologyEngine } from "./legacy-engine";
+import { createLexemeEntryFromRoot } from "./lexicon";
+import { MORPHEME_CATALOG } from "./morpheme-catalog";
 import { DEFAULT_SUFFIX_CATALOG } from "./suffix-catalog";
 import {
   type BuildResult,
   type BuildStep,
+  type LexemeEntry,
+  type MorphologicalAction,
   type MorphologicalState,
+  type MorphologicalStateV2,
   type PartOfSpeech,
-  type PhonologyEvent,
   type RootLexeme,
   type SuffixDefinition,
-  type TransformationLog,
 } from "./types";
 
 type SuffixInput = string | SuffixDefinition;
 
-interface LogTransformationInput {
-  step: number;
-  suffix: SuffixDefinition;
-  beforeState: MorphologicalState;
-  afterState: MorphologicalState;
-  surfaceSuffix: string;
-  events: PhonologyEvent[];
-}
-
 export class TurkishMorphologyEngine {
-  private readonly suffixCatalog: SuffixDefinition[];
+  private readonly legacyEngine: LegacyTurkishMorphologyEngine;
+  private readonly v2Engine: TurkishMorphologyEngineV2;
   private readonly suffixIndex: Map<string, SuffixDefinition>;
+  private readonly legacySuffixToMorpheme: Map<string, MorphologicalAction["id"]>;
 
   constructor(suffixCatalog: SuffixDefinition[] = DEFAULT_SUFFIX_CATALOG) {
-    this.suffixCatalog = suffixCatalog;
+    this.legacyEngine = new LegacyTurkishMorphologyEngine(suffixCatalog);
+    this.v2Engine = new TurkishMorphologyEngineV2();
     this.suffixIndex = new Map(
       suffixCatalog.map((suffix) => [suffix.id, suffix] as const),
     );
+    this.legacySuffixToMorpheme = new Map(
+      MORPHEME_CATALOG.filter((morpheme) => morpheme.legacySuffixId).map((morpheme) => [
+        morpheme.legacySuffixId as string,
+        morpheme.id,
+      ]),
+    );
+  }
+
+  public initializeState(lexeme: LexemeEntry): MorphologicalStateV2 {
+    return this.v2Engine.initializeState(lexeme);
+  }
+
+  public getAvailableActions(state: MorphologicalStateV2): MorphologicalAction[] {
+    return this.v2Engine.getAvailableActions(state);
+  }
+
+  public applyAction(state: MorphologicalStateV2, actionId: string): MorphologicalStateV2 {
+    return this.v2Engine.applyAction(state, actionId);
+  }
+
+  public undoAction(state: MorphologicalStateV2): MorphologicalStateV2 {
+    return this.v2Engine.undoAction(state);
+  }
+
+  public realize(state: MorphologicalStateV2) {
+    return this.v2Engine.realize(state);
+  }
+
+  public explain(state: MorphologicalStateV2) {
+    return this.v2Engine.explain(state);
   }
 
   public getAvailableSuffixes(
     input: RootLexeme | MorphologicalState,
   ): SuffixDefinition[] {
-    const state = this.normalizeState(input);
-
-    return this.suffixCatalog.filter((suffix) => {
-      if (suffix.sourcePos !== state.pos) {
-        return false;
-      }
-
-      if (state.phase === "inflection" && suffix.kind !== "inflectional") {
-        return false;
-      }
-
-      return true;
-    });
+    return this.legacyEngine.getAvailableSuffixes(input);
   }
 
   public buildWord(root: RootLexeme, suffixList: SuffixInput[]): BuildResult {
-    let currentState = this.normalizeState(root);
-    const steps: BuildStep[] = [];
+    if (!this.canUseV2Build(suffixList)) {
+      return this.legacyEngine.buildWord(root, suffixList);
+    }
 
-    suffixList.forEach((suffixInput, index) => {
-      const suffix = this.resolveSuffix(suffixInput);
-      this.assertSuffixAllowed(currentState, suffix);
+    let state = this.initializeState(createLexemeEntryFromRoot(root));
 
-      const beforeState = { ...currentState };
-      const realized = realizeSuffix(beforeState, suffix);
-      const nextPhase =
-        beforeState.phase === "inflection" || suffix.kind === "inflectional"
-          ? "inflection"
-          : "derivation";
+    suffixList.forEach((suffixInput) => {
+      const suffixId = this.resolveLegacySuffixId(suffixInput);
+      const morphemeId = this.legacySuffixToMorpheme.get(suffixId);
 
-      const afterState: MorphologicalState = {
-        ...beforeState,
-        surface: `${realized.stem}${realized.surfaceSuffix}`,
-        pos: suffix.targetPos,
-        phase: nextPhase,
-      };
-
-      const events = [...realized.events];
-      if (beforeState.pos !== afterState.pos) {
-        events.push({
-          type: "pos_change",
-          message: `Kelime türü güncellendi: ${beforeState.pos} -> ${afterState.pos}.`,
-          before: beforeState.pos,
-          after: afterState.pos,
-        });
+      if (!morphemeId) {
+        throw new Error(`No V2 morpheme mapping found for suffix ${suffixId}.`);
       }
 
-      if (beforeState.phase !== afterState.phase) {
-        events.push({
-          type: "phase_change",
-          message:
-            "Çekim aşamasına geçildi; bundan sonra yalnızca çekim ekleri önerilecek.",
-          before: beforeState.phase,
-          after: afterState.phase,
-        });
-      }
-
-      const log = this.logTransformation({
-        step: index + 1,
-        suffix,
-        beforeState,
-        afterState,
-        surfaceSuffix: realized.surfaceSuffix,
-        events,
-      });
-
-      steps.push({
-        step: index + 1,
-        suffix,
-        surfaceSuffix: realized.surfaceSuffix,
-        beforeState,
-        afterState,
-        log,
-      });
-
-      currentState = afterState;
+      state = this.applyAction(state, morphemeId);
     });
 
-    return {
-      root,
-      finalState: currentState,
-      finalSurface: currentState.surface,
-      finalPos: currentState.pos,
-      steps,
-      explanationArray: steps.flatMap((step) => step.log.explanationArray),
-      availableSuffixes: this.getAvailableSuffixes(currentState),
-    };
-  }
-
-  public logTransformation({
-    step,
-    suffix,
-    beforeState,
-    afterState,
-    surfaceSuffix,
-    events,
-  }: LogTransformationInput): TransformationLog {
-    return {
-      step,
-      suffixId: suffix.id,
-      suffixArchiphoneme: suffix.archiphoneme,
-      suffixSurface: surfaceSuffix,
-      sourcePos: beforeState.pos,
-      targetPos: afterState.pos,
-      beforeSurface: beforeState.surface,
-      afterSurface: afterState.surface,
-      explanationArray: events.map((event) => event.message),
-      events,
-      diff: buildHighlightDiff(beforeState.surface, afterState.surface),
-    };
+    return this.buildLegacyFacadeResult(root, state);
   }
 
   public buildState(
@@ -153,44 +93,65 @@ export class TurkishMorphologyEngine {
     pos: PartOfSpeech,
     phase: MorphologicalState["phase"] = "derivation",
   ): MorphologicalState {
-    return { surface, pos, phase };
+    return this.legacyEngine.buildState(surface, pos, phase);
   }
 
-  private normalizeState(input: RootLexeme | MorphologicalState): MorphologicalState {
+  private canUseV2Build(suffixList: SuffixInput[]): boolean {
+    if (suffixList.length === 0) {
+      return false;
+    }
+
+    return suffixList.every((suffixInput) =>
+      this.legacySuffixToMorpheme.has(this.resolveLegacySuffixId(suffixInput)),
+    );
+  }
+
+  private resolveLegacySuffixId(input: SuffixInput): string {
+    return typeof input === "string" ? input : input.id;
+  }
+
+  private toLegacyState(state: MorphologicalStateV2): MorphologicalState {
     return {
-      ...input,
-      phase: input.phase ?? "derivation",
+      surface: state.surface ?? state.lexeme.rootSurface,
+      pos: state.currentPos,
+      phase: state.phase,
+      origin: state.lexeme.origin,
+      forceConsonantMutation: state.lexeme.mutationPolicy === "always",
+      allowConsonantMutation: state.lexeme.mutationPolicy === "never" ? false : undefined,
+      mutationOverrides: state.lexeme.mutationOverrides,
     };
   }
 
-  private resolveSuffix(input: SuffixInput): SuffixDefinition {
-    if (typeof input !== "string") {
-      return input;
-    }
+  private buildLegacyFacadeResult(
+    root: RootLexeme,
+    state: MorphologicalStateV2,
+  ): BuildResult {
+    const steps: BuildStep[] = state.history.map((entry) => ({
+      step: entry.step,
+      suffix: entry.action.legacySuffixId
+        ? this.suffixIndex.get(entry.action.legacySuffixId)
+        : undefined,
+      action: entry.action,
+      surfaceSuffix: entry.surfaceSuffix,
+      beforeState: this.toLegacyState(entry.beforeState),
+      afterState: this.toLegacyState(entry.afterState),
+      log: entry.log,
+    }));
+    const finalState = this.toLegacyState(state);
+    const availableSuffixes = this.getAvailableActions(state)
+      .map((action) => action.legacySuffixId)
+      .filter((value): value is string => Boolean(value))
+      .map((suffixId) => this.suffixIndex.get(suffixId))
+      .filter((suffix): suffix is SuffixDefinition => Boolean(suffix));
 
-    const suffix = this.suffixIndex.get(input);
-    if (!suffix) {
-      throw new Error(`Unknown suffix id: ${input}`);
-    }
-
-    return suffix;
-  }
-
-  private assertSuffixAllowed(
-    state: MorphologicalState,
-    suffix: SuffixDefinition,
-  ): void {
-    if (suffix.sourcePos !== state.pos) {
-      throw new Error(
-        `Suffix ${suffix.id} cannot be applied to ${state.pos}. Current surface: ${state.surface}`,
-      );
-    }
-
-    if (state.phase === "inflection" && suffix.kind !== "inflectional") {
-      throw new Error(
-        `Suffix ${suffix.id} is derivational, but the word is already in inflection phase.`,
-      );
-    }
+    return {
+      root,
+      finalState,
+      finalSurface: finalState.surface,
+      finalPos: finalState.pos,
+      steps,
+      explanationArray: steps.flatMap((step) => step.log.explanationArray),
+      availableSuffixes,
+    };
   }
 }
-

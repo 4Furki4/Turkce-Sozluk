@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
+  Autocomplete,
+  AutocompleteItem,
   Button,
   CardBody,
   Chip,
@@ -19,19 +21,34 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Link as NextIntlLink } from "@/src/i18n/routing";
+import { useDebounce } from "@/src/hooks/use-debounce";
+import { api, type RouterOutputs } from "@/src/trpc/react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import CustomCard from "./heroui/custom-card";
 import {
+  createLexemeEntryFromRoot,
+  getSlotTranslationKey,
   TurkishMorphologyEngine,
   type DiffSegment,
-  type MorphologicalState,
+  type MorphologicalAction,
+  type MorphologicalStateV2,
+  type MorphologyAttestation,
+  type MorphologyEvent,
   type PartOfSpeech,
   type RootLexeme,
-  type SuffixDefinition,
 } from "@/src/lib/morphology";
 
 type MutationMode = "auto" | "always" | "never";
+type DictionarySuggestion = RouterOutputs["search"]["getWords"][number];
+type DictionaryLookup = RouterOutputs["word"]["getWord"];
+type BuilderSection = {
+  key: string;
+  titleKey: string;
+  kind: MorphologicalAction["kind"];
+  actions: MorphologicalAction[];
+};
 
 const engine = new TurkishMorphologyEngine();
 
@@ -41,13 +58,13 @@ const ROOT_SAMPLES: Array<{
   origin: "native" | "foreign";
   mutationMode: MutationMode;
 }> = [
-    { surface: "kitap", pos: "Noun", origin: "native", mutationMode: "auto" },
-    { surface: "aile", pos: "Noun", origin: "native", mutationMode: "auto" },
-    { surface: "yurt", pos: "Noun", origin: "native", mutationMode: "auto" },
-    { surface: "yaz", pos: "Verb", origin: "native", mutationMode: "auto" },
-    { surface: "gör", pos: "Verb", origin: "native", mutationMode: "auto" },
-    { surface: "link", pos: "Noun", origin: "foreign", mutationMode: "auto" },
-  ];
+  { surface: "kitap", pos: "Noun", origin: "native", mutationMode: "auto" },
+  { surface: "aile", pos: "Noun", origin: "native", mutationMode: "auto" },
+  { surface: "ev", pos: "Noun", origin: "native", mutationMode: "auto" },
+  { surface: "yaz", pos: "Verb", origin: "native", mutationMode: "auto" },
+  { surface: "gör", pos: "Verb", origin: "native", mutationMode: "auto" },
+  { surface: "link", pos: "Noun", origin: "foreign", mutationMode: "auto" },
+];
 
 function createRootLexeme(
   surface: string,
@@ -64,6 +81,10 @@ function createRootLexeme(
     forceConsonantMutation: mutationMode === "always",
     allowConsonantMutation: mutationMode === "never" ? false : undefined,
   };
+}
+
+function createBuilderState(root: RootLexeme) {
+  return engine.initializeState(createLexemeEntryFromRoot(root));
 }
 
 function renderDiff(segments: DiffSegment[], mode: "before" | "after") {
@@ -85,16 +106,79 @@ function renderDiff(segments: DiffSegment[], mode: "before" | "after") {
   });
 }
 
-function getGroupedSuffixes(suffixes: SuffixDefinition[]) {
-  const grouped = new Map<string, SuffixDefinition[]>();
+function mapDictionaryPos(value?: string): PartOfSpeech | null {
+  const normalized = value?.trim().toLocaleLowerCase("tr");
 
-  suffixes.forEach((suffix) => {
-    const currentGroup = grouped.get(suffix.group) ?? [];
-    currentGroup.push(suffix);
-    grouped.set(suffix.group, currentGroup);
+  if (!normalized) {
+    return null;
+  }
+
+  if (
+    normalized.includes("fiil") ||
+    normalized.includes("eylem") ||
+    normalized === "verb"
+  ) {
+    return "Verb";
+  }
+
+  if (
+    normalized.includes("isim") ||
+    normalized === "ad" ||
+    normalized === "noun"
+  ) {
+    return "Noun";
+  }
+
+  return null;
+}
+
+function extractDictionaryPosOptions(result: DictionaryLookup | undefined): PartOfSpeech[] {
+  const posSet = new Set<PartOfSpeech>();
+
+  result?.[0]?.word_data.meanings.forEach((meaning) => {
+    const mapped = mapDictionaryPos(meaning.part_of_speech);
+    if (mapped) {
+      posSet.add(mapped);
+    }
   });
 
-  return Array.from(grouped.entries());
+  return Array.from(posSet);
+}
+
+function extractDictionaryOrigin(result: DictionaryLookup | undefined): "native" | "foreign" {
+  const languageCode =
+    result?.[0]?.word_data.root.language_code?.toLocaleLowerCase("tr");
+
+  return languageCode && languageCode !== "tr" ? "foreign" : "native";
+}
+
+function getActionSections(actions: MorphologicalAction[]): BuilderSection[] {
+  const derivationalGroups = new Map<string, MorphologicalAction[]>();
+  const inflectionGroups = new Map<string, MorphologicalAction[]>();
+
+  actions.forEach((action) => {
+    const groupMap =
+      action.kind === "derivational" ? derivationalGroups : inflectionGroups;
+    const key = action.kind === "derivational" ? action.group : action.slot;
+    const currentActions = groupMap.get(key) ?? [];
+    currentActions.push(action);
+    groupMap.set(key, currentActions);
+  });
+
+  return [
+    ...Array.from(derivationalGroups.entries()).map(([key, groupedActions]) => ({
+      key,
+      titleKey: `groups.${key}`,
+      kind: "derivational" as const,
+      actions: groupedActions,
+    })),
+    ...Array.from(inflectionGroups.entries()).map(([key, groupedActions]) => ({
+      key,
+      titleKey: getSlotTranslationKey(key as MorphologicalAction["slot"]),
+      kind: "inflectional" as const,
+      actions: groupedActions,
+    })),
+  ];
 }
 
 function getLocalizedPos(t: ReturnType<typeof useTranslations>, pos: PartOfSpeech) {
@@ -103,14 +187,131 @@ function getLocalizedPos(t: ReturnType<typeof useTranslations>, pos: PartOfSpeec
 
 function getLocalizedPhase(
   t: ReturnType<typeof useTranslations>,
-  phase: MorphologicalState["phase"],
+  phase: MorphologicalStateV2["phase"],
 ) {
   return phase === "inflection" ? t("phaseInflection") : t("phaseDerivation");
 }
 
+function getEventMessage(
+  t: ReturnType<typeof useTranslations>,
+  event: MorphologyEvent,
+) {
+  if (event.code === "action_applied") {
+    return `${t(event.i18nKey)}: ${t(event.params.actionKey)}`;
+  }
+
+  if (event.code === "derivation_applied") {
+    return t(event.i18nKey, {
+      action: t(event.params.actionKey),
+      before: getLocalizedPos(t, event.params.before as PartOfSpeech),
+      after: getLocalizedPos(t, event.params.after as PartOfSpeech),
+    });
+  }
+
+  if (event.code === "phase_change") {
+    return t(event.i18nKey, {
+      before: getLocalizedPhase(t, event.params.before as MorphologicalStateV2["phase"]),
+      after: getLocalizedPhase(t, event.params.after as MorphologicalStateV2["phase"]),
+    });
+  }
+
+  if (event.code === "pos_change") {
+    return t(event.i18nKey, {
+      before: getLocalizedPos(t, event.params.before as PartOfSpeech),
+      after: getLocalizedPos(t, event.params.after as PartOfSpeech),
+    });
+  }
+
+  if (event.code === "lexeme_override_applied") {
+    return `${t(event.i18nKey)}: ${t(event.params.morphemeKey)} -> ${event.params.pattern}`;
+  }
+
+  return t(event.i18nKey, event.params);
+}
+
+function buildAttestationEvent(
+  step: number,
+  action: MorphologicalAction,
+  attestation: MorphologyAttestation,
+  surface: string,
+): MorphologyEvent {
+  return {
+    code: attestation.matched ? "attestation_match_found" : "attestation_match_missing",
+    i18nKey: attestation.matched
+      ? "events.attestationMatchFound"
+      : "events.attestationMatchMissing",
+    params: {
+      word: attestation.wordName ?? surface,
+    },
+    stage: "lexicon",
+    slot: action.slot,
+    morphemeId: `${action.morphemeId}#${step}`,
+  };
+}
+
+function attachAttestationToState(
+  state: MorphologicalStateV2,
+  stepNumber: number,
+  surface: string,
+  attestation: MorphologyAttestation,
+): MorphologicalStateV2 {
+  const existing = state.attestationCache[surface];
+  if (
+    existing?.matched === attestation.matched &&
+    existing?.wordId === attestation.wordId &&
+    existing?.wordName === attestation.wordName
+  ) {
+    return state;
+  }
+
+  return {
+    ...state,
+    attestationCache: {
+      ...state.attestationCache,
+      [surface]: attestation,
+    },
+    history: state.history.map((entry) => {
+      if (entry.step !== stepNumber) {
+        return entry;
+      }
+
+      const filteredEvents = entry.log.events.filter(
+        (event) =>
+          event.code !== "attestation_match_found" &&
+          event.code !== "attestation_match_missing",
+      );
+      const attestationEvent = buildAttestationEvent(
+        stepNumber,
+        entry.action,
+        attestation,
+        surface,
+      );
+
+      return {
+        ...entry,
+        attestation,
+        log: {
+          ...entry.log,
+          events: [...filteredEvents, attestationEvent],
+          explanationArray: [...filteredEvents, attestationEvent].map(
+            (event) => event.i18nKey,
+          ),
+        },
+      };
+    }),
+  };
+}
+
 export default function WordBuilder() {
   const t = useTranslations("WordBuilder");
+  const utils = api.useUtils();
   const initialSample = ROOT_SAMPLES[0];
+  const initialRoot = createRootLexeme(
+    initialSample.surface,
+    initialSample.pos,
+    initialSample.origin,
+    initialSample.mutationMode,
+  );
 
   const [draftSurface, setDraftSurface] = useState(initialSample.surface);
   const [draftPos, setDraftPos] = useState<PartOfSpeech>(initialSample.pos);
@@ -119,59 +320,211 @@ export default function WordBuilder() {
   );
   const [draftMutationMode, setDraftMutationMode] =
     useState<MutationMode>(initialSample.mutationMode);
-  const [activeRoot, setActiveRoot] = useState<RootLexeme>(
-    createRootLexeme(
-      initialSample.surface,
-      initialSample.pos,
-      initialSample.origin,
-      initialSample.mutationMode,
-    ),
+  const [dictionaryQuery, setDictionaryQuery] = useState("");
+  const [selectedDictionaryWord, setSelectedDictionaryWord] =
+    useState<DictionarySuggestion | null>(null);
+  const [selectedDictionaryPos, setSelectedDictionaryPos] =
+    useState<PartOfSpeech | null>(null);
+  const [builderState, setBuilderState] = useState<MorphologicalStateV2>(
+    createBuilderState(initialRoot),
   );
-  const [selectedSuffixIds, setSelectedSuffixIds] = useState<string[]>([]);
 
-  const canStart = draftSurface.trim().length > 0;
+  const debouncedDictionaryQuery = useDebounce(dictionaryQuery, 250);
+  const dictionarySuggestionsQuery = api.search.getWords.useQuery(
+    { query: debouncedDictionaryQuery },
+    { enabled: debouncedDictionaryQuery.trim().length >= 2 },
+  );
+  const selectedDictionaryWordQuery = api.word.getWord.useQuery(
+    {
+      name: selectedDictionaryWord?.name ?? "",
+      skipLogging: true,
+    },
+    { enabled: Boolean(selectedDictionaryWord?.name) },
+  );
 
-  const buildResult = engine.buildWord(activeRoot, selectedSuffixIds);
-  const groupedSuffixes = getGroupedSuffixes(buildResult.availableSuffixes);
+  const dictionaryPosOptions = useMemo(
+    () => extractDictionaryPosOptions(selectedDictionaryWordQuery.data),
+    [selectedDictionaryWordQuery.data],
+  );
+  const dictionaryOrigin = useMemo(
+    () => extractDictionaryOrigin(selectedDictionaryWordQuery.data),
+    [selectedDictionaryWordQuery.data],
+  );
 
-  const startBuilder = () => {
-    if (!canStart) {
+  useEffect(() => {
+    if (!selectedDictionaryWord) {
       return;
     }
 
-    setActiveRoot(
-      createRootLexeme(
-        draftSurface,
-        draftPos,
-        draftOrigin,
-        draftMutationMode,
+    setDraftSurface(selectedDictionaryWord.name);
+    setDraftOrigin(dictionaryOrigin);
+
+    if (dictionaryPosOptions.length === 1) {
+      setSelectedDictionaryPos(dictionaryPosOptions[0]);
+    } else if (
+      selectedDictionaryPos &&
+      !dictionaryPosOptions.includes(selectedDictionaryPos)
+    ) {
+      setSelectedDictionaryPos(null);
+    }
+  }, [
+    dictionaryOrigin,
+    dictionaryPosOptions,
+    selectedDictionaryPos,
+    selectedDictionaryWord,
+  ]);
+
+  useEffect(() => {
+    const pendingAttestations = builderState.history
+      .filter((step) => step.action.kind === "derivational")
+      .map((step) => ({
+        stepNumber: step.step,
+        surface: step.afterState.surface ?? step.log.afterSurface,
+      }))
+      .filter(
+        (item) =>
+          item.surface &&
+          !Object.prototype.hasOwnProperty.call(
+            builderState.attestationCache,
+            item.surface,
+          ),
+      );
+
+    if (pendingAttestations.length === 0) {
+      return;
+    }
+
+    let cancelled = false;
+
+    void (async () => {
+      for (const pending of pendingAttestations) {
+        let attestation: MorphologyAttestation = {
+          matched: false,
+          wordName: pending.surface,
+        };
+
+        try {
+          const result = await utils.word.getWord.fetch({
+            name: pending.surface,
+            skipLogging: true,
+          });
+          const matchedWord = result?.[0]?.word_data;
+
+          if (
+            matchedWord &&
+            matchedWord.word_name.toLocaleLowerCase("tr") ===
+              pending.surface.toLocaleLowerCase("tr")
+          ) {
+            attestation = {
+              matched: true,
+              wordId: matchedWord.word_id,
+              wordName: matchedWord.word_name,
+            };
+          }
+        } catch {
+          attestation = {
+            matched: false,
+            wordName: pending.surface,
+          };
+        }
+
+        if (cancelled) {
+          return;
+        }
+
+        setBuilderState((current) =>
+          attachAttestationToState(
+            current,
+            pending.stepNumber,
+            pending.surface,
+            attestation,
+          ),
+        );
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [builderState.attestationCache, builderState.history, utils.word.getWord]);
+
+  const realization = engine.realize(builderState);
+  const availableActions = engine.getAvailableActions(builderState);
+  const actionSections = useMemo(
+    () => getActionSections(availableActions),
+    [availableActions],
+  );
+  const selectedPos =
+    selectedDictionaryWord && dictionaryPosOptions.length > 0
+      ? dictionaryPosOptions.length === 1
+        ? dictionaryPosOptions[0]
+        : selectedDictionaryPos
+      : draftPos;
+  const canStart = selectedDictionaryWord
+    ? Boolean(selectedPos) && !selectedDictionaryWordQuery.isLoading
+    : draftSurface.trim().length > 0;
+  const currentAttestation = builderState.attestationCache[realization.surface] ?? null;
+
+  const startBuilder = () => {
+    if (!canStart || !selectedPos) {
+      return;
+    }
+
+    const rootSurface = selectedDictionaryWord?.name ?? draftSurface;
+    const rootOrigin = selectedDictionaryWord ? dictionaryOrigin : draftOrigin;
+
+    setBuilderState(
+      createBuilderState(
+        createRootLexeme(
+          rootSurface,
+          selectedPos,
+          rootOrigin,
+          draftMutationMode,
+        ),
       ),
     );
-    setSelectedSuffixIds([]);
+  };
+
+  const clearDictionarySelection = () => {
+    setSelectedDictionaryWord(null);
+    setSelectedDictionaryPos(null);
+    setDictionaryQuery("");
   };
 
   const applySample = (sample: (typeof ROOT_SAMPLES)[number]) => {
+    clearDictionarySelection();
     setDraftSurface(sample.surface);
     setDraftPos(sample.pos);
     setDraftOrigin(sample.origin);
     setDraftMutationMode(sample.mutationMode);
-    setActiveRoot(
-      createRootLexeme(
-        sample.surface,
-        sample.pos,
-        sample.origin,
-        sample.mutationMode,
+    setBuilderState(
+      createBuilderState(
+        createRootLexeme(
+          sample.surface,
+          sample.pos,
+          sample.origin,
+          sample.mutationMode,
+        ),
       ),
     );
-    setSelectedSuffixIds([]);
   };
 
   const undoLastStep = () => {
-    setSelectedSuffixIds((current) => current.slice(0, -1));
+    setBuilderState((current) => engine.undoAction(current));
   };
 
   const resetSteps = () => {
-    setSelectedSuffixIds([]);
+    setBuilderState((current) =>
+      createBuilderState({
+        surface: current.lexeme.rootSurface,
+        pos: current.lexeme.pos,
+        origin: current.lexeme.origin,
+        forceConsonantMutation: current.lexeme.mutationPolicy === "always",
+        allowConsonantMutation:
+          current.lexeme.mutationPolicy === "never" ? false : undefined,
+        mutationOverrides: current.lexeme.mutationOverrides,
+      }),
+    );
   };
 
   return (
@@ -269,15 +622,90 @@ export default function WordBuilder() {
               <p className="text-sm text-foreground/65">{t("rootSetupHint")}</p>
             </div>
 
+            <Autocomplete
+              label={t("dictionarySearchLabel")}
+              placeholder={t("dictionarySearchPlaceholder")}
+              inputValue={dictionaryQuery}
+              onInputChange={setDictionaryQuery}
+              selectedKey={selectedDictionaryWord ? String(selectedDictionaryWord.id) : null}
+              onSelectionChange={(key) => {
+                const nextWord =
+                  dictionarySuggestionsQuery.data?.find(
+                    (item) => String(item.id) === String(key),
+                  ) ?? null;
+
+                setSelectedDictionaryWord(nextWord);
+                setSelectedDictionaryPos(null);
+                setDictionaryQuery(nextWord?.name ?? "");
+              }}
+              isLoading={
+                dictionarySuggestionsQuery.isLoading ||
+                dictionarySuggestionsQuery.isFetching
+              }
+              defaultItems={dictionarySuggestionsQuery.data ?? []}
+              variant="bordered"
+            >
+              {(item) => (
+                <AutocompleteItem key={String(item.id)} textValue={item.name}>
+                  {item.name}
+                </AutocompleteItem>
+              )}
+            </Autocomplete>
+
+            {selectedDictionaryWord ? (
+              <div className="rounded-2xl border border-primary/20 bg-primary/8 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-semibold text-foreground">
+                      {t("dictionarySelectionActive")}
+                    </div>
+                    <div className="text-sm text-foreground/70">
+                      {selectedDictionaryWord.name}
+                    </div>
+                  </div>
+                  <Button variant="flat" size="sm" onPress={clearDictionarySelection}>
+                    {t("clearDictionarySelection")}
+                  </Button>
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {dictionaryPosOptions.length > 0 ? (
+                    dictionaryPosOptions.map((pos) => (
+                      <Chip key={pos} variant="flat">
+                        {getLocalizedPos(t, pos)}
+                      </Chip>
+                    ))
+                  ) : (
+                    <Chip variant="flat">{t("dictionaryPosLoading")}</Chip>
+                  )}
+                </div>
+              </div>
+            ) : null}
+
             <Input
               label={t("rootLabel")}
               placeholder={t("rootPlaceholder")}
               value={draftSurface}
               onValueChange={setDraftSurface}
               variant="bordered"
+              isDisabled={Boolean(selectedDictionaryWord)}
             />
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            {selectedDictionaryWord && dictionaryPosOptions.length > 1 ? (
+              <Select
+                label={t("dictionaryPosLabel")}
+                placeholder={t("dictionaryPosPlaceholder")}
+                selectedKeys={selectedDictionaryPos ? [selectedDictionaryPos] : []}
+                onSelectionChange={(keys) => {
+                  const value = Array.from(keys)[0] as PartOfSpeech | undefined;
+                  setSelectedDictionaryPos(value ?? null);
+                }}
+              >
+                {dictionaryPosOptions.map((pos) => (
+                  <SelectItem key={pos}>{getLocalizedPos(t, pos)}</SelectItem>
+                ))}
+              </Select>
+            ) : (
               <Select
                 label={t("posLabel")}
                 selectedKeys={[draftPos]}
@@ -287,11 +715,20 @@ export default function WordBuilder() {
                     setDraftPos(value);
                   }
                 }}
+                isDisabled={Boolean(selectedDictionaryWord)}
               >
                 <SelectItem key="Noun">{t("posNoun")}</SelectItem>
                 <SelectItem key="Verb">{t("posVerb")}</SelectItem>
               </Select>
+            )}
 
+            {selectedDictionaryWord && dictionaryPosOptions.length > 1 ? (
+              <p className="rounded-2xl border border-border/60 bg-background/60 px-4 py-3 text-sm leading-6 text-foreground/65">
+                {t("dictionaryPosRequired")}
+              </p>
+            ) : null}
+
+            <div className="grid gap-4 sm:grid-cols-2">
               <Select
                 label={t("originLabel")}
                 selectedKeys={[draftOrigin]}
@@ -305,22 +742,22 @@ export default function WordBuilder() {
                 <SelectItem key="native">{t("originNative")}</SelectItem>
                 <SelectItem key="foreign">{t("originForeign")}</SelectItem>
               </Select>
-            </div>
 
-            <Select
-              label={t("mutationLabel")}
-              selectedKeys={[draftMutationMode]}
-              onSelectionChange={(keys) => {
-                const value = Array.from(keys)[0] as MutationMode | undefined;
-                if (value) {
-                  setDraftMutationMode(value);
-                }
-              }}
-            >
-              <SelectItem key="auto">{t("mutationAuto")}</SelectItem>
-              <SelectItem key="always">{t("mutationAlways")}</SelectItem>
-              <SelectItem key="never">{t("mutationNever")}</SelectItem>
-            </Select>
+              <Select
+                label={t("mutationLabel")}
+                selectedKeys={[draftMutationMode]}
+                onSelectionChange={(keys) => {
+                  const value = Array.from(keys)[0] as MutationMode | undefined;
+                  if (value) {
+                    setDraftMutationMode(value);
+                  }
+                }}
+              >
+                <SelectItem key="auto">{t("mutationAuto")}</SelectItem>
+                <SelectItem key="always">{t("mutationAlways")}</SelectItem>
+                <SelectItem key="never">{t("mutationNever")}</SelectItem>
+              </Select>
+            </div>
 
             <p className="rounded-2xl border border-border/60 bg-background/60 px-4 py-3 text-sm leading-6 text-foreground/65">
               {t("mutationHint")}
@@ -352,7 +789,7 @@ export default function WordBuilder() {
                     variant="flat"
                     size="sm"
                     onPress={undoLastStep}
-                    isDisabled={selectedSuffixIds.length === 0}
+                    isDisabled={builderState.history.length === 0}
                     startContent={<CornerDownLeft className="h-4 w-4" />}
                   >
                     {t("undoLast")}
@@ -361,7 +798,7 @@ export default function WordBuilder() {
                     variant="flat"
                     size="sm"
                     onPress={resetSteps}
-                    isDisabled={selectedSuffixIds.length === 0}
+                    isDisabled={builderState.history.length === 0}
                     startContent={<RotateCcw className="h-4 w-4" />}
                   >
                     {t("resetSteps")}
@@ -374,23 +811,38 @@ export default function WordBuilder() {
                   {t("currentWord")}
                 </p>
                 <div className="text-3xl font-semibold tracking-tight sm:text-4xl">
-                  {buildResult.finalSurface}
+                  {realization.surface}
                 </div>
+                {currentAttestation?.matched ? (
+                  <div className="mt-3">
+                    <NextIntlLink
+                      href={{
+                        pathname: "/search/[word]",
+                        params: {
+                          word: currentAttestation.wordName ?? realization.surface,
+                        },
+                      }}
+                      className="inline-flex items-center rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-sm text-primary transition-colors hover:bg-primary/12"
+                    >
+                      {t("attestedBadge")}
+                    </NextIntlLink>
+                  </div>
+                ) : null}
               </div>
 
               <div className="flex flex-wrap gap-2">
                 <Chip color="primary" variant="flat">
-                  {t("currentPos")}: {getLocalizedPos(t, buildResult.finalPos)}
+                  {t("currentPos")}: {getLocalizedPos(t, builderState.currentPos)}
                 </Chip>
                 <Chip variant="flat">
-                  {t("currentPhase")}: {getLocalizedPhase(t, buildResult.finalState.phase)}
+                  {t("currentPhase")}: {getLocalizedPhase(t, builderState.phase)}
                 </Chip>
                 <Chip variant="flat">
-                  {t("stepCount")}: {buildResult.steps.length}
+                  {t("stepCount")}: {builderState.history.length}
                 </Chip>
               </div>
 
-              {buildResult.finalState.phase === "inflection" ? (
+              {builderState.phase === "inflection" ? (
                 <div className="rounded-2xl border border-primary/20 bg-primary/8 px-4 py-3 text-sm text-foreground/80">
                   {t("lockedInflection")}
                 </div>
@@ -400,18 +852,23 @@ export default function WordBuilder() {
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="font-semibold">{t("selectedChain")}</h3>
                   <span className="text-xs uppercase tracking-[0.16em] text-foreground/45">
-                    {buildResult.availableSuffixes.length} {t("availableNow")}
+                    {availableActions.length} {t("availableNow")}
                   </span>
                 </div>
                 <div className="flex min-h-16 flex-wrap gap-2 rounded-2xl border border-dashed border-border/70 bg-background/55 p-3">
-                  {buildResult.steps.length > 0 ? (
-                    buildResult.steps.map((step) => (
+                  {builderState.history.length > 0 ? (
+                    builderState.history.map((step) => (
                       <Badge
                         key={step.step}
                         variant="outline"
-                        className="rounded-full border-primary/20 bg-primary/8 px-3 py-1 text-sm text-primary"
+                        className={cn(
+                          "rounded-full px-3 py-1 text-sm",
+                          step.action.kind === "derivational"
+                            ? "border-primary/20 bg-primary/8 text-primary"
+                            : "border-border/70 bg-background/70 text-foreground/80",
+                        )}
                       >
-                        {step.suffix.label ?? step.suffix.archiphoneme}
+                        {t(step.action.labelKey)}
                       </Badge>
                     ))
                   ) : (
@@ -429,54 +886,125 @@ export default function WordBuilder() {
                 <p className="text-sm text-foreground/65">{t("availableSuffixesHint")}</p>
               </div>
 
-              <div className="space-y-4">
-                {groupedSuffixes.length > 0 ? (
-                  groupedSuffixes.map(([group, suffixes]) => (
-                    <div key={group} className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="rounded-full px-3 py-1">
-                          {t(`groups.${group}`)}
-                        </Badge>
-                      </div>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        {suffixes.map((suffix) => (
-                          <button
-                            key={suffix.id}
-                            type="button"
-                            onClick={() =>
-                              setSelectedSuffixIds((current) => [...current, suffix.id])
-                            }
-                            className="group rounded-2xl border border-border/70 bg-background/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/6"
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div>
-                                <div className="text-base font-semibold text-foreground">
-                                  {suffix.label ?? suffix.archiphoneme}
-                                </div>
-                                <div className="mt-1 font-mono text-xs text-foreground/50">
-                                  {suffix.archiphoneme}
-                                </div>
+              <div className="space-y-6">
+                {actionSections.length > 0 ? (
+                  <>
+                    {actionSections.some((section) => section.kind === "derivational") ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="rounded-full px-3 py-1">
+                            {t("availableDerivations")}
+                          </Badge>
+                        </div>
+                        {actionSections
+                          .filter((section) => section.kind === "derivational")
+                          .map((section) => (
+                            <div key={section.key} className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="rounded-full px-3 py-1">
+                                  {t(section.titleKey)}
+                                </Badge>
                               </div>
-                              <ArrowRight className="mt-1 h-4 w-4 text-foreground/35 transition-colors group-hover:text-primary" />
+                              <div className="grid gap-3 sm:grid-cols-2">
+                                {section.actions.map((action) => (
+                                  <button
+                                    key={action.id}
+                                    type="button"
+                                    onClick={() =>
+                                      setBuilderState((current) =>
+                                        engine.applyAction(current, action.id),
+                                      )
+                                    }
+                                    className="group rounded-2xl border border-border/70 bg-background/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/6"
+                                  >
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div>
+                                        <div className="text-base font-semibold text-foreground">
+                                          {t(action.labelKey)}
+                                        </div>
+                                        <div className="mt-1 font-mono text-xs text-foreground/50">
+                                          {action.preview}
+                                        </div>
+                                      </div>
+                                      <ArrowRight className="mt-1 h-4 w-4 text-foreground/35 transition-colors group-hover:text-primary" />
+                                    </div>
+                                    <div className="mt-4 flex flex-wrap gap-2 text-xs text-foreground/60">
+                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
+                                        {getLocalizedPos(t, action.sourcePos)}
+                                      </span>
+                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
+                                        {getLocalizedPos(t, action.targetPos)}
+                                      </span>
+                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
+                                        {t("phaseDerivation")}
+                                      </span>
+                                    </div>
+                                  </button>
+                                ))}
+                              </div>
                             </div>
-                            <div className="mt-4 flex flex-wrap gap-2 text-xs text-foreground/60">
-                              <span className="rounded-full border border-border/70 px-2.5 py-1">
-                                {getLocalizedPos(t, suffix.sourcePos)}
-                              </span>
-                              <span className="rounded-full border border-border/70 px-2.5 py-1">
-                                {getLocalizedPos(t, suffix.targetPos)}
-                              </span>
-                              <span className="rounded-full border border-border/70 px-2.5 py-1">
-                                {suffix.kind === "inflectional"
-                                  ? t("phaseInflection")
-                                  : t("phaseDerivation")}
-                              </span>
-                            </div>
-                          </button>
-                        ))}
+                          ))}
                       </div>
-                    </div>
-                  ))
+                    ) : null}
+
+                    {actionSections.some((section) => section.kind === "inflectional") ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="rounded-full px-3 py-1">
+                            {t("availableInflections")}
+                          </Badge>
+                        </div>
+                        {actionSections
+                          .filter((section) => section.kind === "inflectional")
+                          .map((section) => (
+                            <div key={section.key} className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="rounded-full px-3 py-1">
+                                  {t(section.titleKey)}
+                                </Badge>
+                              </div>
+                              <div className="grid gap-3 sm:grid-cols-2">
+                                {section.actions.map((action) => (
+                                  <button
+                                    key={action.id}
+                                    type="button"
+                                    onClick={() =>
+                                      setBuilderState((current) =>
+                                        engine.applyAction(current, action.id),
+                                      )
+                                    }
+                                    className="group rounded-2xl border border-border/70 bg-background/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/6"
+                                  >
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div>
+                                        <div className="text-base font-semibold text-foreground">
+                                          {t(action.labelKey)}
+                                        </div>
+                                        <div className="mt-1 font-mono text-xs text-foreground/50">
+                                          {action.preview}
+                                        </div>
+                                      </div>
+                                      <ArrowRight className="mt-1 h-4 w-4 text-foreground/35 transition-colors group-hover:text-primary" />
+                                    </div>
+                                    <div className="mt-4 flex flex-wrap gap-2 text-xs text-foreground/60">
+                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
+                                        {getLocalizedPos(t, builderState.currentPos)}
+                                      </span>
+                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
+                                        {t(section.titleKey)}
+                                      </span>
+                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
+                                        {t("phaseInflection")}
+                                      </span>
+                                    </div>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    ) : null}
+                  </>
                 ) : (
                   <div className="rounded-2xl border border-dashed border-border/70 bg-background/55 px-4 py-5 text-sm text-foreground/55">
                     {t("noAvailableSuffixes")}
@@ -495,8 +1023,8 @@ export default function WordBuilder() {
             </div>
 
             <div className="space-y-4">
-              {buildResult.steps.length > 0 ? (
-                buildResult.steps.map((step) => (
+              {builderState.history.length > 0 ? (
+                builderState.history.map((step) => (
                   <div
                     key={step.step}
                     className="rounded-3xl border border-border/70 bg-background/60 p-6 shadow-[0_10px_35px_-28px_rgba(15,23,42,0.9)]"
@@ -507,14 +1035,29 @@ export default function WordBuilder() {
                           {t("stepLabel", { step: step.step })}
                         </div>
                         <div className="mt-1 flex items-center gap-2 text-lg font-semibold">
-                          <span>{step.beforeState.surface}</span>
+                          <span>{step.log.beforeSurface}</span>
                           <ArrowRight className="h-4 w-4 text-foreground/45" />
-                          <span>{step.afterState.surface}</span>
+                          <span>{step.log.afterSurface}</span>
                         </div>
                       </div>
-                      <Badge className="rounded-full border-primary/20 bg-primary/8 px-3 py-1 text-primary" variant="outline">
-                        {step.suffix.label ?? step.suffix.archiphoneme}
-                      </Badge>
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        {step.attestation?.matched ? (
+                          <NextIntlLink
+                            href={{
+                              pathname: "/search/[word]",
+                              params: {
+                                word: step.attestation.wordName ?? step.log.afterSurface,
+                              },
+                            }}
+                            className="inline-flex items-center rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-sm text-primary transition-colors hover:bg-primary/12"
+                          >
+                            {t("attestedBadge")}
+                          </NextIntlLink>
+                        ) : null}
+                        <Badge className="rounded-full border-primary/20 bg-primary/8 px-3 py-1 text-primary" variant="outline">
+                          {t(step.action.labelKey)}
+                        </Badge>
+                      </div>
                     </div>
 
                     <div className="mt-5 grid gap-3 md:grid-cols-2">
@@ -538,13 +1081,15 @@ export default function WordBuilder() {
 
                     <div className="mt-5 flex flex-wrap gap-2">
                       <Chip variant="flat">
-                        {getLocalizedPos(t, step.beforeState.pos)} <ArrowRight className="mx-1 inline h-3.5 w-3.5" /> {getLocalizedPos(t, step.afterState.pos)}
+                        {getLocalizedPos(t, step.beforeState.currentPos)}{" "}
+                        <ArrowRight className="mx-1 inline h-3.5 w-3.5" />{" "}
+                        {getLocalizedPos(t, step.afterState.currentPos)}
                       </Chip>
                       <Chip variant="flat">
-                        {t("surfaceSuffix")}: {step.surfaceSuffix}
+                        {t("surfaceSuffix")}: {step.surfaceSuffix || t("zeroMorpheme")}
                       </Chip>
                       <Chip variant="flat">
-                        {t("archiphoneme")}: {step.suffix.archiphoneme}
+                        {t("archiphoneme")}: {step.log.suffixArchiphoneme ?? step.action.preview}
                       </Chip>
                     </div>
 
@@ -553,18 +1098,17 @@ export default function WordBuilder() {
                         {t("appliedRules")}
                       </div>
                       <ul className="space-y-2">
-                        {step.log.explanationArray.map((message, index) => (
+                        {step.log.events.map((event, index) => (
                           <li
-                            key={`${step.step}-${index}`}
+                            key={`${step.step}-${event.code}-${index}`}
                             className={cn(
                               "rounded-2xl border border-border/65 px-4 py-3 text-sm leading-6 text-foreground/75",
-                              index === step.log.explanationArray.length - 1 &&
-                                message.includes("Kelime türü")
+                              index === 0
                                 ? "border-primary/20 bg-primary/8 text-foreground"
                                 : "bg-background/55",
                             )}
                           >
-                            {message}
+                            {getEventMessage(t, event)}
                           </li>
                         ))}
                       </ul>

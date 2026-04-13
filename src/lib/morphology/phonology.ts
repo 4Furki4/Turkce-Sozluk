@@ -2,7 +2,9 @@ import {
   type DiffSegment,
   type HighlightDiff,
   type MorphologicalState,
-  type PhonologyEvent,
+  type MorphologyEvent,
+  type MorphemeSlot,
+  type RootLexeme,
   type RuleId,
   type SuffixDefinition,
 } from "./types";
@@ -17,6 +19,40 @@ const MUTATION_MAP = {
   t: "d",
   k: "ğ",
 } as const;
+
+type PhonologyState = Pick<
+  RootLexeme,
+  | "surface"
+  | "origin"
+  | "allowConsonantMutation"
+  | "forceConsonantMutation"
+  | "mutationOverrides"
+>;
+
+interface EventContext {
+  slot?: MorphemeSlot;
+  morphemeId?: string;
+}
+
+function createEvent(
+  code: MorphologyEvent["code"],
+  i18nKey: string,
+  params: Record<string, string>,
+  context: EventContext,
+  before?: string,
+  after?: string,
+): MorphologyEvent {
+  return {
+    code,
+    i18nKey,
+    params,
+    stage: "realization",
+    before,
+    after,
+    slot: context.slot,
+    morphemeId: context.morphemeId,
+  };
+}
 
 function stripArchiphonemeDelimiters(value: string): string {
   return value.replaceAll("/", "");
@@ -70,31 +106,40 @@ export function resolveFourWayHarmony(
 function applyHarmony(
   stem: string,
   archiphoneme: string,
-): { surface: string; events: PhonologyEvent[] } {
-  const events: PhonologyEvent[] = [];
+  context: EventContext,
+): { surface: string; events: MorphologyEvent[] } {
+  const events: MorphologyEvent[] = [];
   const lastVowel = findLastVowel(stem);
   let surface = archiphoneme;
 
   if (surface.includes("I")) {
     const resolved = resolveFourWayHarmony(lastVowel);
     surface = surface.replaceAll("I", resolved);
-    events.push({
-      type: "vowel_harmony",
-      message: `4 yönlü ünlü uyumu uygulandı: /I/ -> ${resolved}.`,
-      before: "I",
-      after: resolved,
-    });
+    events.push(
+      createEvent(
+        "vowel_harmony_4_way",
+        "events.vowelHarmonyFourWay",
+        { archiphoneme: "I", resolved },
+        context,
+        "I",
+        resolved,
+      ),
+    );
   }
 
   if (surface.includes("A") || surface.includes("E")) {
     const resolved = resolveTwoWayHarmony(lastVowel);
     surface = surface.replaceAll("A", resolved).replaceAll("E", resolved);
-    events.push({
-      type: "vowel_harmony",
-      message: `2 yönlü ünlü uyumu uygulandı: /A/ -> ${resolved}.`,
-      before: "A",
-      after: resolved,
-    });
+    events.push(
+      createEvent(
+        "vowel_harmony_2_way",
+        "events.vowelHarmonyTwoWay",
+        { archiphoneme: "A", resolved },
+        context,
+        "A",
+        resolved,
+      ),
+    );
   }
 
   return { surface, events };
@@ -104,7 +149,8 @@ function applyConsonantAssimilation(
   stem: string,
   suffixSurface: string,
   rules: RuleId[],
-): { surface: string; event?: PhonologyEvent } {
+  context: EventContext,
+): { surface: string; event?: MorphologyEvent } {
   if (!rules.includes("consonant_assimilation") || suffixSurface.length === 0) {
     return { surface: suffixSurface };
   }
@@ -131,12 +177,14 @@ function applyConsonantAssimilation(
 
   return {
     surface: `${replacement}${suffixSurface.slice(1)}`,
-    event: {
-      type: "consonant_assimilation",
-      message: `Ünsüz sertleşmesi uygulandı: ${firstLetter} -> ${replacement}.`,
-      before: firstLetter,
-      after: replacement,
-    },
+    event: createEvent(
+      "consonant_assimilation",
+      "events.consonantAssimilation",
+      { before: firstLetter, after: replacement },
+      context,
+      firstLetter,
+      replacement,
+    ),
   };
 }
 
@@ -144,7 +192,8 @@ function applyBufferLetter(
   stem: string,
   suffixSurface: string,
   rules: RuleId[],
-): { surface: string; event?: PhonologyEvent } {
+  context: EventContext,
+): { surface: string; event?: MorphologyEvent } {
   if (!endsWithVowel(stem) || suffixSurface.length === 0 || !endsWithVowel(suffixSurface[0])) {
     return { surface: suffixSurface };
   }
@@ -176,17 +225,19 @@ function applyBufferLetter(
 
   return {
     surface: `${bufferLetter}${suffixSurface}`,
-    event: {
-      type: "buffer_letter",
-      message: `Tampon harf eklendi: ${bufferLetter}.`,
-      before: "",
-      after: bufferLetter,
-    },
+    event: createEvent(
+      "buffer_letter",
+      "events.bufferLetter",
+      { letter: bufferLetter },
+      context,
+      "",
+      bufferLetter,
+    ),
   };
 }
 
 function shouldApplyConsonantMutation(
-  state: MorphologicalState,
+  state: PhonologyState,
   suffixSurface: string,
   rules: RuleId[],
 ): boolean {
@@ -219,10 +270,11 @@ function shouldApplyConsonantMutation(
 }
 
 function applyConsonantMutation(
-  state: MorphologicalState,
+  state: PhonologyState,
   suffixSurface: string,
   rules: RuleId[],
-): { stem: string; event?: PhonologyEvent } {
+  context: EventContext,
+): { stem: string; event?: MorphologyEvent } {
   if (!shouldApplyConsonantMutation(state, suffixSurface, rules)) {
     return { stem: state.surface };
   }
@@ -243,29 +295,34 @@ function applyConsonantMutation(
 
   return {
     stem: letters.join(""),
-    event: {
-      type: "consonant_mutation",
-      message: `Ünsüz yumuşaması uygulandı: ${originalLastLetter} -> ${replacement}.`,
-      before: originalLastLetter,
-      after: replacement,
-    },
+    event: createEvent(
+      "consonant_mutation",
+      "events.consonantMutation",
+      { before: originalLastLetter, after: replacement },
+      context,
+      originalLastLetter,
+      replacement,
+    ),
   };
 }
 
-export function realizeSuffix(
-  state: MorphologicalState,
-  suffix: SuffixDefinition,
-): { stem: string; surfaceSuffix: string; events: PhonologyEvent[] } {
-  const rawArchiphoneme = stripArchiphonemeDelimiters(suffix.archiphoneme);
-  const events: PhonologyEvent[] = [];
+export function realizeAffix(
+  state: PhonologyState,
+  pattern: string,
+  rules: RuleId[],
+  context: EventContext = {},
+): { stem: string; surfaceSuffix: string; events: MorphologyEvent[] } {
+  const rawArchiphoneme = stripArchiphonemeDelimiters(pattern);
+  const events: MorphologyEvent[] = [];
 
-  const harmonyResult = applyHarmony(state.surface, rawArchiphoneme);
+  const harmonyResult = applyHarmony(state.surface, rawArchiphoneme, context);
   events.push(...harmonyResult.events);
 
   const assimilationResult = applyConsonantAssimilation(
     state.surface,
     harmonyResult.surface,
-    suffix.rules,
+    rules,
+    context,
   );
   if (assimilationResult.event) {
     events.push(assimilationResult.event);
@@ -274,7 +331,8 @@ export function realizeSuffix(
   const bufferedResult = applyBufferLetter(
     state.surface,
     assimilationResult.surface,
-    suffix.rules,
+    rules,
+    context,
   );
   if (bufferedResult.event) {
     events.push(bufferedResult.event);
@@ -283,7 +341,8 @@ export function realizeSuffix(
   const mutationResult = applyConsonantMutation(
     state,
     bufferedResult.surface,
-    suffix.rules,
+    rules,
+    context,
   );
   if (mutationResult.event) {
     events.push(mutationResult.event);
@@ -294,6 +353,18 @@ export function realizeSuffix(
     surfaceSuffix: bufferedResult.surface.toLocaleLowerCase("tr"),
     events,
   };
+}
+
+export function realizeSuffix(
+  state: MorphologicalState,
+  suffix: SuffixDefinition,
+): { stem: string; surfaceSuffix: string; events: MorphologyEvent[] } {
+  return realizeAffix(
+    state,
+    suffix.archiphoneme,
+    suffix.rules,
+    { morphemeId: suffix.id },
+  );
 }
 
 export function buildHighlightDiff(
@@ -352,4 +423,3 @@ export function buildHighlightDiff(
     segments,
   };
 }
-
