@@ -1,9 +1,9 @@
 import {
+  type MorphCategory,
   type MorphemeDefinition,
   type MorphemeSlot,
   type PartOfSpeech,
   type RuleId,
-  type SuffixKind,
 } from "./types";
 
 type MorphemeSeed = {
@@ -23,6 +23,7 @@ function createInflectionMorpheme(
     category: MorphemeDefinition["category"];
     slot: MorphemeSlot;
     pos: PartOfSpeech;
+    sourceCategories?: MorphCategory[];
     group: string;
   },
 ): MorphemeDefinition {
@@ -33,6 +34,12 @@ function createInflectionMorpheme(
     slot: base.slot,
     sourcePos: base.pos,
     targetPos: base.pos,
+    sourceCategories:
+      base.sourceCategories ??
+      (base.pos === "Noun"
+        ? ["Noun", "VerbalNoun", "Participle"]
+        : ["Verb"]),
+    targetCategory: base.pos as MorphCategory,
     group: base.group,
     labelKey: base.labelKey,
     preview: base.preview,
@@ -49,6 +56,8 @@ function createDerivationalMorpheme(
   base: MorphemeSeed & {
     sourcePos: PartOfSpeech;
     targetPos: PartOfSpeech;
+    sourceCategories?: MorphCategory[];
+    targetCategory?: MorphCategory;
     group: string;
   },
 ): MorphemeDefinition {
@@ -59,6 +68,36 @@ function createDerivationalMorpheme(
     slot: "derivation",
     sourcePos: base.sourcePos,
     targetPos: base.targetPos,
+    sourceCategories: base.sourceCategories ?? [base.sourcePos as MorphCategory],
+    targetCategory: base.targetCategory ?? (base.targetPos as MorphCategory),
+    group: base.group,
+    labelKey: base.labelKey,
+    preview: base.preview,
+    legacySuffixId: base.legacySuffixId,
+    requires: base.requires,
+    blocks: base.blocks,
+    realizationPattern: base.realizationPattern,
+    phonologyTriggers: base.phonologyTriggers ?? [],
+    setsFeatures: {},
+  };
+}
+
+function createNonfiniteMorpheme(
+  base: MorphemeSeed & {
+    targetPos: PartOfSpeech;
+    targetCategory: MorphCategory;
+    group: string;
+  },
+): MorphemeDefinition {
+  return {
+    id: base.id,
+    kind: "nonfinite",
+    category: "nonfinite",
+    slot: "verb_nonfinite",
+    sourcePos: "Verb",
+    targetPos: base.targetPos,
+    sourceCategories: ["Verb"],
+    targetCategory: base.targetCategory,
     group: base.group,
     labelKey: base.labelKey,
     preview: base.preview,
@@ -276,6 +315,91 @@ export const MORPHEME_CATALOG: MorphemeDefinition[] = [
     preview: "-Iş",
     legacySuffixId: "verb.voice.Iş",
     realizationPattern: "/Iş/",
+  }),
+  createNonfiniteMorpheme({
+    id: "verb.nonfinite.verbalNoun.mA",
+    targetPos: "Noun",
+    targetCategory: "VerbalNoun",
+    group: "VerbalNoun",
+    labelKey: "actions.nonfinite.verbalNoun.mA",
+    preview: "-mA",
+    realizationPattern: "/mA/",
+  }),
+  createNonfiniteMorpheme({
+    id: "verb.nonfinite.verbalNoun.mAk",
+    targetPos: "Noun",
+    targetCategory: "VerbalNoun",
+    group: "VerbalNoun",
+    labelKey: "actions.nonfinite.verbalNoun.mAk",
+    preview: "-mAk",
+    realizationPattern: "/mAk/",
+  }),
+  createNonfiniteMorpheme({
+    id: "verb.nonfinite.verbalNoun.Iş",
+    targetPos: "Noun",
+    targetCategory: "VerbalNoun",
+    group: "VerbalNoun",
+    labelKey: "actions.nonfinite.verbalNoun.Iş",
+    preview: "-Iş",
+    realizationPattern: "/Iş/",
+  }),
+  createNonfiniteMorpheme({
+    id: "verb.nonfinite.participle.An",
+    targetPos: "Noun",
+    targetCategory: "Participle",
+    group: "Participle",
+    labelKey: "actions.nonfinite.participle.An",
+    preview: "-An",
+    realizationPattern: "/An/",
+  }),
+  createNonfiniteMorpheme({
+    id: "verb.nonfinite.participle.mIş",
+    targetPos: "Noun",
+    targetCategory: "Participle",
+    group: "Participle",
+    labelKey: "actions.nonfinite.participle.mIş",
+    preview: "-mIş",
+    realizationPattern: "/mIş/",
+  }),
+  createNonfiniteMorpheme({
+    id: "verb.nonfinite.participle.AcAk",
+    targetPos: "Noun",
+    targetCategory: "Participle",
+    group: "Participle",
+    labelKey: "actions.nonfinite.participle.AcAk",
+    preview: "-(y)AcAk",
+    realizationPattern: "/AcAk/",
+    phonologyTriggers: ["buffer_y"],
+  }),
+  createNonfiniteMorpheme({
+    id: "verb.nonfinite.converb.Ip",
+    targetPos: "Verb",
+    targetCategory: "Converb",
+    group: "Converb",
+    labelKey: "actions.nonfinite.converb.Ip",
+    preview: "-(y)Ip",
+    realizationPattern: "/Ip/",
+    phonologyTriggers: ["buffer_y"],
+  }),
+  createNonfiniteMorpheme({
+    id: "verb.nonfinite.converb.IncA",
+    targetPos: "Verb",
+    targetCategory: "Converb",
+    group: "Converb",
+    labelKey: "actions.nonfinite.converb.IncA",
+    preview: "-(y)IncA",
+    realizationPattern: "/IncA/",
+    phonologyTriggers: ["buffer_y"],
+  }),
+  createNonfiniteMorpheme({
+    id: "verb.nonfinite.converb.ArAk",
+    targetPos: "Verb",
+    targetCategory: "Converb",
+    group: "Converb",
+    labelKey: "actions.nonfinite.converb.ArAk",
+    preview: "-(y)ArAk",
+    realizationPattern: "/ArAk/",
+    phonologyTriggers: ["buffer_y"],
   }),
   createInflectionMorpheme({
     id: "noun.number.pl",

@@ -19,6 +19,9 @@ describe("TurkishMorphologyEngine V2 core", () => {
     expect(actions.some((action) => action.slot === "noun_possessive")).toBe(true);
     expect(actions.some((action) => action.slot === "noun_case")).toBe(true);
     expect(actions.some((action) => action.kind === "derivational")).toBe(true);
+    expect(state.currentCategory).toBe("Noun");
+    expect(state.continuation.allowDerivation).toBe(true);
+    expect(state.continuation.allowNominalInflection).toBe(true);
   });
 
   it("closes earlier noun slots after choosing a later slot", () => {
@@ -47,6 +50,9 @@ describe("TurkishMorphologyEngine V2 core", () => {
     expect(actions.some((action) => action.slot === "verb_polarity")).toBe(true);
     expect(actions.some((action) => action.slot === "verb_tam")).toBe(true);
     expect(actions.some((action) => action.slot === "verb_agreement")).toBe(false);
+    expect(state.currentCategory).toBe("Verb");
+    expect(state.continuation.allowAnalyticConstructions).toBe(true);
+    expect(state.continuation.allowFiniteVerbInflection).toBe(true);
   });
 
   it("builds a negative progressive first-person singular verb chain", () => {
@@ -150,7 +156,10 @@ describe("TurkishMorphologyEngine V2 core", () => {
     state = engine.applyAction(state, "noun.deriv.lAş");
 
     expect(state.currentPos).toBe("Verb");
+    expect(state.currentCategory).toBe("Verb");
     expect(state.phase).toBe("derivation");
+    expect(state.continuation.allowDerivation).toBe(true);
+    expect(state.continuation.allowFiniteVerbInflection).toBe(true);
     expect(engine.realize(state).surface).toBe("kitaplaş");
     expect(
       engine.getAvailableActions(state).some((action) => action.id === "verb.tam.past"),
@@ -172,8 +181,10 @@ describe("TurkishMorphologyEngine V2 core", () => {
     state = engine.applyAction(state, "verb.deriv.mA");
 
     expect(state.currentPos).toBe("Noun");
+    expect(state.currentCategory).toBe("Noun");
     expect(state.phase).toBe("derivation");
     expect(state.features.case).toBe("nom");
+    expect(state.continuation.allowNominalInflection).toBe(true);
     expect(engine.realize(state).surface).toBe("kitaplaşma");
     expect(
       engine.getAvailableActions(state).some((action) => action.id === "noun.case.loc"),
@@ -192,6 +203,9 @@ describe("TurkishMorphologyEngine V2 core", () => {
     state = engine.applyAction(state, "verb.tam.past");
 
     expect(state.phase).toBe("inflection");
+    expect(state.currentCategory).toBe("Verb");
+    expect(state.continuation.allowDerivation).toBe(false);
+    expect(state.continuation.allowAnalyticConstructions).toBe(false);
     expect(
       engine.getAvailableActions(state).some((action) => action.kind === "derivational"),
     ).toBe(false);
@@ -209,9 +223,67 @@ describe("TurkishMorphologyEngine V2 core", () => {
     state = engine.applyAction(state, "verb.deriv.Im");
 
     expect(state.currentPos).toBe("Noun");
+    expect(state.currentCategory).toBe("Noun");
     expect(engine.realize(state).surface).toBe("eğim");
     expect(
       engine.getAvailableActions(state).some((action) => action.id === "noun.case.acc"),
     ).toBe(true);
+  });
+
+  it("supports verbal noun forms and opens nominal inflection afterwards", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "yaz",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.nonfinite.verbalNoun.mA");
+
+    expect(state.currentCategory).toBe("VerbalNoun");
+    expect(state.currentPos).toBe("Noun");
+    expect(state.phase).toBe("inflection");
+    expect(state.continuation.allowNominalInflection).toBe(true);
+    expect(state.continuation.allowDerivation).toBe(false);
+    expect(engine.realize(state).surface).toBe("yazma");
+    expect(
+      engine.getAvailableActions(state).some((action) => action.id === "noun.case.loc"),
+    ).toBe(true);
+  });
+
+  it("supports participle forms and keeps them on the nominal side", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "gel",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.nonfinite.participle.An");
+
+    expect(state.currentCategory).toBe("Participle");
+    expect(state.currentPos).toBe("Noun");
+    expect(state.continuation.allowNominalInflection).toBe(true);
+    expect(state.continuation.allowFiniteVerbInflection).toBe(false);
+    expect(engine.realize(state).surface).toBe("gelen");
+  });
+
+  it("supports converb forms and closes the chain afterwards", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "bak",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.nonfinite.converb.Ip");
+
+    expect(state.currentCategory).toBe("Converb");
+    expect(state.currentPos).toBe("Verb");
+    expect(state.phase).toBe("inflection");
+    expect(state.continuation.allowInflection).toBe(false);
+    expect(state.continuation.allowNonfinite).toBe(false);
+    expect(engine.realize(state).surface).toBe("bakıp");
+    expect(engine.getAvailableActions(state)).toHaveLength(0);
   });
 });

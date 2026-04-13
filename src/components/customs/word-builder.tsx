@@ -154,12 +154,17 @@ function extractDictionaryOrigin(result: DictionaryLookup | undefined): "native"
 
 function getActionSections(actions: MorphologicalAction[]): BuilderSection[] {
   const derivationalGroups = new Map<string, MorphologicalAction[]>();
+  const nonfiniteGroups = new Map<string, MorphologicalAction[]>();
   const inflectionGroups = new Map<string, MorphologicalAction[]>();
 
   actions.forEach((action) => {
     const groupMap =
-      action.kind === "derivational" ? derivationalGroups : inflectionGroups;
-    const key = action.kind === "derivational" ? action.group : action.slot;
+      action.kind === "derivational"
+        ? derivationalGroups
+        : action.kind === "nonfinite"
+          ? nonfiniteGroups
+          : inflectionGroups;
+    const key = action.kind === "inflectional" ? action.slot : action.group;
     const currentActions = groupMap.get(key) ?? [];
     currentActions.push(action);
     groupMap.set(key, currentActions);
@@ -170,6 +175,12 @@ function getActionSections(actions: MorphologicalAction[]): BuilderSection[] {
       key,
       titleKey: `groups.${key}`,
       kind: "derivational" as const,
+      actions: groupedActions,
+    })),
+    ...Array.from(nonfiniteGroups.entries()).map(([key, groupedActions]) => ({
+      key,
+      titleKey: `groups.${key}`,
+      kind: "nonfinite" as const,
       actions: groupedActions,
     })),
     ...Array.from(inflectionGroups.entries()).map(([key, groupedActions]) => ({
@@ -185,11 +196,35 @@ function getLocalizedPos(t: ReturnType<typeof useTranslations>, pos: PartOfSpeec
   return pos === "Noun" ? t("posNoun") : t("posVerb");
 }
 
+function getLocalizedCategory(
+  t: ReturnType<typeof useTranslations>,
+  category: MorphologicalStateV2["currentCategory"],
+) {
+  switch (category) {
+    case "VerbalNoun":
+      return t("categoryVerbalNoun");
+    case "Participle":
+      return t("categoryParticiple");
+    case "Converb":
+      return t("categoryConverb");
+    default:
+      return getLocalizedPos(t, category as PartOfSpeech);
+  }
+}
+
 function getLocalizedPhase(
   t: ReturnType<typeof useTranslations>,
   phase: MorphologicalStateV2["phase"],
 ) {
-  return phase === "inflection" ? t("phaseInflection") : t("phaseDerivation");
+  if (phase === "inflection") {
+    return t("phaseInflection");
+  }
+
+  if (phase === "postfinite") {
+    return t("phasePostFinite");
+  }
+
+  return t("phaseDerivation");
 }
 
 function getEventMessage(
@@ -835,6 +870,9 @@ export default function WordBuilder() {
                   {t("currentPos")}: {getLocalizedPos(t, builderState.currentPos)}
                 </Chip>
                 <Chip variant="flat">
+                  {getLocalizedCategory(t, builderState.currentCategory)}
+                </Chip>
+                <Chip variant="flat">
                   {t("currentPhase")}: {getLocalizedPhase(t, builderState.phase)}
                 </Chip>
                 <Chip variant="flat">
@@ -865,6 +903,8 @@ export default function WordBuilder() {
                           "rounded-full px-3 py-1 text-sm",
                           step.action.kind === "derivational"
                             ? "border-primary/20 bg-primary/8 text-primary"
+                            : step.action.kind === "nonfinite"
+                              ? "border-amber-200 bg-amber-50 text-amber-700"
                             : "border-border/70 bg-background/70 text-foreground/80",
                         )}
                       >
@@ -937,6 +977,68 @@ export default function WordBuilder() {
                                       </span>
                                       <span className="rounded-full border border-border/70 px-2.5 py-1">
                                         {t("phaseDerivation")}
+                                      </span>
+                                    </div>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    ) : null}
+
+                    {actionSections.some((section) => section.kind === "nonfinite") ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="rounded-full px-3 py-1">
+                            {t("availableNonfinite")}
+                          </Badge>
+                        </div>
+                        {actionSections
+                          .filter((section) => section.kind === "nonfinite")
+                          .map((section) => (
+                            <div key={section.key} className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="rounded-full px-3 py-1">
+                                  {t(section.titleKey)}
+                                </Badge>
+                              </div>
+                              <div className="grid gap-3 sm:grid-cols-2">
+                                {section.actions.map((action) => (
+                                  <button
+                                    key={action.id}
+                                    type="button"
+                                    onClick={() =>
+                                      setBuilderState((current) =>
+                                        engine.applyAction(current, action.id),
+                                      )
+                                    }
+                                    className="group rounded-2xl border border-border/70 bg-background/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/6"
+                                  >
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div>
+                                        <div className="text-base font-semibold text-foreground">
+                                          {t(action.labelKey)}
+                                        </div>
+                                        <div className="mt-1 font-mono text-xs text-foreground/50">
+                                          {action.preview}
+                                        </div>
+                                      </div>
+                                      <ArrowRight className="mt-1 h-4 w-4 text-foreground/35 transition-colors group-hover:text-primary" />
+                                    </div>
+                                    <div className="mt-4 flex flex-wrap gap-2 text-xs text-foreground/60">
+                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
+                                        {getLocalizedCategory(t, builderState.currentCategory)}
+                                      </span>
+                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
+                                        {section.key === "VerbalNoun"
+                                          ? t("categoryVerbalNoun")
+                                          : section.key === "Participle"
+                                            ? t("categoryParticiple")
+                                            : t("categoryConverb")}
+                                      </span>
+                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
+                                        {t("nonfiniteKind")}
                                       </span>
                                     </div>
                                   </button>

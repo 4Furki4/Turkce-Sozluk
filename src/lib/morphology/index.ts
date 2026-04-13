@@ -5,6 +5,12 @@ export { MORPHEME_CATALOG } from "./morpheme-catalog";
 export { getAvailableMorphologyActions, getSlotTranslationKey } from "./morphotactics";
 export { buildTraceDiff, realizeMorphologicalState } from "./realization-v2";
 export {
+  createContinuationPolicy,
+  createMorphCategoryFromPos,
+  createStateContext,
+  resolveNextMorphCategory,
+} from "./state-context";
+export {
   buildHighlightDiff,
   countSyllables,
   endsWithVowel,
@@ -20,12 +26,14 @@ export type {
   BuildResult,
   BuildStep,
   CaseFeature,
+  ContinuationPolicy,
   DiffSegment,
   FeatureBundle,
   HarmonyType,
   HighlightDiff,
   LexemeEntry,
   LexemeOrigin,
+  MorphCategory,
   MorphemeCategory,
   MorphemeDefinition,
   MorphemeSlot,

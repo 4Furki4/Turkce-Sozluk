@@ -1,10 +1,18 @@
 export type PartOfSpeech = "Noun" | "Verb";
 
+export type MorphCategory =
+  | "Noun"
+  | "Verb"
+  | "VerbalNoun"
+  | "Participle"
+  | "Converb"
+  | "Predicative";
+
 export type HarmonyType = "none" | "2-way" | "4-way";
 
-export type MorphologicalPhase = "derivation" | "inflection";
+export type MorphologicalPhase = "derivation" | "inflection" | "postfinite";
 
-export type SuffixKind = "derivational" | "inflectional";
+export type SuffixKind = "derivational" | "inflectional" | "nonfinite";
 
 export type RuleId =
   | "consonant_mutation_trigger"
@@ -20,6 +28,7 @@ export type MutationPolicy = "auto" | "always" | "never";
 
 export type MorphemeSlot =
   | "derivation"
+  | "verb_nonfinite"
   | "noun_number"
   | "noun_possessive"
   | "noun_case"
@@ -29,6 +38,7 @@ export type MorphemeSlot =
 
 export type MorphemeCategory =
   | "derivation"
+  | "nonfinite"
   | "number"
   | "possessive"
   | "case"
@@ -71,6 +81,16 @@ export interface FeatureBundle {
   agreement: AgreementFeature;
 }
 
+export interface ContinuationPolicy {
+  allowDerivation: boolean;
+  allowInflection: boolean;
+  allowFiniteVerbInflection: boolean;
+  allowNominalInflection: boolean;
+  allowNonfinite: boolean;
+  allowAnalyticConstructions: boolean;
+  allowPostFinite: boolean;
+}
+
 export interface LexemeEntry {
   id: string;
   lemma: string;
@@ -91,6 +111,8 @@ export interface MorphemeDefinition {
   kind: SuffixKind;
   sourcePos: PartOfSpeech;
   targetPos: PartOfSpeech;
+  sourceCategories: MorphCategory[];
+  targetCategory: MorphCategory;
   group: string;
   labelKey: string;
   preview: string;
@@ -213,11 +235,13 @@ export interface MorphologicalState extends RootLexeme {
 export interface MorphologicalStateV2 {
   lexeme: LexemeEntry;
   currentPos: PartOfSpeech;
+  currentCategory: MorphCategory;
   tokens: MorphemeToken[];
   features: FeatureBundle;
   surface?: string;
   history: MorphologyHistoryEntry[];
   phase: MorphologicalPhase;
+  continuation: ContinuationPolicy;
   attestationCache: Record<string, MorphologyAttestation | null>;
 }
 

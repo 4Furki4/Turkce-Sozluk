@@ -6,6 +6,10 @@ import {
   realizeMorphologicalState,
 } from "./realization-v2";
 import {
+  createStateContext,
+  resolveNextMorphCategory,
+} from "./state-context";
+import {
   type LexemeEntry,
   type MorphologicalAction,
   type MorphologicalStateV2,
@@ -29,11 +33,13 @@ function snapshotState(state: MorphologicalStateV2, surface: string): Morphologi
   return {
     lexeme: { ...state.lexeme, allomorphOverrides: { ...state.lexeme.allomorphOverrides } },
     currentPos: state.currentPos,
+    currentCategory: state.currentCategory,
     tokens: state.tokens.map((token) => ({ ...token })),
     features: { ...state.features },
     surface,
     history: [],
     phase: state.phase,
+    continuation: { ...state.continuation },
     attestationCache: { ...state.attestationCache },
   };
 }
@@ -56,9 +62,11 @@ function createEvent(
 
 export class TurkishMorphologyEngineV2 {
   public initializeState(lexeme: LexemeEntry): MorphologicalStateV2 {
+    const context = createStateContext(lexeme.pos, "derivation");
+
     return {
       lexeme,
-      currentPos: lexeme.pos,
+      ...context,
       tokens: [],
       features: createDefaultFeatureBundle(),
       surface: lexeme.rootSurface,
@@ -92,10 +100,17 @@ export class TurkishMorphologyEngineV2 {
       selectedAtStep: nextStep,
     };
     const nextPhase =
-      morpheme.kind === "inflectional" ? "inflection" : state.phase;
+      morpheme.kind === "inflectional" || morpheme.kind === "nonfinite"
+        ? "inflection"
+        : state.phase;
     const nextCurrentPos = morpheme.targetPos;
+    const nextCurrentCategory = resolveNextMorphCategory(
+      state.currentCategory,
+      morpheme.targetCategory,
+      morpheme.kind,
+    );
     const nextFeatures =
-      morpheme.kind === "derivational"
+      morpheme.kind === "derivational" || morpheme.kind === "nonfinite"
         ? {
             ...createDefaultFeatureBundle(),
             ...morpheme.setsFeatures,
@@ -103,11 +118,16 @@ export class TurkishMorphologyEngineV2 {
         : {
             ...state.features,
             ...morpheme.setsFeatures,
-          };
+        };
+    const nextContext = createStateContext(
+      nextCurrentPos,
+      nextPhase,
+      nextCurrentCategory,
+    );
 
     const nextStateBase: MorphologicalStateV2 = {
       lexeme: state.lexeme,
-      currentPos: nextCurrentPos,
+      ...nextContext,
       tokens: [...state.tokens, token],
       features: nextFeatures,
       surface: state.surface,
@@ -216,17 +236,24 @@ export class TurkishMorphologyEngineV2 {
     const history = state.history.slice(0, -1);
     let features = createDefaultFeatureBundle();
     let currentPos = state.lexeme.pos;
+    let currentCategory = createStateContext(state.lexeme.pos, "derivation").currentCategory;
     let phase: MorphologicalStateV2["phase"] = "derivation";
 
     tokens.forEach((token) => {
       const morpheme = getMorphemeById(token.morphemeId);
 
-      if (morpheme.kind === "derivational") {
+      if (morpheme.kind === "derivational" || morpheme.kind === "nonfinite") {
         features = {
           ...createDefaultFeatureBundle(),
           ...morpheme.setsFeatures,
         };
         currentPos = morpheme.targetPos;
+        currentCategory = resolveNextMorphCategory(
+          currentCategory,
+          morpheme.targetCategory,
+          morpheme.kind,
+        );
+        phase = morpheme.kind === "nonfinite" ? "inflection" : phase;
         return;
       }
 
@@ -236,10 +263,11 @@ export class TurkishMorphologyEngineV2 {
       };
       phase = "inflection";
     });
+    const nextContext = createStateContext(currentPos, phase, currentCategory);
 
     const nextState: MorphologicalStateV2 = {
       lexeme: state.lexeme,
-      currentPos,
+      ...nextContext,
       tokens,
       features,
       surface: state.lexeme.rootSurface,

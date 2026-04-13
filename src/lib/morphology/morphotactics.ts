@@ -71,6 +71,14 @@ export function getSlotTranslationKey(slot: MorphemeSlot): string {
 export function getAvailableMorphologyActions(
   state: MorphologicalStateV2,
 ): MorphologicalAction[] {
+  if (
+    !state.continuation.allowInflection &&
+    !state.continuation.allowDerivation &&
+    !state.continuation.allowNonfinite
+  ) {
+    return [];
+  }
+
   const slotOrder = SLOT_ORDER[state.currentPos];
   const inflectionTokens = state.tokens.filter((token) => token.kind === "inflectional");
   const chosenSlots = new Set(inflectionTokens.map((token) => token.slot));
@@ -80,9 +88,19 @@ export function getAvailableMorphologyActions(
   const highestChosenIndex = chosenIndices.length > 0 ? Math.max(...chosenIndices) : -1;
 
   const derivationalActions =
-    state.phase === "derivation"
+    state.continuation.allowDerivation
       ? MORPHEME_CATALOG.filter((morpheme) => morpheme.kind === "derivational")
           .filter((morpheme) => morpheme.sourcePos === state.currentPos)
+          .filter((morpheme) => morpheme.sourceCategories.includes(state.currentCategory))
+          .filter((morpheme) => matchesConstraints(state, morpheme))
+          .map(toAction)
+      : [];
+
+  const nonfiniteActions =
+    state.continuation.allowNonfinite
+      ? MORPHEME_CATALOG.filter((morpheme) => morpheme.kind === "nonfinite")
+          .filter((morpheme) => morpheme.sourcePos === state.currentPos)
+          .filter((morpheme) => morpheme.sourceCategories.includes(state.currentCategory))
           .filter((morpheme) => matchesConstraints(state, morpheme))
           .map(toAction)
       : [];
@@ -90,6 +108,22 @@ export function getAvailableMorphologyActions(
   const inflectionalActions = MORPHEME_CATALOG
     .filter((morpheme) => morpheme.kind === "inflectional")
     .filter((morpheme) => morpheme.sourcePos === state.currentPos)
+    .filter((morpheme) => morpheme.sourceCategories.includes(state.currentCategory))
+    .filter((morpheme) => {
+      if (!state.continuation.allowInflection) {
+        return false;
+      }
+
+      if (morpheme.sourcePos === "Noun") {
+        return state.continuation.allowNominalInflection;
+      }
+
+      if (morpheme.sourcePos === "Verb") {
+        return state.continuation.allowFiniteVerbInflection;
+      }
+
+      return false;
+    })
     .filter((morpheme) => {
       const slotIndex = slotOrder.indexOf(morpheme.slot);
       if (slotIndex === -1) {
@@ -112,5 +146,5 @@ export function getAvailableMorphologyActions(
     })
     .map(toAction);
 
-  return [...derivationalActions, ...inflectionalActions];
+  return [...derivationalActions, ...nonfiniteActions, ...inflectionalActions];
 }
