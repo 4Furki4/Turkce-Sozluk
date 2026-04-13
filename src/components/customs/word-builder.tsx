@@ -154,6 +154,7 @@ function extractDictionaryOrigin(result: DictionaryLookup | undefined): "native"
 
 function getActionSections(actions: MorphologicalAction[]): BuilderSection[] {
   const derivationalGroups = new Map<string, MorphologicalAction[]>();
+  const analyticGroups = new Map<string, MorphologicalAction[]>();
   const nonfiniteGroups = new Map<string, MorphologicalAction[]>();
   const inflectionGroups = new Map<string, MorphologicalAction[]>();
 
@@ -161,6 +162,8 @@ function getActionSections(actions: MorphologicalAction[]): BuilderSection[] {
     const groupMap =
       action.kind === "derivational"
         ? derivationalGroups
+        : action.kind === "analytic"
+          ? analyticGroups
         : action.kind === "nonfinite"
           ? nonfiniteGroups
           : inflectionGroups;
@@ -175,6 +178,12 @@ function getActionSections(actions: MorphologicalAction[]): BuilderSection[] {
       key,
       titleKey: `groups.${key}`,
       kind: "derivational" as const,
+      actions: groupedActions,
+    })),
+    ...Array.from(analyticGroups.entries()).map(([key, groupedActions]) => ({
+      key,
+      titleKey: `groups.${key}`,
+      kind: "analytic" as const,
       actions: groupedActions,
     })),
     ...Array.from(nonfiniteGroups.entries()).map(([key, groupedActions]) => ({
@@ -243,6 +252,12 @@ function getEventMessage(
     });
   }
 
+  if (event.code === "analytic_applied") {
+    return t(event.i18nKey, {
+      action: t(event.params.actionKey),
+    });
+  }
+
   if (event.code === "phase_change") {
     return t(event.i18nKey, {
       before: getLocalizedPhase(t, event.params.before as MorphologicalStateV2["phase"]),
@@ -280,7 +295,10 @@ function buildAttestationEvent(
     },
     stage: "lexicon",
     slot: action.slot,
-    morphemeId: `${action.morphemeId}#${step}`,
+    morphemeId:
+      action.kind === "analytic"
+        ? `${action.constructionId}#${step}`
+        : `${action.morphemeId}#${step}`,
   };
 }
 
@@ -903,6 +921,8 @@ export default function WordBuilder() {
                           "rounded-full px-3 py-1 text-sm",
                           step.action.kind === "derivational"
                             ? "border-primary/20 bg-primary/8 text-primary"
+                            : step.action.kind === "analytic"
+                              ? "border-sky-200 bg-sky-50 text-sky-700"
                             : step.action.kind === "nonfinite"
                               ? "border-amber-200 bg-amber-50 text-amber-700"
                             : "border-border/70 bg-background/70 text-foreground/80",
@@ -977,6 +997,64 @@ export default function WordBuilder() {
                                       </span>
                                       <span className="rounded-full border border-border/70 px-2.5 py-1">
                                         {t("phaseDerivation")}
+                                      </span>
+                                    </div>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    ) : null}
+
+                    {actionSections.some((section) => section.kind === "analytic") ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="rounded-full px-3 py-1">
+                            {t("availableAnalytics")}
+                          </Badge>
+                        </div>
+                        {actionSections
+                          .filter((section) => section.kind === "analytic")
+                          .map((section) => (
+                            <div key={section.key} className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="rounded-full px-3 py-1">
+                                  {t(section.titleKey)}
+                                </Badge>
+                              </div>
+                              <div className="grid gap-3 sm:grid-cols-2">
+                                {section.actions.map((action) => (
+                                  <button
+                                    key={action.id}
+                                    type="button"
+                                    onClick={() =>
+                                      setBuilderState((current) =>
+                                        engine.applyAction(current, action.id),
+                                      )
+                                    }
+                                    className="group rounded-2xl border border-border/70 bg-background/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/6"
+                                  >
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div>
+                                        <div className="text-base font-semibold text-foreground">
+                                          {t(action.labelKey)}
+                                        </div>
+                                        <div className="mt-1 font-mono text-xs text-foreground/50">
+                                          {action.preview}
+                                        </div>
+                                      </div>
+                                      <ArrowRight className="mt-1 h-4 w-4 text-foreground/35 transition-colors group-hover:text-primary" />
+                                    </div>
+                                    <div className="mt-4 flex flex-wrap gap-2 text-xs text-foreground/60">
+                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
+                                        {getLocalizedPos(t, action.sourcePos)}
+                                      </span>
+                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
+                                        {getLocalizedPos(t, action.targetPos)}
+                                      </span>
+                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
+                                        {t("analyticKind")}
                                       </span>
                                     </div>
                                   </button>

@@ -1,5 +1,6 @@
 export { TurkishMorphologyEngine } from "./engine";
 export { TurkishMorphologyEngineV2 } from "./engine-v2";
+export { ANALYTIC_CONSTRUCTION_CATALOG } from "./analytic-catalog";
 export { createDefaultFeatureBundle, createLexemeEntryFromRoot } from "./lexicon";
 export { MORPHEME_CATALOG } from "./morpheme-catalog";
 export { getAvailableMorphologyActions, getSlotTranslationKey } from "./morphotactics";
@@ -23,6 +24,9 @@ export {
 export { DEFAULT_SUFFIX_CATALOG } from "./suffix-catalog";
 export type {
   AgreementFeature,
+  AnalyticConstructionDefinition,
+  AnalyticConstructionToken,
+  AnalyticConstructionType,
   BuildResult,
   BuildStep,
   CaseFeature,
@@ -38,6 +42,7 @@ export type {
   MorphemeDefinition,
   MorphemeSlot,
   MorphemeToken,
+  MorphToken,
   MorphologicalAction,
   MorphologicalPhase,
   MorphologicalState,

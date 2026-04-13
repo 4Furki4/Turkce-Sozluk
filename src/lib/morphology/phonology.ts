@@ -23,11 +23,14 @@ const MUTATION_MAP = {
 type PhonologyState = Pick<
   RootLexeme,
   | "surface"
+  | "pos"
   | "origin"
   | "allowConsonantMutation"
   | "forceConsonantMutation"
   | "mutationOverrides"
->;
+> & {
+  rootSurface?: string;
+};
 
 interface EventContext {
   slot?: MorphemeSlot;
@@ -263,6 +266,12 @@ function shouldApplyConsonantMutation(
   }
 
   if (state.origin === "foreign") {
+    return false;
+  }
+
+  const rootSurface = state.rootSurface ?? state.surface;
+
+  if (state.pos === "Verb" && state.surface === rootSurface) {
     return false;
   }
 

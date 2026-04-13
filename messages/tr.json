@@ -78,6 +78,7 @@
     "availableSuffixes": "Kullanılabilir ekler",
     "availableSuffixesHint": "Aşağıdaki butonlar güncel kelime türü ve aşamaya göre zaten filtrelenmiştir.",
     "availableDerivations": "Kullanılabilir yapım ekleri",
+    "availableAnalytics": "Kullanılabilir tasvir yapıları",
     "availableNonfinite": "Kullanılabilir fiilimsi ekleri",
     "availableInflections": "Kullanılabilir çekim ekleri",
     "noAvailableSuffixes": "Bu durumda eklenebilecek bir ek kalmadı.",
@@ -94,6 +95,7 @@
     "phaseDerivation": "Yapım",
     "phaseInflection": "Çekim",
     "phasePostFinite": "Sonlu üst katman",
+    "analyticKind": "Tasvir",
     "nonfiniteKind": "Fiilimsi",
     "posNoun": "İsim",
     "posVerb": "Fiil",
@@ -142,6 +144,31 @@
           "Il": "-ıl",
           "In": "-ın",
           "Iş": "-ış"
+        }
+      },
+      "analytic": {
+        "ability": {
+          "ebil": "Yeterlik (-ebil)"
+        },
+        "celerity": {
+          "iver": "Tezlik (-iver)"
+        },
+        "continuative": {
+          "adur": "Sürerlik (-adur)"
+        },
+        "persistence": {
+          "akal": "Kalış (-akal)"
+        },
+        "progression": {
+          "agel": "Süregelme (-agel)"
+        },
+        "approximative": {
+          "ayaz": "Yaklaşma (-ayaz)"
+        },
+        "serial": {
+          "ipDur": "Süreklilik (-(y)Ip dur)",
+          "ipGit": "Sürüp gitme (-(y)Ip git)",
+          "ipKal": "Sonuçta kalma (-(y)Ip kal)"
         }
       },
       "nonfinite": {
@@ -203,6 +230,7 @@
     "events": {
       "actionApplied": "Morfem seçildi",
       "derivationApplied": "{action} uygulandı: {before} -> {after}.",
+      "analyticApplied": "{action} tasvir yapısı eklendi.",
       "phaseChange": "Morfolojik aşama güncellendi: {before} -> {after}.",
       "posChange": "Kelime türü güncellendi: {before} -> {after}.",
       "vowelHarmonyFourWay": "4 yönlü ünlü uyumu uygulandı: /{archiphoneme}/ -> {resolved}.",
@@ -220,6 +248,15 @@
       "NounToVerb": "İsimden fiil",
       "VerbToNoun": "Fiilden isim",
       "VerbToVerb": "Fiilden fiil",
+      "AnalyticAbility": "Yeterlik",
+      "AnalyticCelerity": "Tezlik",
+      "AnalyticContinuative": "Sürerlik",
+      "AnalyticPersistence": "Kalış",
+      "AnalyticProgression": "Süregelme",
+      "AnalyticApproximative": "Yaklaşma",
+      "AnalyticSerialContinuative": "Süreklilik",
+      "AnalyticSerialProgressive": "Sürüp gitme",
+      "AnalyticSerialResultative": "Sonuçta kalma",
       "VerbalNoun": "İsim-fiil",
       "Participle": "Sıfat-fiil",
       "Converb": "Zarf-fiil",

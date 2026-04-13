@@ -78,6 +78,7 @@
     "availableSuffixes": "Available suffixes",
     "availableSuffixesHint": "Buttons below are already filtered by the current part of speech and phase.",
     "availableDerivations": "Available derivations",
+    "availableAnalytics": "Available analytic constructions",
     "availableNonfinite": "Available non-finite forms",
     "availableInflections": "Available inflections",
     "noAvailableSuffixes": "No suffix can be added in the current state.",
@@ -94,6 +95,7 @@
     "phaseDerivation": "Derivation",
     "phaseInflection": "Inflection",
     "phasePostFinite": "Post-finite",
+    "analyticKind": "Analytic",
     "nonfiniteKind": "Non-finite",
     "posNoun": "Noun",
     "posVerb": "Verb",
@@ -142,6 +144,31 @@
           "Il": "-ıl",
           "In": "-ın",
           "Iş": "-ış"
+        }
+      },
+      "analytic": {
+        "ability": {
+          "ebil": "Ability (-ebil)"
+        },
+        "celerity": {
+          "iver": "Celerity (-iver)"
+        },
+        "continuative": {
+          "adur": "Continuative (-adur)"
+        },
+        "persistence": {
+          "akal": "Persistence (-akal)"
+        },
+        "progression": {
+          "agel": "Progression (-agel)"
+        },
+        "approximative": {
+          "ayaz": "Approximative (-ayaz)"
+        },
+        "serial": {
+          "ipDur": "Continuative (-(y)Ip dur)",
+          "ipGit": "Carry-on (-(y)Ip git)",
+          "ipKal": "Resultative (-(y)Ip kal)"
         }
       },
       "nonfinite": {
@@ -203,6 +230,7 @@
     "events": {
       "actionApplied": "Selected morpheme",
       "derivationApplied": "Applied {action}: {before} -> {after}.",
+      "analyticApplied": "Added analytic construction {action}.",
       "phaseChange": "Morphology phase updated: {before} -> {after}.",
       "posChange": "Part of speech updated: {before} -> {after}.",
       "vowelHarmonyFourWay": "Applied 4-way vowel harmony: /{archiphoneme}/ -> {resolved}.",
@@ -220,6 +248,15 @@
       "NounToVerb": "Noun to verb",
       "VerbToNoun": "Verb to noun",
       "VerbToVerb": "Verb to verb",
+      "AnalyticAbility": "Ability",
+      "AnalyticCelerity": "Celerity",
+      "AnalyticContinuative": "Continuative",
+      "AnalyticPersistence": "Persistence",
+      "AnalyticProgression": "Progression",
+      "AnalyticApproximative": "Approximative",
+      "AnalyticSerialContinuative": "Continuative",
+      "AnalyticSerialProgressive": "Carry-on",
+      "AnalyticSerialResultative": "Resultative",
       "VerbalNoun": "Verbal noun",
       "Participle": "Participle",
       "Converb": "Converb",

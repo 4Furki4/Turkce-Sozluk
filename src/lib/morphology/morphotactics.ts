@@ -1,5 +1,7 @@
+import { ANALYTIC_CONSTRUCTION_CATALOG } from "./analytic-catalog";
 import { MORPHEME_CATALOG } from "./morpheme-catalog";
 import {
+  type AnalyticConstructionDefinition,
   type MorphemeDefinition,
   type MorphemeSlot,
   type MorphologicalAction,
@@ -60,6 +62,23 @@ function toAction(morpheme: MorphemeDefinition): MorphologicalAction {
   };
 }
 
+function toAnalyticAction(
+  construction: AnalyticConstructionDefinition,
+): MorphologicalAction {
+  return {
+    id: construction.id,
+    slot: "analytic",
+    kind: "analytic",
+    group: construction.group,
+    labelKey: construction.labelKey,
+    preview: construction.preview,
+    constructionId: construction.id,
+    enabled: true,
+    sourcePos: "Verb",
+    targetPos: "Verb",
+  };
+}
+
 export function getSlotOrder(pos: PartOfSpeech): MorphemeSlot[] {
   return SLOT_ORDER[pos];
 }
@@ -81,6 +100,7 @@ export function getAvailableMorphologyActions(
 
   const slotOrder = SLOT_ORDER[state.currentPos];
   const inflectionTokens = state.tokens.filter((token) => token.kind === "inflectional");
+  const hasAnalyticConstruction = state.tokens.some((token) => token.kind === "analytic");
   const chosenSlots = new Set(inflectionTokens.map((token) => token.slot));
   const chosenIndices = inflectionTokens
     .map((token) => slotOrder.indexOf(token.slot))
@@ -103,6 +123,19 @@ export function getAvailableMorphologyActions(
           .filter((morpheme) => morpheme.sourceCategories.includes(state.currentCategory))
           .filter((morpheme) => matchesConstraints(state, morpheme))
           .map(toAction)
+      : [];
+
+  const analyticActions =
+    state.continuation.allowAnalyticConstructions && !hasAnalyticConstruction
+      ? ANALYTIC_CONSTRUCTION_CATALOG.filter(
+          (construction) => construction.sourcePos === state.currentPos,
+        )
+          .filter((construction) =>
+            construction.sourceCategories.includes(
+              state.currentCategory as AnalyticConstructionDefinition["sourceCategories"][number],
+            ),
+          )
+          .map(toAnalyticAction)
       : [];
 
   const inflectionalActions = MORPHEME_CATALOG
@@ -146,5 +179,10 @@ export function getAvailableMorphologyActions(
     })
     .map(toAction);
 
-  return [...derivationalActions, ...nonfiniteActions, ...inflectionalActions];
+  return [
+    ...derivationalActions,
+    ...analyticActions,
+    ...nonfiniteActions,
+    ...inflectionalActions,
+  ];
 }

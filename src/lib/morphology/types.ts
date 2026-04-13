@@ -12,7 +12,11 @@ export type HarmonyType = "none" | "2-way" | "4-way";
 
 export type MorphologicalPhase = "derivation" | "inflection" | "postfinite";
 
-export type SuffixKind = "derivational" | "inflectional" | "nonfinite";
+export type SuffixKind =
+  | "derivational"
+  | "inflectional"
+  | "nonfinite"
+  | "analytic";
 
 export type RuleId =
   | "consonant_mutation_trigger"
@@ -27,6 +31,7 @@ export type LexemeOrigin = "native" | "foreign";
 export type MutationPolicy = "auto" | "always" | "never";
 
 export type MorphemeSlot =
+  | "analytic"
   | "derivation"
   | "verb_nonfinite"
   | "noun_number"
@@ -108,7 +113,7 @@ export interface MorphemeDefinition {
   id: string;
   category: MorphemeCategory;
   slot: MorphemeSlot;
-  kind: SuffixKind;
+  kind: Exclude<SuffixKind, "analytic">;
   sourcePos: PartOfSpeech;
   targetPos: PartOfSpeech;
   sourceCategories: MorphCategory[];
@@ -124,19 +129,60 @@ export interface MorphemeDefinition {
   setsFeatures: Partial<FeatureBundle>;
 }
 
+export type AnalyticConstructionType =
+  | "ability"
+  | "celerity"
+  | "continuative"
+  | "persistence"
+  | "progression"
+  | "approximative"
+  | "serial_continuative"
+  | "serial_progressive"
+  | "serial_resultative";
+
+export interface AnalyticConstructionDefinition {
+  id: string;
+  kind: "analytic";
+  slot: "analytic";
+  sourcePos: "Verb";
+  targetPos: "Verb";
+  sourceCategories: ["Verb"];
+  targetCategory: "Verb";
+  group: string;
+  constructionType: AnalyticConstructionType;
+  labelKey: string;
+  preview: string;
+  linkerPattern: string;
+  linkerPhonologyTriggers: RuleId[];
+  separator?: string;
+  auxiliaryLemma: string;
+  auxiliarySurface: string;
+}
+
 export interface MorphemeToken {
   id: string;
   morphemeId: string;
-  kind: SuffixKind;
+  kind: Exclude<SuffixKind, "analytic">;
   slot: MorphemeSlot;
   selectedAtStep: number;
 }
+
+export interface AnalyticConstructionToken {
+  id: string;
+  constructionId: string;
+  kind: "analytic";
+  slot: "analytic";
+  selectedAtStep: number;
+}
+
+export type MorphToken = MorphemeToken | AnalyticConstructionToken;
 
 export type MorphologyStage = "morphotactics" | "realization" | "lexicon";
 
 export type MorphologyEventCode =
   | "action_applied"
   | "derivation_applied"
+  | "analytic_applied"
   | "vowel_harmony_2_way"
   | "vowel_harmony_4_way"
   | "consonant_assimilation"
@@ -160,10 +206,10 @@ export interface MorphologyEvent {
   morphemeId?: string;
 }
 
-export interface MorphologicalAction {
+export interface MorphemeAction {
   id: string;
   slot: MorphemeSlot;
-  kind: SuffixKind;
+  kind: Exclude<SuffixKind, "analytic">;
   group: string;
   labelKey: string;
   preview: string;
@@ -176,9 +222,26 @@ export interface MorphologicalAction {
   attestationStatus?: "unknown" | "attested" | "unattested";
 }
 
+export interface AnalyticConstructionAction {
+  id: string;
+  slot: "analytic";
+  kind: "analytic";
+  group: string;
+  labelKey: string;
+  preview: string;
+  constructionId: string;
+  enabled: boolean;
+  reasonIfDisabled?: string;
+  sourcePos: "Verb";
+  targetPos: "Verb";
+}
+
+export type MorphologicalAction = MorphemeAction | AnalyticConstructionAction;
+
 export interface RealizationSegment {
   tokenId: string;
-  morphemeId: string;
+  morphemeId?: string;
+  constructionId?: string;
   slot: MorphemeSlot;
   labelKey: string;
   pattern: string;
@@ -187,7 +250,8 @@ export interface RealizationSegment {
 
 export interface RealizationTrace {
   tokenId: string;
-  morphemeId: string;
+  morphemeId?: string;
+  constructionId?: string;
   slot: MorphemeSlot;
   labelKey: string;
   pattern: string;
@@ -236,7 +300,7 @@ export interface MorphologicalStateV2 {
   lexeme: LexemeEntry;
   currentPos: PartOfSpeech;
   currentCategory: MorphCategory;
-  tokens: MorphemeToken[];
+  tokens: MorphToken[];
   features: FeatureBundle;
   surface?: string;
   history: MorphologyHistoryEntry[];
@@ -265,7 +329,7 @@ export interface MorphologyAttestation {
 export interface MorphologyHistoryEntry {
   step: number;
   action: MorphologicalAction;
-  token: MorphemeToken;
+  token: MorphToken;
   beforeState: MorphologicalStateV2;
   afterState: MorphologicalStateV2;
   surfaceSuffix: string;

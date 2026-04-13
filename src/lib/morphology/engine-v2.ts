@@ -1,3 +1,4 @@
+import { ANALYTIC_CONSTRUCTION_CATALOG } from "./analytic-catalog";
 import { createDefaultFeatureBundle } from "./lexicon";
 import { MORPHEME_CATALOG } from "./morpheme-catalog";
 import { getAvailableMorphologyActions } from "./morphotactics";
@@ -11,12 +12,13 @@ import {
 } from "./state-context";
 import {
   type LexemeEntry,
+  type AnalyticConstructionDefinition,
   type MorphologicalAction,
   type MorphologicalStateV2,
   type MorphologyEvent,
   type MorphologyHistoryEntry,
+  type MorphToken,
   type MorphemeDefinition,
-  type MorphemeToken,
   type RealizationResult,
 } from "./types";
 
@@ -27,6 +29,19 @@ function getMorphemeById(morphemeId: string): MorphemeDefinition {
   }
 
   return morpheme;
+}
+
+function getAnalyticConstructionById(
+  constructionId: string,
+): AnalyticConstructionDefinition {
+  const construction = ANALYTIC_CONSTRUCTION_CATALOG.find(
+    (entry) => entry.id === constructionId,
+  );
+  if (!construction) {
+    throw new Error(`Unknown analytic construction: ${constructionId}`);
+  }
+
+  return construction;
 }
 
 function snapshotState(state: MorphologicalStateV2, surface: string): MorphologicalStateV2 {
@@ -56,7 +71,8 @@ function createEvent(
     params,
     stage: "morphotactics",
     slot: action.slot,
-    morphemeId: action.morphemeId,
+    morphemeId:
+      action.kind === "analytic" ? action.constructionId : action.morphemeId,
   };
 }
 
@@ -89,36 +105,62 @@ export class TurkishMorphologyEngineV2 {
       throw new Error(`Action ${actionId} is not available in the current state.`);
     }
 
-    const morpheme = getMorphemeById(action.morphemeId);
     const beforeRealization = this.realize(state);
     const nextStep = state.history.length + 1;
-    const token: MorphemeToken = {
-      id: `${morpheme.id}#${nextStep}`,
-      morphemeId: morpheme.id,
-      kind: morpheme.kind,
-      slot: morpheme.slot,
-      selectedAtStep: nextStep,
-    };
-    const nextPhase =
-      morpheme.kind === "inflectional" || morpheme.kind === "nonfinite"
-        ? "inflection"
-        : state.phase;
-    const nextCurrentPos = morpheme.targetPos;
-    const nextCurrentCategory = resolveNextMorphCategory(
-      state.currentCategory,
-      morpheme.targetCategory,
-      morpheme.kind,
-    );
-    const nextFeatures =
-      morpheme.kind === "derivational" || morpheme.kind === "nonfinite"
-        ? {
-            ...createDefaultFeatureBundle(),
-            ...morpheme.setsFeatures,
-          }
-        : {
-            ...state.features,
-            ...morpheme.setsFeatures,
-        };
+    let token: MorphToken;
+    let nextPhase = state.phase;
+    let nextCurrentPos = state.currentPos;
+    let nextCurrentCategory = state.currentCategory;
+    let nextFeatures = { ...state.features };
+    let derivationApplied = false;
+
+    if (action.kind === "analytic") {
+      const construction = getAnalyticConstructionById(action.constructionId);
+      token = {
+        id: `${construction.id}#${nextStep}`,
+        constructionId: construction.id,
+        kind: "analytic",
+        slot: "analytic",
+        selectedAtStep: nextStep,
+      };
+      nextCurrentPos = construction.targetPos;
+      nextCurrentCategory = resolveNextMorphCategory(
+        state.currentCategory,
+        construction.targetCategory,
+        "analytic",
+      );
+    } else {
+      const morpheme = getMorphemeById(action.morphemeId);
+      token = {
+        id: `${morpheme.id}#${nextStep}`,
+        morphemeId: morpheme.id,
+        kind: morpheme.kind,
+        slot: morpheme.slot,
+        selectedAtStep: nextStep,
+      };
+      nextPhase =
+        morpheme.kind === "inflectional" || morpheme.kind === "nonfinite"
+          ? "inflection"
+          : state.phase;
+      nextCurrentPos = morpheme.targetPos;
+      nextCurrentCategory = resolveNextMorphCategory(
+        state.currentCategory,
+        morpheme.targetCategory,
+        morpheme.kind,
+      );
+      nextFeatures =
+        morpheme.kind === "derivational" || morpheme.kind === "nonfinite"
+          ? {
+              ...createDefaultFeatureBundle(),
+              ...morpheme.setsFeatures,
+            }
+          : {
+              ...state.features,
+              ...morpheme.setsFeatures,
+            };
+      derivationApplied = morpheme.kind === "derivational";
+    }
+
     const nextContext = createStateContext(
       nextCurrentPos,
       nextPhase,
@@ -150,7 +192,20 @@ export class TurkishMorphologyEngineV2 {
       ),
     ];
 
-    if (morpheme.kind === "derivational") {
+    if (action.kind === "analytic") {
+      events.push(
+        createEvent(
+          "analytic_applied",
+          "events.analyticApplied",
+          {
+            actionKey: action.labelKey,
+          },
+          action,
+        ),
+      );
+    }
+
+    if (derivationApplied) {
       events.push(
         createEvent(
           "derivation_applied",
@@ -208,7 +263,8 @@ export class TurkishMorphologyEngineV2 {
       surfaceSuffix: trace?.surface ?? "",
       log: {
         step: nextStep,
-        suffixId: action.legacySuffixId,
+        suffixId:
+          action.kind === "analytic" ? undefined : action.legacySuffixId,
         suffixArchiphoneme: trace?.pattern,
         suffixSurface: trace?.surface ?? "",
         sourcePos: beforeSnapshot.currentPos,
@@ -240,6 +296,17 @@ export class TurkishMorphologyEngineV2 {
     let phase: MorphologicalStateV2["phase"] = "derivation";
 
     tokens.forEach((token) => {
+      if (token.kind === "analytic") {
+        const construction = getAnalyticConstructionById(token.constructionId);
+        currentPos = construction.targetPos;
+        currentCategory = resolveNextMorphCategory(
+          currentCategory,
+          construction.targetCategory,
+          "analytic",
+        );
+        return;
+      }
+
       const morpheme = getMorphemeById(token.morphemeId);
 
       if (morpheme.kind === "derivational" || morpheme.kind === "nonfinite") {

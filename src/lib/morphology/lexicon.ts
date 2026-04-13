@@ -24,6 +24,14 @@ const KNOWN_LEXEME_OVERRIDES: Record<string, Partial<LexemeEntry>> = {
       "verb.tam.aor": "/Ir/",
     },
   },
+  "Verb:git": {
+    irregularClass: "vowel_initial_stem_alternation",
+    mutationPolicy: "always",
+  },
+  "Verb:et": {
+    irregularClass: "vowel_initial_stem_alternation",
+    mutationPolicy: "always",
+  },
 };
 
 function createLexemeKey(pos: PartOfSpeech, lemma: string) {

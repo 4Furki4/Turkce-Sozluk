@@ -233,7 +233,7 @@ export const MORPHEME_CATALOG: MorphemeDefinition[] = [
     preview: "-ICI",
     legacySuffixId: "verb.deriv.ICI",
     realizationPattern: "/ICI/",
-    phonologyTriggers: ["consonant_assimilation"],
+    phonologyTriggers: ["consonant_assimilation", "consonant_mutation_trigger"],
   }),
   createDerivationalMorpheme({
     id: "verb.deriv.mA",
@@ -254,6 +254,7 @@ export const MORPHEME_CATALOG: MorphemeDefinition[] = [
     preview: "-Iş",
     legacySuffixId: "verb.deriv.Iş",
     realizationPattern: "/Iş/",
+    phonologyTriggers: ["consonant_mutation_trigger"],
   }),
   createDerivationalMorpheme({
     id: "verb.deriv.Ak",
@@ -264,6 +265,7 @@ export const MORPHEME_CATALOG: MorphemeDefinition[] = [
     preview: "-Ak",
     legacySuffixId: "verb.deriv.Ak",
     realizationPattern: "/Ak/",
+    phonologyTriggers: ["consonant_mutation_trigger"],
   }),
   createDerivationalMorpheme({
     id: "verb.deriv.Im",
@@ -274,6 +276,7 @@ export const MORPHEME_CATALOG: MorphemeDefinition[] = [
     preview: "-Im",
     legacySuffixId: "verb.deriv.Im",
     realizationPattern: "/Im/",
+    phonologyTriggers: ["consonant_mutation_trigger"],
   }),
   createDerivationalMorpheme({
     id: "verb.voice.DIr",
@@ -295,6 +298,7 @@ export const MORPHEME_CATALOG: MorphemeDefinition[] = [
     preview: "-Il",
     legacySuffixId: "verb.voice.Il",
     realizationPattern: "/Il/",
+    phonologyTriggers: ["consonant_mutation_trigger"],
   }),
   createDerivationalMorpheme({
     id: "verb.voice.In",
@@ -305,6 +309,7 @@ export const MORPHEME_CATALOG: MorphemeDefinition[] = [
     preview: "-In",
     legacySuffixId: "verb.voice.In",
     realizationPattern: "/In/",
+    phonologyTriggers: ["consonant_mutation_trigger"],
   }),
   createDerivationalMorpheme({
     id: "verb.voice.Iş",
@@ -315,6 +320,7 @@ export const MORPHEME_CATALOG: MorphemeDefinition[] = [
     preview: "-Iş",
     legacySuffixId: "verb.voice.Iş",
     realizationPattern: "/Iş/",
+    phonologyTriggers: ["consonant_mutation_trigger"],
   }),
   createNonfiniteMorpheme({
     id: "verb.nonfinite.verbalNoun.mA",
@@ -342,6 +348,7 @@ export const MORPHEME_CATALOG: MorphemeDefinition[] = [
     labelKey: "actions.nonfinite.verbalNoun.Iş",
     preview: "-Iş",
     realizationPattern: "/Iş/",
+    phonologyTriggers: ["consonant_mutation_trigger"],
   }),
   createNonfiniteMorpheme({
     id: "verb.nonfinite.participle.An",
@@ -351,6 +358,7 @@ export const MORPHEME_CATALOG: MorphemeDefinition[] = [
     labelKey: "actions.nonfinite.participle.An",
     preview: "-An",
     realizationPattern: "/An/",
+    phonologyTriggers: ["consonant_mutation_trigger"],
   }),
   createNonfiniteMorpheme({
     id: "verb.nonfinite.participle.mIş",
@@ -369,7 +377,7 @@ export const MORPHEME_CATALOG: MorphemeDefinition[] = [
     labelKey: "actions.nonfinite.participle.AcAk",
     preview: "-(y)AcAk",
     realizationPattern: "/AcAk/",
-    phonologyTriggers: ["buffer_y"],
+    phonologyTriggers: ["buffer_y", "consonant_mutation_trigger"],
   }),
   createNonfiniteMorpheme({
     id: "verb.nonfinite.converb.Ip",
@@ -379,7 +387,7 @@ export const MORPHEME_CATALOG: MorphemeDefinition[] = [
     labelKey: "actions.nonfinite.converb.Ip",
     preview: "-(y)Ip",
     realizationPattern: "/Ip/",
-    phonologyTriggers: ["buffer_y"],
+    phonologyTriggers: ["buffer_y", "consonant_mutation_trigger"],
   }),
   createNonfiniteMorpheme({
     id: "verb.nonfinite.converb.IncA",
@@ -389,7 +397,7 @@ export const MORPHEME_CATALOG: MorphemeDefinition[] = [
     labelKey: "actions.nonfinite.converb.IncA",
     preview: "-(y)IncA",
     realizationPattern: "/IncA/",
-    phonologyTriggers: ["buffer_y"],
+    phonologyTriggers: ["buffer_y", "consonant_mutation_trigger"],
   }),
   createNonfiniteMorpheme({
     id: "verb.nonfinite.converb.ArAk",
@@ -399,7 +407,7 @@ export const MORPHEME_CATALOG: MorphemeDefinition[] = [
     labelKey: "actions.nonfinite.converb.ArAk",
     preview: "-(y)ArAk",
     realizationPattern: "/ArAk/",
-    phonologyTriggers: ["buffer_y"],
+    phonologyTriggers: ["buffer_y", "consonant_mutation_trigger"],
   }),
   createInflectionMorpheme({
     id: "noun.number.pl",

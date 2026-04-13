@@ -55,6 +55,45 @@ describe("TurkishMorphologyEngine V2 core", () => {
     expect(state.continuation.allowFiniteVerbInflection).toBe(true);
   });
 
+  it("offers analytic constructions from the initial verb state", () => {
+    const state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "yap",
+        pos: "Verb",
+      }),
+    );
+
+    const actions = engine.getAvailableActions(state);
+
+    expect(
+      actions.some((action) => action.id === "verb.analytic.ability.ebil"),
+    ).toBe(true);
+    expect(
+      actions.some((action) => action.id === "verb.analytic.celerity.iver"),
+    ).toBe(true);
+    expect(
+      actions.some((action) => action.id === "verb.analytic.continuative.adur"),
+    ).toBe(true);
+    expect(
+      actions.some((action) => action.id === "verb.analytic.persistence.akal"),
+    ).toBe(true);
+    expect(
+      actions.some((action) => action.id === "verb.analytic.progression.agel"),
+    ).toBe(true);
+    expect(
+      actions.some((action) => action.id === "verb.analytic.approximative.ayaz"),
+    ).toBe(true);
+    expect(
+      actions.some((action) => action.id === "verb.analytic.serial.ipDur"),
+    ).toBe(true);
+    expect(
+      actions.some((action) => action.id === "verb.analytic.serial.ipGit"),
+    ).toBe(true);
+    expect(
+      actions.some((action) => action.id === "verb.analytic.serial.ipKal"),
+    ).toBe(true);
+  });
+
   it("builds a negative progressive first-person singular verb chain", () => {
     let state = engine.initializeState(
       createLexemeEntryFromRoot({
@@ -91,6 +130,48 @@ describe("TurkishMorphologyEngine V2 core", () => {
     expect(state.history[0]?.log.events.some((event) => event.code === "lexeme_override_applied")).toBe(
       true,
     );
+  });
+
+  it("handles lexical verb softening for git before vowel-initial derivational and nonfinite forms", () => {
+    let derivationState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "git",
+        pos: "Verb",
+      }),
+    );
+
+    derivationState = engine.applyAction(derivationState, "verb.deriv.Iş");
+
+    expect(engine.realize(derivationState).surface).toBe("gidiş");
+    expect(
+      derivationState.history[0]?.log.events.some(
+        (event) => event.code === "consonant_mutation",
+      ),
+    ).toBe(true);
+
+    let converbState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "git",
+        pos: "Verb",
+      }),
+    );
+
+    converbState = engine.applyAction(converbState, "verb.nonfinite.converb.IncA");
+
+    expect(engine.realize(converbState).surface).toBe("gidince");
+  });
+
+  it("handles lexical verb softening for et before vowel-initial converb forms", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "et",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.nonfinite.converb.Ip");
+
+    expect(engine.realize(state).surface).toBe("edip");
   });
 
   it("does not insert pronominal n after first-person possessive before accusative", () => {
@@ -285,5 +366,161 @@ describe("TurkishMorphologyEngine V2 core", () => {
     expect(state.continuation.allowNonfinite).toBe(false);
     expect(engine.realize(state).surface).toBe("bakıp");
     expect(engine.getAvailableActions(state)).toHaveLength(0);
+  });
+
+  it("supports ability analytic constructions before nonfinite forms", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "yap",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.analytic.ability.ebil");
+    state = engine.applyAction(state, "verb.nonfinite.verbalNoun.mAk");
+
+    expect(state.currentCategory).toBe("VerbalNoun");
+    expect(state.currentPos).toBe("Noun");
+    expect(engine.realize(state).surface).toBe("yapabilmek");
+    expect(
+      state.history[0]?.log.events.some((event) => event.code === "analytic_applied"),
+    ).toBe(true);
+  });
+
+  it("supports celerity analytic constructions before finite inflection", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "bak",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.analytic.celerity.iver");
+    state = engine.applyAction(state, "verb.tam.past");
+
+    expect(state.currentCategory).toBe("Verb");
+    expect(state.phase).toBe("inflection");
+    expect(engine.realize(state).surface).toBe("bakıverdi");
+  });
+
+  it("supports continuative analytic constructions before verbal noun forms", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "yaz",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.analytic.continuative.adur");
+    state = engine.applyAction(state, "verb.nonfinite.verbalNoun.mAk");
+
+    expect(engine.realize(state).surface).toBe("yazadurmak");
+  });
+
+  it("supports persistence analytic constructions before verbal noun forms", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "bak",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.analytic.persistence.akal");
+    state = engine.applyAction(state, "verb.nonfinite.verbalNoun.mAk");
+
+    expect(engine.realize(state).surface).toBe("bakakalmak");
+  });
+
+  it("supports progression analytic constructions before verbal noun forms", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "sür",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.analytic.progression.agel");
+    state = engine.applyAction(state, "verb.nonfinite.verbalNoun.mAk");
+
+    expect(engine.realize(state).surface).toBe("süregelmek");
+  });
+
+  it("supports approximative analytic constructions before finite inflection", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "öl",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.analytic.approximative.ayaz");
+    state = engine.applyAction(state, "verb.tam.past");
+
+    expect(engine.realize(state).surface).toBe("öleyazdı");
+  });
+
+  it("supports serial converb-based analytic constructions with spaced auxiliaries", () => {
+    let continuativeState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "bak",
+        pos: "Verb",
+      }),
+    );
+
+    continuativeState = engine.applyAction(
+      continuativeState,
+      "verb.analytic.serial.ipDur",
+    );
+    continuativeState = engine.applyAction(
+      continuativeState,
+      "verb.nonfinite.verbalNoun.mAk",
+    );
+
+    expect(engine.realize(continuativeState).surface).toBe("bakıp durmak");
+
+    let progressiveState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "gül",
+        pos: "Verb",
+      }),
+    );
+
+    progressiveState = engine.applyAction(
+      progressiveState,
+      "verb.analytic.serial.ipGit",
+    );
+    progressiveState = engine.applyAction(progressiveState, "verb.tam.past");
+
+    expect(engine.realize(progressiveState).surface).toBe("gülüp gitti");
+
+    let resultativeState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "don",
+        pos: "Verb",
+      }),
+    );
+
+    resultativeState = engine.applyAction(
+      resultativeState,
+      "verb.analytic.serial.ipKal",
+    );
+    resultativeState = engine.applyAction(resultativeState, "verb.tam.past");
+
+    expect(engine.realize(resultativeState).surface).toBe("donup kaldı");
+  });
+
+  it("does not expose a second analytic construction after one has been selected", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "yap",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.analytic.ability.ebil");
+
+    expect(
+      engine.getAvailableActions(state).some((action) => action.kind === "analytic"),
+    ).toBe(false);
   });
 });

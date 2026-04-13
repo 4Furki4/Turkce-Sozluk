@@ -128,7 +128,7 @@ export class TurkishMorphologyEngine {
   ): BuildResult {
     const steps: BuildStep[] = state.history.map((entry) => ({
       step: entry.step,
-      suffix: entry.action.legacySuffixId
+      suffix: entry.action.kind !== "analytic" && entry.action.legacySuffixId
         ? this.suffixIndex.get(entry.action.legacySuffixId)
         : undefined,
       action: entry.action,
@@ -139,7 +139,7 @@ export class TurkishMorphologyEngine {
     }));
     const finalState = this.toLegacyState(state);
     const availableSuffixes = this.getAvailableActions(state)
-      .map((action) => action.legacySuffixId)
+      .map((action) => (action.kind === "analytic" ? undefined : action.legacySuffixId))
       .filter((value): value is string => Boolean(value))
       .map((suffixId) => this.suffixIndex.get(suffixId))
       .filter((suffix): suffix is SuffixDefinition => Boolean(suffix));

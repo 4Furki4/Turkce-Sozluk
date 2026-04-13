@@ -1,3 +1,4 @@
+import { ANALYTIC_CONSTRUCTION_CATALOG } from "./analytic-catalog";
 import { MORPHEME_CATALOG } from "./morpheme-catalog";
 import {
   buildHighlightDiff,
@@ -11,6 +12,7 @@ import {
   type MorphologyEvent,
   type RealizationResult,
   type RealizationTrace,
+  type AnalyticConstructionDefinition,
 } from "./types";
 
 function createEvent(
@@ -43,9 +45,28 @@ function getMorpheme(morphemeId: string): MorphemeDefinition {
   return morpheme;
 }
 
-function createPhonologyState(state: MorphologicalStateV2, surface: string) {
+function getAnalyticConstruction(
+  constructionId: string,
+): AnalyticConstructionDefinition {
+  const construction = ANALYTIC_CONSTRUCTION_CATALOG.find(
+    (entry) => entry.id === constructionId,
+  );
+  if (!construction) {
+    throw new Error(`Unknown analytic construction: ${constructionId}`);
+  }
+
+  return construction;
+}
+
+function createPhonologyState(
+  state: MorphologicalStateV2,
+  surface: string,
+  pos: MorphemeDefinition["sourcePos"] | AnalyticConstructionDefinition["sourcePos"],
+) {
   return {
     surface,
+    pos,
+    rootSurface: state.lexeme.rootSurface,
     origin: state.lexeme.origin,
     forceConsonantMutation: state.lexeme.mutationPolicy === "always",
     allowConsonantMutation: state.lexeme.mutationPolicy === "never" ? false : undefined,
@@ -262,7 +283,7 @@ function resolveTokenRecipe(
       return {
         workingSurface: currentSurface,
         pattern: resolved.pattern,
-        rules: resolved.rules,
+        rules: [...resolved.rules, "consonant_mutation_trigger"],
         setupEvents: [...setupEvents, ...resolved.events],
       };
     }
@@ -287,12 +308,17 @@ function resolveTokenRecipe(
         return {
           workingSurface: droppedSurface,
           pattern: "/Iyor/",
-          rules: [],
+          rules: ["consonant_mutation_trigger"],
           setupEvents,
         };
       }
 
-      return { workingSurface: currentSurface, pattern: "/Iyor/", rules: [], setupEvents };
+      return {
+        workingSurface: currentSurface,
+        pattern: "/Iyor/",
+        rules: ["consonant_mutation_trigger"],
+        setupEvents,
+      };
     }
     case "verb.tam.past":
       return {
@@ -305,7 +331,7 @@ function resolveTokenRecipe(
       return {
         workingSurface: currentSurface,
         pattern: "/AcAk/",
-        rules: ["buffer_y"],
+        rules: ["buffer_y", "consonant_mutation_trigger"],
         setupEvents,
       };
     case "verb.agreement.1sg":
@@ -338,6 +364,38 @@ export function realizeMorphologicalState(
   const traces: RealizationTrace[] = [];
 
   state.tokens.forEach((token) => {
+    if (token.kind === "analytic") {
+      const construction = getAnalyticConstruction(token.constructionId);
+      const phonologyState = createPhonologyState(
+        state,
+        currentSurface,
+        construction.sourcePos,
+      );
+      const realizedLinker = realizeAffix(
+        phonologyState,
+        construction.linkerPattern,
+        construction.linkerPhonologyTriggers,
+        { slot: "analytic", morphemeId: construction.id },
+      );
+      const analyticSurface = `${realizedLinker.surfaceSuffix}${construction.separator ?? ""}${construction.auxiliarySurface}`;
+      const afterSurface = `${realizedLinker.stem}${analyticSurface}`;
+
+      traces.push({
+        tokenId: token.id,
+        constructionId: construction.id,
+        slot: "analytic",
+        labelKey: construction.labelKey,
+        pattern: `${construction.linkerPattern}+${construction.auxiliarySurface}`,
+        beforeSurface: currentSurface,
+        afterSurface,
+        surface: analyticSurface,
+        events: realizedLinker.events,
+      });
+
+      currentSurface = afterSurface;
+      return;
+    }
+
     const morpheme = getMorpheme(token.morphemeId);
     const recipe = resolveTokenRecipe(state, morpheme, currentSurface);
     const overridePattern =
@@ -358,7 +416,11 @@ export function realizeMorphologicalState(
           ]
         : [];
 
-    const phonologyState = createPhonologyState(state, recipe.workingSurface);
+    const phonologyState = createPhonologyState(
+      state,
+      recipe.workingSurface,
+      morpheme.sourcePos,
+    );
     const realized = realizeAffix(
       phonologyState,
       overridePattern,
@@ -387,6 +449,7 @@ export function realizeMorphologicalState(
     segments: traces.map((trace) => ({
       tokenId: trace.tokenId,
       morphemeId: trace.morphemeId,
+      constructionId: trace.constructionId,
       slot: trace.slot,
       labelKey: trace.labelKey,
       pattern: trace.pattern,

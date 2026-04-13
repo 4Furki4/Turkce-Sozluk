@@ -29,6 +29,10 @@ export function resolveNextMorphCategory(
     return targetCategory;
   }
 
+  if (kind === "analytic") {
+    return targetCategory;
+  }
+
   return currentCategory;
 }
 
