@@ -1,6 +1,7 @@
 import {
   type FeatureBundle,
   type LexemeEntry,
+  type LexemeInitialCategory,
   type PartOfSpeech,
   type RootLexeme,
 } from "./types";
@@ -34,8 +35,8 @@ const KNOWN_LEXEME_OVERRIDES: Record<string, Partial<LexemeEntry>> = {
   },
 };
 
-function createLexemeKey(pos: PartOfSpeech, lemma: string) {
-  return `${pos}:${lemma}`;
+function createLexemeKey(category: LexemeInitialCategory, lemma: string) {
+  return `${category}:${lemma}`;
 }
 
 export function createDefaultFeatureBundle(): FeatureBundle {
@@ -51,7 +52,8 @@ export function createDefaultFeatureBundle(): FeatureBundle {
 
 export function createLexemeEntryFromRoot(root: RootLexeme): LexemeEntry {
   const lemma = root.surface.trim().toLocaleLowerCase("tr");
-  const key = createLexemeKey(root.pos, lemma);
+  const initialCategory = root.category ?? root.pos;
+  const key = createLexemeKey(initialCategory, lemma);
   const knownOverride = KNOWN_LEXEME_OVERRIDES[key] ?? {};
 
   return {
@@ -59,6 +61,7 @@ export function createLexemeEntryFromRoot(root: RootLexeme): LexemeEntry {
     lemma,
     rootSurface: lemma,
     pos: root.pos,
+    initialCategory,
     origin: root.origin ?? "native",
     mutationPolicy: root.forceConsonantMutation
       ? "always"

@@ -24,6 +24,27 @@ describe("TurkishMorphologyEngine V2 core", () => {
     expect(state.continuation.allowNominalInflection).toBe(true);
   });
 
+  it("keeps adjectives as a separate lexical category while reusing the nominal predicative path", () => {
+    const state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "güzel",
+        pos: "Noun",
+        category: "Adjective",
+      }),
+    );
+
+    const actions = engine.getAvailableActions(state);
+
+    expect(state.currentPos).toBe("Noun");
+    expect(state.currentCategory).toBe("Adjective");
+    expect(state.continuation.allowNominalInflection).toBe(false);
+    expect(actions.some((action) => action.id === "noun.case.loc")).toBe(false);
+    expect(actions.some((action) => action.id === "predicative.agreement.1sg")).toBe(
+      true,
+    );
+    expect(actions.some((action) => action.id === "postfinite.copula.imiş")).toBe(true);
+  });
+
   it("closes earlier noun slots after choosing a later slot", () => {
     let state = engine.initializeState(
       createLexemeEntryFromRoot({
@@ -34,9 +55,18 @@ describe("TurkishMorphologyEngine V2 core", () => {
 
     state = engine.applyAction(state, "noun.case.loc");
 
+    const actions = engine.getAvailableActions(state);
+
     expect(
-      engine.getAvailableActions(state).every((action) => action.kind === "postfinite"),
+      actions.every(
+        (action) =>
+          action.kind === "postfinite" ||
+          action.id.startsWith("predicative."),
+      ),
     ).toBe(true);
+    expect(actions.some((action) => action.id === "predicative.agreement.1sg")).toBe(
+      true,
+    );
     expect(engine.realize(state).surface).toBe("evde");
   });
 
@@ -616,6 +646,274 @@ describe("TurkishMorphologyEngine V2 core", () => {
     expect(engine.realize(whileState).surface).toBe("evdeyken");
   });
 
+  it("supports direct conditional overlay on past finite verbs", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "gel",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.tam.past");
+    state = engine.applyAction(state, "postfinite.conditional.ise");
+
+    expect(engine.realize(state).surface).toBe("geldiyse");
+    expect(state.currentCategory).toBe("Verb");
+  });
+
+  it("supports nominal predicative overlays and promotes the category to Predicative", () => {
+    let evidentialState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "ev",
+        pos: "Noun",
+      }),
+    );
+
+    evidentialState = engine.applyAction(evidentialState, "noun.case.loc");
+    evidentialState = engine.applyAction(evidentialState, "postfinite.copula.imiş");
+
+    expect(engine.realize(evidentialState).surface).toBe("evdeymiş");
+    expect(evidentialState.currentCategory).toBe("Predicative");
+    expect(
+      evidentialState.tokens.some(
+        (token) => token.kind !== "analytic" && token.kind !== "postfinite" && token.morphemeId === "predicative.zero.3sg",
+      ),
+    ).toBe(true);
+    expect(
+      evidentialState.history[1]?.log.events.some(
+        (event) => event.code === "predicative_zero_applied",
+      ),
+    ).toBe(true);
+
+    let questionPastState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "ev",
+        pos: "Noun",
+      }),
+    );
+
+    questionPastState = engine.applyAction(questionPastState, "postfinite.question.mI");
+    questionPastState = engine.applyAction(
+      questionPastState,
+      "postfinite.copula.idi",
+    );
+
+    expect(engine.realize(questionPastState).surface).toBe("ev miydi");
+    expect(questionPastState.currentCategory).toBe("Predicative");
+  });
+
+  it("supports predicative agreement on bare and case-marked nominal stems", () => {
+    let bareState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "ev",
+        pos: "Noun",
+      }),
+    );
+
+    bareState = engine.applyAction(bareState, "predicative.agreement.1sg");
+
+    expect(engine.realize(bareState).surface).toBe("evim");
+    expect(bareState.currentCategory).toBe("Predicative");
+    expect(
+      bareState.tokens.some(
+        (token) => token.kind !== "analytic" && token.kind !== "postfinite" && token.morphemeId === "predicative.zero.3sg",
+      ),
+    ).toBe(true);
+
+    let locativeState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "ev",
+        pos: "Noun",
+      }),
+    );
+
+    locativeState = engine.applyAction(locativeState, "noun.case.loc");
+    locativeState = engine.applyAction(locativeState, "predicative.agreement.1sg");
+
+    expect(engine.realize(locativeState).surface).toBe("evdeyim");
+    expect(locativeState.currentCategory).toBe("Predicative");
+  });
+
+  it("does not expose the implicit zero predicate as a selectable action and removes it on undo", () => {
+    const initialState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "ev",
+        pos: "Noun",
+      }),
+    );
+
+    expect(
+      engine.getAvailableActions(initialState).some((action) => action.id === "predicative.zero.3sg"),
+    ).toBe(false);
+
+    const predicatedState = engine.applyAction(
+      initialState,
+      "postfinite.copula.imiş",
+    );
+
+    expect(predicatedState.tokens).toHaveLength(2);
+
+    const undoneState = engine.undoAction(predicatedState);
+
+    expect(undoneState.tokens).toHaveLength(0);
+    expect(undoneState.currentCategory).toBe("Noun");
+  });
+
+  it("supports predicative agreement after copular overlays", () => {
+    let pastState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "ev",
+        pos: "Noun",
+      }),
+    );
+
+    pastState = engine.applyAction(pastState, "postfinite.copula.idi");
+    pastState = engine.applyAction(pastState, "predicative.agreement.1sg");
+
+    expect(engine.realize(pastState).surface).toBe("evdim");
+
+    let evidentialState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "ev",
+        pos: "Noun",
+      }),
+    );
+
+    evidentialState = engine.applyAction(evidentialState, "postfinite.copula.imiş");
+    evidentialState = engine.applyAction(evidentialState, "predicative.agreement.1sg");
+
+    expect(engine.realize(evidentialState).surface).toBe("evmişim");
+
+    let questionedState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "ev",
+        pos: "Noun",
+      }),
+    );
+
+    questionedState = engine.applyAction(questionedState, "postfinite.question.mI");
+    questionedState = engine.applyAction(
+      questionedState,
+      "predicative.agreement.1sg",
+    );
+
+    expect(engine.realize(questionedState).surface).toBe("ev miyim");
+  });
+
+  it("supports adjective-based predicative chains without exposing noun inflection", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "güzel",
+        pos: "Noun",
+        category: "Adjective",
+      }),
+    );
+
+    state = engine.applyAction(state, "predicative.agreement.1sg");
+    expect(engine.realize(state).surface).toBe("güzelim");
+    expect(state.currentCategory).toBe("Predicative");
+
+    let evidentialState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "güzel",
+        pos: "Noun",
+        category: "Adjective",
+      }),
+    );
+
+    evidentialState = engine.applyAction(evidentialState, "postfinite.copula.imiş");
+    expect(engine.realize(evidentialState).surface).toBe("güzelmiş");
+
+    let questionedState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "güzel",
+        pos: "Noun",
+        category: "Adjective",
+      }),
+    );
+
+    questionedState = engine.applyAction(questionedState, "postfinite.question.mI");
+    questionedState = engine.applyAction(
+      questionedState,
+      "predicative.agreement.1sg",
+    );
+
+    expect(engine.realize(questionedState).surface).toBe("güzel miyim");
+  });
+
+  it("supports adjective derivation into noun, verb, and adverb categories", () => {
+    let nounState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "güzel",
+        pos: "Noun",
+        category: "Adjective",
+      }),
+    );
+
+    nounState = engine.applyAction(nounState, "adjective.deriv.lIk");
+
+    expect(engine.realize(nounState).surface).toBe("güzellik");
+    expect(nounState.currentCategory).toBe("Noun");
+    expect(
+      engine.getAvailableActions(nounState).some((action) => action.id === "noun.case.loc"),
+    ).toBe(true);
+
+    let verbState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "güzel",
+        pos: "Noun",
+        category: "Adjective",
+      }),
+    );
+
+    verbState = engine.applyAction(verbState, "adjective.deriv.lAş");
+    verbState = engine.applyAction(verbState, "verb.tam.past");
+
+    expect(engine.realize(verbState).surface).toBe("güzelleşti");
+    expect(verbState.currentCategory).toBe("Verb");
+
+    let adverbState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "güzel",
+        pos: "Noun",
+        category: "Adjective",
+      }),
+    );
+
+    adverbState = engine.applyAction(adverbState, "adjective.deriv.CA");
+
+    expect(engine.realize(adverbState).surface).toBe("güzelce");
+    expect(adverbState.currentCategory).toBe("Adverb");
+    expect(engine.getAvailableActions(adverbState)).toHaveLength(0);
+  });
+
+  it("supports assertive predicative forms", () => {
+    let possessedState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "ev",
+        pos: "Noun",
+      }),
+    );
+
+    possessedState = engine.applyAction(possessedState, "noun.possessive.p1sg");
+    possessedState = engine.applyAction(possessedState, "predicative.assertive.dIr");
+
+    expect(engine.realize(possessedState).surface).toBe("evimdir");
+    expect(possessedState.currentCategory).toBe("Predicative");
+
+    let agreedState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "öğretmen",
+        pos: "Noun",
+      }),
+    );
+
+    agreedState = engine.applyAction(agreedState, "predicative.agreement.1sg");
+    agreedState = engine.applyAction(agreedState, "predicative.assertive.dIr");
+
+    expect(engine.realize(agreedState).surface).toBe("öğretmenimdir");
+  });
+
   it("exposes a second post-finite overlay after question particle selection", () => {
     let state = engine.initializeState(
       createLexemeEntryFromRoot({
@@ -680,6 +978,20 @@ describe("TurkishMorphologyEngine V2 core", () => {
     );
 
     expect(engine.realize(conditionalState).surface).toBe("gelecek miyse");
+
+    let nominalState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "ev",
+        pos: "Noun",
+      }),
+    );
+
+    nominalState = engine.applyAction(nominalState, "noun.case.loc");
+    nominalState = engine.applyAction(nominalState, "postfinite.question.mI");
+    nominalState = engine.applyAction(nominalState, "postfinite.copula.imiş");
+
+    expect(engine.realize(nominalState).surface).toBe("evde miymiş");
+    expect(nominalState.currentCategory).toBe("Predicative");
   });
 
   it("closes the post-finite chain after a second overlay has been selected", () => {

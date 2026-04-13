@@ -12,6 +12,7 @@ import {
   type MorphologicalStateV2,
   type MorphologyEvent,
   type PostfiniteOverlayDefinition,
+  type PostfiniteOverlayType,
   type RealizationResult,
   type RealizationTrace,
   type AnalyticConstructionDefinition,
@@ -247,6 +248,69 @@ function resolveVerbAgreementPattern(state: MorphologicalStateV2) {
   }
 }
 
+function getLastPostfiniteOverlayType(
+  state: MorphologicalStateV2,
+): PostfiniteOverlayType | null {
+  const lastPostfiniteToken = [...state.tokens]
+    .reverse()
+    .find((token) => token.kind === "postfinite");
+
+  if (!lastPostfiniteToken || lastPostfiniteToken.kind !== "postfinite") {
+    return null;
+  }
+
+  return getPostfiniteOverlay(lastPostfiniteToken.overlayId).overlayType;
+}
+
+function resolvePredicativeAgreementPattern(
+  state: MorphologicalStateV2,
+  surface: string,
+) {
+  const lastPostfiniteOverlayType = getLastPostfiniteOverlayType(state);
+  const vowelFinal = endsWithVowel(surface);
+  const usesPastLikeAgreement =
+    lastPostfiniteOverlayType === "copula_past" ||
+    lastPostfiniteOverlayType === "conditional";
+
+  if (usesPastLikeAgreement) {
+    switch (state.features.agreement) {
+      case "1sg":
+        return { pattern: "/m/", rules: [] };
+      case "2sg":
+        return { pattern: "/n/", rules: [] };
+      case "1pl":
+        return { pattern: "/k/", rules: [] };
+      case "2pl":
+        return { pattern: "/nIz/", rules: [] };
+      case "3pl":
+        return { pattern: "/lAr/", rules: [] };
+      default:
+        return { pattern: "", rules: [] };
+    }
+  }
+
+  switch (state.features.agreement) {
+    case "1sg":
+      return {
+        pattern: vowelFinal ? "/yIm/" : "/Im/",
+        rules: vowelFinal ? [] : (["consonant_mutation_trigger"] as const),
+      };
+    case "2sg":
+      return { pattern: "/sIn/", rules: [] };
+    case "1pl":
+      return {
+        pattern: vowelFinal ? "/yIz/" : "/Iz/",
+        rules: vowelFinal ? [] : (["consonant_mutation_trigger"] as const),
+      };
+    case "2pl":
+      return { pattern: "/sInIz/", rules: [] };
+    case "3pl":
+      return { pattern: "/lAr/", rules: [] };
+    default:
+      return { pattern: "", rules: [] };
+  }
+}
+
 function resolvePostfiniteRecipe(
   overlay: PostfiniteOverlayDefinition,
   currentSurface: string,
@@ -398,6 +462,26 @@ function resolveTokenRecipe(
         setupEvents,
       };
     }
+    case "predicative.agreement.1sg":
+    case "predicative.agreement.2sg":
+    case "predicative.agreement.1pl":
+    case "predicative.agreement.2pl":
+    case "predicative.agreement.3pl": {
+      const resolved = resolvePredicativeAgreementPattern(state, currentSurface);
+      return {
+        workingSurface: currentSurface,
+        pattern: resolved.pattern,
+        rules: resolved.rules,
+        setupEvents,
+      };
+    }
+    case "predicative.assertive.dIr":
+      return {
+        workingSurface: currentSurface,
+        pattern: "/DIr/",
+        rules: ["consonant_assimilation"],
+        setupEvents,
+      };
     default:
       return {
         workingSurface: currentSurface,

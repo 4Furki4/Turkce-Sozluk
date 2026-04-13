@@ -100,7 +100,11 @@
     "nonfiniteKind": "Non-finite",
     "postfiniteKind": "Overlay",
     "posNoun": "Noun",
+    "posAdjective": "Adjective",
+    "posAdverb": "Adverb",
     "posVerb": "Verb",
+    "categoryAdjective": "Adjective",
+    "categoryAdverb": "Adverb",
     "categoryVerbalNoun": "Verbal noun",
     "categoryParticiple": "Participle",
     "categoryConverb": "Converb",
@@ -116,12 +120,22 @@
       "noun_number": "Number",
       "noun_possessive": "Possessive",
       "noun_case": "Case",
+      "predicative_zero": "Implicit predicate",
+      "predicative_agreement": "Predicative person",
+      "predicative_assertive": "Assertive",
       "verb_polarity": "Polarity",
       "verb_tam": "Tense/Aspect/Mood",
       "verb_agreement": "Agreement"
     },
     "actions": {
       "derivation": {
+        "adjective": {
+          "lIk": "-lık",
+          "lI": "-lı",
+          "lAş": "-laş",
+          "lAştır": "-laştır",
+          "CA": "-ca"
+        },
         "noun": {
           "lIk": "-lık",
           "lI": "-lı",
@@ -226,6 +240,21 @@
           "gen": "Genitive"
         }
       },
+      "predicative": {
+        "zero": {
+          "3sg": "Implicit 3rd singular predicate (Ø)"
+        },
+        "agreement": {
+          "1sg": "1st singular predicate",
+          "2sg": "2nd singular predicate",
+          "1pl": "1st plural predicate",
+          "2pl": "2nd plural predicate",
+          "3pl": "3rd plural predicate"
+        },
+        "assertive": {
+          "dIr": "Assertive copula (-DIr)"
+        }
+      },
       "verb": {
         "polarity": {
           "neg": "Negative"
@@ -250,6 +279,7 @@
       "derivationApplied": "Applied {action}: {before} -> {after}.",
       "analyticApplied": "Added analytic construction {action}.",
       "postfiniteApplied": "Added post-finite overlay {action}.",
+      "predicativeZeroApplied": "Activated the implicit 3rd-singular predicative layer.",
       "phaseChange": "Morphology phase updated: {before} -> {after}.",
       "posChange": "Part of speech updated: {before} -> {after}.",
       "vowelHarmonyFourWay": "Applied 4-way vowel harmony: /{archiphoneme}/ -> {resolved}.",
@@ -267,6 +297,9 @@
       "NounToVerb": "Noun to verb",
       "VerbToNoun": "Verb to noun",
       "VerbToVerb": "Verb to verb",
+      "AdjectiveToNoun": "Adjective to noun",
+      "AdjectiveToVerb": "Adjective to verb",
+      "AdjectiveToAdverb": "Adjective to adverb",
       "AnalyticAbility": "Ability",
       "AnalyticCelerity": "Celerity",
       "AnalyticContinuative": "Continuative",
@@ -283,6 +316,7 @@
       "VerbalNoun": "Verbal noun",
       "Participle": "Participle",
       "Converb": "Converb",
+      "PredicativeInflection": "Predicative inflection",
       "NounInflection": "Noun inflection",
       "VerbInflection": "Verb inflection"
     }

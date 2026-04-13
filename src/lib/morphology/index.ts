@@ -37,6 +37,7 @@ export type {
   HarmonyType,
   HighlightDiff,
   LexemeEntry,
+  LexemeInitialCategory,
   LexemeOrigin,
   MorphCategory,
   MorphemeCategory,

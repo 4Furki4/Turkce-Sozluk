@@ -100,7 +100,11 @@
     "nonfiniteKind": "Fiilimsi",
     "postfiniteKind": "Üst katman",
     "posNoun": "İsim",
+    "posAdjective": "Sıfat",
+    "posAdverb": "Zarf",
     "posVerb": "Fiil",
+    "categoryAdjective": "Sıfat",
+    "categoryAdverb": "Zarf",
     "categoryVerbalNoun": "İsim-fiil",
     "categoryParticiple": "Sıfat-fiil",
     "categoryConverb": "Zarf-fiil",
@@ -116,12 +120,22 @@
       "noun_number": "Sayı",
       "noun_possessive": "İyelik",
       "noun_case": "Hal",
+      "predicative_zero": "Örtük yüklem",
+      "predicative_agreement": "Yüklem kişisi",
+      "predicative_assertive": "Bildirme",
       "verb_polarity": "Kutupluluk",
       "verb_tam": "Zaman/Kip",
       "verb_agreement": "Kişi"
     },
     "actions": {
       "derivation": {
+        "adjective": {
+          "lIk": "-lık",
+          "lI": "-lı",
+          "lAş": "-laş",
+          "lAştır": "-laştır",
+          "CA": "-ca"
+        },
         "noun": {
           "lIk": "-lık",
           "lI": "-lı",
@@ -226,6 +240,21 @@
           "gen": "İlgi hali"
         }
       },
+      "predicative": {
+        "zero": {
+          "3sg": "Örtük 3. tekil yüklem (Ø)"
+        },
+        "agreement": {
+          "1sg": "1. tekil yüklem",
+          "2sg": "2. tekil yüklem",
+          "1pl": "1. çoğul yüklem",
+          "2pl": "2. çoğul yüklem",
+          "3pl": "3. çoğul yüklem"
+        },
+        "assertive": {
+          "dIr": "Bildirme eki (-DIr)"
+        }
+      },
       "verb": {
         "polarity": {
           "neg": "Olumsuzluk"
@@ -250,6 +279,7 @@
       "derivationApplied": "{action} uygulandı: {before} -> {after}.",
       "analyticApplied": "{action} tasvir yapısı eklendi.",
       "postfiniteApplied": "{action} sonlu üst katmanı eklendi.",
+      "predicativeZeroApplied": "Örtük 3. tekil yüklem katmanı etkinleştirildi.",
       "phaseChange": "Morfolojik aşama güncellendi: {before} -> {after}.",
       "posChange": "Kelime türü güncellendi: {before} -> {after}.",
       "vowelHarmonyFourWay": "4 yönlü ünlü uyumu uygulandı: /{archiphoneme}/ -> {resolved}.",
@@ -267,6 +297,9 @@
       "NounToVerb": "İsimden fiil",
       "VerbToNoun": "Fiilden isim",
       "VerbToVerb": "Fiilden fiil",
+      "AdjectiveToNoun": "Sıfattan isim",
+      "AdjectiveToVerb": "Sıfattan fiil",
+      "AdjectiveToAdverb": "Sıfattan zarf",
       "AnalyticAbility": "Yeterlik",
       "AnalyticCelerity": "Tezlik",
       "AnalyticContinuative": "Sürerlik",
@@ -283,6 +316,7 @@
       "VerbalNoun": "İsim-fiil",
       "Participle": "Sıfat-fiil",
       "Converb": "Zarf-fiil",
+      "PredicativeInflection": "Yüklem çekimi",
       "NounInflection": "İsim çekimi",
       "VerbInflection": "Fiil çekimi"
     }

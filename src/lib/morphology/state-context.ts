@@ -21,6 +21,10 @@ export function resolveNextMorphCategory(
   targetCategory: MorphCategory,
   kind: SuffixKind,
 ): MorphCategory {
+  if (kind === "inflectional" && currentCategory !== targetCategory) {
+    return targetCategory;
+  }
+
   if (kind === "derivational") {
     return targetCategory;
   }
@@ -48,6 +52,7 @@ export function createContinuationPolicy({
         allowInflection: true,
         allowFiniteVerbInflection: false,
         allowNominalInflection: true,
+        allowPredicativeInflection: true,
         allowNonfinite: false,
         allowAnalyticConstructions: false,
         allowPostFinite: true,
@@ -58,9 +63,32 @@ export function createContinuationPolicy({
         allowInflection: true,
         allowFiniteVerbInflection: pos === "Verb",
         allowNominalInflection: false,
+        allowPredicativeInflection: false,
         allowNonfinite: phase === "derivation",
         allowAnalyticConstructions: phase === "derivation",
         allowPostFinite: true,
+      };
+    case "Adjective":
+      return {
+        allowDerivation: phase === "derivation",
+        allowInflection: false,
+        allowFiniteVerbInflection: false,
+        allowNominalInflection: false,
+        allowPredicativeInflection: true,
+        allowNonfinite: false,
+        allowAnalyticConstructions: false,
+        allowPostFinite: true,
+      };
+    case "Adverb":
+      return {
+        allowDerivation: false,
+        allowInflection: false,
+        allowFiniteVerbInflection: false,
+        allowNominalInflection: false,
+        allowPredicativeInflection: false,
+        allowNonfinite: false,
+        allowAnalyticConstructions: false,
+        allowPostFinite: false,
       };
     case "VerbalNoun":
       return {
@@ -68,6 +96,7 @@ export function createContinuationPolicy({
         allowInflection: true,
         allowFiniteVerbInflection: false,
         allowNominalInflection: true,
+        allowPredicativeInflection: true,
         allowNonfinite: false,
         allowAnalyticConstructions: false,
         allowPostFinite: true,
@@ -78,6 +107,7 @@ export function createContinuationPolicy({
         allowInflection: true,
         allowFiniteVerbInflection: false,
         allowNominalInflection: true,
+        allowPredicativeInflection: true,
         allowNonfinite: false,
         allowAnalyticConstructions: false,
         allowPostFinite: true,
@@ -88,6 +118,7 @@ export function createContinuationPolicy({
         allowInflection: false,
         allowFiniteVerbInflection: false,
         allowNominalInflection: false,
+        allowPredicativeInflection: false,
         allowNonfinite: false,
         allowAnalyticConstructions: false,
         allowPostFinite: false,
@@ -98,6 +129,7 @@ export function createContinuationPolicy({
         allowInflection: false,
         allowFiniteVerbInflection: false,
         allowNominalInflection: false,
+        allowPredicativeInflection: true,
         allowNonfinite: false,
         allowAnalyticConstructions: false,
         allowPostFinite: true,
@@ -108,6 +140,7 @@ export function createContinuationPolicy({
         allowInflection: false,
         allowFiniteVerbInflection: false,
         allowNominalInflection: false,
+        allowPredicativeInflection: false,
         allowNonfinite: false,
         allowAnalyticConstructions: false,
         allowPostFinite: false,

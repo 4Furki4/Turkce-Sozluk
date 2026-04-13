@@ -3,10 +3,14 @@ export type PartOfSpeech = "Noun" | "Verb";
 export type MorphCategory =
   | "Noun"
   | "Verb"
+  | "Adjective"
+  | "Adverb"
   | "VerbalNoun"
   | "Participle"
   | "Converb"
   | "Predicative";
+
+export type LexemeInitialCategory = Extract<MorphCategory, "Noun" | "Verb" | "Adjective">;
 
 export type HarmonyType = "none" | "2-way" | "4-way";
 
@@ -39,6 +43,9 @@ export type MorphemeSlot =
   | "noun_number"
   | "noun_possessive"
   | "noun_case"
+  | "predicative_zero"
+  | "predicative_agreement"
+  | "predicative_assertive"
   | "verb_polarity"
   | "verb_tam"
   | "verb_agreement";
@@ -49,6 +56,8 @@ export type MorphemeCategory =
   | "number"
   | "possessive"
   | "case"
+  | "predication"
+  | "assertive"
   | "polarity"
   | "tam"
   | "agreement";
@@ -93,6 +102,7 @@ export interface ContinuationPolicy {
   allowInflection: boolean;
   allowFiniteVerbInflection: boolean;
   allowNominalInflection: boolean;
+  allowPredicativeInflection: boolean;
   allowNonfinite: boolean;
   allowAnalyticConstructions: boolean;
   allowPostFinite: boolean;
@@ -103,6 +113,7 @@ export interface LexemeEntry {
   lemma: string;
   rootSurface: string;
   pos: PartOfSpeech;
+  initialCategory: LexemeInitialCategory;
   origin: LexemeOrigin;
   irregularClass?: string;
   flags?: string[];
@@ -123,6 +134,7 @@ export interface MorphemeDefinition {
   group: string;
   labelKey: string;
   preview: string;
+  hidden?: boolean;
   legacySuffixId?: string;
   requires?: Partial<FeatureBundle>;
   blocks?: Partial<FeatureBundle>;
@@ -217,6 +229,7 @@ export type MorphologyEventCode =
   | "derivation_applied"
   | "analytic_applied"
   | "postfinite_applied"
+  | "predicative_zero_applied"
   | "vowel_harmony_2_way"
   | "vowel_harmony_4_way"
   | "consonant_assimilation"
@@ -338,6 +351,7 @@ export interface SuffixDefinition {
 export interface RootLexeme {
   surface: string;
   pos: PartOfSpeech;
+  category?: LexemeInitialCategory;
   phase?: MorphologicalPhase;
   origin?: LexemeOrigin;
   allowConsonantMutation?: boolean;

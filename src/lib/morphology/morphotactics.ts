@@ -12,7 +12,14 @@ import {
 } from "./types";
 
 const SLOT_ORDER: Record<PartOfSpeech, MorphemeSlot[]> = {
-  Noun: ["noun_number", "noun_possessive", "noun_case"],
+  Noun: [
+    "noun_number",
+    "noun_possessive",
+    "noun_case",
+    "predicative_zero",
+    "predicative_agreement",
+    "predicative_assertive",
+  ],
   Verb: ["verb_polarity", "verb_tam", "verb_agreement"],
 };
 
@@ -40,11 +47,11 @@ function matchesConstraints(
 }
 
 function canExposeSlot(state: MorphologicalStateV2, slot: MorphemeSlot): boolean {
-  if (slot !== "verb_agreement") {
-    return true;
+  if (slot === "verb_agreement") {
+    return state.features.tam !== "bare";
   }
 
-  return state.features.tam !== "bare";
+  return slot !== "predicative_agreement" && slot !== "predicative_assertive";
 }
 
 function canExposePostfinite(state: MorphologicalStateV2): boolean {
@@ -52,8 +59,72 @@ function canExposePostfinite(state: MorphologicalStateV2): boolean {
     return false;
   }
 
+  if (state.tokens.some((token) => token.kind !== "analytic" && token.kind !== "postfinite" && token.kind !== "derivational" && token.kind !== "nonfinite" && token.morphemeId === "predicative.assertive.dIr")) {
+    return false;
+  }
+
+  if (state.currentCategory === "Predicative" && state.features.agreement !== "none") {
+    return false;
+  }
+
   if (state.currentCategory === "Verb") {
     return state.features.tam !== "bare";
+  }
+
+  return true;
+}
+
+function getLastPostfiniteOverlay(
+  postfiniteOverlays: PostfiniteOverlayDefinition[],
+): PostfiniteOverlayDefinition | null {
+  return postfiniteOverlays.at(-1) ?? null;
+}
+
+function canExposePredicativeAgreement(
+  state: MorphologicalStateV2,
+  postfiniteOverlays: PostfiniteOverlayDefinition[],
+): boolean {
+  if (!state.continuation.allowPredicativeInflection || state.currentPos !== "Noun") {
+    return false;
+  }
+
+  if (state.currentCategory === "Verb" || state.currentCategory === "Converb") {
+    return false;
+  }
+
+  if (state.features.possessive !== "none") {
+    return false;
+  }
+
+  const lastOverlay = getLastPostfiniteOverlay(postfiniteOverlays);
+
+  return lastOverlay?.overlayType !== "while";
+}
+
+function canExposePredicativeAssertive(
+  state: MorphologicalStateV2,
+  postfiniteOverlays: PostfiniteOverlayDefinition[],
+): boolean {
+  if (!state.continuation.allowPredicativeInflection || state.currentPos !== "Noun") {
+    return false;
+  }
+
+  if (state.currentCategory === "Verb" || state.currentCategory === "Converb") {
+    return false;
+  }
+
+  const lastOverlay = getLastPostfiniteOverlay(postfiniteOverlays);
+
+  if (
+    lastOverlay?.overlayType === "copula_past" ||
+    lastOverlay?.overlayType === "conditional" ||
+    lastOverlay?.overlayType === "while"
+  ) {
+    return false;
+  }
+
+  if (lastOverlay?.overlayType === "question" && state.features.agreement !== "none") {
+    return false;
   }
 
   return true;
@@ -147,6 +218,7 @@ export function getAvailableMorphologyActions(
     !state.continuation.allowInflection &&
     !state.continuation.allowDerivation &&
     !state.continuation.allowNonfinite &&
+    !state.continuation.allowPredicativeInflection &&
     !state.continuation.allowPostFinite
   ) {
     return [];
@@ -172,6 +244,7 @@ export function getAvailableMorphologyActions(
   const derivationalActions =
     state.continuation.allowDerivation
       ? MORPHEME_CATALOG.filter((morpheme) => morpheme.kind === "derivational")
+          .filter((morpheme) => !morpheme.hidden)
           .filter((morpheme) => morpheme.sourcePos === state.currentPos)
           .filter((morpheme) => morpheme.sourceCategories.includes(state.currentCategory))
           .filter((morpheme) => matchesConstraints(state, morpheme))
@@ -181,6 +254,7 @@ export function getAvailableMorphologyActions(
   const nonfiniteActions =
     state.continuation.allowNonfinite
       ? MORPHEME_CATALOG.filter((morpheme) => morpheme.kind === "nonfinite")
+          .filter((morpheme) => !morpheme.hidden)
           .filter((morpheme) => morpheme.sourcePos === state.currentPos)
           .filter((morpheme) => morpheme.sourceCategories.includes(state.currentCategory))
           .filter((morpheme) => matchesConstraints(state, morpheme))
@@ -202,9 +276,17 @@ export function getAvailableMorphologyActions(
 
   const inflectionalActions = MORPHEME_CATALOG
     .filter((morpheme) => morpheme.kind === "inflectional")
+    .filter((morpheme) => !morpheme.hidden)
     .filter((morpheme) => morpheme.sourcePos === state.currentPos)
     .filter((morpheme) => morpheme.sourceCategories.includes(state.currentCategory))
     .filter((morpheme) => {
+      if (
+        morpheme.slot === "predicative_agreement" ||
+        morpheme.slot === "predicative_assertive"
+      ) {
+        return state.continuation.allowPredicativeInflection;
+      }
+
       if (!state.continuation.allowInflection) {
         return false;
       }
@@ -231,6 +313,14 @@ export function getAvailableMorphologyActions(
 
       if (slotIndex <= highestChosenIndex) {
         return false;
+      }
+
+      if (morpheme.slot === "predicative_agreement") {
+        return canExposePredicativeAgreement(state, chosenPostfiniteOverlays);
+      }
+
+      if (morpheme.slot === "predicative_assertive") {
+        return canExposePredicativeAssertive(state, chosenPostfiniteOverlays);
       }
 
       if (!canExposeSlot(state, morpheme.slot)) {

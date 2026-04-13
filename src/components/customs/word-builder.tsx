@@ -33,15 +33,16 @@ import {
   getSlotTranslationKey,
   TurkishMorphologyEngine,
   type DiffSegment,
+  type LexemeInitialCategory,
   type MorphologicalAction,
   type MorphologicalStateV2,
   type MorphologyAttestation,
   type MorphologyEvent,
-  type PartOfSpeech,
   type RootLexeme,
 } from "@/src/lib/morphology";
 
 type MutationMode = "auto" | "always" | "never";
+type BuilderLexicalCategory = LexemeInitialCategory;
 type DictionarySuggestion = RouterOutputs["search"]["getWords"][number];
 type DictionaryLookup = RouterOutputs["word"]["getWord"];
 type BuilderSection = {
@@ -55,13 +56,14 @@ const engine = new TurkishMorphologyEngine();
 
 const ROOT_SAMPLES: Array<{
   surface: string;
-  pos: PartOfSpeech;
+  pos: BuilderLexicalCategory;
   origin: "native" | "foreign";
   mutationMode: MutationMode;
 }> = [
   { surface: "kitap", pos: "Noun", origin: "native", mutationMode: "auto" },
   { surface: "aile", pos: "Noun", origin: "native", mutationMode: "auto" },
   { surface: "ev", pos: "Noun", origin: "native", mutationMode: "auto" },
+  { surface: "güzel", pos: "Adjective", origin: "native", mutationMode: "auto" },
   { surface: "yaz", pos: "Verb", origin: "native", mutationMode: "auto" },
   { surface: "gör", pos: "Verb", origin: "native", mutationMode: "auto" },
   { surface: "link", pos: "Noun", origin: "foreign", mutationMode: "auto" },
@@ -69,15 +71,17 @@ const ROOT_SAMPLES: Array<{
 
 function createRootLexeme(
   surface: string,
-  pos: PartOfSpeech,
+  category: BuilderLexicalCategory,
   origin: "native" | "foreign",
   mutationMode: MutationMode,
 ): RootLexeme {
   const normalizedSurface = surface.trim().toLocaleLowerCase("tr");
+  const pos = category === "Verb" ? "Verb" : "Noun";
 
   return {
     surface: normalizedSurface,
     pos,
+    category,
     origin,
     forceConsonantMutation: mutationMode === "always",
     allowConsonantMutation: mutationMode === "never" ? false : undefined,
@@ -107,7 +111,7 @@ function renderDiff(segments: DiffSegment[], mode: "before" | "after") {
   });
 }
 
-function mapDictionaryPos(value?: string): PartOfSpeech | null {
+function mapDictionaryPos(value?: string): BuilderLexicalCategory | null {
   const normalized = value?.trim().toLocaleLowerCase("tr");
 
   if (!normalized) {
@@ -123,6 +127,13 @@ function mapDictionaryPos(value?: string): PartOfSpeech | null {
   }
 
   if (
+    normalized.includes("sıfat") ||
+    normalized === "adjective"
+  ) {
+    return "Adjective";
+  }
+
+  if (
     normalized.includes("isim") ||
     normalized === "ad" ||
     normalized === "noun"
@@ -133,8 +144,8 @@ function mapDictionaryPos(value?: string): PartOfSpeech | null {
   return null;
 }
 
-function extractDictionaryPosOptions(result: DictionaryLookup | undefined): PartOfSpeech[] {
-  const posSet = new Set<PartOfSpeech>();
+function extractDictionaryPosOptions(result: DictionaryLookup | undefined): BuilderLexicalCategory[] {
+  const posSet = new Set<BuilderLexicalCategory>();
 
   result?.[0]?.word_data.meanings.forEach((meaning) => {
     const mapped = mapDictionaryPos(meaning.part_of_speech);
@@ -211,7 +222,18 @@ function getActionSections(actions: MorphologicalAction[]): BuilderSection[] {
   ];
 }
 
-function getLocalizedPos(t: ReturnType<typeof useTranslations>, pos: PartOfSpeech) {
+function getLocalizedPos(
+  t: ReturnType<typeof useTranslations>,
+  pos: "Noun" | "Verb" | "Adjective" | "Adverb",
+) {
+  if (pos === "Adjective") {
+    return t("posAdjective");
+  }
+
+  if (pos === "Adverb") {
+    return t("posAdverb");
+  }
+
   return pos === "Noun" ? t("posNoun") : t("posVerb");
 }
 
@@ -226,10 +248,14 @@ function getLocalizedCategory(
       return t("categoryParticiple");
     case "Converb":
       return t("categoryConverb");
+    case "Adjective":
+      return t("categoryAdjective");
+    case "Adverb":
+      return t("categoryAdverb");
     case "Predicative":
       return t("categoryPredicative");
     default:
-      return getLocalizedPos(t, category as PartOfSpeech);
+      return getLocalizedPos(t, category as BuilderLexicalCategory);
   }
 }
 
@@ -259,8 +285,8 @@ function getEventMessage(
   if (event.code === "derivation_applied") {
     return t(event.i18nKey, {
       action: t(event.params.actionKey),
-      before: getLocalizedPos(t, event.params.before as PartOfSpeech),
-      after: getLocalizedPos(t, event.params.after as PartOfSpeech),
+      before: getLocalizedPos(t, event.params.before as BuilderLexicalCategory),
+      after: getLocalizedPos(t, event.params.after as BuilderLexicalCategory),
     });
   }
 
@@ -285,8 +311,8 @@ function getEventMessage(
 
   if (event.code === "pos_change") {
     return t(event.i18nKey, {
-      before: getLocalizedPos(t, event.params.before as PartOfSpeech),
-      after: getLocalizedPos(t, event.params.after as PartOfSpeech),
+      before: getLocalizedPos(t, event.params.before as BuilderLexicalCategory),
+      after: getLocalizedPos(t, event.params.after as BuilderLexicalCategory),
     });
   }
 
@@ -387,7 +413,7 @@ export default function WordBuilder() {
   );
 
   const [draftSurface, setDraftSurface] = useState(initialSample.surface);
-  const [draftPos, setDraftPos] = useState<PartOfSpeech>(initialSample.pos);
+  const [draftPos, setDraftPos] = useState<BuilderLexicalCategory>(initialSample.pos);
   const [draftOrigin, setDraftOrigin] = useState<"native" | "foreign">(
     initialSample.origin,
   );
@@ -397,7 +423,7 @@ export default function WordBuilder() {
   const [selectedDictionaryWord, setSelectedDictionaryWord] =
     useState<DictionarySuggestion | null>(null);
   const [selectedDictionaryPos, setSelectedDictionaryPos] =
-    useState<PartOfSpeech | null>(null);
+    useState<BuilderLexicalCategory | null>(null);
   const [builderState, setBuilderState] = useState<MorphologicalStateV2>(
     createBuilderState(initialRoot),
   );
@@ -599,6 +625,7 @@ export default function WordBuilder() {
       createBuilderState({
         surface: current.lexeme.rootSurface,
         pos: current.lexeme.pos,
+        category: current.lexeme.initialCategory,
         origin: current.lexeme.origin,
         forceConsonantMutation: current.lexeme.mutationPolicy === "always",
         allowConsonantMutation:
@@ -778,7 +805,7 @@ export default function WordBuilder() {
                 placeholder={t("dictionaryPosPlaceholder")}
                 selectedKeys={selectedDictionaryPos ? [selectedDictionaryPos] : []}
                 onSelectionChange={(keys) => {
-                  const value = Array.from(keys)[0] as PartOfSpeech | undefined;
+                  const value = Array.from(keys)[0] as BuilderLexicalCategory | undefined;
                   setSelectedDictionaryPos(value ?? null);
                 }}
               >
@@ -791,7 +818,7 @@ export default function WordBuilder() {
                 label={t("posLabel")}
                 selectedKeys={[draftPos]}
                 onSelectionChange={(keys) => {
-                  const value = Array.from(keys)[0] as PartOfSpeech | undefined;
+                  const value = Array.from(keys)[0] as BuilderLexicalCategory | undefined;
                   if (value) {
                     setDraftPos(value);
                   }
@@ -799,6 +826,7 @@ export default function WordBuilder() {
                 isDisabled={Boolean(selectedDictionaryWord)}
               >
                 <SelectItem key="Noun">{t("posNoun")}</SelectItem>
+                <SelectItem key="Adjective">{t("posAdjective")}</SelectItem>
                 <SelectItem key="Verb">{t("posVerb")}</SelectItem>
               </Select>
             )}

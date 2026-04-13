@@ -15,6 +15,7 @@ import {
   type LexemeEntry,
   type AnalyticConstructionDefinition,
   type MorphologicalAction,
+  type MorphCategory,
   type MorphologicalStateV2,
   type MorphologyEvent,
   type MorphologyHistoryEntry,
@@ -93,9 +94,51 @@ function createEvent(
   };
 }
 
+function resolvePostfiniteCategory(currentCategory: MorphCategory): MorphCategory {
+  return currentCategory === "Verb" ? currentCategory : "Predicative";
+}
+
+function shouldInsertImplicitPredicativeZero(
+  state: MorphologicalStateV2,
+  action: MorphologicalAction,
+): boolean {
+  if (state.currentPos !== "Noun") {
+    return false;
+  }
+
+  if (
+    state.currentCategory !== "Noun" &&
+    state.currentCategory !== "Adjective" &&
+    state.currentCategory !== "VerbalNoun" &&
+    state.currentCategory !== "Participle"
+  ) {
+    return false;
+  }
+
+  if (
+    state.tokens.some(
+      (token) => token.kind !== "analytic" && token.kind !== "postfinite" && token.morphemeId === "predicative.zero.3sg",
+    )
+  ) {
+    return false;
+  }
+
+  if (action.kind === "postfinite") {
+    return true;
+  }
+
+  if (action.kind === "analytic") {
+    return false;
+  }
+
+  return (
+    action.slot === "predicative_agreement" || action.slot === "predicative_assertive"
+  );
+}
+
 export class TurkishMorphologyEngineV2 {
   public initializeState(lexeme: LexemeEntry): MorphologicalStateV2 {
-    const context = createStateContext(lexeme.pos, "derivation");
+    const context = createStateContext(lexeme.pos, "derivation", lexeme.initialCategory);
 
     return {
       lexeme,
@@ -124,12 +167,24 @@ export class TurkishMorphologyEngineV2 {
 
     const beforeRealization = this.realize(state);
     const nextStep = state.history.length + 1;
+    const implicitTokens: MorphToken[] = [];
     let token: MorphToken;
     let nextPhase = state.phase;
     let nextCurrentPos = state.currentPos;
     let nextCurrentCategory = state.currentCategory;
     let nextFeatures = { ...state.features };
     let derivationApplied = false;
+
+    if (shouldInsertImplicitPredicativeZero(state, action)) {
+      const implicitPredicativeZero = getMorphemeById("predicative.zero.3sg");
+      implicitTokens.push({
+        id: `${implicitPredicativeZero.id}#${nextStep}`,
+        morphemeId: implicitPredicativeZero.id,
+        kind: implicitPredicativeZero.kind,
+        slot: implicitPredicativeZero.slot,
+        selectedAtStep: nextStep,
+      });
+    }
 
     if (action.kind === "analytic") {
       const construction = getAnalyticConstructionById(action.constructionId);
@@ -156,6 +211,7 @@ export class TurkishMorphologyEngineV2 {
         selectedAtStep: nextStep,
       };
       nextPhase = "postfinite";
+      nextCurrentCategory = resolvePostfiniteCategory(state.currentCategory);
     } else {
       const morpheme = getMorphemeById(action.morphemeId);
       token = {
@@ -166,8 +222,10 @@ export class TurkishMorphologyEngineV2 {
         selectedAtStep: nextStep,
       };
       nextPhase =
-        morpheme.kind === "inflectional" || morpheme.kind === "nonfinite"
-          ? "inflection"
+        morpheme.targetCategory === "Predicative"
+          ? "postfinite"
+          : morpheme.kind === "inflectional" || morpheme.kind === "nonfinite"
+            ? "inflection"
           : state.phase;
       nextCurrentPos = morpheme.targetPos;
       nextCurrentCategory = resolveNextMorphCategory(
@@ -197,7 +255,7 @@ export class TurkishMorphologyEngineV2 {
     const nextStateBase: MorphologicalStateV2 = {
       lexeme: state.lexeme,
       ...nextContext,
-      tokens: [...state.tokens, token],
+      tokens: [...state.tokens, ...implicitTokens, token],
       features: nextFeatures,
       surface: state.surface,
       history: state.history,
@@ -243,6 +301,17 @@ export class TurkishMorphologyEngineV2 {
           action,
         ),
       );
+    }
+
+    if (implicitTokens.length > 0) {
+      events.push({
+        code: "predicative_zero_applied",
+        i18nKey: "events.predicativeZeroApplied",
+        params: {},
+        stage: "morphotactics",
+        slot: "predicative_zero",
+        morphemeId: "predicative.zero.3sg",
+      });
     }
 
     if (derivationApplied) {
@@ -330,11 +399,15 @@ export class TurkishMorphologyEngineV2 {
       return state;
     }
 
-    const tokens = state.tokens.slice(0, -1);
     const history = state.history.slice(0, -1);
+    const tokens = state.tokens.filter((token) => token.selectedAtStep <= history.length);
     let features = createDefaultFeatureBundle();
     let currentPos = state.lexeme.pos;
-    let currentCategory = createStateContext(state.lexeme.pos, "derivation").currentCategory;
+    let currentCategory = createStateContext(
+      state.lexeme.pos,
+      "derivation",
+      state.lexeme.initialCategory,
+    ).currentCategory;
     let phase: MorphologicalStateV2["phase"] = "derivation";
 
     tokens.forEach((token) => {
@@ -351,6 +424,7 @@ export class TurkishMorphologyEngineV2 {
 
       if (token.kind === "postfinite") {
         phase = "postfinite";
+        currentCategory = resolvePostfiniteCategory(currentCategory);
         return;
       }
 
@@ -375,7 +449,12 @@ export class TurkishMorphologyEngineV2 {
         ...features,
         ...morpheme.setsFeatures,
       };
-      phase = "inflection";
+      phase = morpheme.targetCategory === "Predicative" ? "postfinite" : "inflection";
+      currentCategory = resolveNextMorphCategory(
+        currentCategory,
+        morpheme.targetCategory,
+        morpheme.kind,
+      );
     });
     const nextContext = createStateContext(currentPos, phase, currentCategory);
 
