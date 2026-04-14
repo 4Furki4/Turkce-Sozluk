@@ -35,6 +35,8 @@ export type LexemeOrigin = "native" | "foreign";
 
 export type MutationPolicy = "auto" | "always" | "never";
 
+export type DerivationRepeatPolicy = "allow" | "once_per_chain";
+
 export type MorphemeSlot =
   | "analytic"
   | "postfinite"
@@ -117,6 +119,8 @@ export interface LexemeEntry {
   origin: LexemeOrigin;
   irregularClass?: string;
   flags?: string[];
+  blockedMorphemeIds?: string[];
+  blockedGroups?: string[];
   mutationPolicy?: MutationPolicy;
   allomorphOverrides?: Partial<Record<string, string>>;
   mutationOverrides?: Partial<Record<"p" | "ç" | "t" | "k", string>>;
@@ -138,6 +142,10 @@ export interface MorphemeDefinition {
   legacySuffixId?: string;
   requires?: Partial<FeatureBundle>;
   blocks?: Partial<FeatureBundle>;
+  conflictsWithMorphemeIds?: string[];
+  derivationFamily?: string;
+  derivationRepeatPolicy?: DerivationRepeatPolicy;
+  naturalnessWeight?: number;
   realizationPattern: string;
   phonologyTriggers: RuleId[];
   setsFeatures: Partial<FeatureBundle>;
@@ -166,6 +174,7 @@ export interface AnalyticConstructionDefinition {
   constructionType: AnalyticConstructionType;
   labelKey: string;
   preview: string;
+  naturalnessWeight?: number;
   linkerPattern: string;
   linkerPhonologyTriggers: RuleId[];
   separator?: string;
@@ -189,6 +198,7 @@ export interface PostfiniteOverlayDefinition {
   overlayType: PostfiniteOverlayType;
   labelKey: string;
   preview: string;
+  naturalnessWeight?: number;
   allowAsFirst: boolean;
   allowAfterQuestion?: boolean;
 }
@@ -267,6 +277,7 @@ export interface MorphemeAction {
   sourcePos: PartOfSpeech;
   targetPos: PartOfSpeech;
   attestationStatus?: "unknown" | "attested" | "unattested";
+  naturalnessWeight?: number;
 }
 
 export interface AnalyticConstructionAction {
@@ -281,6 +292,7 @@ export interface AnalyticConstructionAction {
   reasonIfDisabled?: string;
   sourcePos: "Verb";
   targetPos: "Verb";
+  naturalnessWeight?: number;
 }
 
 export interface PostfiniteOverlayAction {
@@ -295,6 +307,7 @@ export interface PostfiniteOverlayAction {
   reasonIfDisabled?: string;
   sourcePos: PartOfSpeech;
   targetPos: PartOfSpeech;
+  naturalnessWeight?: number;
 }
 
 export type MorphologicalAction =

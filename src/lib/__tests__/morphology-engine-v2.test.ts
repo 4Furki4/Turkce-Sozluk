@@ -165,6 +165,28 @@ describe("TurkishMorphologyEngine V2 core", () => {
     );
   });
 
+  it("uses curated lexical aorist overrides for other high-frequency irregular verbs", () => {
+    let alState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "al",
+        pos: "Verb",
+      }),
+    );
+
+    alState = engine.applyAction(alState, "verb.tam.aor");
+    expect(engine.realize(alState).surface).toBe("alır");
+
+    let olState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "ol",
+        pos: "Verb",
+      }),
+    );
+
+    olState = engine.applyAction(olState, "verb.tam.aor");
+    expect(engine.realize(olState).surface).toBe("olur");
+  });
+
   it("handles lexical verb softening for git before vowel-initial derivational and nonfinite forms", () => {
     let derivationState = engine.initializeState(
       createLexemeEntryFromRoot({
@@ -342,6 +364,182 @@ describe("TurkishMorphologyEngine V2 core", () => {
     expect(
       engine.getAvailableActions(state).some((action) => action.id === "noun.case.acc"),
     ).toBe(true);
+  });
+
+  it("inserts buffer y before agentive -ICI on vowel-final verbal stems", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "güzel",
+        pos: "Noun",
+        category: "Adjective",
+      }),
+    );
+
+    state = engine.applyAction(state, "adjective.deriv.lIk");
+    state = engine.applyAction(state, "noun.deriv.lA");
+    state = engine.applyAction(state, "verb.deriv.ICI");
+
+    expect(engine.realize(state).surface).toBe("güzellikleyici");
+  });
+
+  it("does not expose the same derivational morpheme twice in a row", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "kitap",
+        pos: "Noun",
+      }),
+    );
+
+    state = engine.applyAction(state, "noun.deriv.lIk");
+
+    expect(engine.realize(state).surface).toBe("kitaplık");
+    expect(
+      engine.getAvailableActions(state).some((action) => action.id === "noun.deriv.lIk"),
+    ).toBe(false);
+    expect(
+      engine.getAvailableActions(state).some((action) => action.id === "noun.deriv.lI"),
+    ).toBe(true);
+  });
+
+  it("does not expose the same derivation family twice in one chain", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "güzel",
+        pos: "Noun",
+        category: "Adjective",
+      }),
+    );
+
+    state = engine.applyAction(state, "adjective.deriv.lIk");
+
+    const actions = engine.getAvailableActions(state);
+
+    expect(actions.some((action) => action.id === "noun.deriv.lIk")).toBe(false);
+    expect(actions.some((action) => action.id === "noun.deriv.lI")).toBe(true);
+  });
+
+  it("ranks more natural noun derivations before marginal ones", () => {
+    const state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "kitap",
+        pos: "Noun",
+      }),
+    );
+
+    const derivationIds = engine
+      .getAvailableActions(state)
+      .filter((action) => action.kind === "derivational")
+      .map((action) => action.id);
+
+    expect(derivationIds.indexOf("noun.deriv.lIk")).toBeLessThan(
+      derivationIds.indexOf("noun.deriv.sA"),
+    );
+    expect(derivationIds.indexOf("noun.deriv.lIk")).toBeLessThan(
+      derivationIds.indexOf("noun.deriv.DAş"),
+    );
+  });
+
+  it("ranks common post-finite overlays before marked ones", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "gel",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.tam.prog");
+
+    const postfiniteIds = engine
+      .getAvailableActions(state)
+      .filter((action) => action.kind === "postfinite")
+      .map((action) => action.id);
+
+    expect(postfiniteIds.indexOf("postfinite.question.mI")).toBeLessThan(
+      postfiniteIds.indexOf("postfinite.while.iken"),
+    );
+    expect(postfiniteIds.indexOf("postfinite.copula.idi")).toBeLessThan(
+      postfiniteIds.indexOf("postfinite.while.iken"),
+    );
+  });
+
+  it("respects lexeme-level blocked morphemes and groups", () => {
+    const state = engine.initializeState({
+      ...createLexemeEntryFromRoot({
+        surface: "kitap",
+        pos: "Noun",
+      }),
+      blockedMorphemeIds: ["noun.deriv.lIk"],
+      blockedGroups: ["NounToVerb"],
+    });
+
+    const actions = engine.getAvailableActions(state);
+
+    expect(actions.some((action) => action.id === "noun.deriv.lIk")).toBe(false);
+    expect(actions.some((action) => action.id === "noun.deriv.lA")).toBe(false);
+    expect(actions.some((action) => action.id === "noun.deriv.lI")).toBe(true);
+  });
+
+  it("keeps passive, reflexive, and reciprocal voice morphemes mutually exclusive", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "yaz",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.voice.Il");
+
+    const actions = engine.getAvailableActions(state);
+
+    expect(actions.some((action) => action.id === "verb.voice.In")).toBe(false);
+    expect(actions.some((action) => action.id === "verb.voice.Iş")).toBe(false);
+    expect(actions.some((action) => action.id === "verb.voice.DIr")).toBe(true);
+  });
+
+  it("treats reflexive and reciprocal as root-level voice steps but still allows causative after them", () => {
+    let reflexiveState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "giy",
+        pos: "Verb",
+      }),
+    );
+
+    reflexiveState = engine.applyAction(reflexiveState, "verb.voice.In");
+
+    let actions = engine.getAvailableActions(reflexiveState);
+
+    expect(actions.some((action) => action.id === "verb.voice.DIr")).toBe(true);
+    expect(actions.some((action) => action.id === "verb.voice.Iş")).toBe(false);
+
+    let causativeState = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "gör",
+        pos: "Verb",
+      }),
+    );
+
+    causativeState = engine.applyAction(causativeState, "verb.voice.DIr");
+
+    actions = engine.getAvailableActions(causativeState);
+
+    expect(actions.some((action) => action.id === "verb.voice.In")).toBe(false);
+    expect(actions.some((action) => action.id === "verb.voice.Iş")).toBe(false);
+    expect(actions.some((action) => action.id === "verb.voice.Il")).toBe(true);
+  });
+
+  it("closes voice derivation after an analytic construction has been selected", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "yap",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.analytic.ability.ebil");
+
+    const actions = engine.getAvailableActions(state);
+
+    expect(actions.some((action) => action.id.startsWith("verb.voice."))).toBe(false);
   });
 
   it("supports verbal noun forms and opens nominal inflection afterwards", () => {
@@ -555,6 +753,50 @@ describe("TurkishMorphologyEngine V2 core", () => {
     expect(
       engine.getAvailableActions(state).some((action) => action.kind === "analytic"),
     ).toBe(false);
+  });
+
+  it("supports negative finite chains after ability constructions", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "yap",
+        pos: "Verb",
+      }),
+    );
+
+    state = engine.applyAction(state, "verb.analytic.ability.ebil");
+    state = engine.applyAction(state, "verb.polarity.neg");
+    state = engine.applyAction(state, "verb.tam.past");
+    state = engine.applyAction(state, "verb.agreement.1pl");
+
+    expect(engine.realize(state).surface).toBe("yapabilemedik");
+  });
+
+  it("keeps participle derivation available after ability plus negative and reaches user-facing long chains", () => {
+    let state = engine.initializeState(
+      createLexemeEntryFromRoot({
+        surface: "güzel",
+        pos: "Noun",
+        category: "Adjective",
+      }),
+    );
+
+    state = engine.applyAction(state, "adjective.deriv.lAş");
+    state = engine.applyAction(state, "verb.voice.DIr");
+    state = engine.applyAction(state, "verb.analytic.ability.ebil");
+    state = engine.applyAction(state, "verb.polarity.neg");
+
+    expect(engine.realize(state).surface).toBe("güzelleştirebileme");
+    expect(
+      engine
+        .getAvailableActions(state)
+        .some((action) => action.id === "verb.nonfinite.participle.DIK"),
+    ).toBe(true);
+
+    state = engine.applyAction(state, "verb.nonfinite.participle.DIK");
+    state = engine.applyAction(state, "noun.number.pl");
+    state = engine.applyAction(state, "noun.possessive.p1pl");
+
+    expect(engine.realize(state).surface).toBe("güzelleştirebilemediklerimiz");
   });
 
   it("exposes post-finite overlays after finite verb inflection starts", () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Autocomplete,
   AutocompleteItem,
@@ -29,6 +29,9 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import CustomCard from "./heroui/custom-card";
 import {
+  splitActionsByRarity,
+  sortActionsForDisplay,
+  suppressLowFrequencyDerivations,
   createLexemeEntryFromRoot,
   getSlotTranslationKey,
   TurkishMorphologyEngine,
@@ -51,6 +54,27 @@ type BuilderSection = {
   kind: MorphologicalAction["kind"];
   actions: MorphologicalAction[];
 };
+type CandidateDerivationAction = {
+  actionId: string;
+  surface: string;
+  cacheKey: string;
+};
+type ActionTabKey =
+  | "recommended"
+  | "derivational"
+  | "analytic"
+  | "nonfinite"
+  | "inflectional"
+  | "postfinite";
+
+const ACTION_TAB_ORDER: ActionTabKey[] = [
+  "recommended",
+  "derivational",
+  "analytic",
+  "nonfinite",
+  "inflectional",
+  "postfinite",
+];
 
 const engine = new TurkishMorphologyEngine();
 
@@ -220,6 +244,109 @@ function getActionSections(actions: MorphologicalAction[]): BuilderSection[] {
       actions: groupedActions,
     })),
   ];
+}
+
+function getActionTabLabelKey(tab: ActionTabKey) {
+  switch (tab) {
+    case "recommended":
+      return "tabRecommended";
+    case "derivational":
+      return "availableDerivations";
+    case "analytic":
+      return "availableAnalytics";
+    case "nonfinite":
+      return "availableNonfinite";
+    case "inflectional":
+      return "availableInflections";
+    case "postfinite":
+      return "availablePostfinite";
+    default:
+      return "availableSuffixes";
+  }
+}
+
+function getRecommendedSections(
+  sections: BuilderSection[],
+  phase: MorphologicalStateV2["phase"],
+): BuilderSection[] {
+  const priorities: Record<MorphologicalAction["kind"], number> =
+    phase === "inflection"
+      ? {
+          inflectional: 0,
+          postfinite: 1,
+          nonfinite: 2,
+          analytic: 3,
+          derivational: 4,
+        }
+      : phase === "postfinite"
+        ? {
+            postfinite: 0,
+            inflectional: 1,
+            nonfinite: 2,
+            analytic: 3,
+            derivational: 4,
+          }
+        : {
+            derivational: 0,
+            nonfinite: 1,
+            analytic: 2,
+            inflectional: 3,
+            postfinite: 4,
+          };
+
+  const preparedSections = sections
+    .map((section) => ({
+      ...section,
+      actions: sortActionsForDisplay(
+        section.kind === "derivational"
+          ? suppressLowFrequencyDerivations(section.actions)
+          : section.actions,
+      ),
+    }))
+    .filter((section) => section.actions.length > 0);
+
+  const sortedSections = [...preparedSections].sort(
+    (left, right) => priorities[left.kind] - priorities[right.kind],
+  );
+  const recommended: BuilderSection[] = [];
+  let remaining = 8;
+
+  sortedSections.forEach((section, index) => {
+    if (remaining <= 0) {
+      return;
+    }
+
+    const cap = index === 0 ? 3 : 2;
+    const actions = section.actions.slice(0, Math.min(cap, remaining));
+
+    if (actions.length > 0) {
+      recommended.push({ ...section, actions });
+      remaining -= actions.length;
+    }
+  });
+
+  return recommended;
+}
+
+function getTabSections(
+  tab: ActionTabKey,
+  sections: BuilderSection[],
+  phase: MorphologicalStateV2["phase"],
+) {
+  if (tab === "recommended") {
+    return getRecommendedSections(sections, phase);
+  }
+
+  return sections
+    .filter((section) => section.kind === tab)
+    .map((section) => ({
+      ...section,
+      actions: sortActionsForDisplay(section.actions),
+    }));
+}
+
+function getSectionStorageKey(tab: ActionTabKey, section: BuilderSection) {
+  return `${tab}:${section.kind}:${section.key}`;
 }
 
 function getLocalizedPos(
@@ -424,9 +551,19 @@ export default function WordBuilder() {
     useState<DictionarySuggestion | null>(null);
   const [selectedDictionaryPos, setSelectedDictionaryPos] =
     useState<BuilderLexicalCategory | null>(null);
+  const [activeActionTab, setActiveActionTab] =
+    useState<ActionTabKey>("recommended");
+  const [selectedStepNumber, setSelectedStepNumber] = useState<number | null>(null);
+  const [expandedRareSections, setExpandedRareSections] = useState<
+    Record<string, boolean>
+  >({});
+  const [candidateAttestationCache, setCandidateAttestationCache] = useState<
+    Record<string, MorphologyAttestation | null>
+  >({});
   const [builderState, setBuilderState] = useState<MorphologicalStateV2>(
     createBuilderState(initialRoot),
   );
+  const previousHistoryLengthRef = useRef(builderState.history.length);
 
   const debouncedDictionaryQuery = useDebounce(dictionaryQuery, 250);
   const dictionarySuggestionsQuery = api.search.getWords.useQuery(
@@ -557,9 +694,125 @@ export default function WordBuilder() {
 
   const realization = engine.realize(builderState);
   const availableActions = engine.getAvailableActions(builderState);
+  const derivationCandidates = useMemo<CandidateDerivationAction[]>(
+    () =>
+      availableActions
+        .filter((action) => action.kind === "derivational")
+        .map((action) => {
+          const nextState = engine.applyAction(builderState, action.id);
+          const surface = engine.realize(nextState).surface;
+
+          return {
+            actionId: action.id,
+            surface,
+            cacheKey: `${action.id}::${surface}`,
+          };
+        }),
+    [availableActions, builderState],
+  );
+  const candidateAttestationByActionId = useMemo(
+    () =>
+      derivationCandidates.reduce<Record<string, MorphologyAttestation | null | undefined>>(
+        (accumulator, candidate) => {
+          accumulator[candidate.actionId] =
+            builderState.attestationCache[candidate.surface] ??
+            candidateAttestationCache[candidate.cacheKey];
+          return accumulator;
+        },
+        {},
+      ),
+    [builderState.attestationCache, candidateAttestationCache, derivationCandidates],
+  );
+
+  useEffect(() => {
+    const pendingCandidates = derivationCandidates.filter((candidate) => {
+      if (builderState.attestationCache[candidate.surface]) {
+        return false;
+      }
+
+      return !Object.prototype.hasOwnProperty.call(
+        candidateAttestationCache,
+        candidate.cacheKey,
+      );
+    });
+
+    if (pendingCandidates.length === 0) {
+      return;
+    }
+
+    let cancelled = false;
+
+    void (async () => {
+      for (const pending of pendingCandidates) {
+        let attestation: MorphologyAttestation = {
+          matched: false,
+          wordName: pending.surface,
+        };
+
+        try {
+          const result = await utils.word.getWord.fetch({
+            name: pending.surface,
+            skipLogging: true,
+          });
+          const matchedWord = result?.[0]?.word_data;
+
+          if (
+            matchedWord &&
+            matchedWord.word_name.toLocaleLowerCase("tr") ===
+              pending.surface.toLocaleLowerCase("tr")
+          ) {
+            attestation = {
+              matched: true,
+              wordId: matchedWord.word_id,
+              wordName: matchedWord.word_name,
+            };
+          }
+        } catch {
+          attestation = {
+            matched: false,
+            wordName: pending.surface,
+          };
+        }
+
+        if (cancelled) {
+          return;
+        }
+
+        setCandidateAttestationCache((current) => ({
+          ...current,
+          [pending.cacheKey]: attestation,
+        }));
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    builderState.attestationCache,
+    candidateAttestationCache,
+    derivationCandidates,
+    utils.word.getWord,
+  ]);
   const actionSections = useMemo(
     () => getActionSections(availableActions),
     [availableActions],
+  );
+  const visibleActionSections = useMemo(
+    () =>
+      getTabSections(
+        activeActionTab,
+        actionSections,
+        builderState.phase,
+      ),
+    [actionSections, activeActionTab, builderState.phase],
+  );
+  const selectedHistoryEntry = useMemo(
+    () =>
+      builderState.history.find((step) => step.step === selectedStepNumber) ??
+      builderState.history.at(-1) ??
+      null,
+    [builderState.history, selectedStepNumber],
   );
   const selectedPos =
     selectedDictionaryWord && dictionaryPosOptions.length > 0
@@ -571,6 +824,66 @@ export default function WordBuilder() {
     ? Boolean(selectedPos) && !selectedDictionaryWordQuery.isLoading
     : draftSurface.trim().length > 0;
   const currentAttestation = builderState.attestationCache[realization.surface] ?? null;
+  const showInflectionLockNotice =
+    builderState.phase === "inflection" &&
+    availableActions.every(
+      (action) => action.kind === "inflectional" || action.kind === "postfinite",
+    );
+  const actionTabCounts = useMemo(
+    () => ({
+      recommended: getRecommendedSections(
+        actionSections,
+        builderState.phase,
+      ).reduce(
+        (total, section) => total + section.actions.length,
+        0,
+      ),
+      derivational: actionSections
+        .filter((section) => section.kind === "derivational")
+        .reduce((total, section) => total + section.actions.length, 0),
+      analytic: actionSections
+        .filter((section) => section.kind === "analytic")
+        .reduce((total, section) => total + section.actions.length, 0),
+      nonfinite: actionSections
+        .filter((section) => section.kind === "nonfinite")
+        .reduce((total, section) => total + section.actions.length, 0),
+      inflectional: actionSections
+        .filter((section) => section.kind === "inflectional")
+        .reduce((total, section) => total + section.actions.length, 0),
+      postfinite: actionSections
+        .filter((section) => section.kind === "postfinite")
+        .reduce((total, section) => total + section.actions.length, 0),
+    }),
+    [actionSections, builderState.phase],
+  );
+
+  useEffect(() => {
+    const previousLength = previousHistoryLengthRef.current;
+    const currentLength = builderState.history.length;
+
+    if (currentLength === 0) {
+      if (selectedStepNumber !== null) {
+        setSelectedStepNumber(null);
+      }
+      previousHistoryLengthRef.current = 0;
+      return;
+    }
+
+    if (currentLength > previousLength) {
+      setSelectedStepNumber(builderState.history[currentLength - 1]?.step ?? null);
+      previousHistoryLengthRef.current = currentLength;
+      return;
+    }
+
+    if (
+      selectedStepNumber !== null &&
+      !builderState.history.some((step) => step.step === selectedStepNumber)
+    ) {
+      setSelectedStepNumber(builderState.history[currentLength - 1]?.step ?? null);
+    }
+
+    previousHistoryLengthRef.current = currentLength;
+  }, [builderState.history, selectedStepNumber]);
 
   const startBuilder = () => {
     if (!canStart || !selectedPos) {
@@ -590,6 +903,13 @@ export default function WordBuilder() {
         ),
       ),
     );
+    setExpandedRareSections({});
+    setCandidateAttestationCache({});
+  };
+
+  const applyAction = (actionId: string) => {
+    setBuilderState((current) => engine.applyAction(current, actionId));
+    setExpandedRareSections({});
   };
 
   const clearDictionarySelection = () => {
@@ -614,10 +934,13 @@ export default function WordBuilder() {
         ),
       ),
     );
+    setExpandedRareSections({});
+    setCandidateAttestationCache({});
   };
 
   const undoLastStep = () => {
     setBuilderState((current) => engine.undoAction(current));
+    setExpandedRareSections({});
   };
 
   const resetSteps = () => {
@@ -632,6 +955,114 @@ export default function WordBuilder() {
           current.lexeme.mutationPolicy === "never" ? false : undefined,
         mutationOverrides: current.lexeme.mutationOverrides,
       }),
+    );
+    setExpandedRareSections({});
+    setCandidateAttestationCache({});
+  };
+
+  const renderActionCard = (section: BuilderSection, action: MorphologicalAction) => {
+    const attestation =
+      section.kind === "derivational"
+        ? candidateAttestationByActionId[action.id]
+        : undefined;
+
+    return (
+      <button
+        key={action.id}
+        type="button"
+        onClick={() => applyAction(action.id)}
+        className="group rounded-lg border border-border/70 bg-background/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/6"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="text-base font-semibold text-foreground">
+                {t(action.labelKey)}
+              </div>
+              {section.kind === "derivational" && attestation?.matched ? (
+                <Badge
+                  variant="outline"
+                  className="rounded-full border-primary/20 bg-primary/8 px-2 py-0.5 text-[11px] text-primary"
+                >
+                  {t("attestedBadge")}
+                </Badge>
+              ) : null}
+              {section.kind === "derivational" &&
+              attestation &&
+              !attestation.matched ? (
+                <Badge
+                  variant="outline"
+                  className="rounded-full border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-700 dark:text-amber-300"
+                >
+                  {t("candidateUnattestedBadge")}
+                </Badge>
+              ) : null}
+            </div>
+            <div className="mt-1 font-mono text-xs text-foreground/50">
+              {action.preview}
+            </div>
+          </div>
+          <ArrowRight className="mt-1 h-4 w-4 text-foreground/35 transition-colors group-hover:text-primary" />
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2 text-xs text-foreground/60">
+          {section.kind === "derivational" ||
+          section.kind === "analytic" ? (
+            <>
+              <span className="rounded-full border border-border/70 px-2.5 py-1">
+                {getLocalizedPos(t, action.sourcePos)}
+              </span>
+              <span className="rounded-full border border-border/70 px-2.5 py-1">
+                {getLocalizedPos(t, action.targetPos)}
+              </span>
+            </>
+          ) : null}
+
+          {section.kind === "nonfinite" ? (
+            <>
+              <span className="rounded-full border border-border/70 px-2.5 py-1">
+                {getLocalizedCategory(t, builderState.currentCategory)}
+              </span>
+              <span className="rounded-full border border-border/70 px-2.5 py-1">
+                {section.key === "VerbalNoun"
+                  ? t("categoryVerbalNoun")
+                  : section.key === "Participle"
+                    ? t("categoryParticiple")
+                    : t("categoryConverb")}
+              </span>
+            </>
+          ) : null}
+
+          {section.kind === "inflectional" ? (
+            <>
+              <span className="rounded-full border border-border/70 px-2.5 py-1">
+                {getLocalizedPos(t, builderState.currentPos)}
+              </span>
+              <span className="rounded-full border border-border/70 px-2.5 py-1">
+                {t(section.titleKey)}
+              </span>
+            </>
+          ) : null}
+
+          {section.kind === "postfinite" ? (
+            <span className="rounded-full border border-border/70 px-2.5 py-1">
+              {getLocalizedPos(t, action.sourcePos)}
+            </span>
+          ) : null}
+
+          <span className="rounded-full border border-border/70 px-2.5 py-1">
+            {section.kind === "derivational"
+              ? t("phaseDerivation")
+              : section.kind === "analytic"
+                ? t("analyticKind")
+                : section.kind === "nonfinite"
+                  ? t("nonfiniteKind")
+                  : section.kind === "postfinite"
+                    ? t("phasePostFinite")
+                    : t("phaseInflection")}
+          </span>
+        </div>
+      </button>
     );
   };
 
@@ -660,7 +1091,7 @@ export default function WordBuilder() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-2xl border border-primary/15 bg-background/70 p-4">
+              <div className="rounded-lg border border-primary/15 bg-background/70 p-4">
                 <div className="mb-2 flex items-center gap-2 text-primary">
                   <Languages className="h-4 w-4" />
                   <span className="text-xs font-semibold uppercase tracking-[0.18em]">
@@ -669,7 +1100,7 @@ export default function WordBuilder() {
                 </div>
                 <p className="text-sm text-foreground/75">{t("featureHarmonyBody")}</p>
               </div>
-              <div className="rounded-2xl border border-primary/15 bg-background/70 p-4">
+              <div className="rounded-lg border border-primary/15 bg-background/70 p-4">
                 <div className="mb-2 flex items-center gap-2 text-primary">
                   <Orbit className="h-4 w-4" />
                   <span className="text-xs font-semibold uppercase tracking-[0.18em]">
@@ -678,7 +1109,7 @@ export default function WordBuilder() {
                 </div>
                 <p className="text-sm text-foreground/75">{t("featurePhonologyBody")}</p>
               </div>
-              <div className="rounded-2xl border border-primary/15 bg-background/70 p-4">
+              <div className="rounded-lg border border-primary/15 bg-background/70 p-4">
                 <div className="mb-2 flex items-center gap-2 text-primary">
                   <Blocks className="h-4 w-4" />
                   <span className="text-xs font-semibold uppercase tracking-[0.18em]">
@@ -687,7 +1118,7 @@ export default function WordBuilder() {
                 </div>
                 <p className="text-sm text-foreground/75">{t("featurePosBody")}</p>
               </div>
-              <div className="rounded-2xl border border-primary/15 bg-background/70 p-4">
+              <div className="rounded-lg border border-primary/15 bg-background/70 p-4">
                 <div className="mb-2 flex items-center gap-2 text-primary">
                   <Sparkles className="h-4 w-4" />
                   <span className="text-xs font-semibold uppercase tracking-[0.18em]">
@@ -761,7 +1192,7 @@ export default function WordBuilder() {
             </Autocomplete>
 
             {selectedDictionaryWord ? (
-              <div className="rounded-2xl border border-primary/20 bg-primary/8 p-4">
+              <div className="rounded-lg border border-primary/20 bg-primary/8 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <div className="text-sm font-semibold text-foreground">
@@ -832,7 +1263,7 @@ export default function WordBuilder() {
             )}
 
             {selectedDictionaryWord && dictionaryPosOptions.length > 1 ? (
-              <p className="rounded-2xl border border-border/60 bg-background/60 px-4 py-3 text-sm leading-6 text-foreground/65">
+              <p className="rounded-lg border border-border/60 bg-background/60 px-4 py-3 text-sm leading-6 text-foreground/65">
                 {t("dictionaryPosRequired")}
               </p>
             ) : null}
@@ -868,7 +1299,7 @@ export default function WordBuilder() {
               </Select>
             </div>
 
-            <p className="rounded-2xl border border-border/60 bg-background/60 px-4 py-3 text-sm leading-6 text-foreground/65">
+            <p className="rounded-lg border border-border/60 bg-background/60 px-4 py-3 text-sm leading-6 text-foreground/65">
               {t("mutationHint")}
             </p>
 
@@ -884,90 +1315,67 @@ export default function WordBuilder() {
         </CustomCard>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-        <div className="space-y-6">
-          <CustomCard className="border-border/70">
-            <CardBody className="gap-5 p-6">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h2 className="text-xl font-semibold">{t("stateTitle")}</h2>
-                  <p className="text-sm text-foreground/65">{t("stateHint")}</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant="flat"
-                    size="sm"
-                    onPress={undoLastStep}
-                    isDisabled={builderState.history.length === 0}
-                    startContent={<CornerDownLeft className="h-4 w-4" />}
-                  >
-                    {t("undoLast")}
-                  </Button>
-                  <Button
-                    variant="flat"
-                    size="sm"
-                    onPress={resetSteps}
-                    isDisabled={builderState.history.length === 0}
-                    startContent={<RotateCcw className="h-4 w-4" />}
-                  >
-                    {t("resetSteps")}
-                  </Button>
-                </div>
-              </div>
-
-              <div className="rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/10 via-background/80 to-background p-5">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">
-                  {t("currentWord")}
-                </p>
-                <div className="text-3xl font-semibold tracking-tight sm:text-4xl">
-                  {realization.surface}
-                </div>
-                {currentAttestation?.matched ? (
-                  <div className="mt-3">
-                    <NextIntlLink
-                      href={{
-                        pathname: "/search/[word]",
-                        params: {
-                          word: currentAttestation.wordName ?? realization.surface,
-                        },
-                      }}
-                      className="inline-flex items-center rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-sm text-primary transition-colors hover:bg-primary/12"
-                    >
-                      {t("attestedBadge")}
-                    </NextIntlLink>
-                  </div>
-                ) : null}
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <Chip color="primary" variant="flat">
-                  {t("currentPos")}: {getLocalizedPos(t, builderState.currentPos)}
-                </Chip>
-                <Chip variant="flat">
-                  {getLocalizedCategory(t, builderState.currentCategory)}
-                </Chip>
-                <Chip variant="flat">
-                  {t("currentPhase")}: {getLocalizedPhase(t, builderState.phase)}
-                </Chip>
-                <Chip variant="flat">
-                  {t("stepCount")}: {builderState.history.length}
-                </Chip>
-              </div>
-
-              {builderState.phase === "inflection" ? (
-                <div className="rounded-2xl border border-primary/20 bg-primary/8 px-4 py-3 text-sm text-foreground/80">
-                  {t("lockedInflection")}
-                </div>
-              ) : null}
-
+      <div className="sticky top-4 z-20">
+        <div className="rounded-xl border border-primary/20 bg-background/85 shadow-[0_18px_50px_-32px_rgba(15,23,42,0.45)] backdrop-blur">
+          <div className="flex flex-col gap-4 p-4 sm:p-5">
+            <div className="space-y-3">
               <div className="space-y-3">
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-semibold">{t("selectedChain")}</h3>
-                  <span className="text-xs uppercase tracking-[0.16em] text-foreground/45">
-                    {availableActions.length} {t("availableNow")}
-                  </span>
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">
+                    {t("currentWord")}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                      {realization.surface}
+                    </div>
+                    {currentAttestation?.matched ? (
+                      <NextIntlLink
+                        href={{
+                          pathname: "/search/[word]",
+                          params: {
+                            word: currentAttestation.wordName ?? realization.surface,
+                          },
+                        }}
+                        className="inline-flex items-center rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-sm text-primary transition-colors hover:bg-primary/12"
+                      >
+                        {t("attestedBadge")}
+                      </NextIntlLink>
+                    ) : null}
+                  </div>
                 </div>
-                <div className="flex min-h-16 flex-wrap gap-2 rounded-2xl border border-dashed border-border/70 bg-background/55 p-3">
+
+                <div className="flex flex-wrap gap-2">
+                  <Chip color="primary" variant="flat">
+                    {t("currentPos")}: {getLocalizedPos(t, builderState.currentPos)}
+                  </Chip>
+                  <Chip variant="flat">
+                    {getLocalizedCategory(t, builderState.currentCategory)}
+                  </Chip>
+                  <Chip variant="flat">
+                    {t("currentPhase")}: {getLocalizedPhase(t, builderState.phase)}
+                  </Chip>
+                  <Chip variant="flat">
+                    {t("stepCount")}: {builderState.history.length}
+                  </Chip>
+                </div>
+              </div>
+            </div>
+
+            {showInflectionLockNotice ? (
+              <div className="rounded-lg border border-primary/20 bg-primary/8 px-4 py-3 text-sm text-foreground/80">
+                {t("lockedInflection")}
+              </div>
+            ) : null}
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="font-semibold">{t("selectedChain")}</h2>
+                <span className="text-xs uppercase tracking-[0.16em] text-foreground/45">
+                  {availableActions.length} {t("availableNow")}
+                </span>
+              </div>
+              <div className="overflow-x-auto pb-1">
+                <div className="flex min-h-16 min-w-max items-center gap-2 rounded-lg border border-dashed border-border/70 bg-background/55 p-3">
                   {builderState.history.length > 0 ? (
                     builderState.history.map((step) => (
                       <Badge
@@ -979,11 +1387,11 @@ export default function WordBuilder() {
                             ? "border-primary/20 bg-primary/8 text-primary"
                             : step.action.kind === "analytic"
                               ? "border-sky-200 bg-sky-50 text-sky-700"
-                            : step.action.kind === "nonfinite"
-                              ? "border-amber-200 bg-amber-50 text-amber-700"
-                            : step.action.kind === "postfinite"
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                            : "border-border/70 bg-background/70 text-foreground/80",
+                              : step.action.kind === "nonfinite"
+                                ? "border-amber-200 bg-amber-50 text-amber-700"
+                                : step.action.kind === "postfinite"
+                                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                  : "border-border/70 bg-background/70 text-foreground/80",
                         )}
                       >
                         {t(step.action.labelKey)}
@@ -994,429 +1402,338 @@ export default function WordBuilder() {
                   )}
                 </div>
               </div>
-            </CardBody>
-          </CustomCard>
+            </div>
 
-          <CustomCard className="border-border/70">
-            <CardBody className="gap-5 p-6">
-              <div className="space-y-1">
-                <h2 className="text-xl font-semibold">{t("availableSuffixes")}</h2>
-                <p className="text-sm text-foreground/65">{t("availableSuffixesHint")}</p>
-              </div>
-
-              <div className="space-y-6">
-                {actionSections.length > 0 ? (
-                  <>
-                    {actionSections.some((section) => section.kind === "derivational") ? (
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="rounded-full px-3 py-1">
-                            {t("availableDerivations")}
-                          </Badge>
-                        </div>
-                        {actionSections
-                          .filter((section) => section.kind === "derivational")
-                          .map((section) => (
-                            <div key={section.key} className="space-y-3">
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="rounded-full px-3 py-1">
-                                  {t(section.titleKey)}
-                                </Badge>
-                              </div>
-                              <div className="grid gap-3 sm:grid-cols-2">
-                                {section.actions.map((action) => (
-                                  <button
-                                    key={action.id}
-                                    type="button"
-                                    onClick={() =>
-                                      setBuilderState((current) =>
-                                        engine.applyAction(current, action.id),
-                                      )
-                                    }
-                                    className="group rounded-2xl border border-border/70 bg-background/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/6"
-                                  >
-                                    <div className="flex items-start justify-between gap-3">
-                                      <div>
-                                        <div className="text-base font-semibold text-foreground">
-                                          {t(action.labelKey)}
-                                        </div>
-                                        <div className="mt-1 font-mono text-xs text-foreground/50">
-                                          {action.preview}
-                                        </div>
-                                      </div>
-                                      <ArrowRight className="mt-1 h-4 w-4 text-foreground/35 transition-colors group-hover:text-primary" />
-                                    </div>
-                                    <div className="mt-4 flex flex-wrap gap-2 text-xs text-foreground/60">
-                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
-                                        {getLocalizedPos(t, action.sourcePos)}
-                                      </span>
-                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
-                                        {getLocalizedPos(t, action.targetPos)}
-                                      </span>
-                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
-                                        {t("phaseDerivation")}
-                                      </span>
-                                    </div>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                      </div>
-                    ) : null}
-
-                    {actionSections.some((section) => section.kind === "analytic") ? (
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="rounded-full px-3 py-1">
-                            {t("availableAnalytics")}
-                          </Badge>
-                        </div>
-                        {actionSections
-                          .filter((section) => section.kind === "analytic")
-                          .map((section) => (
-                            <div key={section.key} className="space-y-3">
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="rounded-full px-3 py-1">
-                                  {t(section.titleKey)}
-                                </Badge>
-                              </div>
-                              <div className="grid gap-3 sm:grid-cols-2">
-                                {section.actions.map((action) => (
-                                  <button
-                                    key={action.id}
-                                    type="button"
-                                    onClick={() =>
-                                      setBuilderState((current) =>
-                                        engine.applyAction(current, action.id),
-                                      )
-                                    }
-                                    className="group rounded-2xl border border-border/70 bg-background/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/6"
-                                  >
-                                    <div className="flex items-start justify-between gap-3">
-                                      <div>
-                                        <div className="text-base font-semibold text-foreground">
-                                          {t(action.labelKey)}
-                                        </div>
-                                        <div className="mt-1 font-mono text-xs text-foreground/50">
-                                          {action.preview}
-                                        </div>
-                                      </div>
-                                      <ArrowRight className="mt-1 h-4 w-4 text-foreground/35 transition-colors group-hover:text-primary" />
-                                    </div>
-                                    <div className="mt-4 flex flex-wrap gap-2 text-xs text-foreground/60">
-                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
-                                        {getLocalizedPos(t, action.sourcePos)}
-                                      </span>
-                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
-                                        {getLocalizedPos(t, action.targetPos)}
-                                      </span>
-                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
-                                        {t("analyticKind")}
-                                      </span>
-                                    </div>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                      </div>
-                    ) : null}
-
-                    {actionSections.some((section) => section.kind === "nonfinite") ? (
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="rounded-full px-3 py-1">
-                            {t("availableNonfinite")}
-                          </Badge>
-                        </div>
-                        {actionSections
-                          .filter((section) => section.kind === "nonfinite")
-                          .map((section) => (
-                            <div key={section.key} className="space-y-3">
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="rounded-full px-3 py-1">
-                                  {t(section.titleKey)}
-                                </Badge>
-                              </div>
-                              <div className="grid gap-3 sm:grid-cols-2">
-                                {section.actions.map((action) => (
-                                  <button
-                                    key={action.id}
-                                    type="button"
-                                    onClick={() =>
-                                      setBuilderState((current) =>
-                                        engine.applyAction(current, action.id),
-                                      )
-                                    }
-                                    className="group rounded-2xl border border-border/70 bg-background/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/6"
-                                  >
-                                    <div className="flex items-start justify-between gap-3">
-                                      <div>
-                                        <div className="text-base font-semibold text-foreground">
-                                          {t(action.labelKey)}
-                                        </div>
-                                        <div className="mt-1 font-mono text-xs text-foreground/50">
-                                          {action.preview}
-                                        </div>
-                                      </div>
-                                      <ArrowRight className="mt-1 h-4 w-4 text-foreground/35 transition-colors group-hover:text-primary" />
-                                    </div>
-                                    <div className="mt-4 flex flex-wrap gap-2 text-xs text-foreground/60">
-                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
-                                        {getLocalizedCategory(t, builderState.currentCategory)}
-                                      </span>
-                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
-                                        {section.key === "VerbalNoun"
-                                          ? t("categoryVerbalNoun")
-                                          : section.key === "Participle"
-                                            ? t("categoryParticiple")
-                                            : t("categoryConverb")}
-                                      </span>
-                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
-                                        {t("nonfiniteKind")}
-                                      </span>
-                                    </div>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                      </div>
-                    ) : null}
-
-                    {actionSections.some((section) => section.kind === "inflectional") ? (
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="rounded-full px-3 py-1">
-                            {t("availableInflections")}
-                          </Badge>
-                        </div>
-                        {actionSections
-                          .filter((section) => section.kind === "inflectional")
-                          .map((section) => (
-                            <div key={section.key} className="space-y-3">
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="rounded-full px-3 py-1">
-                                  {t(section.titleKey)}
-                                </Badge>
-                              </div>
-                              <div className="grid gap-3 sm:grid-cols-2">
-                                {section.actions.map((action) => (
-                                  <button
-                                    key={action.id}
-                                    type="button"
-                                    onClick={() =>
-                                      setBuilderState((current) =>
-                                        engine.applyAction(current, action.id),
-                                      )
-                                    }
-                                    className="group rounded-2xl border border-border/70 bg-background/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/6"
-                                  >
-                                    <div className="flex items-start justify-between gap-3">
-                                      <div>
-                                        <div className="text-base font-semibold text-foreground">
-                                          {t(action.labelKey)}
-                                        </div>
-                                        <div className="mt-1 font-mono text-xs text-foreground/50">
-                                          {action.preview}
-                                        </div>
-                                      </div>
-                                      <ArrowRight className="mt-1 h-4 w-4 text-foreground/35 transition-colors group-hover:text-primary" />
-                                    </div>
-                                    <div className="mt-4 flex flex-wrap gap-2 text-xs text-foreground/60">
-                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
-                                        {getLocalizedPos(t, builderState.currentPos)}
-                                      </span>
-                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
-                                        {t(section.titleKey)}
-                                      </span>
-                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
-                                        {t("phaseInflection")}
-                                      </span>
-                                    </div>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                      </div>
-                    ) : null}
-
-                    {actionSections.some((section) => section.kind === "postfinite") ? (
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="rounded-full px-3 py-1">
-                            {t("availablePostfinite")}
-                          </Badge>
-                        </div>
-                        {actionSections
-                          .filter((section) => section.kind === "postfinite")
-                          .map((section) => (
-                            <div key={section.key} className="space-y-3">
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="rounded-full px-3 py-1">
-                                  {t(section.titleKey)}
-                                </Badge>
-                              </div>
-                              <div className="grid gap-3 sm:grid-cols-2">
-                                {section.actions.map((action) => (
-                                  <button
-                                    key={action.id}
-                                    type="button"
-                                    onClick={() =>
-                                      setBuilderState((current) =>
-                                        engine.applyAction(current, action.id),
-                                      )
-                                    }
-                                    className="group rounded-2xl border border-border/70 bg-background/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/6"
-                                  >
-                                    <div className="flex items-start justify-between gap-3">
-                                      <div>
-                                        <div className="text-base font-semibold text-foreground">
-                                          {t(action.labelKey)}
-                                        </div>
-                                        <div className="mt-1 font-mono text-xs text-foreground/50">
-                                          {action.preview}
-                                        </div>
-                                      </div>
-                                      <ArrowRight className="mt-1 h-4 w-4 text-foreground/35 transition-colors group-hover:text-primary" />
-                                    </div>
-                                    <div className="mt-4 flex flex-wrap gap-2 text-xs text-foreground/60">
-                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
-                                        {getLocalizedPos(t, action.sourcePos)}
-                                      </span>
-                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
-                                        {t("phasePostFinite")}
-                                      </span>
-                                      <span className="rounded-full border border-border/70 px-2.5 py-1">
-                                        {t("postfiniteKind")}
-                                      </span>
-                                    </div>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                      </div>
-                    ) : null}
-                  </>
-                ) : (
-                  <div className="rounded-2xl border border-dashed border-border/70 bg-background/55 px-4 py-5 text-sm text-foreground/55">
-                    {t("noAvailableSuffixes")}
-                  </div>
-                )}
-              </div>
-            </CardBody>
-          </CustomCard>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="flat"
+                size="sm"
+                onPress={undoLastStep}
+                isDisabled={builderState.history.length === 0}
+                startContent={<CornerDownLeft className="h-4 w-4" />}
+              >
+                {t("undoLast")}
+              </Button>
+              <Button
+                variant="flat"
+                size="sm"
+                onPress={resetSteps}
+                isDisabled={builderState.history.length === 0}
+                startContent={<RotateCcw className="h-4 w-4" />}
+              >
+                {t("resetSteps")}
+              </Button>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
+        <CustomCard className="border-border/70">
+          <CardBody className="gap-5 p-6">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div className="space-y-1">
+                <h2 className="text-xl font-semibold">{t("actionDockTitle")}</h2>
+                <p className="text-sm text-foreground/65">{t("actionDockHint")}</p>
+              </div>
+              <Badge variant="outline" className="rounded-full px-3 py-1">
+                {availableActions.length} {t("availableNow")}
+              </Badge>
+            </div>
+
+            <div className="overflow-x-auto pb-1">
+              <div className="flex min-w-max gap-2">
+                {ACTION_TAB_ORDER.map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setActiveActionTab(tab)}
+                    className={cn(
+                      "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                      activeActionTab === tab
+                        ? "border-primary/25 bg-primary/10 text-primary"
+                        : "border-border/70 bg-background/70 text-foreground/70 hover:border-primary/20 hover:text-foreground",
+                    )}
+                  >
+                    <span>{t(getActionTabLabelKey(tab))}</span>
+                    <span className="rounded-full bg-background/80 px-2 py-0.5 text-xs text-foreground/55">
+                      {actionTabCounts[tab]}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-4 lg:max-h-[48rem] lg:overflow-y-auto lg:pr-1">
+              {visibleActionSections.length > 0 ? (
+                visibleActionSections.map((section) => (
+                  <div key={section.key} className="space-y-2">
+                    {(() => {
+                      const sectionStorageKey = getSectionStorageKey(
+                        activeActionTab,
+                        section,
+                      );
+                      const { primaryActions, rareActions } =
+                        section.kind === "derivational"
+                          ? splitActionsByRarity(section.actions)
+                          : {
+                              primaryActions: section.actions,
+                              rareActions: [],
+                            };
+                      const showRareActions =
+                        expandedRareSections[sectionStorageKey] === true;
+
+                      return (
+                        <>
+                          <div className="flex items-center gap-2 pb-0.5">
+                            <Badge variant="outline" className="rounded-full px-3 py-1">
+                              {t(section.titleKey)}
+                            </Badge>
+                            {rareActions.length > 0 ? (
+                              <Badge
+                                variant="outline"
+                                className="rounded-full border-border/60 bg-background/60 px-2.5 py-1 text-[11px] text-foreground/55"
+                              >
+                                {t("rareOptionsLabel")}
+                              </Badge>
+                            ) : null}
+                          </div>
+
+                          {primaryActions.length > 0 ? (
+                            <div className="grid gap-3 md:grid-cols-2">
+                              {primaryActions.map((action) =>
+                                renderActionCard(section, action),
+                              )}
+                            </div>
+                          ) : null}
+
+                          {rareActions.length > 0 ? (
+                            <div className="space-y-3 rounded-lg border border-dashed border-border/60 bg-background/45 p-4">
+                              <div className="flex flex-wrap items-center justify-between gap-3">
+                                <div className="space-y-1">
+                                  <div className="text-sm font-medium text-foreground/80">
+                                    {t("rareOptionsLabel")}
+                                  </div>
+                                  <p className="text-xs text-foreground/55">
+                                    {t("rareOptionsHint")}
+                                  </p>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setExpandedRareSections((current) => ({
+                                      ...current,
+                                      [sectionStorageKey]: !showRareActions,
+                                    }))
+                                  }
+                                  className="inline-flex items-center rounded-full border border-border/70 bg-background/75 px-3 py-1.5 text-sm font-medium text-foreground/75 transition-colors hover:border-primary/20 hover:text-foreground"
+                                >
+                                  {showRareActions
+                                    ? t("hideRareOptions")
+                                    : t("showRareOptions", {
+                                        count: rareActions.length,
+                                      })}
+                                </button>
+                              </div>
+
+                              {showRareActions ? (
+                                <div className="grid gap-3 md:grid-cols-2">
+                                  {rareActions.map((action) =>
+                                    renderActionCard(section, action),
+                                  )}
+                                </div>
+                              ) : null}
+                            </div>
+                          ) : null}
+                        </>
+                      );
+                    })()}
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-lg border border-dashed border-border/70 bg-background/55 px-4 py-5 text-sm text-foreground/55">
+                  {t("noAvailableSuffixes")}
+                </div>
+              )}
+            </div>
+          </CardBody>
+        </CustomCard>
 
         <CustomCard className="border-border/70">
           <CardBody className="gap-5 p-6">
             <div className="space-y-1">
-              <h2 className="text-xl font-semibold">{t("logsTitle")}</h2>
-              <p className="text-sm text-foreground/65">{t("logsHint")}</p>
+              <h2 className="text-xl font-semibold">{t("timelineTitle")}</h2>
+              <p className="text-sm text-foreground/65">{t("timelineHint")}</p>
             </div>
 
-            <div className="space-y-4">
-              {builderState.history.length > 0 ? (
-                builderState.history.map((step) => (
-                  <div
-                    key={step.step}
-                    className="rounded-3xl border border-border/70 bg-background/60 p-6 shadow-[0_10px_35px_-28px_rgba(15,23,42,0.9)]"
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">
-                          {t("stepLabel", { step: step.step })}
-                        </div>
-                        <div className="mt-1 flex items-center gap-2 text-lg font-semibold">
-                          <span>{step.log.beforeSurface}</span>
-                          <ArrowRight className="h-4 w-4 text-foreground/45" />
-                          <span>{step.log.afterSurface}</span>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap items-center justify-end gap-2">
-                        {step.attestation?.matched ? (
-                          <NextIntlLink
-                            href={{
-                              pathname: "/search/[word]",
-                              params: {
-                                word: step.attestation.wordName ?? step.log.afterSurface,
-                              },
-                            }}
-                            className="inline-flex items-center rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-sm text-primary transition-colors hover:bg-primary/12"
-                          >
-                            {t("attestedBadge")}
-                          </NextIntlLink>
-                        ) : null}
-                        <Badge className="rounded-full border-primary/20 bg-primary/8 px-3 py-1 text-primary" variant="outline">
-                          {t(step.action.labelKey)}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <div className="mt-5 grid gap-3 md:grid-cols-2">
-                      <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
-                        <div className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-foreground/45">
-                          {t("before")}
-                        </div>
-                        <div className="flex flex-wrap items-center gap-1.5 font-mono text-base">
-                          {renderDiff(step.log.diff.segments, "before")}
-                        </div>
-                      </div>
-                      <div className="rounded-2xl border border-primary/20 bg-primary/8 p-4">
-                        <div className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary/75">
-                          {t("after")}
-                        </div>
-                        <div className="flex flex-wrap items-center gap-1.5 font-mono text-base">
-                          {renderDiff(step.log.diff.segments, "after")}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      <Chip variant="flat">
-                        {getLocalizedPos(t, step.beforeState.currentPos)}{" "}
-                        <ArrowRight className="mx-1 inline h-3.5 w-3.5" />{" "}
-                        {getLocalizedPos(t, step.afterState.currentPos)}
-                      </Chip>
-                      <Chip variant="flat">
-                        {t("surfaceSuffix")}: {step.surfaceSuffix || t("zeroMorpheme")}
-                      </Chip>
-                      <Chip variant="flat">
-                        {t("archiphoneme")}: {step.log.suffixArchiphoneme ?? step.action.preview}
-                      </Chip>
-                    </div>
-
-                    <div className="mt-5 space-y-3">
-                      <div className="text-sm font-semibold text-foreground/85">
-                        {t("appliedRules")}
-                      </div>
-                      <ul className="space-y-2">
-                        {step.log.events.map((event, index) => (
-                          <li
-                            key={`${step.step}-${event.code}-${index}`}
-                            className={cn(
-                              "rounded-2xl border border-border/65 px-4 py-3 text-sm leading-6 text-foreground/75",
-                              index === 0
-                                ? "border-primary/20 bg-primary/8 text-foreground"
-                                : "bg-background/55",
-                            )}
-                          >
-                            {getEventMessage(t, event)}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+            {builderState.history.length > 0 ? (
+              <div className="grid gap-5 xl:grid-cols-[0.4fr_0.6fr]">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="font-semibold">{t("logsTitle")}</h3>
+                    <span className="text-xs uppercase tracking-[0.16em] text-foreground/45">
+                      {builderState.history.length}
+                    </span>
                   </div>
-                ))
-              ) : (
-                <div className="rounded-3xl border border-dashed border-border/70 bg-background/55 px-5 py-10 text-center text-sm text-foreground/55">
-                  {t("noSteps")}
+
+                  <div className="space-y-2 xl:max-h-[48rem] xl:overflow-y-auto xl:pr-1">
+                    {builderState.history.map((step) => (
+                      <button
+                        key={step.step}
+                        type="button"
+                        onClick={() => setSelectedStepNumber(step.step)}
+                        className={cn(
+                          "w-full rounded-lg border p-4 text-left transition-colors",
+                          selectedHistoryEntry?.step === step.step
+                            ? "border-primary/25 bg-primary/8 shadow-[0_12px_25px_-20px_rgba(194,65,12,0.8)]"
+                            : "border-border/70 bg-background/60 hover:border-primary/20 hover:bg-background/80",
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="text-xs font-semibold uppercase tracking-[0.16em] text-primary/80">
+                              {t("stepLabel", { step: step.step })}
+                            </div>
+                            <div className="mt-2 truncate text-sm font-semibold text-foreground">
+                              {t(step.action.labelKey)}
+                            </div>
+                          </div>
+                          {step.attestation?.matched ? (
+                            <Badge
+                              variant="outline"
+                              className="shrink-0 rounded-full border-primary/20 bg-primary/8 px-2 py-0.5 text-xs text-primary"
+                            >
+                              {t("attestedBadge")}
+                            </Badge>
+                          ) : null}
+                        </div>
+
+                        <div className="mt-3 flex items-center gap-2 text-sm text-foreground/70">
+                          <span className="truncate">{step.log.beforeSurface}</span>
+                          <ArrowRight className="h-3.5 w-3.5 shrink-0 text-foreground/40" />
+                          <span className="truncate font-medium text-foreground">
+                            {step.log.afterSurface}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              )}
-            </div>
+
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <h3 className="font-semibold">{t("detailTitle")}</h3>
+                    <p className="text-sm text-foreground/65">{t("detailHint")}</p>
+                  </div>
+
+                  {selectedHistoryEntry ? (
+                    <div className="rounded-xl border border-border/70 bg-background/60 p-6 shadow-[0_10px_35px_-28px_rgba(15,23,42,0.9)]">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">
+                            {t("stepLabel", { step: selectedHistoryEntry.step })}
+                          </div>
+                          <div className="mt-1 flex items-center gap-2 text-lg font-semibold">
+                            <span>{selectedHistoryEntry.log.beforeSurface}</span>
+                            <ArrowRight className="h-4 w-4 text-foreground/45" />
+                            <span>{selectedHistoryEntry.log.afterSurface}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center justify-end gap-2">
+                          {selectedHistoryEntry.attestation?.matched ? (
+                            <NextIntlLink
+                              href={{
+                                pathname: "/search/[word]",
+                                params: {
+                                  word:
+                                    selectedHistoryEntry.attestation.wordName ??
+                                    selectedHistoryEntry.log.afterSurface,
+                                },
+                              }}
+                              className="inline-flex items-center rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-sm text-primary transition-colors hover:bg-primary/12"
+                            >
+                              {t("attestedBadge")}
+                            </NextIntlLink>
+                          ) : null}
+                          <Badge
+                            className="rounded-full border-primary/20 bg-primary/8 px-3 py-1 text-primary"
+                            variant="outline"
+                          >
+                            {t(selectedHistoryEntry.action.labelKey)}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      <div className="mt-5 grid gap-3 md:grid-cols-2">
+                        <div className="rounded-lg border border-border/70 bg-background/70 p-4">
+                          <div className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-foreground/45">
+                            {t("before")}
+                          </div>
+                          <div className="flex flex-wrap items-center gap-1.5 font-mono text-base">
+                            {renderDiff(selectedHistoryEntry.log.diff.segments, "before")}
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-primary/20 bg-primary/8 p-4">
+                          <div className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary/75">
+                            {t("after")}
+                          </div>
+                          <div className="flex flex-wrap items-center gap-1.5 font-mono text-base">
+                            {renderDiff(selectedHistoryEntry.log.diff.segments, "after")}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-5 flex flex-wrap gap-2">
+                        <Chip variant="flat">
+                          {getLocalizedPos(t, selectedHistoryEntry.beforeState.currentPos)}{" "}
+                          <ArrowRight className="mx-1 inline h-3.5 w-3.5" />{" "}
+                          {getLocalizedPos(t, selectedHistoryEntry.afterState.currentPos)}
+                        </Chip>
+                        <Chip variant="flat">
+                          {t("surfaceSuffix")}:{" "}
+                          {selectedHistoryEntry.surfaceSuffix || t("zeroMorpheme")}
+                        </Chip>
+                        <Chip variant="flat">
+                          {t("archiphoneme")}:{" "}
+                          {selectedHistoryEntry.log.suffixArchiphoneme ??
+                            selectedHistoryEntry.action.preview}
+                        </Chip>
+                      </div>
+
+                      <div className="mt-5 space-y-3">
+                        <div className="text-sm font-semibold text-foreground/85">
+                          {t("appliedRules")}
+                        </div>
+                        <ul className="space-y-2">
+                          {selectedHistoryEntry.log.events.map((event, index) => (
+                            <li
+                              key={`${selectedHistoryEntry.step}-${event.code}-${index}`}
+                              className={cn(
+                                "rounded-lg border border-border/65 px-4 py-3 text-sm leading-6 text-foreground/75",
+                                index === 0
+                                  ? "border-primary/20 bg-primary/8 text-foreground"
+                                  : "bg-background/55",
+                              )}
+                            >
+                              {getEventMessage(t, event)}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-dashed border-border/70 bg-background/55 px-5 py-10 text-center text-sm text-foreground/55">
+                      {t("selectStepHint")}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed border-border/70 bg-background/55 px-5 py-10 text-center text-sm text-foreground/55">
+                {t("noSteps")}
+              </div>
+            )}
           </CardBody>
         </CustomCard>
       </div>

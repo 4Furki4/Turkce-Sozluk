@@ -64,7 +64,7 @@ export function createContinuationPolicy({
         allowFiniteVerbInflection: pos === "Verb",
         allowNominalInflection: false,
         allowPredicativeInflection: false,
-        allowNonfinite: phase === "derivation",
+        allowNonfinite: phase !== "postfinite",
         allowAnalyticConstructions: phase === "derivation",
         allowPostFinite: true,
       };

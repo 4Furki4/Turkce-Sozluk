@@ -7,6 +7,30 @@ import {
 } from "./types";
 
 const KNOWN_LEXEME_OVERRIDES: Record<string, Partial<LexemeEntry>> = {
+  "Verb:al": {
+    irregularClass: "aor_irregular",
+    allomorphOverrides: {
+      "verb.tam.aor": "/Ir/",
+    },
+  },
+  "Verb:bil": {
+    irregularClass: "aor_irregular",
+    allomorphOverrides: {
+      "verb.tam.aor": "/Ir/",
+    },
+  },
+  "Verb:bul": {
+    irregularClass: "aor_irregular",
+    allomorphOverrides: {
+      "verb.tam.aor": "/Ir/",
+    },
+  },
+  "Verb:dur": {
+    irregularClass: "aor_irregular",
+    allomorphOverrides: {
+      "verb.tam.aor": "/Ir/",
+    },
+  },
   "Verb:gör": {
     irregularClass: "aor_irregular",
     allomorphOverrides: {
@@ -29,9 +53,45 @@ const KNOWN_LEXEME_OVERRIDES: Record<string, Partial<LexemeEntry>> = {
     irregularClass: "vowel_initial_stem_alternation",
     mutationPolicy: "always",
   },
+  "Verb:kal": {
+    irregularClass: "aor_irregular",
+    allomorphOverrides: {
+      "verb.tam.aor": "/Ir/",
+    },
+  },
+  "Verb:ol": {
+    irregularClass: "aor_irregular",
+    allomorphOverrides: {
+      "verb.tam.aor": "/Ir/",
+    },
+  },
+  "Verb:öl": {
+    irregularClass: "aor_irregular",
+    allomorphOverrides: {
+      "verb.tam.aor": "/Ir/",
+    },
+  },
+  "Verb:san": {
+    irregularClass: "aor_irregular",
+    allomorphOverrides: {
+      "verb.tam.aor": "/Ir/",
+    },
+  },
   "Verb:et": {
     irregularClass: "vowel_initial_stem_alternation",
     mutationPolicy: "always",
+  },
+  "Verb:var": {
+    irregularClass: "aor_irregular",
+    allomorphOverrides: {
+      "verb.tam.aor": "/Ir/",
+    },
+  },
+  "Verb:vur": {
+    irregularClass: "aor_irregular",
+    allomorphOverrides: {
+      "verb.tam.aor": "/Ir/",
+    },
   },
 };
 

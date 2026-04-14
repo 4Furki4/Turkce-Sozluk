@@ -61,6 +61,19 @@ function getAnalyticConstruction(
   return construction;
 }
 
+function getPreviousAnalyticConstruction(
+  state: MorphologicalStateV2,
+  currentTokenIndex: number,
+): AnalyticConstructionDefinition | null {
+  const previousToken = state.tokens[currentTokenIndex - 1];
+
+  if (!previousToken || previousToken.kind !== "analytic") {
+    return null;
+  }
+
+  return getAnalyticConstruction(previousToken.constructionId);
+}
+
 function getPostfiniteOverlay(
   overlayId: string,
 ): PostfiniteOverlayDefinition {
@@ -353,6 +366,7 @@ function resolveTokenRecipe(
   state: MorphologicalStateV2,
   morpheme: MorphemeDefinition,
   currentSurface: string,
+  currentTokenIndex: number,
 ): {
   workingSurface: string;
   pattern: string;
@@ -391,8 +405,23 @@ function resolveTokenRecipe(
         setupEvents,
       };
     }
-    case "verb.polarity.neg":
+    case "verb.polarity.neg": {
+      const previousAnalyticConstruction = getPreviousAnalyticConstruction(
+        state,
+        currentTokenIndex,
+      );
+
+      if (previousAnalyticConstruction?.constructionType === "ability") {
+        return {
+          workingSurface: currentSurface,
+          pattern: "/AmA/",
+          rules: [],
+          setupEvents,
+        };
+      }
+
       return { workingSurface: currentSurface, pattern: "/mA/", rules: [], setupEvents };
+    }
     case "verb.tam.aor": {
       const resolved = resolveVerbAorPattern(state, currentSurface);
       return {
@@ -498,7 +527,7 @@ export function realizeMorphologicalState(
   let currentSurface = state.lexeme.rootSurface;
   const traces: RealizationTrace[] = [];
 
-  state.tokens.forEach((token) => {
+  state.tokens.forEach((token, tokenIndex) => {
     if (token.kind === "analytic") {
       const construction = getAnalyticConstruction(token.constructionId);
       const phonologyState = createPhonologyState(
@@ -565,7 +594,7 @@ export function realizeMorphologicalState(
     }
 
     const morpheme = getMorpheme(token.morphemeId);
-    const recipe = resolveTokenRecipe(state, morpheme, currentSurface);
+    const recipe = resolveTokenRecipe(state, morpheme, currentSurface, tokenIndex);
     const overridePattern =
       state.lexeme.allomorphOverrides?.[morpheme.id] ?? recipe.pattern;
     const overrideEvents =

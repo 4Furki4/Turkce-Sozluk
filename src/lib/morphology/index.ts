@@ -1,6 +1,12 @@
 export { TurkishMorphologyEngine } from "./engine";
 export { TurkishMorphologyEngineV2 } from "./engine-v2";
 export { ANALYTIC_CONSTRUCTION_CATALOG } from "./analytic-catalog";
+export {
+  LOW_FREQUENCY_DERIVATION_THRESHOLD,
+  splitActionsByRarity,
+  sortActionsForDisplay,
+  suppressLowFrequencyDerivations,
+} from "./action-ranking";
 export { createDefaultFeatureBundle, createLexemeEntryFromRoot } from "./lexicon";
 export { MORPHEME_CATALOG } from "./morpheme-catalog";
 export { POSTFINITE_OVERLAY_CATALOG } from "./postfinite-catalog";
