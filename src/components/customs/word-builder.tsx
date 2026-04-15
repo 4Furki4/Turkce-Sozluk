@@ -268,6 +268,10 @@ function getActionTabLabelKey(tab: ActionTabKey) {
 function getRecommendedSections(
   sections: BuilderSection[],
   phase: MorphologicalStateV2["phase"],
+  attestationByActionId: Record<
+    string,
+    MorphologyAttestation | null | undefined
+  > = {},
 ): BuilderSection[] {
   const priorities: Record<MorphologicalAction["kind"], number> =
     phase === "inflection"
@@ -299,8 +303,12 @@ function getRecommendedSections(
       ...section,
       actions: sortActionsForDisplay(
         section.kind === "derivational"
-          ? suppressLowFrequencyDerivations(section.actions)
+          ? suppressLowFrequencyDerivations(
+              section.actions,
+              attestationByActionId,
+            )
           : section.actions,
+        attestationByActionId,
       ),
     }))
     .filter((section) => section.actions.length > 0);
@@ -332,16 +340,20 @@ function getTabSections(
   tab: ActionTabKey,
   sections: BuilderSection[],
   phase: MorphologicalStateV2["phase"],
+  attestationByActionId: Record<
+    string,
+    MorphologyAttestation | null | undefined
+  > = {},
 ) {
   if (tab === "recommended") {
-    return getRecommendedSections(sections, phase);
+    return getRecommendedSections(sections, phase, attestationByActionId);
   }
 
   return sections
     .filter((section) => section.kind === tab)
     .map((section) => ({
       ...section,
-      actions: sortActionsForDisplay(section.actions),
+      actions: sortActionsForDisplay(section.actions, attestationByActionId),
     }));
 }
 
@@ -804,8 +816,14 @@ export default function WordBuilder() {
         activeActionTab,
         actionSections,
         builderState.phase,
+        candidateAttestationByActionId,
       ),
-    [actionSections, activeActionTab, builderState.phase],
+    [
+      actionSections,
+      activeActionTab,
+      builderState.phase,
+      candidateAttestationByActionId,
+    ],
   );
   const selectedHistoryEntry = useMemo(
     () =>
@@ -834,6 +852,7 @@ export default function WordBuilder() {
       recommended: getRecommendedSections(
         actionSections,
         builderState.phase,
+        candidateAttestationByActionId,
       ).reduce(
         (total, section) => total + section.actions.length,
         0,
@@ -854,7 +873,7 @@ export default function WordBuilder() {
         .filter((section) => section.kind === "postfinite")
         .reduce((total, section) => total + section.actions.length, 0),
     }),
-    [actionSections, builderState.phase],
+    [actionSections, builderState.phase, candidateAttestationByActionId],
   );
 
   useEffect(() => {
@@ -1475,7 +1494,10 @@ export default function WordBuilder() {
                       );
                       const { primaryActions, rareActions } =
                         section.kind === "derivational"
-                          ? splitActionsByRarity(section.actions)
+                          ? splitActionsByRarity(
+                              section.actions,
+                              candidateAttestationByActionId,
+                            )
                           : {
                               primaryActions: section.actions,
                               rareActions: [],
