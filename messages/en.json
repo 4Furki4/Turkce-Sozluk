@@ -2,6 +2,7 @@
   "Navbar": {
     "Home": "Home",
     "Word List": "Word List",
+    "WordBuilder": "Word Builder",
     "Sign In": "Sign In",
     "Title": "Turkish Dictionary",
     "Profile": "Profile",
@@ -28,6 +29,312 @@
     "WordMatchingGame": "Word Matching",
     "WordBuilder": "Verb Builder",
     "SpeedRoundGame": "Speed Round"
+  },
+  "WordBuilder": {
+    "metaTitle": "Turkish Word Builder",
+    "metaDescription": "Build Turkish words with a morpheme- and feature-driven engine while tracking slot flow and phonology in real time.",
+    "titleBadge": "Morphology Lab",
+    "phaseAware": "Feature-driven morphotactics",
+    "title": "Build Turkish words one morpheme at a time",
+    "description": "Choose a root, then select number, possession, case, polarity, tense, and agreement step by step while the engine explains phonology and surface changes.",
+    "featureHarmonyTitle": "Harmony",
+    "featureHarmonyBody": "2-way and 4-way vowel harmony are resolved from abstract morpheme patterns in real time.",
+    "featurePhonologyTitle": "Phonology",
+    "featurePhonologyBody": "Softening, hardening, buffer letters, and progressive vowel loss are applied and explained at each step.",
+    "featurePosTitle": "Slot Flow",
+    "featurePosBody": "The engine manages number, possession, case, TAM, and agreement slots instead of a flat suffix list.",
+    "featureLogTitle": "Step Logs",
+    "featureLogBody": "Each transformation records the chosen morpheme, the surface diff, and the triggered structured events.",
+    "samples": "Quick roots",
+    "rootSetup": "Root setup",
+    "rootSetupHint": "Pick a root profile and start a fresh build chain whenever you want to test another pattern.",
+    "dictionarySearchLabel": "Search dictionary",
+    "dictionarySearchPlaceholder": "Type a word and pick it from the dictionary...",
+    "dictionarySelectionActive": "Dictionary selection is active",
+    "clearDictionarySelection": "Clear selection",
+    "dictionaryPosLabel": "Dictionary POS",
+    "dictionaryPosPlaceholder": "Choose the starting POS",
+    "dictionaryPosRequired": "This dictionary entry appears with more than one part of speech. Choose the starting POS before launching the builder.",
+    "dictionaryPosLoading": "Loading POS data",
+    "rootLabel": "Root",
+    "rootPlaceholder": "kitap, yaz, aile...",
+    "posLabel": "Word class",
+    "originLabel": "Origin",
+    "mutationLabel": "Softening policy",
+    "mutationHint": "Use auto for default Turkish behavior, force for lexical exceptions, or disable it for foreign and frozen forms.",
+    "startBuilder": "Start builder",
+    "stateTitle": "Current state",
+    "stateHint": "The engine keeps the root, selected morphemes, feature bundle, and live surface form in sync.",
+    "currentWord": "Current word",
+    "currentPos": "Current POS",
+    "currentPhase": "Current phase",
+    "undoLast": "Undo last step",
+    "resetSteps": "Reset steps",
+    "stepCount": "Step count",
+    "selectedChain": "Suffix chain",
+    "attestedBadge": "Found in dictionary",
+    "candidateUnattestedBadge": "Not found in dictionary",
+    "availableNow": "available now",
+    "chainEmpty": "No suffix has been added yet.",
+    "lockedInflection": "Inflection phase is active. Only inflectional suffixes remain available from this point on.",
+    "actionDockTitle": "Next move",
+    "actionDockHint": "Switch between tabs to see only the relevant family of actions; the recommended tab surfaces the most natural next steps.",
+    "showRareOptions": "Show more ({count})",
+    "hideRareOptions": "Show less",
+    "rareOptionsLabel": "Rarer options",
+    "rareOptionsHint": "Lower-frequency or not-yet-attested options.",
+    "tabRecommended": "Recommended",
+    "availableSuffixes": "Available suffixes",
+    "availableSuffixesHint": "Buttons below are already filtered by the current part of speech and phase.",
+    "availableDerivations": "Available derivations",
+    "availableAnalytics": "Available analytic constructions",
+    "availableNonfinite": "Available non-finite forms",
+    "availableInflections": "Available inflections",
+    "availablePostfinite": "Available post-finite overlays",
+    "noAvailableSuffixes": "No suffix can be added in the current state.",
+    "timelineTitle": "Step timeline",
+    "timelineHint": "Track the chain in a compact timeline and focus on one step at a time instead of scanning every full card.",
+    "logsTitle": "Transformation log",
+    "logsHint": "Each step shows the surface diff, the realized piece, and every structured event emitted by the engine.",
+    "detailTitle": "Step detail",
+    "detailHint": "Inspect the selected step's surface diff, category shift, and triggered rules here.",
+    "selectStepHint": "Pick a step from the timeline to inspect its details.",
+    "noSteps": "Choose a suffix from the list to begin the build.",
+    "stepLabel": "Step {step}",
+    "before": "Before",
+    "after": "After",
+    "appliedRules": "Triggered rules",
+    "surfaceSuffix": "Surface suffix",
+    "archiphoneme": "Archiphoneme",
+    "zeroMorpheme": "(zero)",
+    "phaseDerivation": "Derivation",
+    "phaseInflection": "Inflection",
+    "phasePostFinite": "Post-finite",
+    "analyticKind": "Analytic",
+    "nonfiniteKind": "Non-finite",
+    "postfiniteKind": "Overlay",
+    "posNoun": "Noun",
+    "posAdjective": "Adjective",
+    "posAdverb": "Adverb",
+    "posVerb": "Verb",
+    "categoryAdjective": "Adjective",
+    "categoryAdverb": "Adverb",
+    "categoryVerbalNoun": "Verbal noun",
+    "categoryParticiple": "Participle",
+    "categoryConverb": "Converb",
+    "categoryPredicative": "Predicative",
+    "originNative": "Native",
+    "originForeign": "Foreign",
+    "mutationAuto": "Auto",
+    "mutationAlways": "Always soften",
+    "mutationNever": "Never soften",
+    "slots": {
+      "derivation": "Derivation",
+      "verb_nonfinite": "Non-finite",
+      "noun_number": "Number",
+      "noun_possessive": "Possessive",
+      "noun_case": "Case",
+      "predicative_zero": "Implicit predicate",
+      "predicative_agreement": "Predicative person",
+      "predicative_assertive": "Assertive",
+      "verb_polarity": "Polarity",
+      "verb_tam": "Tense/Aspect/Mood",
+      "verb_agreement": "Agreement"
+    },
+    "actions": {
+      "derivation": {
+        "adjective": {
+          "lIk": "-lık",
+          "lI": "-lı",
+          "lAş": "-laş",
+          "lAştır": "-laştır",
+          "CA": "-ca"
+        },
+        "noun": {
+          "lIk": "-lık",
+          "lI": "-lı",
+          "sIz": "-sız",
+          "CI": "-cı",
+          "DAş": "-daş",
+          "lA": "-la",
+          "lAş": "-laş",
+          "lAn": "-lan",
+          "Al": "-al",
+          "sA": "-sa"
+        },
+        "verb": {
+          "GI": "-gı",
+          "ICI": "-ıcı",
+          "mA": "-ma",
+          "Iş": "-ış",
+          "Ak": "-ak",
+          "Im": "-ım"
+        },
+        "voice": {
+          "DIr": "-dır",
+          "Il": "-ıl",
+          "In": "-ın",
+          "Iş": "-ış"
+        }
+      },
+      "analytic": {
+        "ability": {
+          "ebil": "Ability (-ebil)"
+        },
+        "celerity": {
+          "iver": "Celerity (-iver)"
+        },
+        "continuative": {
+          "adur": "Continuative (-adur)"
+        },
+        "persistence": {
+          "akal": "Persistence (-akal)"
+        },
+        "progression": {
+          "agel": "Progression (-agel)"
+        },
+        "approximative": {
+          "ayaz": "Approximative (-ayaz)"
+        },
+        "serial": {
+          "ipDur": "Continuative (-(y)Ip dur)",
+          "ipGit": "Carry-on (-(y)Ip git)",
+          "ipKal": "Resultative (-(y)Ip kal)"
+        }
+      },
+      "postfinite": {
+        "question": {
+          "mI": "Question particle (mI)"
+        },
+        "copula": {
+          "idi": "Copular past (idi)",
+          "imiş": "Copular evidential (imiş)"
+        },
+        "conditional": {
+          "ise": "Conditional overlay (ise)"
+        },
+        "while": {
+          "iken": "While overlay (iken)"
+        }
+      },
+      "nonfinite": {
+        "verbalNoun": {
+          "mA": "-ma",
+          "mAk": "-mak",
+          "Iş": "-ış"
+        },
+        "participle": {
+          "An": "-an",
+          "DIK": "-dık",
+          "mIş": "-mış",
+          "AcAk": "-acak"
+        },
+        "converb": {
+          "Ip": "-ıp",
+          "IncA": "-ınca",
+          "ArAk": "-arak"
+        }
+      },
+      "noun": {
+        "number": {
+          "pl": "Plural"
+        },
+        "possessive": {
+          "p1sg": "1st singular possessive",
+          "p2sg": "2nd singular possessive",
+          "p3sg": "3rd singular possessive",
+          "p1pl": "1st plural possessive",
+          "p2pl": "2nd plural possessive",
+          "p3pl": "3rd plural possessive"
+        },
+        "case": {
+          "acc": "Accusative",
+          "dat": "Dative",
+          "loc": "Locative",
+          "abl": "Ablative",
+          "gen": "Genitive"
+        }
+      },
+      "predicative": {
+        "zero": {
+          "3sg": "Implicit 3rd singular predicate (Ø)"
+        },
+        "agreement": {
+          "1sg": "1st singular predicate",
+          "2sg": "2nd singular predicate",
+          "1pl": "1st plural predicate",
+          "2pl": "2nd plural predicate",
+          "3pl": "3rd plural predicate"
+        },
+        "assertive": {
+          "dIr": "Assertive copula (-DIr)"
+        }
+      },
+      "verb": {
+        "polarity": {
+          "neg": "Negative"
+        },
+        "tam": {
+          "aor": "Aorist",
+          "prog": "Progressive",
+          "past": "Past",
+          "future": "Future"
+        },
+        "agreement": {
+          "1sg": "1st singular",
+          "2sg": "2nd singular",
+          "1pl": "1st plural",
+          "2pl": "2nd plural",
+          "3pl": "3rd plural"
+        }
+      }
+    },
+    "events": {
+      "actionApplied": "Selected morpheme",
+      "derivationApplied": "Applied {action}: {before} -> {after}.",
+      "analyticApplied": "Added analytic construction {action}.",
+      "postfiniteApplied": "Added post-finite overlay {action}.",
+      "predicativeZeroApplied": "Activated the implicit 3rd-singular predicative layer.",
+      "phaseChange": "Morphology phase updated: {before} -> {after}.",
+      "posChange": "Part of speech updated: {before} -> {after}.",
+      "vowelHarmonyFourWay": "Applied 4-way vowel harmony: /{archiphoneme}/ -> {resolved}.",
+      "vowelHarmonyTwoWay": "Applied 2-way vowel harmony: /{archiphoneme}/ -> {resolved}.",
+      "consonantAssimilation": "Applied consonant assimilation: {before} -> {after}.",
+      "bufferLetter": "Inserted buffer letter: {letter}.",
+      "consonantMutation": "Applied consonant mutation: {before} -> {after}.",
+      "progressiveVowelDrop": "Dropped the final stem vowel before the progressive marker.",
+      "lexemeOverrideApplied": "Applied lexical allomorph override",
+      "attestationMatchFound": "Found \"{word}\" in the dictionary.",
+      "attestationMatchMissing": "No dictionary match found for \"{word}\"."
+    },
+    "groups": {
+      "NounToNoun": "Noun to noun",
+      "NounToVerb": "Noun to verb",
+      "VerbToNoun": "Verb to noun",
+      "VerbToVerb": "Verb to verb",
+      "AdjectiveToNoun": "Adjective to noun",
+      "AdjectiveToVerb": "Adjective to verb",
+      "AdjectiveToAdverb": "Adjective to adverb",
+      "AnalyticAbility": "Ability",
+      "AnalyticCelerity": "Celerity",
+      "AnalyticContinuative": "Continuative",
+      "AnalyticPersistence": "Persistence",
+      "AnalyticProgression": "Progression",
+      "AnalyticApproximative": "Approximative",
+      "AnalyticSerialContinuative": "Continuative",
+      "AnalyticSerialProgressive": "Carry-on",
+      "AnalyticSerialResultative": "Resultative",
+      "PostfiniteQuestion": "Question",
+      "PostfiniteCopula": "Copula",
+      "PostfiniteConditional": "Conditional",
+      "PostfiniteWhile": "While",
+      "VerbalNoun": "Verbal noun",
+      "Participle": "Participle",
+      "Converb": "Converb",
+      "PredicativeInflection": "Predicative inflection",
+      "NounInflection": "Noun inflection",
+      "VerbInflection": "Verb inflection"
+    }
   },
   "Footer": {
     "description": "Community-driven, open source and modern Turkish dictionary.",

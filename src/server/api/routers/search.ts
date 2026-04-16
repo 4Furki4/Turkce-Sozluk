@@ -1,4 +1,8 @@
 import { createTRPCRouter, publicProcedure } from "@/src/server/api/trpc";
+import {
+  normalizeDictionaryQuery,
+  sortDictionarySuggestions,
+} from "@/src/lib/search-suggestions";
 import { z } from "zod";
 import { words } from "@/db/schema/words";
 import { ilike, sql } from "drizzle-orm";
@@ -33,18 +37,36 @@ export const searchRouter = createTRPCRouter({
   getWords: publicProcedure
     .input(z.object({ query: z.string() }))
     .query(async ({ ctx, input }) => {
-      if (input.query.length < 2) {
+      const normalizedQuery = normalizeDictionaryQuery(input.query);
+
+      if (normalizedQuery.length < 2) {
         return [];
       }
-      const results = await ctx.db.query.words.findMany({
-        where: ilike(words.name, `%${input.query}%`),
-        limit: 10,
-        columns: {
-          id: true,
-          name: true,
-        },
-      });
-      return results;
+
+      const exactPattern = normalizedQuery;
+      const prefixPattern = `${normalizedQuery}%`;
+      const containsPattern = `%${normalizedQuery}%`;
+
+      const results = await ctx.db
+        .select({
+          id: words.id,
+          name: words.name,
+        })
+        .from(words)
+        .where(ilike(words.name, containsPattern))
+        .orderBy(
+          sql<number>`
+            case
+              when ${words.name} ilike ${exactPattern} then 0
+              when ${words.name} ilike ${prefixPattern} then 1
+              else 2
+            end
+          `,
+          sql`lower(${words.name})`,
+        )
+        .limit(25);
+
+      return sortDictionarySuggestions(results, normalizedQuery).slice(0, 10);
     }),
   searchVerbRoots: publicProcedure
     .input(

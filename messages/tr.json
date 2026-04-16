@@ -2,6 +2,7 @@
   "Navbar": {
     "Home": "Ana Sayfa",
     "Word List": "Kelime Listesi",
+    "WordBuilder": "Kelime İnşası",
     "Sign In": "Giriş Yap",
     "Title": "Türkçe Sözlük",
     "Profile": "Profil",
@@ -28,6 +29,312 @@
     "WordBuilder": "Fiil Çekimi",
     "SpeedRoundGame": "Hızlı Tur",
     "ForeignTermSuggestions": "Yabancı Terim Önerileri"
+  },
+  "WordBuilder": {
+    "metaTitle": "Türkçe Kelime İnşa Motoru",
+    "metaDescription": "Türkçe kelimeleri morfem ve özellik tabanlı bir motorla adım adım kurun; çekim akışını ve ses olaylarını canlı olarak izleyin.",
+    "titleBadge": "Morfoloji Laboratuvarı",
+    "phaseAware": "Özellik odaklı morfotaktik",
+    "title": "Türkçe kelimeleri morfem morfem inşa edin",
+    "description": "Bir kök seçin, sonra sayı, iyelik, hal, kutupluluk, zaman ve kişi seçimlerini adım adım yapın; motor her adımda ses olaylarını ve yüzey değişimini açıklasın.",
+    "featureHarmonyTitle": "Uyum",
+    "featureHarmonyBody": "2 yönlü ve 4 yönlü ünlü uyumu soyut morfem örüntülerinden anlık olarak çözülür.",
+    "featurePhonologyTitle": "Ses Olayı",
+    "featurePhonologyBody": "Yumuşama, sertleşme, kaynaştırma ve ilerleyen zaman ünlü düşmesi gibi kurallar her adımda uygulanır ve açıklanır.",
+    "featurePosTitle": "Slot Akışı",
+    "featurePosBody": "Motor serbest bir ek listesi yerine sayı, iyelik, hal, kip ve kişi slotlarını yönetir.",
+    "featureLogTitle": "Adım Günlüğü",
+    "featureLogBody": "Her dönüşüm seçilen morfemi, yüzey farkını ve yapılandırılmış olayları birlikte kaydeder.",
+    "samples": "Hızlı kökler",
+    "rootSetup": "Kök ayarları",
+    "rootSetupHint": "Farklı örüntüleri test etmek için kök profilini değiştirip yeni bir zincir başlatabilirsiniz.",
+    "dictionarySearchLabel": "Sözlükten ara",
+    "dictionarySearchPlaceholder": "Kelime yazıp sözlükten seçin...",
+    "dictionarySelectionActive": "Sözlük seçimi aktif",
+    "clearDictionarySelection": "Seçimi temizle",
+    "dictionaryPosLabel": "Sözlük türü",
+    "dictionaryPosPlaceholder": "Başlangıç türünü seçin",
+    "dictionaryPosRequired": "Bu sözlük girdisi birden fazla türde kullanılıyor. İnşaya başlamadan önce başlangıç türünü seçin.",
+    "dictionaryPosLoading": "Tür bilgisi yükleniyor",
+    "rootLabel": "Kök",
+    "rootPlaceholder": "kitap, yaz, aile...",
+    "posLabel": "Kelime türü",
+    "originLabel": "Köken",
+    "mutationLabel": "Yumuşama politikası",
+    "mutationHint": "Varsayılan Türkçe davranışı için otomatik kullanın; sözlüksel istisnalar için zorlayın, yabancı ve donmuş biçimler için kapatın.",
+    "startBuilder": "İnşayı başlat",
+    "stateTitle": "Güncel durum",
+    "stateHint": "Motor, kökü, seçilen morfemleri, özellik paketini ve yüzey biçimini birlikte takip eder.",
+    "currentWord": "Güncel kelime",
+    "currentPos": "Güncel tür",
+    "currentPhase": "Güncel aşama",
+    "undoLast": "Son adımı geri al",
+    "resetSteps": "Adımları sıfırla",
+    "stepCount": "Adım sayısı",
+    "selectedChain": "Ek zinciri",
+    "attestedBadge": "Sözlükte mevcut",
+    "candidateUnattestedBadge": "Sözlükte yok",
+    "availableNow": "şu an kullanılabilir",
+    "chainEmpty": "Henüz hiç ek eklenmedi.",
+    "lockedInflection": "Çekim aşaması aktif. Bu noktadan sonra yalnızca çekim ekleri kullanılabilir.",
+    "actionDockTitle": "Sonraki hamle",
+    "actionDockHint": "Sekmeler arasında geçip yalnızca o anda ilgili ek ailesini görün; önerilen sekmesi en doğal devam seçeneklerini öne çıkarır.",
+    "showRareOptions": "Daha fazla göster ({count})",
+    "hideRareOptions": "Daha az göster",
+    "rareOptionsLabel": "Nadir seçenekler",
+    "rareOptionsHint": "Düşük frekanslı veya henüz sözlükte doğrulanmamış seçenekler.",
+    "tabRecommended": "Önerilen",
+    "availableSuffixes": "Kullanılabilir ekler",
+    "availableSuffixesHint": "Aşağıdaki butonlar güncel kelime türü ve aşamaya göre zaten filtrelenmiştir.",
+    "availableDerivations": "Kullanılabilir yapım ekleri",
+    "availableAnalytics": "Kullanılabilir tasvir yapıları",
+    "availableNonfinite": "Kullanılabilir fiilimsi ekleri",
+    "availableInflections": "Kullanılabilir çekim ekleri",
+    "availablePostfinite": "Kullanılabilir sonlu üst katmanlar",
+    "noAvailableSuffixes": "Bu durumda eklenebilecek bir ek kalmadı.",
+    "timelineTitle": "Adım geçmişi",
+    "timelineHint": "Zinciri soldan sağa uzatmak yerine, adımları kısa bir zaman çizelgesinde izleyip istediğiniz adıma odaklanın.",
+    "logsTitle": "Dönüşüm günlüğü",
+    "logsHint": "Her adım yüzey farkını, gerçekleşen parçayı ve motorun ürettiği yapılandırılmış olay açıklamalarını gösterir.",
+    "detailTitle": "Adım detayı",
+    "detailHint": "Seçili adımın yüzey farkını, tür değişimini ve tetiklenen kurallarını burada görün.",
+    "selectStepHint": "Detayları görmek için zaman çizelgesinden bir adım seçin.",
+    "noSteps": "İnşaya başlamak için listeden bir ek seçin.",
+    "stepLabel": "Adım {step}",
+    "before": "Önce",
+    "after": "Sonra",
+    "appliedRules": "Tetiklenen kurallar",
+    "surfaceSuffix": "Yüzey eki",
+    "archiphoneme": "Arşifonem",
+    "zeroMorpheme": "(sıfır)",
+    "phaseDerivation": "Yapım",
+    "phaseInflection": "Çekim",
+    "phasePostFinite": "Sonlu üst katman",
+    "analyticKind": "Tasvir",
+    "nonfiniteKind": "Fiilimsi",
+    "postfiniteKind": "Üst katman",
+    "posNoun": "İsim",
+    "posAdjective": "Sıfat",
+    "posAdverb": "Zarf",
+    "posVerb": "Fiil",
+    "categoryAdjective": "Sıfat",
+    "categoryAdverb": "Zarf",
+    "categoryVerbalNoun": "İsim-fiil",
+    "categoryParticiple": "Sıfat-fiil",
+    "categoryConverb": "Zarf-fiil",
+    "categoryPredicative": "Yüklemsi",
+    "originNative": "Yerli",
+    "originForeign": "Yabancı",
+    "mutationAuto": "Otomatik",
+    "mutationAlways": "Her zaman yumuşat",
+    "mutationNever": "Asla yumuşatma",
+    "slots": {
+      "derivation": "Yapım",
+      "verb_nonfinite": "Fiilimsi",
+      "noun_number": "Sayı",
+      "noun_possessive": "İyelik",
+      "noun_case": "Hal",
+      "predicative_zero": "Örtük yüklem",
+      "predicative_agreement": "Yüklem kişisi",
+      "predicative_assertive": "Bildirme",
+      "verb_polarity": "Kutupluluk",
+      "verb_tam": "Zaman/Kip",
+      "verb_agreement": "Kişi"
+    },
+    "actions": {
+      "derivation": {
+        "adjective": {
+          "lIk": "-lık",
+          "lI": "-lı",
+          "lAş": "-laş",
+          "lAştır": "-laştır",
+          "CA": "-ca"
+        },
+        "noun": {
+          "lIk": "-lık",
+          "lI": "-lı",
+          "sIz": "-sız",
+          "CI": "-cı",
+          "DAş": "-daş",
+          "lA": "-la",
+          "lAş": "-laş",
+          "lAn": "-lan",
+          "Al": "-al",
+          "sA": "-sa"
+        },
+        "verb": {
+          "GI": "-gı",
+          "ICI": "-ıcı",
+          "mA": "-ma",
+          "Iş": "-ış",
+          "Ak": "-ak",
+          "Im": "-ım"
+        },
+        "voice": {
+          "DIr": "-dır",
+          "Il": "-ıl",
+          "In": "-ın",
+          "Iş": "-ış"
+        }
+      },
+      "analytic": {
+        "ability": {
+          "ebil": "Yeterlik (-ebil)"
+        },
+        "celerity": {
+          "iver": "Tezlik (-iver)"
+        },
+        "continuative": {
+          "adur": "Sürerlik (-adur)"
+        },
+        "persistence": {
+          "akal": "Kalış (-akal)"
+        },
+        "progression": {
+          "agel": "Süregelme (-agel)"
+        },
+        "approximative": {
+          "ayaz": "Yaklaşma (-ayaz)"
+        },
+        "serial": {
+          "ipDur": "Süreklilik (-(y)Ip dur)",
+          "ipGit": "Sürüp gitme (-(y)Ip git)",
+          "ipKal": "Sonuçta kalma (-(y)Ip kal)"
+        }
+      },
+      "postfinite": {
+        "question": {
+          "mI": "Soru parçacığı (mI)"
+        },
+        "copula": {
+          "idi": "Ek-fiil geçmişi (idi)",
+          "imiş": "Ek-fiil rivayeti (imiş)"
+        },
+        "conditional": {
+          "ise": "Şart üst katmanı (ise)"
+        },
+        "while": {
+          "iken": "Zarf-fiil üst katmanı (iken)"
+        }
+      },
+      "nonfinite": {
+        "verbalNoun": {
+          "mA": "-ma",
+          "mAk": "-mak",
+          "Iş": "-ış"
+        },
+        "participle": {
+          "An": "-an",
+          "DIK": "-dık",
+          "mIş": "-mış",
+          "AcAk": "-acak"
+        },
+        "converb": {
+          "Ip": "-ıp",
+          "IncA": "-ınca",
+          "ArAk": "-arak"
+        }
+      },
+      "noun": {
+        "number": {
+          "pl": "Çoğul"
+        },
+        "possessive": {
+          "p1sg": "1. tekil iyelik",
+          "p2sg": "2. tekil iyelik",
+          "p3sg": "3. tekil iyelik",
+          "p1pl": "1. çoğul iyelik",
+          "p2pl": "2. çoğul iyelik",
+          "p3pl": "3. çoğul iyelik"
+        },
+        "case": {
+          "acc": "Belirtme hali",
+          "dat": "Yönelme hali",
+          "loc": "Bulunma hali",
+          "abl": "Ayrılma hali",
+          "gen": "İlgi hali"
+        }
+      },
+      "predicative": {
+        "zero": {
+          "3sg": "Örtük 3. tekil yüklem (Ø)"
+        },
+        "agreement": {
+          "1sg": "1. tekil yüklem",
+          "2sg": "2. tekil yüklem",
+          "1pl": "1. çoğul yüklem",
+          "2pl": "2. çoğul yüklem",
+          "3pl": "3. çoğul yüklem"
+        },
+        "assertive": {
+          "dIr": "Bildirme eki (-DIr)"
+        }
+      },
+      "verb": {
+        "polarity": {
+          "neg": "Olumsuzluk"
+        },
+        "tam": {
+          "aor": "Geniş zaman",
+          "prog": "Şimdiki zaman",
+          "past": "Görülen geçmiş zaman",
+          "future": "Gelecek zaman"
+        },
+        "agreement": {
+          "1sg": "1. tekil kişi",
+          "2sg": "2. tekil kişi",
+          "1pl": "1. çoğul kişi",
+          "2pl": "2. çoğul kişi",
+          "3pl": "3. çoğul kişi"
+        }
+      }
+    },
+    "events": {
+      "actionApplied": "Morfem seçildi",
+      "derivationApplied": "{action} uygulandı: {before} -> {after}.",
+      "analyticApplied": "{action} tasvir yapısı eklendi.",
+      "postfiniteApplied": "{action} sonlu üst katmanı eklendi.",
+      "predicativeZeroApplied": "Örtük 3. tekil yüklem katmanı etkinleştirildi.",
+      "phaseChange": "Morfolojik aşama güncellendi: {before} -> {after}.",
+      "posChange": "Kelime türü güncellendi: {before} -> {after}.",
+      "vowelHarmonyFourWay": "4 yönlü ünlü uyumu uygulandı: /{archiphoneme}/ -> {resolved}.",
+      "vowelHarmonyTwoWay": "2 yönlü ünlü uyumu uygulandı: /{archiphoneme}/ -> {resolved}.",
+      "consonantAssimilation": "Ünsüz sertleşmesi uygulandı: {before} -> {after}.",
+      "bufferLetter": "Tampon harf eklendi: {letter}.",
+      "consonantMutation": "Ünsüz yumuşaması uygulandı: {before} -> {after}.",
+      "progressiveVowelDrop": "Şimdiki zaman öncesi son ünlü düşürüldü.",
+      "lexemeOverrideApplied": "Sözlüksel allomorf geçersiz kıldı",
+      "attestationMatchFound": "\"{word}\" sözlükte bulundu.",
+      "attestationMatchMissing": "\"{word}\" için sözlük eşleşmesi bulunamadı."
+    },
+    "groups": {
+      "NounToNoun": "İsimden isim",
+      "NounToVerb": "İsimden fiil",
+      "VerbToNoun": "Fiilden isim",
+      "VerbToVerb": "Fiilden fiil",
+      "AdjectiveToNoun": "Sıfattan isim",
+      "AdjectiveToVerb": "Sıfattan fiil",
+      "AdjectiveToAdverb": "Sıfattan zarf",
+      "AnalyticAbility": "Yeterlik",
+      "AnalyticCelerity": "Tezlik",
+      "AnalyticContinuative": "Sürerlik",
+      "AnalyticPersistence": "Kalış",
+      "AnalyticProgression": "Süregelme",
+      "AnalyticApproximative": "Yaklaşma",
+      "AnalyticSerialContinuative": "Süreklilik",
+      "AnalyticSerialProgressive": "Sürüp gitme",
+      "AnalyticSerialResultative": "Sonuçta kalma",
+      "PostfiniteQuestion": "Soru",
+      "PostfiniteCopula": "Ek-fiil",
+      "PostfiniteConditional": "Şart",
+      "PostfiniteWhile": "İken",
+      "VerbalNoun": "İsim-fiil",
+      "Participle": "Sıfat-fiil",
+      "Converb": "Zarf-fiil",
+      "PredicativeInflection": "Yüklem çekimi",
+      "NounInflection": "İsim çekimi",
+      "VerbInflection": "Fiil çekimi"
+    }
   },
   "Footer": {
     "description": "Topluluk ile gelişen, açık kaynak ve modern Türkçe sözlüğü.",

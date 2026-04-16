@@ -1,26 +1,36 @@
-import type { Metadata } from "next";
-import type { Params } from "next/dist/server/request/params";
-import { getTranslations } from "next-intl/server";
-import VerbBuilder from "@/src/components/tools/verb-builder";
+import WordBuilder from "@/src/components/customs/word-builder";
+import { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
-export async function generateMetadata({
-    params,
-}: {
-    params: Promise<Params>;
-}): Promise<Metadata> {
-    const { locale } = (await params) as { locale: string };
-    const t = await getTranslations({ locale, namespace: "VerbBuilder" });
+type Props = {
+  params: Promise<{
+    locale: string;
+  }>;
+};
 
-    return {
-        title: t("metaTitle"),
-        description: t("metaDescription"),
-    };
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "WordBuilder" });
+
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+    openGraph: {
+      title: t("metaTitle"),
+      description: t("metaDescription"),
+      type: "website",
+    },
+  };
 }
 
-export default async function WordBuilderPage() {
-    return (
-        <section className="w-full px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-            <VerbBuilder />
-        </section>
-    );
+export default async function WordBuilderPage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  return (
+    <section className="w-full">
+      <WordBuilder />
+    </section>
+  );
 }
+

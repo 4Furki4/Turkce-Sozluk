@@ -42,6 +42,7 @@ export default function NavbarAndSidebar({
     HomeIntl: string
     SignInIntl: string
     WordListIntl: string
+    WordBuilderIntl: string
     TitleIntl: string
     ProfileIntl: string
     SavedWordsIntl: string
@@ -63,7 +64,6 @@ export default function NavbarAndSidebar({
     LearnIntl: string,
     FlashcardGameIntl: string,
     WordMatchingGameIntl: string,
-    WordBuilderIntl: string,
     SpeedRoundGameIntl: string,
     ForeignTermSuggestionsIntl: string
 }) {
@@ -78,6 +78,7 @@ export default function NavbarAndSidebar({
                 HomeIntl={HomeIntl}
                 SignInIntl={SignInIntl}
                 WordListIntl={WordListIntl}
+                WordBuilderIntl={WordBuilderIntl}
                 TitleIntl={TitleIntl}
                 ProfileIntl={ProfileIntl}
                 SavedWordsIntl={SavedWordsIntl}
@@ -100,7 +101,6 @@ export default function NavbarAndSidebar({
                 LearnIntl={LearnIntl}
                 FlashcardGameIntl={FlashcardGameIntl}
                 WordMatchingGameIntl={WordMatchingGameIntl}
-                WordBuilderIntl={WordBuilderIntl}
                 SpeedRoundGameIntl={SpeedRoundGameIntl}
                 ForeignTermSuggestionsIntl={ForeignTermSuggestionsIntl}
             />
