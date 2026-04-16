@@ -84,14 +84,14 @@ const ROOT_SAMPLES: Array<{
   origin: "native" | "foreign";
   mutationMode: MutationMode;
 }> = [
-  { surface: "kitap", pos: "Noun", origin: "native", mutationMode: "auto" },
-  { surface: "aile", pos: "Noun", origin: "native", mutationMode: "auto" },
-  { surface: "ev", pos: "Noun", origin: "native", mutationMode: "auto" },
-  { surface: "güzel", pos: "Adjective", origin: "native", mutationMode: "auto" },
-  { surface: "yaz", pos: "Verb", origin: "native", mutationMode: "auto" },
-  { surface: "gör", pos: "Verb", origin: "native", mutationMode: "auto" },
-  { surface: "link", pos: "Noun", origin: "foreign", mutationMode: "auto" },
-];
+    { surface: "kitap", pos: "Noun", origin: "native", mutationMode: "auto" },
+    { surface: "aile", pos: "Noun", origin: "native", mutationMode: "auto" },
+    { surface: "ev", pos: "Noun", origin: "native", mutationMode: "auto" },
+    { surface: "güzel", pos: "Adjective", origin: "native", mutationMode: "auto" },
+    { surface: "yaz", pos: "Verb", origin: "native", mutationMode: "auto" },
+    { surface: "gör", pos: "Verb", origin: "native", mutationMode: "auto" },
+    { surface: "link", pos: "Noun", origin: "foreign", mutationMode: "auto" },
+  ];
 
 function createRootLexeme(
   surface: string,
@@ -201,11 +201,11 @@ function getActionSections(actions: MorphologicalAction[]): BuilderSection[] {
         ? derivationalGroups
         : action.kind === "analytic"
           ? analyticGroups
-        : action.kind === "nonfinite"
-          ? nonfiniteGroups
-          : action.kind === "postfinite"
-            ? postfiniteGroups
-          : inflectionGroups;
+          : action.kind === "nonfinite"
+            ? nonfiniteGroups
+            : action.kind === "postfinite"
+              ? postfiniteGroups
+              : inflectionGroups;
     const key = action.kind === "inflectional" ? action.slot : action.group;
     const currentActions = groupMap.get(key) ?? [];
     currentActions.push(action);
@@ -276,27 +276,27 @@ function getRecommendedSections(
   const priorities: Record<MorphologicalAction["kind"], number> =
     phase === "inflection"
       ? {
-          inflectional: 0,
-          postfinite: 1,
+        inflectional: 0,
+        postfinite: 1,
+        nonfinite: 2,
+        analytic: 3,
+        derivational: 4,
+      }
+      : phase === "postfinite"
+        ? {
+          postfinite: 0,
+          inflectional: 1,
           nonfinite: 2,
           analytic: 3,
           derivational: 4,
         }
-      : phase === "postfinite"
-        ? {
-            postfinite: 0,
-            inflectional: 1,
-            nonfinite: 2,
-            analytic: 3,
-            derivational: 4,
-          }
         : {
-            derivational: 0,
-            nonfinite: 1,
-            analytic: 2,
-            inflectional: 3,
-            postfinite: 4,
-          };
+          derivational: 0,
+          nonfinite: 1,
+          analytic: 2,
+          inflectional: 3,
+          postfinite: 4,
+        };
 
   const preparedSections = sections
     .map((section) => ({
@@ -304,9 +304,9 @@ function getRecommendedSections(
       actions: sortActionsForDisplay(
         section.kind === "derivational"
           ? suppressLowFrequencyDerivations(
-              section.actions,
-              attestationByActionId,
-            )
+            section.actions,
+            attestationByActionId,
+          )
           : section.actions,
         attestationByActionId,
       ),
@@ -483,7 +483,7 @@ function buildAttestationEvent(
         ? `${action.constructionId}#${step}`
         : action.kind === "postfinite"
           ? `${action.overlayId}#${step}`
-        : `${action.morphemeId}#${step}`,
+          : `${action.morphemeId}#${step}`,
   };
 }
 
@@ -669,7 +669,7 @@ export default function WordBuilder() {
           if (
             matchedWord &&
             matchedWord.word_name.toLocaleLowerCase("tr") ===
-              pending.surface.toLocaleLowerCase("tr")
+            pending.surface.toLocaleLowerCase("tr")
           ) {
             attestation = {
               matched: true,
@@ -771,7 +771,7 @@ export default function WordBuilder() {
           if (
             matchedWord &&
             matchedWord.word_name.toLocaleLowerCase("tr") ===
-              pending.surface.toLocaleLowerCase("tr")
+            pending.surface.toLocaleLowerCase("tr")
           ) {
             attestation = {
               matched: true,
@@ -1007,8 +1007,8 @@ export default function WordBuilder() {
                 </Badge>
               ) : null}
               {section.kind === "derivational" &&
-              attestation &&
-              !attestation.matched ? (
+                attestation &&
+                !attestation.matched ? (
                 <Badge
                   variant="outline"
                   className="rounded-full border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-700 dark:text-amber-300"
@@ -1026,7 +1026,7 @@ export default function WordBuilder() {
 
         <div className="mt-4 flex flex-wrap gap-2 text-xs text-foreground/60">
           {section.kind === "derivational" ||
-          section.kind === "analytic" ? (
+            section.kind === "analytic" ? (
             <>
               <span className="rounded-full border border-border/70 px-2.5 py-1">
                 {getLocalizedPos(t, action.sourcePos)}
@@ -1086,10 +1086,10 @@ export default function WordBuilder() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 lg:py-10">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-2 py-4 lg:py-10">
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <CustomCard className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/10 via-background/70 to-background/90 shadow-[0_18px_60px_-26px_rgba(194,65,12,0.65)]">
-          <CardBody className="gap-6 p-6 sm:p-8">
+          <CardBody className="gap-6 p-2 sm:p-8">
             <div className="space-y-3">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge className="rounded-full border-primary/25 bg-primary/12 px-3 py-1 text-primary" variant="outline">
@@ -1174,7 +1174,7 @@ export default function WordBuilder() {
         </CustomCard>
 
         <CustomCard className="border-border/70 bg-background/85 shadow-[0_18px_45px_-34px_rgba(15,23,42,0.55)]">
-          <CardBody className="gap-5 p-6">
+          <CardBody className="gap-5 px-2 py-4 sm:p-6">
             <div className="space-y-1">
               <h2 className="text-xl font-semibold">{t("rootSetup")}</h2>
               <p className="text-sm text-foreground/65">{t("rootSetupHint")}</p>
@@ -1334,122 +1334,120 @@ export default function WordBuilder() {
         </CustomCard>
       </div>
 
-      <div className="sticky top-4 z-20">
-        <div className="rounded-xl border border-primary/20 bg-background/85 shadow-[0_18px_50px_-32px_rgba(15,23,42,0.45)] backdrop-blur">
-          <div className="flex flex-col gap-4 p-4 sm:p-5">
+      <CustomCard className="sticky top-4 z-20">
+        <CardBody className="flex flex-col gap-4 px-2 py-4 sm:p-5">
+          <div className="space-y-3">
             <div className="space-y-3">
-              <div className="space-y-3">
-                <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">
-                    {t("currentWord")}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="text-3xl font-semibold tracking-tight sm:text-4xl">
-                      {realization.surface}
-                    </div>
-                    {currentAttestation?.matched ? (
-                      <NextIntlLink
-                        href={{
-                          pathname: "/search/[word]",
-                          params: {
-                            word: currentAttestation.wordName ?? realization.surface,
-                          },
-                        }}
-                        className="inline-flex items-center rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-sm text-primary transition-colors hover:bg-primary/12"
-                      >
-                        {t("attestedBadge")}
-                      </NextIntlLink>
-                    ) : null}
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">
+                  {t("currentWord")}
+                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                    {realization.surface}
                   </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <Chip color="primary" variant="flat">
-                    {t("currentPos")}: {getLocalizedPos(t, builderState.currentPos)}
-                  </Chip>
-                  <Chip variant="flat">
-                    {getLocalizedCategory(t, builderState.currentCategory)}
-                  </Chip>
-                  <Chip variant="flat">
-                    {t("currentPhase")}: {getLocalizedPhase(t, builderState.phase)}
-                  </Chip>
-                  <Chip variant="flat">
-                    {t("stepCount")}: {builderState.history.length}
-                  </Chip>
+                  {currentAttestation?.matched ? (
+                    <NextIntlLink
+                      href={{
+                        pathname: "/search/[word]",
+                        params: {
+                          word: currentAttestation.wordName ?? realization.surface,
+                        },
+                      }}
+                      className="inline-flex items-center rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-sm text-primary transition-colors hover:bg-primary/12"
+                    >
+                      {t("attestedBadge")}
+                    </NextIntlLink>
+                  ) : null}
                 </div>
               </div>
-            </div>
 
-            {showInflectionLockNotice ? (
-              <div className="rounded-lg border border-primary/20 bg-primary/8 px-4 py-3 text-sm text-foreground/80">
-                {t("lockedInflection")}
+              <div className="flex flex-wrap gap-2">
+                <Chip color="primary" variant="flat">
+                  {t("currentPos")}: {getLocalizedPos(t, builderState.currentPos)}
+                </Chip>
+                <Chip variant="flat">
+                  {getLocalizedCategory(t, builderState.currentCategory)}
+                </Chip>
+                <Chip variant="flat">
+                  {t("currentPhase")}: {getLocalizedPhase(t, builderState.phase)}
+                </Chip>
+                <Chip variant="flat">
+                  {t("stepCount")}: {builderState.history.length}
+                </Chip>
               </div>
-            ) : null}
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="font-semibold">{t("selectedChain")}</h2>
-                <span className="text-xs uppercase tracking-[0.16em] text-foreground/45">
-                  {availableActions.length} {t("availableNow")}
-                </span>
-              </div>
-              <div className="overflow-x-auto pb-1">
-                <div className="flex min-h-16 min-w-max items-center gap-2 rounded-lg border border-dashed border-border/70 bg-background/55 p-3">
-                  {builderState.history.length > 0 ? (
-                    builderState.history.map((step) => (
-                      <Badge
-                        key={step.step}
-                        variant="outline"
-                        className={cn(
-                          "rounded-full px-3 py-1 text-sm",
-                          step.action.kind === "derivational"
-                            ? "border-primary/20 bg-primary/8 text-primary"
-                            : step.action.kind === "analytic"
-                              ? "border-sky-200 bg-sky-50 text-sky-700"
-                              : step.action.kind === "nonfinite"
-                                ? "border-amber-200 bg-amber-50 text-amber-700"
-                                : step.action.kind === "postfinite"
-                                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                  : "border-border/70 bg-background/70 text-foreground/80",
-                        )}
-                      >
-                        {t(step.action.labelKey)}
-                      </Badge>
-                    ))
-                  ) : (
-                    <p className="text-sm text-foreground/55">{t("chainEmpty")}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="flat"
-                size="sm"
-                onPress={undoLastStep}
-                isDisabled={builderState.history.length === 0}
-                startContent={<CornerDownLeft className="h-4 w-4" />}
-              >
-                {t("undoLast")}
-              </Button>
-              <Button
-                variant="flat"
-                size="sm"
-                onPress={resetSteps}
-                isDisabled={builderState.history.length === 0}
-                startContent={<RotateCcw className="h-4 w-4" />}
-              >
-                {t("resetSteps")}
-              </Button>
             </div>
           </div>
-        </div>
-      </div>
+
+          {showInflectionLockNotice ? (
+            <div className="rounded-lg border border-primary/20 bg-primary/8 px-4 py-3 text-sm text-foreground/80">
+              {t("lockedInflection")}
+            </div>
+          ) : null}
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="font-semibold">{t("selectedChain")}</h2>
+              <span className="text-xs uppercase tracking-[0.16em] text-foreground/45">
+                {availableActions.length} {t("availableNow")}
+              </span>
+            </div>
+            <div className="overflow-x-auto pb-1">
+              <div className="flex min-h-16 min-w-max items-center gap-2 rounded-lg border border-dashed border-border/70 bg-background/55 p-3">
+                {builderState.history.length > 0 ? (
+                  builderState.history.map((step) => (
+                    <Badge
+                      key={step.step}
+                      variant="outline"
+                      className={cn(
+                        "rounded-full px-3 py-1 text-sm",
+                        step.action.kind === "derivational"
+                          ? "border-primary/20 bg-primary/8 text-primary"
+                          : step.action.kind === "analytic"
+                            ? "border-sky-200 bg-sky-50 text-sky-700"
+                            : step.action.kind === "nonfinite"
+                              ? "border-amber-200 bg-amber-50 text-amber-700"
+                              : step.action.kind === "postfinite"
+                                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                : "border-border/70 bg-background/70 text-foreground/80",
+                      )}
+                    >
+                      {t(step.action.labelKey)}
+                    </Badge>
+                  ))
+                ) : (
+                  <p className="text-sm text-foreground/55">{t("chainEmpty")}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="flat"
+              size="sm"
+              onPress={undoLastStep}
+              isDisabled={builderState.history.length === 0}
+              startContent={<CornerDownLeft className="h-4 w-4" />}
+            >
+              {t("undoLast")}
+            </Button>
+            <Button
+              variant="flat"
+              size="sm"
+              onPress={resetSteps}
+              isDisabled={builderState.history.length === 0}
+              startContent={<RotateCcw className="h-4 w-4" />}
+            >
+              {t("resetSteps")}
+            </Button>
+          </div>
+        </CardBody>
+      </CustomCard>
 
       <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
         <CustomCard className="border-border/70">
-          <CardBody className="gap-5 p-6">
+          <CardBody className="gap-5 px-2 py-4">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div className="space-y-1">
                 <h2 className="text-xl font-semibold">{t("actionDockTitle")}</h2>
@@ -1495,13 +1493,13 @@ export default function WordBuilder() {
                       const { primaryActions, rareActions } =
                         section.kind === "derivational"
                           ? splitActionsByRarity(
-                              section.actions,
-                              candidateAttestationByActionId,
-                            )
+                            section.actions,
+                            candidateAttestationByActionId,
+                          )
                           : {
-                              primaryActions: section.actions,
-                              rareActions: [],
-                            };
+                            primaryActions: section.actions,
+                            rareActions: [],
+                          };
                       const showRareActions =
                         expandedRareSections[sectionStorageKey] === true;
 
@@ -1553,8 +1551,8 @@ export default function WordBuilder() {
                                   {showRareActions
                                     ? t("hideRareOptions")
                                     : t("showRareOptions", {
-                                        count: rareActions.length,
-                                      })}
+                                      count: rareActions.length,
+                                    })}
                                 </button>
                               </div>
 
@@ -1582,7 +1580,7 @@ export default function WordBuilder() {
         </CustomCard>
 
         <CustomCard className="border-border/70">
-          <CardBody className="gap-5 p-6">
+          <CardBody className="gap-5 px-2 py-4 sm:p-6">
             <div className="space-y-1">
               <h2 className="text-xl font-semibold">{t("timelineTitle")}</h2>
               <p className="text-sm text-foreground/65">{t("timelineHint")}</p>
