@@ -1,0 +1,4 @@
+https://yeni.turkce-sozluk.com {
+    # It is usually best practice to route to the Compose service name rather than the container name
+    reverse_proxy app:3000
+}

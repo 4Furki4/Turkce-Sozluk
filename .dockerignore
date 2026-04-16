@@ -1,0 +1,17 @@
+.git
+.gitignore
+.cursor
+.vscode
+.vercel
+.next
+.swc
+node_modules
+npm-debug.log
+.DS_Store
+coverage
+backups
+Dockerfile
+docker-compose*.yml
+docker-compose*.yaml
+README.md
+*.tsbuildinfo

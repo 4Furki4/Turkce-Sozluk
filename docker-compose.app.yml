@@ -1,0 +1,74 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy-1
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+  app:
+    # Use the image you built locally on your Mac
+    image: turkish-dictionary-app
+    container_name: app-1
+    restart: unless-stopped
+    env_file:
+      - .env.production.local
+    environment:
+      - NODE_ENV=production
+      # These override whatever is in the env_file to ensure Next.js 
+      # talks to the internal PgBouncer container, not localhost
+      - DATABASE_HOST=pgbouncer
+      - DATABASE_PORT=5432
+      - DATABASE_USERNAME=postgres
+      - DATABASE_PASSWORD=furkicik
+      - DATABASE_DATABASE=turkish_dictionary
+      # Keep this if your app also expects the full connection string
+      - DATABASE_URL=postgresql://postgres:furkicik@pgbouncer:5432/turkish_dictionary?sslmode=disable
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - pgbouncer
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: pgbouncer-1
+    restart: unless-stopped
+    environment:
+      - DB_USER=postgres
+      - DB_PASSWORD=furkicik
+      # Connects to the db service
+      - DB_HOST=db
+      - DB_NAME=turkish_dictionary
+      - POOL_MODE=transaction
+      - MAX_CLIENT_CONN=100
+      - DEFAULT_POOL_SIZE=20
+    depends_on:
+      - db
+
+  db:
+    image: postgres:17-alpine
+    container_name: db-1
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=furkicik
+      - POSTGRES_DB=turkish_dictionary
+       # Force Postgres 17 to use md5 instead of scram-sha-256
+      - POSTGRES_HOST_AUTH_METHOD=md5
+      - POSTGRES_INITDB_ARGS=--auth=md5
+    ports:
+      - "5432:5432" 
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
