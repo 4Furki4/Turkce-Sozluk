@@ -1,14 +1,11 @@
 import { defineRouting } from 'next-intl/routing';
 import { createNavigation } from 'next-intl/navigation';
+import { locales, pathnames } from './pathnames';
 
-export const locales = ["en", "tr"] as const;
-export const localePrefix = "as-needed";
-
-// The `pathnames` object holds pairs of internal
-// and external paths, separated by locale.
 export const routing = defineRouting({
-  locales: ["en", "tr"],
+  locales: [...locales],
   defaultLocale: 'tr',
+  alternateLinks: false,
   localePrefix: {
     mode: 'always',
     prefixes: {

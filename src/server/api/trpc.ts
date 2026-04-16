@@ -90,9 +90,20 @@ function isSearchBot(userAgent: string | null): boolean {
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
   limiter: Ratelimit.slidingWindow(60, "10 s"),
-  analytics: true,
+  analytics: false,
   prefix: "@upstash/ratelimit",
 });
+
+let isRateLimitBackendDisabled = false;
+let hasLoggedRateLimitBackendDisabled = false;
+
+function isUpstashQuotaExceededError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  return error.message.toLowerCase().includes("max requests limit exceeded");
+}
 
 const rateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
   if (process.env.NODE_ENV === "development") {
@@ -115,6 +126,10 @@ const rateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
     identifier = ctx.headers.get("x-forwarded-for") ?? "127.0.0.1";
   }
 
+  if (isRateLimitBackendDisabled) {
+    return next();
+  }
+
   try {
     const { success } = await ratelimit.limit(identifier);
 
@@ -128,7 +143,21 @@ const rateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
     if (error instanceof TRPCError) {
       throw error;
     }
-    // Fail open: Log error and allow request to proceed
+
+    if (isUpstashQuotaExceededError(error)) {
+      isRateLimitBackendDisabled = true;
+
+      if (!hasLoggedRateLimitBackendDisabled) {
+        hasLoggedRateLimitBackendDisabled = true;
+        console.warn(
+          "Rate limiter disabled (fail open): Upstash request quota exceeded. Requests will bypass rate limiting until the process restarts.",
+        );
+      }
+
+      return next();
+    }
+
+    // Fail open: Log unexpected errors and allow request to proceed
     console.error("Rate Limiter Error (Fail Open):", error);
     return next();
   }

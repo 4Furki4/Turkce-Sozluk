@@ -14,7 +14,8 @@ import {
 import { Edit3, MoreVertical, Plus, Trash2 } from "lucide-react";
 import { api } from "@/src/trpc/react";
 import { Link as NextUILink } from "@heroui/react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
 import { Link } from "@/src/i18n/routing";
 import WordListDeleteModal from "./word-list-delete-modal";
 import EditWordModal from "./edit-modal/edit-word-modal";
@@ -27,6 +28,7 @@ import { CustomTable } from "@/src/components/customs/heroui/custom-table";
 import { CustomPagination } from '@/src/components/customs/heroui/custom-pagination'
 import { CustomSelect, OptionsMap } from '@/src/components/customs/heroui/custom-select'
 import { CustomInput } from '@/src/components/customs/heroui/custom-input'
+import { getWordCanonicalPath } from "@/src/lib/seo-utils";
 
 
 const wordPerPageOptions = [
@@ -205,13 +207,13 @@ export default function WordList() {
           return <span>{item.meaning}</span>;
         }
         return (
-          <NextUILink target='_blank' as={Link} href={`/arama/${item.name}`}>
+          <NextUILink target='_blank' as={Link} href={getWordCanonicalPath(item.name, "tr")}>
             {t("Dashboard.NavigationWordLink")}
           </NextUILink>
         );
       case "name":
         return (
-          <NextUILink target='_blank' as={Link} href={`/arama/${item.name}`}>
+          <NextUILink target='_blank' as={Link} href={getWordCanonicalPath(item.name, "tr")}>
             {cellValue}
           </NextUILink>
         );

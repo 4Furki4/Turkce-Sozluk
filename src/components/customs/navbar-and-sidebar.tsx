@@ -13,7 +13,6 @@ export default function NavbarAndSidebar({
     HomeIntl,
     SignInIntl,
     WordListIntl,
-    WordBuilderIntl,
     TitleIntl,
     ProfileIntl,
     SavedWordsIntl,
@@ -35,6 +34,7 @@ export default function NavbarAndSidebar({
     LearnIntl,
     FlashcardGameIntl,
     WordMatchingGameIntl,
+    WordBuilderIntl,
     SpeedRoundGameIntl,
     ForeignTermSuggestionsIntl
 }: {

@@ -1,4 +1,3 @@
-import { Button } from "@heroui/react";
 import { Link } from "@/src/i18n/routing";
 import { ArrowLeft, Search } from "lucide-react";
 
@@ -19,24 +18,20 @@ export default function WordNotFound() {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Button
-                        as={Link}
+                    <Link
                         href="/"
-                        variant="solid"
-                        color="primary"
-                        startContent={<ArrowLeft className="h-4 w-4" />}
+                        className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
                     >
+                        <ArrowLeft className="h-4 w-4" />
                         Ana Sayfaya Dön
-                    </Button>
+                    </Link>
 
-                    <Button
-                        as={Link}
+                    <Link
                         href="/contribute-word"
-                        variant="bordered"
-                        color="primary"
+                        className="inline-flex items-center justify-center rounded-md border border-primary px-4 py-2 text-sm font-medium text-primary"
                     >
                         Kelime Öner
-                    </Button>
+                    </Link>
                 </div>
             </div>
         </div>

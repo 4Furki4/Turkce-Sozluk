@@ -1,8 +1,8 @@
 "use client";
 
 import React from 'react';
-import { Link as NextIntlLink } from '@/src/i18n/routing'
-import { Link as HeroUILink, CardHeader, CardBody, Tooltip } from '@heroui/react'
+import { Link as NextIntlLink } from "@/src/i18n/routing";
+import { CardHeader, CardBody, Tooltip } from '@heroui/react'
 import { useTranslations } from 'next-intl';
 import { type Session } from '@/src/lib/auth';
 import { type RouterOutputs } from '@/src/trpc/shared';
@@ -175,7 +175,7 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                                 <ul className="space-y-2">
                                     {savedWordsToRender.map((savedWord) => (
                                         <li key={savedWord.wordId}>
-                                            <HeroUILink as={NextIntlLink} href={`/search/${savedWord.wordName}`} className="block w-full text-left">
+                                            <NextIntlLink href={{ pathname: '/search/[word]', params: { word: savedWord.wordName } }} className="block w-full text-left">
                                                 <div className="p-3 bg-zinc-500/5 hover:bg-zinc-500/10 rounded-lg border border-transparent hover:border-zinc-500/20 transition-all duration-200 group">
                                                     <div className="flex justify-between items-start">
                                                         <span className="font-medium text-foreground group-hover:text-primary transition-colors">{savedWord.wordName}</span>
@@ -189,7 +189,7 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                                                         </p>
                                                     )}
                                                 </div>
-                                            </HeroUILink>
+                                            </NextIntlLink>
                                         </li>
                                     ))}
                                 </ul>

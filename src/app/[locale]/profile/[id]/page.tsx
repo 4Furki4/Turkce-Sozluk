@@ -6,7 +6,6 @@ import ProfilePageWrapper from '@/src/_pages/profile/profile-page-wrapper';
 import { notFound } from 'next/navigation';
 import { TRPCError } from '@trpc/server';
 import { ErrorBoundary } from 'react-error-boundary';
-import { Card, CardBody } from '@heroui/react';
 import { headers } from "next/headers";
 interface ProfilePageProps {
     params: Promise<{
@@ -26,11 +25,11 @@ export default async function ProfilePage({ params: paramsPromise }: ProfilePage
         const profileData = await api.user.getPublicProfileData({ userId: id });
 
         return (
-            <ErrorBoundary fallback={<Card className='w-full bg-transparent'>
-                <CardBody className='flex items-center justify-center'>
+            <ErrorBoundary fallback={<div className='w-full bg-transparent'>
+                <div className='flex items-center justify-center py-8'>
                     <h1 className='text-fs-2'>{t('somethingWentWrong')}</h1>
-                </CardBody>
-            </Card>}>
+                </div>
+            </div>}>
                 <ProfilePageWrapper profileData={profileData} userId={id} session={session} locale={locale} />
             </ErrorBoundary>
         )

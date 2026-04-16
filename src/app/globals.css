@@ -132,6 +132,28 @@
   }
 }
 
+@keyframes navigation-progress-crawl {
+  0% {
+    transform: translateX(-100%) scaleX(0.35);
+  }
+  50% {
+    transform: translateX(15vw) scaleX(0.65);
+  }
+  100% {
+    transform: translateX(100vw) scaleX(0.35);
+  }
+}
+
+.navigation-progress-crawl {
+  animation: navigation-progress-crawl 1.15s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navigation-progress-crawl {
+    animation: none;
+  }
+}
+
 /* Kept your Glow Animation - It's cool for special features */
 @keyframes glow {
   0%, 100% {

@@ -7,7 +7,8 @@ import SaveWord from "./save-word";
 import { Button, useDisclosure, Popover, PopoverTrigger, PopoverContent, Tabs, Tab } from "@heroui/react";
 import { Link as NextUILink } from "@heroui/react"
 import { useTranslations } from "next-intl";
-import { Link, usePathname, useRouter } from "@/src/i18n/routing";
+import { Link, usePathname } from "@/src/i18n/routing";
+import { useRouter } from "@/src/i18n/routing";
 import { Camera, Eye, Share2, Volume2, WifiOff, WifiSync } from "lucide-react";
 import Image from "next/image";
 import { useRef, } from "react";
@@ -18,6 +19,7 @@ import WordCardRequestModal from "./modals/word-card-request-modal";
 import CustomCard from "./heroui/custom-card";
 import PronunciationCard from "./pronunciation-card";
 import { Session } from '@/src/lib/auth-client';
+import { startNavigationProgress } from "@/src/lib/navigation-progress";
 
 type WordCardProps = {
   word_data: WordSearchResult["word_data"] & { source?: "online" | "offline" };
@@ -371,12 +373,15 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                         <p>
                           {t("You can request an edit if you are signed in")}
                         </p>
-                        <button onClick={() => router.push({
-                          pathname: "/signin",
-                          query: {
-                            backTo: window.location.pathname,
-                          },
-                        })} className="text-primary underline underline-offset-2 cursor-pointer">
+                        <button onClick={() => {
+                          startNavigationProgress();
+                          router.push({
+                            pathname: "/signin",
+                            query: {
+                              backTo: window.location.pathname,
+                            },
+                          });
+                        }} className="text-primary underline underline-offset-2 cursor-pointer">
                           {t("SignIn")}
                         </button>
                       </div>

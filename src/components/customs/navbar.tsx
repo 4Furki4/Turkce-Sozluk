@@ -29,6 +29,7 @@ import CustomDropdown from "./heroui/custom-dropdown";
 import { Session } from "@/src/lib/auth-client";
 import { useLocaleSwitchHref } from "@/src/hooks/useLocaleSwitchHref";
 import { useState } from "react";
+import { startNavigationProgress } from "@/src/lib/navigation-progress";
 
 type NavbarProps = {
   session: Session | null;
@@ -38,7 +39,6 @@ export default function Navbar({
   session,
   TitleIntl,
   WordListIntl,
-  WordBuilderIntl,
   SignInIntl,
   HomeIntl,
   ProfileIntl,
@@ -60,6 +60,7 @@ export default function Navbar({
   LearnIntl,
   FlashcardGameIntl,
   WordMatchingGameIntl,
+  WordBuilderIntl,
   SpeedRoundGameIntl,
   ForeignTermSuggestionsIntl,
   SearchIntl,
@@ -94,6 +95,7 @@ export default function Navbar({
     const input = navbarSearchQuery.trim();
     if (!input) return;
     setNavbarSearchQuery("");
+    startNavigationProgress();
     router.push({
       pathname: "/search/[word]",
       params: { word: encodeURIComponent(input) },
@@ -238,6 +240,11 @@ export default function Navbar({
                 {WordMatchingGameIntl}
               </NextIntlLink>
             </DropdownItem>
+            <DropdownItem key="word-builder" startContent={<Sparkles aria-label={WordBuilderIntl} className="w-4 h-4" />} className="py-0 pr-0">
+              <NextIntlLink href="/word-builder" className="flex items-center gap-2 py-1.5">
+                {WordBuilderIntl}
+              </NextIntlLink>
+            </DropdownItem>
             <DropdownItem key="speed-round" startContent={<Zap aria-label={SpeedRoundGameIntl} className="w-4 h-4" />} className="py-0 pr-0">
               <NextIntlLink href="/speed-round" className="flex items-center gap-2 py-1.5">
                 {SpeedRoundGameIntl}
@@ -276,6 +283,7 @@ export default function Navbar({
               // @ts-ignore
               href={languageSwitchHref}
               locale="tr"
+              data-skip-navigation-progress
             >
               <span className="flex items-center gap-2">
                 <Languages aria-label={ariaLanguages} className="w-5 h-5 xs:w-6 xs:h-6" /> TR
@@ -287,6 +295,7 @@ export default function Navbar({
               // @ts-ignore
               href={languageSwitchHref}
               locale="en"
+              data-skip-navigation-progress
             >
               <span className="flex items-center gap-2">
                 <Languages aria-label={ariaLanguages} className="w-5 h-5 xs:w-6 xs:h-6" /> EN

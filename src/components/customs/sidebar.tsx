@@ -1,6 +1,7 @@
 import { BellIcon, Blocks, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, HomeIcon, LayoutDashboard, Layers, Link2, ListTree, LogIn, MicIcon, StarIcon, UserIcon, WifiOff, Sun, Moon, Sparkles, Sparkle, Languages, LogOut, Zap } from 'lucide-react'
 import React from 'react'
-import { Link as NextIntlLink, useRouter } from "@/src/i18n/routing";
+import { Link as NextIntlLink } from "@/src/i18n/routing";
+import { useRouter } from "@/src/i18n/routing";
 import {
     Sheet,
     SheetContent,
@@ -91,6 +92,11 @@ export default function Sidebar(
                             <li>
                                 <NextIntlLink className='flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 rounded-sm' href={'/word-matching'} onClick={() => setIsSidebarOpen(false)}>
                                     <Link2 className="h-6 w-6" /> <span className={`text-nowrap`}>{t("Navbar.WordMatchingGame")}</span>
+                                </NextIntlLink>
+                            </li>
+                            <li>
+                                <NextIntlLink className='flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 rounded-sm' href={'/word-builder'} onClick={() => setIsSidebarOpen(false)}>
+                                    <Sparkles className="h-6 w-6" /> <span className={`text-nowrap`}>{t("Navbar.WordBuilder")}</span>
                                 </NextIntlLink>
                             </li>
                             <li>
@@ -210,6 +216,7 @@ export default function Sidebar(
                                 // @ts-ignore
                                 href={languageSwitchHref}
                                 locale={locale === "en" ? "tr" : "en"}
+                                data-skip-navigation-progress
                             >
                                 <Languages className="w-5 h-5" />
                                 <span className="font-medium">{locale === "en" ? "Türkçe'ye Geç" : "Switch to English"}</span>

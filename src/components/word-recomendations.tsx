@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
 import { useLocale } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { useDebounce } from "@/src/hooks/use-debounce";

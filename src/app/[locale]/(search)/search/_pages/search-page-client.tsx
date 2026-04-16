@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 
 import { useWordSearch } from "@/src/hooks/useWordSearch";
-import Loading from "../_loading";
+import WordLoadingSkeleton from "../_components/word-loading-skeleton";
 import WordNotFoundCard from "@/src/components/customs/word-not-found-card";
 import WordCardWrapper from "@/src/components/customs/word-card-wrapper";
 import { useLocale } from "next-intl";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { authClient } from "@/src/lib/auth-client";
 import { extractSearchWordFromPathname } from "@/src/lib/search-route";
+import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
 
 export default function SearchPageClient() {
     const pathname = usePathname();
@@ -36,7 +37,7 @@ export default function SearchPageClient() {
 
     // Show loading while extracting word from URL or while searching
     if (!wordName || isLoading) {
-        return <Loading />;
+        return <WordLoadingSkeleton />;
     }
 
     // Show the "Not Found" component if there's an error or no data

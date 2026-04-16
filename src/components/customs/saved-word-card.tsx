@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Button, CardBody, CardFooter, CardHeader, ModalContent, useDisclosure } from "@heroui/react";
-import Loading from "@/app/[locale]/(search)/search/_loading";
+import WordLoadingSkeleton from "@/app/[locale]/(search)/search/_components/word-loading-skeleton";
 import { useTranslations } from "next-intl";
 import { api } from "@/src/trpc/react";
 import WordCard from "./word-card";
@@ -10,7 +10,6 @@ import { Session } from "@/src/lib/auth";
 import { formatDistanceToNow } from "date-fns";
 import { tr } from "date-fns/locale";
 import { Link as NextIntlLink } from "@/src/i18n/routing";
-import { Link } from "@heroui/react";
 import CustomCard from "./heroui/custom-card";
 import { CustomModal } from "./heroui/custom-modal";
 import { Clock, Eye, Trash2 } from "lucide-react";
@@ -44,9 +43,9 @@ export default function SavedWordCard({ wordData, onUnsave, session, locale }: S
         <CardHeader className="flex flex-col items-start gap-1 pt-6 px-6 pb-2">
           <div className="flex items-baseline gap-2 w-full">
             <h3 className="text-2xl font-bold truncate">
-              <Link underline="hover" className="text-primary hover:text-primary transition-colors max-sm:underline decoration-primary hover:decoration-primary" as={NextIntlLink} href={`/search/${encodeURIComponent(wordData.word_name)}`}>
+              <NextIntlLink className="text-primary hover:text-primary transition-colors max-sm:underline decoration-primary hover:decoration-primary" href={{ pathname: '/search/[word]', params: { word: wordData.word_name } }}>
                 {wordData.word_name}
-              </Link>
+              </NextIntlLink>
             </h3>
             {wordData.root?.root && (
               <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
@@ -105,7 +104,7 @@ export default function SavedWordCard({ wordData, onUnsave, session, locale }: S
       <CustomModal isOpen={isOpen} onOpenChange={onOpenChange} size="3xl" backdrop="blur" scrollBehavior="inside">
         <ModalContent>
           {loadingDetails ? (
-            <Loading />
+            <WordLoadingSkeleton />
           ) : fullData ? (
             <WordCard word_data={fullData.word_data} session={session} locale={locale} />
           ) : null}

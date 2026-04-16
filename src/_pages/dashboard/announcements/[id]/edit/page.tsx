@@ -5,7 +5,8 @@ import AnnouncementForm from "../../announcement-form";
 import { useTranslations } from "next-intl";
 import { api } from "@/src/trpc/react";
 import { Spinner } from "@heroui/react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
 
 export default function EditAnnouncementPage() {
   const t = useTranslations("Dashboard.Announcements");

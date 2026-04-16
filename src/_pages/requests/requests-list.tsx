@@ -8,7 +8,8 @@ import {
   Tooltip,
 } from "@heroui/react";
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
 import { formatDistanceToNow } from "date-fns";
 import { EntityTypes, Actions, Status, entityTypesEnum, actionsEnum, statusEnum } from "@/db/schema/requests";
 import { Link } from "@/src/i18n/routing";

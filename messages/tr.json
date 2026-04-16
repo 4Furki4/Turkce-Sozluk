@@ -26,6 +26,7 @@
     "FlashcardGame": "Kelime Kartları",
     "Learn": "Öğren",
     "WordMatchingGame": "Kelime Eşleştirme",
+    "WordBuilder": "Fiil Çekimi",
     "SpeedRoundGame": "Hızlı Tur",
     "ForeignTermSuggestions": "Yabancı Terim Önerileri"
   },
@@ -1999,6 +2000,108 @@
       "suggestionNotFound": "Öneri bulunamadı",
       "loginRequired": "Oy vermek için lütfen giriş yapın",
       "suggestionAlreadyResolved": "Bu öneri zaten çözümlenmiş"
+    }
+  },
+  "VerbBuilder": {
+    "metaTitle": "Türkçe Fiil Çekim Oluşturucu | Türkçe Sözlük",
+    "metaDescription": "Türkçe fiilleri adım adım çekimleyin; ünlü uyumu, ünsüz değişimleri ve kişi ekleri otomatik uygulansın.",
+    "badgeLive": "Canlı",
+    "title": "Türkçe Fiil Çekim Oluşturucu",
+    "subtitle": "Bir fiili ek ek ilerleyerek kurun",
+    "autoRules": "Ünlü uyumu, yumuşama, sertleşme ve kaynaştırma harfleri otomatik uygulanır.",
+    "currentForm": "Güncel biçim",
+    "emptyResult": "Bir fiil kökü girin",
+    "emptyState": "Başlamak için bir fiil kökü girin.",
+    "sections": {
+      "rootChoicesTitle": "Kök ve seçimler",
+      "rootChoicesSubtitle": "Kökü belirleyin, sonra biçimi adım adım kurun.",
+      "wizardTitle": "Ek sihirbazı",
+      "wizardSubtitle": "Sadece geçerli sonraki adımlar gösterilir.",
+      "negationTitle": "Olumsuzluk",
+      "negationSubtitle": "İsteğe bağlıdır ve sadece zamandan önce eklenebilir.",
+      "tenseTitle": "Zaman",
+      "tenseSubtitle": "Bir zaman seçin. Uyum ve kök kuralları biçimi otomatik günceller.",
+      "personTitle": "Kişi",
+      "personSubtitle": "Kişi ekleri ancak zaman seçildikten sonra açılır.",
+      "questionTitle": "Soru",
+      "questionSubtitle": "Kurulan fiilin sonuna, emir biçimleri dahil, evet/hayır soru parçacığı ekler."
+    },
+    "field": {
+      "label": "Fiil kökü",
+      "placeholder": "Gel",
+      "description": "Gel, yaz, ara gibi yalın bir Türkçe fiil kökü kullanın."
+    },
+    "dictionary": {
+      "title": "Sözlük kökleri",
+      "subtitle": "Veritabanınızdaki eşleşen fiil kökleri",
+      "typeMore": "Sözlükte aramak için en az 2 harf yazın.",
+      "loading": "Sözlükte fiiller aranıyor...",
+      "empty": "Eşleşen fiil kökü bulunamadı.",
+      "connected": "Sözlük eşleşmesi: {word}",
+      "wordName": "Sözlük biçimi: {word}"
+    },
+    "active": {
+      "negation": "Olumsuzluk",
+      "question": "Soru",
+      "none": "Henüz ek seçilmedi."
+    },
+    "nextStepTitle": "Sıradaki adım",
+    "nextSteps": {
+      "start": "İsterseniz önce olumsuzluk ekleyin ya da doğrudan bir zaman seçin.",
+      "invalidRoot": "Önce kökü düzeltin. Yalın fiil kökünde yalnızca Türkçe harfler kullanın.",
+      "afterNegation": "Olumsuzluk seçildi. Sıradaki geçerli adım bir zaman seçmek.",
+      "afterTense": "Şimdi bir kişi eki, son soru parçacığı ya da ikisini birden ekleyin.",
+      "afterPerson": "Fiil artık çekimli. İsterseniz bunu evet/hayır sorusuna çevirebilirsiniz.",
+      "afterQuestion": "Hâlâ bir kişi eki ekleyebilirsiniz. Soru parçacığı sonda kalır.",
+      "complete": "Biçim tamamlandı. İsterseniz adımları değiştirin ya da sıfırlayın."
+    },
+    "validation": {
+      "emptyRoot": "Bir fiil kökü girin.",
+      "invalidCharacters": "Yalın fiil kökünde yalnızca Türkçe harfler kullanın."
+    },
+    "personEndings": {
+      "label": "Kişi ekleri: {set}",
+      "type1": "Düzenli set (-yim, -sin, -yiz)",
+      "type2": "Geçmiş zaman seti (-m, -n, -k)",
+      "imperative": "Emir seti (yalın kök, -sin, -elim, -in)"
+    },
+    "phonology": {
+      "softening": "Yumuşama",
+      "hardening": "Sertleşme",
+      "twoWay": "2 yönlü uyum",
+      "fourWay": "4 yönlü uyum",
+      "buffer": "Kaynaştırma y"
+    },
+    "finish": "Bitir ve sonuca git",
+    "reset": "Sıfırla / Baştan Başla",
+    "enterRootPrompt": "Kurmak için bir kök girin.",
+    "common": {
+      "noSuffix": "Ek yok",
+      "unavailableAfterNegation": "Olumsuzluktan sonra kullanılamaz",
+      "unavailableInImperative": "Bu kişi emir kipinde kullanılmaz."
+    },
+    "categories": {
+      "root": "Kök",
+      "negation": "Olumsuzluk",
+      "tense": "Zaman",
+      "person": "Kişi",
+      "question": "Soru"
+    },
+    "options": {
+      "negation": "Olumsuzluk",
+      "future": "Gelecek Zaman",
+      "pastSeen": "Görülen Geçmiş",
+      "pastHeard": "Duyulan Geçmiş",
+      "presentContinuous": "Şimdiki Zaman",
+      "aorist": "Geniş Zaman",
+      "imperative": "Emir Kipi",
+      "ben": "Ben",
+      "sen": "Sen",
+      "o": "O",
+      "biz": "Biz",
+      "siz": "Siz",
+      "onlar": "Onlar",
+      "question": "Soru"
     }
   }
 }

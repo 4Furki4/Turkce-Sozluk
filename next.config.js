@@ -1,6 +1,5 @@
 const createNextIntlPlugin = require('next-intl/plugin');
 const {
-    PHASE_DEVELOPMENT_SERVER,
     PHASE_PRODUCTION_BUILD,
 } = require("next/constants");
 
@@ -8,6 +7,20 @@ const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    output: "standalone",
+
+    // RAM Saving Configurations
+    productionBrowserSourceMaps: false,
+    eslint: {
+        ignoreDuringBuilds: true,
+    },
+    typescript: {
+        ignoreBuildErrors: true,
+    },
+    experimental: {
+        webpackBuildWorker: true,
+    },
+
     images: {
         remotePatterns: [
             {
@@ -27,7 +40,9 @@ module.exports = async (phase) => {
     const revision = crypto.randomUUID();
     const nextIntlConfig = withNextIntl(nextConfig);
 
-    if (phase === PHASE_DEVELOPMENT_SERVER || phase === PHASE_PRODUCTION_BUILD) {
+    // Keep the service worker out of local development to avoid stale localhost
+    // caches masking routing changes and causing browser-only redirect loops.
+    if (phase === PHASE_PRODUCTION_BUILD) {
         const withSerwist = (await import("@serwist/next")).default({
             swSrc: "src/app/sw.ts",
             swDest: "public/sw.js",
