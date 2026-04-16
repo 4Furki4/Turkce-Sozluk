@@ -14,7 +14,7 @@ services:
 
   app:
     # Use the image you built locally on your Mac
-    image: turkish-dictionary-app
+    image: furki4/turkish-dictionary-app
     container_name: app-1
     restart: unless-stopped
     env_file:
