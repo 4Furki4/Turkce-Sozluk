@@ -1,15 +1,9 @@
 "use client";
 import { useLocale, useTranslations } from "next-intl";
-import { Search as SearchIcon, PuzzleIcon, KeyboardIcon, ArrowRight, XCircle, CheckCircle2, BookOpen, TrendingUpIcon, Download, Wifi, HeartHandshake } from "lucide-react";
+import { ArrowRight, XCircle, CheckCircle2, BookOpen, Download, Wifi, HeartHandshake } from "lucide-react";
 import { Link } from "@/src/i18n/routing";
-import { Input } from "@heroui/input";
-import { useEffect, useRef, useState } from "react";
-import { Button, Card, CardBody, CardFooter, CardHeader, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@heroui/react";
-import { useDebounce } from "@uidotdev/usehooks";
-import { cn } from "@/lib/utils";
-import { TurkishKeyboard } from "./customs/utils/TurkishKeyboard"; // Keeping for reference if needed, but unused now
-import { searchAutocompleteOffline, searchByPattern } from "@/src/lib/offline-db"; // Keeping for reference if needed
-import { useTypewriter } from "../hooks/use-typewriter";
+import { useState } from "react";
+import { Button, Card, CardBody, CardFooter, CardHeader, Divider, } from "@heroui/react";
 import { useOnlineStatus } from "@/src/hooks/use-online-status";
 
 import { api } from "@/src/trpc/react";
@@ -141,7 +135,7 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
 
 
   return (
-    <CustomCard className="h-full min-h-[300px]  shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
+    <CustomCard className="h-full min-h-[300px] shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
       {/* Background Decoration */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors duration-500" />
 
@@ -158,7 +152,7 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
 
       <CardBody className="px-8 py-4 flex flex-col justify-center gap-4 relative z-10">
         <div>
-          <h2 className="text-6xl sm:text-7xl font-serif font-bold text-foreground mb-4 group-hover:text-primary transition-colors duration-300">
+          <h2 className="text-fs-4 sm:text-7xl font-serif font-bold text-foreground mb-4 group-hover:text-primary transition-colors duration-300">
             {wordData.word}
           </h2>
           <div className="flex items-center gap-3 text-muted-foreground font-mono text-sm">
@@ -301,7 +295,7 @@ function BentoGalatiMeshur() {
     : "";
 
   return (
-    <CustomCard className="h-[220px] dark:bg-background/50 bg-background/50 group relative overflow-hidden flex flex-col">
+    <CustomCard className="dark:bg-background/50 bg-background/50 group relative overflow-hidden flex flex-col">
       <div className="absolute top-0 right-0 p-4 opacity-50 transition-opacity">
         <BookOpen className="w-16 h-16 text-amber-500" />
       </div>
@@ -330,7 +324,7 @@ function BentoGalatiMeshur() {
           </div>
         ) : item ? (
           <>
-            <div className="rounded-md border border-amber-500/20 bg-amber-500/5 px-3 py-2 pr-10 overflow-hidden">
+            <div className="rounded-md border border-amber-500/20 bg-amber-500/5 px-3 py-2 pr-10">
               <p className="text-lg font-serif font-semibold text-foreground line-clamp-1 mb-2">
                 {item.word}
               </p>
@@ -406,17 +400,27 @@ function BentoFeatures() {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <CustomCard className="grid grid-cols-1 md:grid-cols-3 border-1">
       {features.map((feature, idx) => (
-        <CustomCard key={idx} className="h-full bg-background/50 p-0">
-          <CardBody className="p-6 relative overflow-hidden">
+
+        <div key={idx} className="h-full bg-background/50 p-0 flex flex-col md:flex-row">
+          {
+            idx === 0 ? null : (
+              <>
+                <Divider className="hidden md:block" orientation="vertical" />
+                <Divider className="block md:hidden" orientation="horizontal" />
+
+              </>
+            )
+          }
+          <div className="p-6 relative overflow-hidden">
             <div className={`absolute top-0 right-0 w-full h-full bg-gradient-to-bl ${feature.gradient} dark:opacity-30 opacity-40 rounded-bl-full pointer-events-none`} />
             <div className="mb-4">{feature.icon}</div>
             <h3 className="text-lg font-bold text-foreground mb-2">{feature.title}</h3>
             <p className="text-sm text-balance text-muted-foreground leading-relaxed">{feature.description}</p>
-          </CardBody>
-        </CustomCard>
+          </div>
+        </div>
       ))}
-    </div>
+    </CustomCard>
   )
 }
