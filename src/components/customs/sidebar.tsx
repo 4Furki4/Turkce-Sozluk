@@ -95,11 +95,6 @@ export default function Sidebar(
                                 </NextIntlLink>
                             </li>
                             <li>
-                                <NextIntlLink className='flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 rounded-sm' href={'/word-builder'} onClick={() => setIsSidebarOpen(false)}>
-                                    <Sparkles className="h-6 w-6" /> <span className={`text-nowrap`}>{t("Navbar.WordBuilder")}</span>
-                                </NextIntlLink>
-                            </li>
-                            <li>
                                 <NextIntlLink className='flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 rounded-sm' href={'/speed-round'} onClick={() => setIsSidebarOpen(false)}>
                                     <Zap className="h-6 w-6" /> <span className={`text-nowrap`}>{t("Navbar.SpeedRoundGame")}</span>
                                 </NextIntlLink>

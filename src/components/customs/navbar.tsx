@@ -11,7 +11,7 @@ import {
   NavbarBrand,
   DropdownSection
 } from "@heroui/react";
-import { Blocks, BookOpen, ChevronDown, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, Link2, LogOut, Mic, Moon, Search, Sparkle, Sparkles, StarIcon, Sun, UserIcon, Zap } from "lucide-react";
+import { Blocks, BookOpen, ChevronDown, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, Link2, LogOut, Mic, Moon, Search, StarIcon, Sun, UserIcon, Zap } from "lucide-react";
 import { Input } from "@heroui/input";
 // import { signIn, signOut } from "next-auth/react"; // Removed
 import { authClient, type User } from "@/src/lib/auth-client"; // Added
@@ -238,11 +238,6 @@ export default function Navbar({
             <DropdownItem key="word-matching" startContent={<Link2 aria-label={WordMatchingGameIntl} className="w-4 h-4" />} className="py-0 pr-0">
               <NextIntlLink href="/word-matching" className="flex items-center gap-2 py-1.5">
                 {WordMatchingGameIntl}
-              </NextIntlLink>
-            </DropdownItem>
-            <DropdownItem key="word-builder" startContent={<Sparkles aria-label={WordBuilderIntl} className="w-4 h-4" />} className="py-0 pr-0">
-              <NextIntlLink href="/word-builder" className="flex items-center gap-2 py-1.5">
-                {WordBuilderIntl}
               </NextIntlLink>
             </DropdownItem>
             <DropdownItem key="speed-round" startContent={<Zap aria-label={SpeedRoundGameIntl} className="w-4 h-4" />} className="py-0 pr-0">

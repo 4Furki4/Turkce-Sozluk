@@ -2,7 +2,7 @@
   "Navbar": {
     "Home": "Home",
     "Word List": "Word List",
-    "WordBuilder": "Word Builder",
+    "WordBuilder": "Word Wizard",
     "Sign In": "Sign In",
     "Title": "Turkish Dictionary",
     "Profile": "Profile",
@@ -27,7 +27,6 @@
     "FlashcardGame": "Flashcard Game",
     "Learn": "Learn",
     "WordMatchingGame": "Word Matching",
-    "WordBuilder": "Verb Builder",
     "SpeedRoundGame": "Speed Round"
   },
   "WordBuilder": {
