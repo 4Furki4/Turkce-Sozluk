@@ -5,7 +5,7 @@ import { Session } from '@/src/lib/auth-client';
 import WordNotFoundCard from './word-not-found-card';
 import { WordSearchResult } from '@/types';
 
-export default function WordCardWrapper({ session, locale, data, isOnline, isWordFetching }: { session: Session | null, locale: "en" | "tr", data?: WordSearchResult[], isOnline?: boolean, isWordFetching?: boolean }) {
+export default function WordCardWrapper({ session, locale, data, isOnline, isWordFetching, headingLevel = "h2" }: { session: Session | null, locale: "en" | "tr", data?: WordSearchResult[], isOnline?: boolean, isWordFetching?: boolean, headingLevel?: "h1" | "h2" }) {
 
     if (!data || data.length === 0) {
         return (
@@ -26,6 +26,7 @@ export default function WordCardWrapper({ session, locale, data, isOnline, isWor
                     session={session}
                     isOnline={isOnline}
                     isWordFetching={isWordFetching}
+                    headingLevel={headingLevel}
                 />
             );
         })

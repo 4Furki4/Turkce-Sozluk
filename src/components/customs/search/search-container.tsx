@@ -4,16 +4,18 @@ import { useTranslations } from "next-intl";
 import { Search as SearchIcon, PuzzleIcon, KeyboardIcon, TrendingUpIcon, BookOpenIcon, TypeIcon } from "lucide-react";
 import { useRouter } from "@/src/i18n/routing";
 import { Input } from "@heroui/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@heroui/react";
 import { useDebounce } from "@uidotdev/usehooks";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { TurkishKeyboard } from "@/src/components/customs/utils/TurkishKeyboard";
-import { searchAutocompleteOffline, searchByPattern } from "@/src/lib/offline-db";
+import { getWordByNameOffline, searchAutocompleteOffline, searchByPattern } from "@/src/lib/offline-db";
 import { useTypewriter } from "@/src/hooks/use-typewriter";
 import { useOnlineStatus } from "@/src/hooks/use-online-status";
 import { api } from "@/src/trpc/react";
 import { startNavigationProgress } from "@/src/lib/navigation-progress";
+import { getOfflineWordSearchQueryKey, toOfflineWordSearchResult } from "@/src/hooks/useWordSearch";
 
 type SearchMode = "word" | "meaning";
 
@@ -41,6 +43,7 @@ export default function SearchContainer({
 }: SearchContainerProps) {
     const t = useTranslations("Home");
     const router = useRouter();
+    const queryClient = useQueryClient();
     const [wordInput, setWordInput] = useState<string>("");
     const [inputError, setInputError] = useState<string>("");
     const [showRecommendations, setShowRecommendations] = useState(false);
@@ -194,35 +197,60 @@ export default function SearchContainer({
         }
     };
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        const input = wordInput.trim();
+    const primeOfflineWordCache = useCallback(async (word: string) => {
+        if (!word || word.includes("_")) return;
+
+        try {
+            const offlineWord = await getWordByNameOffline(word);
+            if (!offlineWord) return;
+
+            const queryData = toOfflineWordSearchResult(offlineWord);
+            const cacheKeys = Array.from(new Set([
+                word,
+                offlineWord.word_name,
+                word.toLocaleLowerCase("tr"),
+                offlineWord.word_name.toLocaleLowerCase("tr"),
+            ]));
+
+            for (const cacheKey of cacheKeys) {
+                queryClient.setQueryData(getOfflineWordSearchQueryKey(cacheKey), queryData);
+            }
+        } catch (error) {
+            console.warn("[SearchContainer] Failed to prime offline word cache:", error);
+        }
+    }, [queryClient]);
+
+    const navigateToWord = useCallback(async (word: string) => {
+        const input = word.trim();
         if (!input) {
             setInputError(t("hero.searchError"));
             setWordInput("");
             return;
         }
+
         setWordInput("");
         setInputError("");
         setShowRecommendations(false);
         onSearchComplete?.();
         startNavigationProgress();
+
+        await primeOfflineWordCache(input);
+
         router.push({
             pathname: "/search/[word]",
             params: { word: encodeURIComponent(input) },
         });
+    }, [onSearchComplete, primeOfflineWordCache, router, t]);
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        void navigateToWord(wordInput);
     };
 
     const handleRecommendationClick = (word: string) => {
         isSelecting.current = true;
         setWordInput(word);
-        setShowRecommendations(false);
-        onSearchComplete?.();
-        startNavigationProgress();
-        router.push({
-            pathname: "/search/[word]",
-            params: { word: encodeURIComponent(word) },
-        });
+        void navigateToWord(word);
     };
 
     return (

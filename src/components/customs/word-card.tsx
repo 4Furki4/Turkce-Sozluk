@@ -27,15 +27,17 @@ type WordCardProps = {
   session: Session | null;
   isWordFetching?: boolean
   isOnline?: boolean
+  headingLevel?: "h1" | "h2";
 };
 
-export default function WordCard({ word_data, locale, session, isWordFetching, isOnline }: WordCardProps) {
+export default function WordCard({ word_data, locale, session, isWordFetching, isOnline, headingLevel = "h2" }: WordCardProps) {
 
   const { isOpen, onOpenChange, onClose } = useDisclosure()
   const t = useTranslations("WordCard");
   const router = useRouter();
   const pathname = usePathname();
   const isOffline = word_data.source === "offline";
+  const WordHeading = headingLevel;
 
   // Helper function to format view counts (e.g., 1500 → "1.5K")
   const formatViewCount = (count: number): string => {
@@ -101,9 +103,9 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                   <span aria-hidden>- </span>
                 </span>
               )}
-              <h2 className="text-fs-2 md:text-fs-3 text-start break-words hyphens-auto">
+              <WordHeading className="text-fs-2 md:text-fs-3 text-start break-words hyphens-auto">
                 {word_data.word_name}
-              </h2>
+              </WordHeading>
               {word_data.suffix && (
                 <span className="text-fs-0">
                   <span aria-hidden> -</span>

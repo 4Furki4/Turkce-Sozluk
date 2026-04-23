@@ -8,6 +8,9 @@ const withNextIntl = createNextIntlPlugin();
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     output: "standalone",
+    // Keep metadata in the initial <head> for all HTML user agents instead of
+    // streaming it into the body. This makes curl/view-source match crawler HTML.
+    htmlLimitedBots: /.*/,
 
     // RAM Saving Configurations
     productionBrowserSourceMaps: false,

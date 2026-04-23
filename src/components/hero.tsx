@@ -13,7 +13,7 @@ import SearchContainer from "./customs/search/search-container";
 // Removes TRENDING_TAGS constant
 
 export default function Hero({ children }: {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }) {
   const t = useTranslations("Home");
   const locale = useLocale()
