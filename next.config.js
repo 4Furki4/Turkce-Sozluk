@@ -9,18 +9,6 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig = {
     htmlLimitedBots: /.*/,
 
-    // RAM Saving Configurations
-    productionBrowserSourceMaps: false,
-    eslint: {
-        ignoreDuringBuilds: true,
-    },
-    typescript: {
-        ignoreBuildErrors: true,
-    },
-    experimental: {
-        webpackBuildWorker: true,
-    },
-
     images: {
         remotePatterns: [
             {
