@@ -28,7 +28,7 @@ import {
     getPersonEndingType,
     normalizeVerbRoot,
     type ConjugationErrorCode,
-} from "@/src/lib/morphology/engine";
+} from "@/src/lib/morphology/verb-conjugation";
 import {
     DEFAULT_SELECTION,
     NEGATION_SUFFIXES,

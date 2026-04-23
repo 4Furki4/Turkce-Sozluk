@@ -216,7 +216,6 @@ export default async function RootLayout({
                     LearnIntl={t("Learn")}
                     FlashcardGameIntl={t("FlashcardGame")}
                     WordMatchingGameIntl={t("WordMatchingGame")}
-                    WordBuilderIntl={t("WordBuilder")}
                     SpeedRoundGameIntl={t("SpeedRoundGame")}
                     ForeignTermSuggestionsIntl={t("ForeignTermSuggestions")}
                   />
