@@ -10,9 +10,10 @@ import { toast } from 'sonner';
 export default function SaveWord({
     word_data,
     isSavedWord,
-    className
+    className,
+    iconClassName
 }: {
-    word_data: any, isSavedWord?: boolean, className?: string
+    word_data: any, isSavedWord?: boolean, className?: string, iconClassName?: string
 }) {
     const savedWordsQuery = api.user.getWordSaveStatus.useQuery(word_data.word_id, {
         initialData: isSavedWord
@@ -54,7 +55,11 @@ export default function SaveWord({
         >
             <Heart
                 aria-label="save word"
-                className={`w-5 h-5 sm:w-6 sm:h-6 ${savedWordsQuery.data ? "fill-primary text-primary" : "fill-transparent"} transition-colors`}
+                className={cn(
+                    "h-5 w-5 sm:h-6 sm:w-6 transition-colors",
+                    savedWordsQuery.data ? "fill-primary text-primary" : "fill-transparent",
+                    iconClassName,
+                )}
             />
         </Button>
     )
