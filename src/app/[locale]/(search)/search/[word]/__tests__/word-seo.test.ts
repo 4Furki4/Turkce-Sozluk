@@ -62,4 +62,39 @@ describe("word SEO metadata", () => {
             follow: true,
         });
     });
+
+    it("uses a dynamic value signal in Turkish word titles", () => {
+        const metadata = buildWordMetadata("KİTAP", "tr", wordData);
+
+        expect(metadata.title).toEqual({
+            absolute: "kitap ne demek? | deyimleri, örnekleri ve kullanımı | Türkçe Sözlük",
+        });
+        expect(metadata.openGraph?.title).toBe("kitap ne demek? | deyimleri, örnekleri ve kullanımı | Türkçe Sözlük");
+    });
+
+    it("prefers meaning count when the word page has rich phrase coverage", () => {
+        const richWordData: WordSearchResult["word_data"] = {
+            ...wordData,
+            word_name: "göz",
+            meanings: [
+                ...wordData.meanings,
+                {
+                    ...wordData.meanings[0],
+                    meaning_id: 11,
+                    meaning: "Bakma, görüş",
+                },
+                {
+                    ...wordData.meanings[0],
+                    meaning_id: 12,
+                    meaning: "İlgi, dikkat",
+                },
+            ],
+        };
+
+        const metadata = buildWordMetadata("göz", "tr", richWordData);
+
+        expect(metadata.title).toEqual({
+            absolute: "göz ne demek? | 3 anlamı, deyimleri ve örnekleri | Türkçe Sözlük",
+        });
+    });
 });

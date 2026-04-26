@@ -6,6 +6,49 @@ import type { WordSearchResult } from "@/types";
 
 type WordEntryData = WordSearchResult["word_data"];
 
+function buildWordTitleSignal(wordData: WordEntryData, isEnglish: boolean) {
+    const meaningCount = wordData.meanings?.length ?? 0;
+    const relatedPhraseCount = wordData.relatedPhrases?.length ?? 0;
+    const hasManyMeanings = meaningCount >= 3;
+    const hasRelatedPhrases = relatedPhraseCount > 0;
+    const hasRoot = Boolean(wordData.root?.root);
+    const hasPronunciation = Boolean(wordData.phonetic);
+
+    if (hasManyMeanings && hasRelatedPhrases) {
+        return isEnglish
+            ? `${meaningCount} meanings, phrases and examples`
+            : `${meaningCount} anlamı, deyimleri ve örnekleri`;
+    }
+
+    if (hasRelatedPhrases) {
+        return isEnglish
+            ? "phrases, examples and usage"
+            : "deyimleri, örnekleri ve kullanımı";
+    }
+
+    if (hasRoot && hasPronunciation) {
+        return isEnglish
+            ? "origin, pronunciation and examples"
+            : "kökeni, telaffuzu ve örnekleri";
+    }
+
+    if (hasRoot) {
+        return isEnglish
+            ? "origin, examples and usage"
+            : "kökeni, örnekleri ve kullanımı";
+    }
+
+    if (hasPronunciation) {
+        return isEnglish
+            ? "pronunciation, examples and usage"
+            : "telaffuzu, örnekleri ve kullanımı";
+    }
+
+    return isEnglish
+        ? "meaning, examples and usage"
+        : "anlamı, örnekleri ve kullanımı";
+}
+
 export function buildWordJsonLd(wordData: WordEntryData, locale: string) {
     const relatedWords = wordData.relatedWords?.map((word) => word.related_word_name) ?? [];
     const firstMeaning = wordData.meanings?.[0]?.meaning ?? "";
@@ -69,9 +112,10 @@ export function buildWordMetadata(
     const relatedPhrases = wordData.relatedPhrases?.map((phrase) => phrase.related_phrase) ?? [];
     const firstMeaning = wordData.meanings?.[0]?.meaning ?? "";
 
+    const titleSignal = buildWordTitleSignal(wordData, isEnglish);
     const title = isEnglish
-        ? `What does "${canonicalWordName}" mean? Definition & Examples`
-        : `"${canonicalWordName}" ne demek? Anlamı ve Örnek Cümleler`;
+        ? `What does ${canonicalWordName} mean? | ${titleSignal} | Turkish Dictionary`
+        : `${canonicalWordName} ne demek? | ${titleSignal} | Türkçe Sözlük`;
 
     const description = isEnglish
         ? `Official definition, pronunciation, and example sentences for the Turkish word "${canonicalWordName}": ${firstMeaning}. Learn more with our community-driven dictionary.`
@@ -82,7 +126,9 @@ export function buildWordMetadata(
         : ["türkçe sözlük", `${canonicalWordName} anlamı`, `${canonicalWordName} ne demek`, "kelime anlamları"];
 
     return {
-        title,
+        title: {
+            absolute: title,
+        },
         description,
         keywords: [canonicalWordName, ...baseKeywords, ...relatedWords, ...relatedPhrases],
         openGraph: {
