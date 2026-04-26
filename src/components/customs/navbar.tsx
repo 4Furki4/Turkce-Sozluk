@@ -11,7 +11,7 @@ import {
   NavbarBrand,
   DropdownSection
 } from "@heroui/react";
-import { Blocks, BookOpen, ChevronDown, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, Link2, LogOut, Mic, Moon, Search, StarIcon, Sun, UserIcon, Zap } from "lucide-react";
+import { Blocks, BookOpen, ChevronDown, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, Link2, LogOut, Mic, Monitor, Moon, Search, StarIcon, Sun, UserIcon, Zap } from "lucide-react";
 import { Input } from "@heroui/input";
 // import { signIn, signOut } from "next-auth/react"; // Removed
 import { authClient, type User } from "@/src/lib/auth-client"; // Added
@@ -173,25 +173,17 @@ export default function Navbar({
                 "dark:data-[hover=true]:bg-primary/30",
               ]
             }}>
-            <DropdownItem key="contribute-word" startContent={<HeartHandshake aria-label={ContributeWordIntl} className="w-4 h-4" />} className="py-0 pr-0">
-              <NextIntlLink href="/contribute-word" className="flex items-center gap-2 py-1.5">
-                {ContributeWordIntl}
-              </NextIntlLink>
+            <DropdownItem key="contribute-word" as={NextIntlLink} href="/contribute-word" startContent={<HeartHandshake aria-label={ContributeWordIntl} className="w-4 h-4" />}>
+              {ContributeWordIntl}
             </DropdownItem>
-            <DropdownItem key="pronunciation-voting" startContent={<Mic aria-label={PronunciationsIntl} className="w-4 h-4" />} className="py-0 pr-0">
-              <NextIntlLink href="/pronunciation-voting" className="flex items-center gap-2 py-1.5">
-                {PronunciationsIntl}
-              </NextIntlLink>
+            <DropdownItem key="pronunciation-voting" as={NextIntlLink} href="/pronunciation-voting" startContent={<Mic aria-label={PronunciationsIntl} className="w-4 h-4" />}>
+              {PronunciationsIntl}
             </DropdownItem>
-            <DropdownItem key={'feedback'} startContent={<HandHeart aria-label={FeedbackIntl} className="w-4 h-4" />} className="py-0 pr-0">
-              <NextIntlLink href="/feedback" className="flex items-center gap-2 py-1.5">
-                {FeedbackIntl}
-              </NextIntlLink>
+            <DropdownItem key={'feedback'} as={NextIntlLink} href="/feedback" startContent={<HandHeart aria-label={FeedbackIntl} className="w-4 h-4" />}>
+              {FeedbackIntl}
             </DropdownItem>
-            <DropdownItem key={'foreign-term-suggestions'} startContent={<Globe aria-label={ForeignTermSuggestionsIntl} className="w-4 h-4" />} className="py-0 pr-0">
-              <NextIntlLink href="/foreign-term-suggestions" className="flex items-center gap-2 py-1.5">
-                {ForeignTermSuggestionsIntl}
-              </NextIntlLink>
+            <DropdownItem key={'foreign-term-suggestions'} as={NextIntlLink} href="/foreign-term-suggestions" startContent={<Globe aria-label={ForeignTermSuggestionsIntl} className="w-4 h-4" />}>
+              {ForeignTermSuggestionsIntl}
             </DropdownItem>
           </DropdownMenu>
         </CustomDropdown>
@@ -220,30 +212,20 @@ export default function Navbar({
                 "dark:data-[hover=true]:bg-primary/30",
               ]
             }}>
-            <DropdownItem key="word-list" startContent={<BookOpen aria-label={WordListIntl} className="w-4 h-4" />} className="py-0 pr-0">
-              <NextIntlLink href="/word-list" className="flex items-center gap-2 py-1.5">
-                {WordListIntl}
-              </NextIntlLink>
+            <DropdownItem key="word-list" as={NextIntlLink} href="/word-list" startContent={<BookOpen aria-label={WordListIntl} className="w-4 h-4" />}>
+              {WordListIntl}
             </DropdownItem>
-            <DropdownItem key="word-builder" startContent={<Blocks aria-label={WordBuilderIntl} className="w-4 h-4" />} className="py-0 pr-0">
-              <NextIntlLink href="/word-builder" className="flex items-center gap-2 py-1.5">
-                {WordBuilderIntl}
-              </NextIntlLink>
+            <DropdownItem key="word-builder" as={NextIntlLink} href="/word-builder" startContent={<Blocks aria-label={WordBuilderIntl} className="w-4 h-4" />}>
+              {WordBuilderIntl}
             </DropdownItem>
-            <DropdownItem key="flashcard-game" startContent={<Layers aria-label={FlashcardGameIntl} className="w-4 h-4" />} className="py-0 pr-0">
-              <NextIntlLink href="/flashcard-game" className="flex items-center gap-2 py-1.5">
-                {FlashcardGameIntl}
-              </NextIntlLink>
+            <DropdownItem key="flashcard-game" as={NextIntlLink} href="/flashcard-game" startContent={<Layers aria-label={FlashcardGameIntl} className="w-4 h-4" />}>
+              {FlashcardGameIntl}
             </DropdownItem>
-            <DropdownItem key="word-matching" startContent={<Link2 aria-label={WordMatchingGameIntl} className="w-4 h-4" />} className="py-0 pr-0">
-              <NextIntlLink href="/word-matching" className="flex items-center gap-2 py-1.5">
-                {WordMatchingGameIntl}
-              </NextIntlLink>
+            <DropdownItem key="word-matching" as={NextIntlLink} href="/word-matching" startContent={<Link2 aria-label={WordMatchingGameIntl} className="w-4 h-4" />}>
+              {WordMatchingGameIntl}
             </DropdownItem>
-            <DropdownItem key="speed-round" startContent={<Zap aria-label={SpeedRoundGameIntl} className="w-4 h-4" />} className="py-0 pr-0">
-              <NextIntlLink href="/speed-round" className="flex items-center gap-2 py-1.5">
-                {SpeedRoundGameIntl}
-              </NextIntlLink>
+            <DropdownItem key="speed-round" as={NextIntlLink} href="/speed-round" startContent={<Zap aria-label={SpeedRoundGameIntl} className="w-4 h-4" />}>
+              {SpeedRoundGameIntl}
             </DropdownItem>
           </DropdownMenu>
         </CustomDropdown>
@@ -298,14 +280,41 @@ export default function Navbar({
             </NextIntlLink>
           )}
         </NavbarItem>
-        <NavbarItem>
-          {/* theme button */}
-          <Button className="hidden md:inline-flex" aria-label={ariaSwitchTheme} variant="light" isIconOnly onPress={() => setTheme(theme === "dark" ? "light" : "dark")}>
-            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          </Button>
-
-        </NavbarItem>
+        <CustomDropdown>
+          <NavbarItem className="hidden md:flex">
+            <DropdownTrigger>
+              <Button aria-label={ariaSwitchTheme} variant="light" isIconOnly>
+                <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              </Button>
+            </DropdownTrigger>
+          </NavbarItem>
+          <DropdownMenu
+            aria-label={ariaSwitchTheme}
+            selectionMode="single"
+            selectedKeys={new Set([theme ?? "system"])}
+            onSelectionChange={(keys) => {
+              const selected = Array.from(keys)[0] as string;
+              if (selected) setTheme(selected);
+            }}
+            itemClasses={{
+              base: [
+                "data-[hover=true]:bg-primary/30",
+                "dark:data-[hover=true]:bg-primary/30",
+              ]
+            }}
+          >
+            <DropdownItem key="light" startContent={<Sun className="w-4 h-4" />}>
+              Light
+            </DropdownItem>
+            <DropdownItem key="dark" startContent={<Moon className="w-4 h-4" />}>
+              Dark
+            </DropdownItem>
+            <DropdownItem key="system" startContent={<Monitor className="w-4 h-4" />}>
+              System
+            </DropdownItem>
+          </DropdownMenu>
+        </CustomDropdown>
         {!session?.user ? (
           <NavbarItem>
             <Button
@@ -342,11 +351,13 @@ export default function Navbar({
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
+                className="min-w-[240px]"
                 itemClasses={{
                   base: [
                     "data-[hover=true]:bg-primary/30",
                     "dark:data-[hover=true]:bg-primary/30",
-                  ]
+                  ],
+                  title: "whitespace-normal text-wrap text-base sm:text-sm"
                 }}
                 onAction={(key) => {
                   switch (key) {
@@ -357,34 +368,24 @@ export default function Navbar({
                 }}
               >
                 <DropdownSection showDivider>
-                  <DropdownItem key={"profile"} className="rounded-md py-0 pr-0" startContent={<UserIcon className="h-6 w-6" />}>
-                    <Link color="foreground" as={NextIntlLink} className="w-full py-1.5" href={`/profile/${session.user.id}`}>
-                      {ProfileIntl}
-                    </Link>
+                  <DropdownItem key="profile" as={NextIntlLink} href={`/profile/${session.user.id}`} className="rounded-md" startContent={<UserIcon className="h-6 w-6" />}>
+                    {ProfileIntl}
                   </DropdownItem>
                   {(session?.user as User & { role: string })?.role === "admin" ? (
-                    <DropdownItem key={"dashboard"} className="rounded-md py-0 pr-0" startContent={<Layers className="h-6 w-6" />}>
-                      <Link color="foreground" as={NextIntlLink} className="w-full py-1.5" href="/dashboard">
-                        {DashboardIntl}
-                      </Link>
+                    <DropdownItem key="dashboard" as={NextIntlLink} href="/dashboard" className="rounded-md" startContent={<Layers className="h-6 w-6" />}>
+                      {DashboardIntl}
                     </DropdownItem>
                   ) : null}
                 </DropdownSection>
                 <DropdownSection showDivider>
-                  <DropdownItem key={"saved-words"} startContent={<StarIcon className="h-6 w-6" />} className="text-center rounded-md py-0 pr-0">
-                    <Link color="foreground" as={NextIntlLink} className="w-full py-1.5" href="/saved-words">
-                      {SavedWordsIntl}
-                    </Link>
+                  <DropdownItem key="saved-words" as={NextIntlLink} href="/saved-words" startContent={<StarIcon className="h-6 w-6" />} className="rounded-md">
+                    {SavedWordsIntl}
                   </DropdownItem>
-                  <DropdownItem key={"requests"} startContent={<GitPullRequestArrow className="h-6 w-6" />} className="text-center rounded-md py-0 pr-0">
-                    <Link color="foreground" as={NextIntlLink} className="w-full py-1.5" href="/my-requests">
-                      {MyRequestsIntl}
-                    </Link>
+                  <DropdownItem key="requests" as={NextIntlLink} href="/my-requests" startContent={<GitPullRequestArrow className="h-6 w-6" />} className="rounded-md">
+                    {MyRequestsIntl}
                   </DropdownItem>
-                  <DropdownItem startContent={<HistoryIcon className="h-6 w-6" />} key={"search-history"} className="text-center rounded-md py-0 pr-0">
-                    <Link color="foreground" as={NextIntlLink} className="w-full py-1.5" href="/search-history">
-                      {SearchHistoryIntl}
-                    </Link>
+                  <DropdownItem key="search-history" as={NextIntlLink} href="/search-history" startContent={<HistoryIcon className="h-6 w-6" />} className="rounded-md">
+                    {SearchHistoryIntl}
                   </DropdownItem>
                 </DropdownSection>
 
@@ -400,9 +401,8 @@ export default function Navbar({
                     ]
                   }}
                   className="rounded-md text-destructive"
-                  key={"sign-out"}
+                  key="sign-out"
                   color="danger"
-                  onPress={() => handleSignOut()}
                 >
                   {LogoutIntl}
                 </DropdownItem>

@@ -1,4 +1,4 @@
-import { BellIcon, Blocks, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, HomeIcon, LayoutDashboard, Layers, Link2, ListTree, LogIn, MicIcon, StarIcon, UserIcon, WifiOff, Sun, Moon, Sparkles, Sparkle, Languages, LogOut, Zap } from 'lucide-react'
+import { BellIcon, Blocks, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, HomeIcon, LayoutDashboard, Layers, Link2, ListTree, LogIn, MicIcon, Monitor, StarIcon, UserIcon, WifiOff, Sun, Moon, Sparkles, Sparkle, Languages, LogOut, Zap } from 'lucide-react'
 import React from 'react'
 import { Link as NextIntlLink } from "@/src/i18n/routing";
 import { useRouter } from "@/src/i18n/routing";
@@ -182,17 +182,47 @@ export default function Sidebar(
                             <Separator />
                             <div className="flex items-center justify-between gap-2">
                                 {/* Theme Toggle */}
-                                <Button
-                                    className="flex-1 bg-default-100 dark:bg-default-50 border border-default-200"
-                                    variant="flat"
-                                    onPress={() => setTheme(theme === "dark" ? "light" : "dark")}
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                                        <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                                        <span className="text-sm font-medium">{theme === 'dark' ? 'Dark' : 'Light'}</span>
-                                    </div>
-                                </Button>
+                                <div className="flex-1 flex rounded-medium overflow-hidden border border-default-200">
+                                    <Button
+                                        className={cn(
+                                            "flex-1 min-w-0 rounded-none border-none",
+                                            theme === "light" ? "bg-primary/20 text-primary" : "bg-default-100 dark:bg-default-50"
+                                        )}
+                                        variant="flat"
+                                        isIconOnly
+                                        size="sm"
+                                        onPress={() => setTheme("light")}
+                                        aria-label="Light"
+                                    >
+                                        <Sun className="h-[1.1rem] w-[1.1rem]" />
+                                    </Button>
+                                    <Button
+                                        className={cn(
+                                            "flex-1 min-w-0 rounded-none border-x border-default-200",
+                                            theme === "dark" ? "bg-primary/20 text-primary" : "bg-default-100 dark:bg-default-50"
+                                        )}
+                                        variant="flat"
+                                        isIconOnly
+                                        size="sm"
+                                        onPress={() => setTheme("dark")}
+                                        aria-label="Dark"
+                                    >
+                                        <Moon className="h-[1.1rem] w-[1.1rem]" />
+                                    </Button>
+                                    <Button
+                                        className={cn(
+                                            "flex-1 min-w-0 rounded-none border-none",
+                                            theme === "system" ? "bg-primary/20 text-primary" : "bg-default-100 dark:bg-default-50"
+                                        )}
+                                        variant="flat"
+                                        isIconOnly
+                                        size="sm"
+                                        onPress={() => setTheme("system")}
+                                        aria-label="System"
+                                    >
+                                        <Monitor className="h-[1.1rem] w-[1.1rem]" />
+                                    </Button>
+                                </div>
 
                                 {/* Blur Toggle */}
                                 <Button
