@@ -19,7 +19,7 @@ export default function ExampleSentenceInput({
                     placeholder='You can enter an example sentence for this meaning.'
                     label="Example Sentence"
                     labelPlacement='outside'
-                    radius='sm'
+                    radius='md'
                     {...field}
                 />
             )}

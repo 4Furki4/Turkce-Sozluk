@@ -120,7 +120,7 @@ export function WordRecommendation({
             {isOpen && suggestions.length > 0 && (
                 <ul
                     ref={searchResultsRef}
-                    className="absolute z-10 w-full bg-white dark:bg-gray-800 shadow-lg rounded-sm mt-1 border border-gray-200 dark:border-gray-700"
+                    className="absolute z-10 w-full bg-white dark:bg-gray-800 shadow-lg rounded-md mt-1 border border-gray-200 dark:border-gray-700"
                 >
                     {suggestions.map((item, index) => (
                         <li

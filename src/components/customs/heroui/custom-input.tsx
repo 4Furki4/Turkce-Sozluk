@@ -42,7 +42,7 @@ export const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
 
         return (
             <Input
-                radius='sm'
+                radius='md'
                 ref={ref}
                 color="primary"
                 variant="bordered"

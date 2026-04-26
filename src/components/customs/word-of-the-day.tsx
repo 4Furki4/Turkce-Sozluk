@@ -18,19 +18,19 @@ export function WordOfTheDayCard() {
         return (
             <CustomCard className="w-full min-h-[300px]">
                 <CardHeader className="flex justify-between items-center pb-0">
-                    <Skeleton className="w-24 h-4 rounded-sm" />
-                    <Skeleton className="w-20 h-4 rounded-sm" />
+                    <Skeleton className="w-24 h-4 rounded-md" />
+                    <Skeleton className="w-20 h-4 rounded-md" />
                 </CardHeader>
 
                 <CardBody className="flex flex-col items-center justify-center text-center py-8 gap-4 overflow-hidden">
-                    <Skeleton className="w-3/4 h-10 rounded-sm" />
-                    <Skeleton className="w-1/4 h-5 rounded-sm" />
-                    <Skeleton className="w-full h-16 rounded-sm mt-2" />
+                    <Skeleton className="w-3/4 h-10 rounded-md" />
+                    <Skeleton className="w-1/4 h-5 rounded-md" />
+                    <Skeleton className="w-full h-16 rounded-md mt-2" />
                 </CardBody>
 
                 <CardFooter className="flex justify-center gap-3 pt-0 pb-6">
-                    <Skeleton className="w-24 h-9 rounded-sm" />
-                    <Skeleton className="w-28 h-9 rounded-sm" />
+                    <Skeleton className="w-24 h-9 rounded-md" />
+                    <Skeleton className="w-28 h-9 rounded-md" />
                 </CardFooter>
             </CustomCard>
         );
@@ -63,7 +63,7 @@ export function WordOfTheDayCard() {
                 </Link>
 
                 {word.phonetic && (
-                    <p className="text-sm text-default-400 mb-5 font-mono bg-primary/15 px-2 py-0.5 rounded-sm">
+                    <p className="text-sm text-default-400 mb-5 font-mono bg-primary/15 px-2 py-0.5 rounded-md">
                         /{word.phonetic}/
                     </p>
                 )}
@@ -87,7 +87,7 @@ export function WordOfTheDayCard() {
                                         key={related.relatedWord.id}
                                         // @ts-ignore
                                         href={getWordRoute(related.relatedWord.name)}
-                                        className="px-3 py-1 bg-primary/10 hover:bg-primary/20 rounded-sm transition-colors text-primary"
+                                        className="px-3 py-1 bg-primary/10 hover:bg-primary/20 rounded-md transition-colors text-primary"
                                     >
                                         {/* @ts-ignore */}
                                         {related.relatedWord.name}

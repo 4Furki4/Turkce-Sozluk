@@ -21,7 +21,7 @@ export default function MeaningAttributesInput({ control, meaningAttributes, mea
                 <Select
                     as={'div'}
                     items={meaningAttributes || []}
-                    radius='sm'
+                    radius='md'
                     label={t("Attributes")}
                     placeholder={t("YouCanSelectAnAttributeForThisMeaning")}
                     selectionMode="multiple"

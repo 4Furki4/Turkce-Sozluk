@@ -154,7 +154,7 @@ function WordCardVariantToggle({
       <div
         role="radiogroup"
         aria-label={t("Layout")}
-        className="grid w-full grid-cols-2 rounded-sm border border-border/80 bg-background/90 p-1 shadow-sm shadow-black/5 sm:w-auto"
+        className="grid w-full grid-cols-2 rounded-md border border-border/80 bg-background/90 p-1 shadow-sm shadow-black/5 sm:w-auto"
       >
         {WORD_CARD_VARIANTS.map(({ value, labelKey, icon: Icon }) => {
           const isSelected = variant === value;
@@ -167,7 +167,7 @@ function WordCardVariantToggle({
               aria-checked={isSelected}
               onClick={() => onVariantChange(value)}
               className={cn(
-                "relative inline-flex min-h-7 items-center justify-center gap-2 rounded-sm px-3 text-sm font-medium transition-all duration-200 sm:min-w-36",
+                "relative inline-flex min-h-7 items-center justify-center gap-2 rounded-md px-3 text-sm font-medium transition-all duration-200 sm:min-w-36",
                 isSelected
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
@@ -239,7 +239,7 @@ function SearchWordCardVariant({
       as="article"
       aria-label={t("Words")}
       role="article"
-      className="overflow-hidden rounded-sm p-0 shadow-sm shadow-black/5"
+      className="overflow-hidden rounded-md p-0 shadow-sm shadow-black/5"
     >
       <div key={variant} className="animate-in fade-in-0 slide-in-from-bottom-1 duration-200">
         {variant === "magazine" ? (
@@ -553,7 +553,7 @@ function WordMetadata({
       )}
     >
       {hasRoot ? (
-        <div className="inline-flex min-h-8 items-center gap-2 rounded-sm border border-border/70 bg-background/70 px-3 py-1.5 font-mono text-xs text-muted-foreground">
+        <div className="inline-flex min-h-8 items-center gap-2 rounded-md border border-border/70 bg-background/70 px-3 py-1.5 font-mono text-xs text-muted-foreground">
           <span className="font-semibold text-foreground">{t("Root")}</span>
           <span>{word_data.root.root}</span>
           {rootLanguage ? <span className="text-muted-foreground/80">({rootLanguage})</span> : null}
@@ -564,14 +564,14 @@ function WordMetadata({
         <div className="group relative inline-flex">
           <button
             type="button"
-            className="inline-flex min-h-8 items-center gap-1.5 rounded-sm bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary outline-none transition-colors hover:bg-primary/15 focus-visible:ring-2 focus-visible:ring-primary/30"
+            className="inline-flex min-h-8 items-center gap-1.5 rounded-md bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary outline-none transition-colors hover:bg-primary/15 focus-visible:ring-2 focus-visible:ring-primary/30"
             aria-label={viewCountFreshness}
             title={viewCountFreshness}
           >
             <Eye className="h-3.5 w-3.5" />
             <span>{formatViewCount(word_data.view_count ?? 0)} {t("views")}</span>
           </button>
-          <div className="pointer-events-none absolute bottom-full left-0 z-20 mb-2 w-max max-w-56 rounded-sm border border-border/70 bg-popover px-3 py-2 text-xs text-popover-foreground opacity-0 shadow-md transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+          <div className="pointer-events-none absolute bottom-full left-0 z-20 mb-2 w-max max-w-56 rounded-md border border-border/70 bg-popover px-3 py-2 text-xs text-popover-foreground opacity-0 shadow-md transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
             {viewCountFreshness}
           </div>
         </div>
@@ -584,7 +584,7 @@ function WordMetadata({
               key={attribute.attribute_id}
               size="sm"
               variant="flat"
-              className="rounded-sm bg-primary/10 font-mono text-primary"
+              className="rounded-md bg-primary/10 font-mono text-primary"
             >
               {attribute.attribute}
             </Chip>
@@ -605,7 +605,7 @@ function CompactBadge({
   onClick?: () => void;
 }) {
   const className = cn(
-    "inline-flex min-h-7 items-center rounded-sm border px-2 py-0.5 text-xs font-medium transition-colors",
+    "inline-flex min-h-7 items-center rounded-md border px-2 py-0.5 text-xs font-medium transition-colors",
     tone === "default" && "border-border/70 bg-muted/40 text-muted-foreground",
     tone === "root" && "border-sky-500/20 bg-sky-500/10 text-sky-700 dark:text-sky-300",
     tone === "tag" && "border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
@@ -670,7 +670,7 @@ function CompactPronunciationPopover({
       <PopoverTrigger>
         <button
           type="button"
-          className="inline-flex min-h-9 items-center gap-1.5 rounded-sm border border-border/70 bg-muted/30 px-2.5 py-1 text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-foreground"
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-md border border-border/70 bg-muted/30 px-2.5 py-1 text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-foreground"
           aria-label={hasPronunciations ? tWord("PlayPronunciation") : tWord("RequestPronunciation")}
         >
           {word_data.phonetic ? (
@@ -695,14 +695,14 @@ function CompactPronunciationPopover({
               {tPronunciation("loading") || "Loading pronunciations..."}
             </p>
           ) : pronunciationItems.length === 0 ? (
-            <div className="rounded-sm border border-dashed border-border/80 bg-muted/20 p-3">
+            <div className="rounded-md border border-dashed border-border/80 bg-muted/20 p-3">
               <p className="text-sm font-medium text-foreground">{tWord("NoPronunciationsPrompt")}</p>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{tWord("AddPronunciationPrompt")}</p>
               <Button
                 size="sm"
                 color="primary"
                 variant="flat"
-                className="mt-3 h-8 min-h-8 rounded-sm px-3 text-xs font-medium"
+                className="mt-3 h-8 min-h-8 rounded-md px-3 text-xs font-medium"
                 onPress={handleRequestPronunciation}
               >
                 {tWord("RequestPronunciation")}
@@ -731,7 +731,7 @@ function CompactPronunciationPopover({
                 );
 
                 return (
-                  <div key={pronunciation.id} className="rounded-sm border border-border/70 bg-muted/20 p-2">
+                  <div key={pronunciation.id} className="rounded-md border border-border/70 bg-muted/20 p-2">
                     {profileTarget ? (
                       <Link
                         href={profileTarget}
@@ -778,7 +778,7 @@ function WordUtilityActions({
 }) {
   const t = useTranslations("WordCard");
   const actionButtonClassName = cn(
-    "h-10 min-h-10 w-10 min-w-10 rounded-sm bg-transparent p-0 text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground",
+    "h-10 min-h-10 w-10 min-w-10 rounded-md bg-transparent p-0 text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground",
     compact && "h-9 min-h-9 w-9 min-w-9",
   );
   const iconClassName = compact ? "h-4 w-4" : "h-[18px] w-[18px]";
@@ -880,7 +880,7 @@ function CompactMeanings({
           id={getMeaningDomId(word_data.word_id, meaning.meaning_id)}
           key={`${meaning.meaning_id}-${index}`}
           className={cn(
-            "scroll-mt-28 -mx-3 rounded-sm px-3 py-4 transition-colors duration-300 first:pt-0 last:pb-0",
+            "scroll-mt-28 -mx-3 rounded-md px-3 py-4 transition-colors duration-300 first:pt-0 last:pb-0",
             highlightedMeaningId === meaning.meaning_id && "bg-primary/10 ring-1 ring-primary/30",
           )}
         >
@@ -964,7 +964,7 @@ function MeaningContent({
         </div>
 
         {meaning.imageUrl ? (
-          <div className="overflow-hidden rounded-sm border border-border/70 bg-muted/20">
+          <div className="overflow-hidden rounded-md border border-border/70 bg-muted/20">
             <Image
               src={meaning.imageUrl}
               alt={meaning.meaning}
@@ -1084,7 +1084,7 @@ function CompactRelatedWordLink({ relatedWord }: { relatedWord: RelatedWord }) {
         params: { word: relatedWord.related_word_name },
       }}
       prefetch={false}
-      className="inline-flex min-h-8 items-center rounded-sm border border-border/70 bg-muted/35 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+      className="inline-flex min-h-8 items-center rounded-md border border-border/70 bg-muted/35 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
     >
       <span>{relatedWord.related_word_name}</span>
       {relationLabel && relatedWord.relation_type !== "relatedWord" ? (
@@ -1218,7 +1218,7 @@ function DossierStats({ word_data, compact = false }: { word_data: WordEntryData
 
   if (compact) {
     return (
-      <dl className="inline-flex shrink-0 items-center gap-3 rounded-sm border border-border/70 bg-background/70 px-2.5 py-1.5 text-xs text-muted-foreground">
+      <dl className="inline-flex shrink-0 items-center gap-3 rounded-md border border-border/70 bg-background/70 px-2.5 py-1.5 text-xs text-muted-foreground">
         <div className="inline-flex items-baseline gap-1.5">
           <dt>{t("Definitions")}</dt>
           <dd className="font-mono font-semibold text-foreground">{word_data.meanings?.length ?? 0}</dd>
@@ -1233,7 +1233,7 @@ function DossierStats({ word_data, compact = false }: { word_data: WordEntryData
   }
 
   return (
-    <dl className="grid grid-cols-2 overflow-hidden rounded-sm border border-border/70 bg-background/65">
+    <dl className="grid grid-cols-2 overflow-hidden rounded-md border border-border/70 bg-background/65">
       <div className="border-r border-border/70 p-3">
         <dt className="text-xs text-muted-foreground">{t("Definitions")}</dt>
         <dd className="mt-1 font-mono text-xl font-semibold text-foreground">

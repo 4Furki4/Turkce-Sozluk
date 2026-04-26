@@ -116,7 +116,7 @@ export default async function AnnouncementDetailPage({
         <div className="mb-6">
           <Link
             href={{ pathname: "/announcements" }}
-            className="inline-flex items-center gap-2 rounded-sm bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -135,7 +135,7 @@ export default async function AnnouncementDetailPage({
           </Link>
         </div>
 
-        <CustomCard className="border-2 border-border rounded-sm px-2 py-4 w-full">
+        <CustomCard className="border-2 border-border rounded-md px-2 py-4 w-full">
           <div className="px-4 pb-4">
             <div className="flex flex-col gap-2">
               <h1 className="text-3xl font-bold">{announcement.title}</h1>
@@ -151,7 +151,7 @@ export default async function AnnouncementDetailPage({
                 src={announcement.imageUrl}
                 alt={announcement.title || ""}
                 fill
-                className="object-cover rounded-sm"
+                className="object-cover rounded-md"
               />
             </div>
           )}
@@ -171,7 +171,7 @@ export default async function AnnouncementDetailPage({
                   href={announcement.actionUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center rounded-sm bg-primary px-5 py-3 text-sm font-medium text-primary-foreground"
+                  className="inline-flex items-center rounded-md bg-primary px-5 py-3 text-sm font-medium text-primary-foreground"
                 >
                   {announcement.actionTextKey
                     ? t(announcement.actionTextKey)

@@ -183,7 +183,7 @@ export default function CreateWord({ locale }: {
             variant="faded"
             color="primary"
             className="w-full"
-            radius="sm"
+            radius="md"
           >
             {t('Dashboard.CreateWord')}
           </Button>

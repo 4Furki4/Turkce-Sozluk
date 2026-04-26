@@ -16,9 +16,9 @@ export default function MeaningFieldArrayButtons({
 }) {
     const t = useTranslations();
     return (
-        <ButtonGroup radius='sm' className="w-full flex  gap-2 ">
+        <ButtonGroup radius='md' className="w-full flex  gap-2 ">
             <Button
-                radius='sm'
+                radius='md'
                 className="w-full"
                 type="button"
                 onPress={() => {
@@ -28,7 +28,7 @@ export default function MeaningFieldArrayButtons({
                 {t('Dashboard.Append')}
             </Button>
             <Button
-                radius='sm'
+                radius='md'
                 className="w-full"
                 type="button"
                 onPress={() => {

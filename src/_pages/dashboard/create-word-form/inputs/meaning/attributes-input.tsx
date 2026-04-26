@@ -48,7 +48,7 @@ export default function MeaningAttributesInput({
                     <Select {...field}
                         as={'div'}
                         tabIndex={0}
-                        radius='sm'
+                        radius='md'
                         label={t('Attributes')}
                         classNames={{
                             trigger: "pl-1",

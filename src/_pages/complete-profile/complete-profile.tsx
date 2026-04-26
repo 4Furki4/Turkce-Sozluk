@@ -97,7 +97,7 @@ export default function CompleteProfile({ session }: { session: Session | null }
 
                     <Button
                         type="submit"
-                        className="w-full bg-primary text-white py-2 rounded-sm hover:bg-primary-500 transition-colors"
+                        className="w-full bg-primary text-white py-2 rounded-md hover:bg-primary-500 transition-colors"
                         disabled={updateProfile.isPending}
                     >
                         {updateProfile.isPending ? t("updating") : t("complete_profile")}

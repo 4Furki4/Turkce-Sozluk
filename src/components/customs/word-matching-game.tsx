@@ -409,21 +409,21 @@ export default function WordMatchingGame({ session, locale }: WordMatchingGamePr
                             </h2>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 bg-primary/10 rounded-sm">
+                                <div className="p-4 bg-primary/10 rounded-md">
                                     <p className="text-sm text-muted-foreground">{t("matchedPairs")}</p>
                                     <p className="text-2xl font-bold text-primary">
                                         {matchedPairs.size}/{pairCountNum}
                                     </p>
                                 </div>
-                                <div className="p-4 bg-success/10 rounded-sm">
+                                <div className="p-4 bg-success/10 rounded-md">
                                     <p className="text-sm text-muted-foreground">{t("score")}</p>
                                     <p className="text-2xl font-bold text-success">{score}</p>
                                 </div>
-                                <div className="p-4 bg-danger/10 rounded-sm">
+                                <div className="p-4 bg-danger/10 rounded-md">
                                     <p className="text-sm text-muted-foreground">{t("mistakes")}</p>
                                     <p className="text-2xl font-bold text-danger">{incorrectAttempts}</p>
                                 </div>
-                                <div className="p-4 bg-secondary/10 rounded-sm">
+                                <div className="p-4 bg-secondary/10 rounded-md">
                                     <p className="text-sm text-muted-foreground">{t("time")}</p>
                                     <p className="text-2xl font-bold">
                                         {gameMode === "timed"

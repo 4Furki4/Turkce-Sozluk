@@ -21,7 +21,7 @@ export default function MeaningExampleSentenceInput({
                 <>
                     <Input
                         {...field}
-                        radius='sm'
+                        radius='md'
                         label={t('ExampleSentence')}
                         labelPlacement='outside'
                         description={t('Forms.ExampleSentence.Description')}

@@ -12,7 +12,7 @@ export const PronunciationCardSkeleton = () => {
                         <Skeleton className="h-3 w-20" />
                     </div>
                 </div>
-                <Skeleton className="h-8 w-8 rounded-sm" />
+                <Skeleton className="h-8 w-8 rounded-md" />
             </CardHeader>
             <CardBody className="px-3 py-0">
                 <Skeleton className="h-6 w-40" />

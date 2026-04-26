@@ -75,7 +75,7 @@ export function PublicFeedbackFilterBar({
     filters.sortOrder !== "desc";
 
   return (
-    <div className="space-y-4 p-4 border border-border rounded-sm bg-background/50">
+    <div className="space-y-4 p-4 border border-border rounded-md bg-background/50">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">{tFeedback("title")}</h3>
         {hasActiveFilters && (

@@ -193,7 +193,7 @@ export default function WordEditRequest({
                     control={control}
                     render={({ field, fieldState: { error } }) => (
                       <CustomAutocomplete
-                        radius='sm'
+                        radius='md'
                         {...field}
                         label={t("Language")}
                         isLoading={languagesIsLoading}

@@ -69,7 +69,7 @@ export default function SavedWordCard({ wordData, onUnsave, session, locale }: S
         </CardBody>
 
         <CardFooter className="px-6 pb-6 pt-2 flex justify-between items-center">
-          <p className="text-xs text-default-400 font-medium flex items-center gap-1.5 bg-default-100/50 px-2 py-1 rounded-sm">
+          <p className="text-xs text-default-400 font-medium flex items-center gap-1.5 bg-default-100/50 px-2 py-1 rounded-md">
             <Clock className="w-3.5 h-3.5" />
             {formatDistanceToNow(new Date(wordData.saved_at), {
               addSuffix: true,

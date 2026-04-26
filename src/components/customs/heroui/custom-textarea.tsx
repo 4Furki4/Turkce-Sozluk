@@ -11,7 +11,7 @@ import { preferencesState } from '@/src/store/preferences';
 const customTextareaStyles = tv({
     slots: {
         inputWrapper: [
-            "rounded-sm",
+            "rounded-md",
             "border-2",
             "border-primary/40",
             "shadow-xl",

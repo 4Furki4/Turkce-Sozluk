@@ -57,7 +57,7 @@ export default function SigninWithEmailForm({ SigninWithEmailIntl, EnterYourEmai
                         <Input
                             classNames={{
                                 inputWrapper: [
-                                    "rounded-sm",
+                                    "rounded-md",
                                     "backdrop-blur-xs",
                                     "border-2 border-primary/40",
                                     "shadow-xl",
@@ -71,7 +71,7 @@ export default function SigninWithEmailForm({ SigninWithEmailIntl, EnterYourEmai
                                 ]
                             }}
                             {...field}
-                            className="rounded-sm w-full"
+                            className="rounded-md w-full"
                             label={EmailSigninLabelIntl}
                             variant="bordered"
                             labelPlacement='outside'
@@ -93,7 +93,7 @@ export default function SigninWithEmailForm({ SigninWithEmailIntl, EnterYourEmai
                         <Input
                             classNames={{
                                 inputWrapper: [
-                                    "rounded-sm",
+                                    "rounded-md",
                                     "backdrop-blur-xs",
                                     "border-2 border-primary/40",
                                     "shadow-xl",
@@ -108,7 +108,7 @@ export default function SigninWithEmailForm({ SigninWithEmailIntl, EnterYourEmai
                                 ]
                             }}
                             {...field}
-                            className="rounded-sm w-full"
+                            className="rounded-md w-full"
                             label="Verification Code"
                             variant="bordered"
                             labelPlacement='outside'
@@ -124,7 +124,7 @@ export default function SigninWithEmailForm({ SigninWithEmailIntl, EnterYourEmai
                 />
             )}
             <Button
-                className="rounded-sm w-full"
+                className="rounded-md w-full"
                 variant="flat"
                 color="primary"
                 type="submit"

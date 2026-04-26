@@ -13,7 +13,7 @@ export default function WordNameInput({
         <Controller name='name' control={control} render={({ field, formState: { errors } }) => (
             <Input
                 {...field}
-                radius='sm'
+                radius='md'
                 labelPlacement='outside'
                 label="Word name"
                 placeholder='You must enter a word name here.'

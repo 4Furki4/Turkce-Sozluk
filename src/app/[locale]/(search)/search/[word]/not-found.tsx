@@ -20,7 +20,7 @@ export default function WordNotFound() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Link
                         href="/"
-                        className="inline-flex items-center justify-center gap-2 rounded-sm bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+                        className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         Ana Sayfaya Dön
@@ -28,7 +28,7 @@ export default function WordNotFound() {
 
                     <Link
                         href="/contribute-word"
-                        className="inline-flex items-center justify-center rounded-sm border border-primary px-4 py-2 text-sm font-medium text-primary"
+                        className="inline-flex items-center justify-center rounded-md border border-primary px-4 py-2 text-sm font-medium text-primary"
                     >
                         Kelime Öner
                     </Link>

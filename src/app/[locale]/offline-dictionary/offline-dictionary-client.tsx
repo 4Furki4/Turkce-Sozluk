@@ -245,7 +245,7 @@ export default function OfflineDictionaryClient() {
 
                 {/* File Size Information */}
                 {(status === "not-downloaded" || status === "update-available") && (
-                    <div className="p-4 bg-background-50 rounded-sm border ">
+                    <div className="p-4 bg-background-50 rounded-md border ">
                         <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
                             <Download className="h-4 w-4" />
                             {t("download_info.title")}

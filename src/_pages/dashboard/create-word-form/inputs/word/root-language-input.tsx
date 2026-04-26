@@ -48,7 +48,7 @@ export default function WordRootLanguageInput({
             }}
             render={({ field, fieldState: { error } }) => (
                 <Autocomplete
-                    radius='sm'
+                    radius='md'
                     placeholder={t('EnterLanguage')}
                     description={t('Forms.Language.Description')}
                     labelPlacement='outside'
@@ -60,9 +60,9 @@ export default function WordRootLanguageInput({
                         clearErrors("language");
                     }}
                     classNames={{
-                        listboxWrapper: 'rounded-sm',
-                        popoverContent: 'rounded-sm',
-                        base: 'rounded-sm',
+                        listboxWrapper: 'rounded-md',
+                        popoverContent: 'rounded-md',
+                        base: 'rounded-md',
                     }}
                     errorMessage={isError ? fetchError?.message : error?.message ? error.message : ""}
                     isInvalid={isError || error !== undefined}

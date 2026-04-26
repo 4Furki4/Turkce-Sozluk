@@ -18,7 +18,7 @@ export default function MeaningInput({
                 <Input {...field}
                     label="Meaning"
                     labelPlacement='outside'
-                    radius='sm'
+                    radius='md'
                     // placeholder='You must enter a meaning here.'
                     isRequired
                     errorMessage={errors.meanings ? errors.meanings[index]?.meaning?.message : undefined}

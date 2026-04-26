@@ -36,7 +36,7 @@ export default function PartOfSpeechInput({
                     {...field}
                     selectedKeys={value}
                     onChange={handleSelectionChange}
-                    radius='sm'
+                    radius='md'
                     label={t("PartOfSpeech")}
                     labelPlacement='outside'
                     isRequired

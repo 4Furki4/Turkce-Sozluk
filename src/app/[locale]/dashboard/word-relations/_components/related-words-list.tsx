@@ -199,7 +199,7 @@ export default function RelatedWordsList({
                     isDisabled={isUpdateMutationInProgress(relatedItem.id)}
                     className="w-full"
                     classNames={{
-                      trigger: "p-2 border rounded-sm text-sm bg-background text-foreground border-border focus:ring-primary focus:border-primary",
+                      trigger: "p-2 border rounded-md text-sm bg-background text-foreground border-border focus:ring-primary focus:border-primary",
                       popoverContent: "bg-background border-border"
                     }}
                   >

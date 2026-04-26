@@ -24,30 +24,30 @@ export function FeedbackTableSkeleton({ rowCount = 10 }: FeedbackTableSkeletonPr
           <TableRow key={index}>
             <TableCell>
               <div className="space-y-2">
-                <Skeleton className="h-4 w-3/4 rounded-sm" />
-                <Skeleton className="h-3 w-1/2 rounded-sm" />
+                <Skeleton className="h-4 w-3/4 rounded-md" />
+                <Skeleton className="h-3 w-1/2 rounded-md" />
               </div>
             </TableCell>
             <TableCell>
-              <Skeleton className="h-6 w-16 rounded-sm" />
+              <Skeleton className="h-6 w-16 rounded-md" />
             </TableCell>
             <TableCell>
-              <Skeleton className="h-6 w-20 rounded-sm" />
+              <Skeleton className="h-6 w-20 rounded-md" />
             </TableCell>
             <TableCell>
-              <Skeleton className="h-4 w-8 rounded-sm" />
+              <Skeleton className="h-4 w-8 rounded-md" />
             </TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
                 <Skeleton className="flex rounded-full w-8 h-8" />
-                <Skeleton className="h-4 w-20 rounded-sm" />
+                <Skeleton className="h-4 w-20 rounded-md" />
               </div>
             </TableCell>
             <TableCell>
-              <Skeleton className="h-4 w-16 rounded-sm" />
+              <Skeleton className="h-4 w-16 rounded-md" />
             </TableCell>
             <TableCell>
-              <Skeleton className="h-8 w-8 rounded-sm" />
+              <Skeleton className="h-8 w-8 rounded-md" />
             </TableCell>
           </TableRow>
         ))}

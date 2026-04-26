@@ -557,7 +557,7 @@ function BuilderSection({
     return (
         <div className="rounded-2xl border border-primary/10 bg-gradient-to-br from-background to-primary/5 p-4">
             <div className="mb-4 flex items-start gap-3">
-                <div className="rounded-sm bg-primary/10 p-2 text-primary">{icon}</div>
+                <div className="rounded-md bg-primary/10 p-2 text-primary">{icon}</div>
                 <div>
                     <h4 className="text-sm font-semibold uppercase tracking-[0.25em] text-foreground/80">
                         {title}

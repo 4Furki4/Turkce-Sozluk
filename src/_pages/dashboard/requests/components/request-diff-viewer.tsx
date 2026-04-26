@@ -120,7 +120,7 @@ function GenericDiff({ currentData, newData }: { currentData: any; newData: any 
         </CardHeader>
         <Divider />
         <CardBody>
-          <pre className="max-h-60 overflow-auto rounded-sm bg-gray-100 p-3 text-sm dark:bg-gray-800">
+          <pre className="max-h-60 overflow-auto rounded-md bg-gray-100 p-3 text-sm dark:bg-gray-800">
             {JSON.stringify(currentData, null, 2)}
           </pre>
         </CardBody>
@@ -132,7 +132,7 @@ function GenericDiff({ currentData, newData }: { currentData: any; newData: any 
         </CardHeader>
         <Divider />
         <CardBody>
-          <pre className="max-h-60 overflow-auto rounded-sm bg-gray-100 p-3 text-sm dark:bg-gray-800">
+          <pre className="max-h-60 overflow-auto rounded-md bg-gray-100 p-3 text-sm dark:bg-gray-800">
             {JSON.stringify(newData, null, 2)}
           </pre>
         </CardBody>

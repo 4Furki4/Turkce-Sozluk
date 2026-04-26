@@ -63,7 +63,7 @@ export default function OtpEmail({ validationCode = "123456", locale = "en" }: O
                             {t.body}
                         </Text>
                         <Section className="text-center mt-[32px] mb-[32px]">
-                            <Text className="text-center text-black bg-[#a91101] rounded-sm py-4 px-6 text-2xl font-bold tracking-[10px] inline-block">
+                            <Text className="text-center text-black bg-[#a91101] rounded-md py-4 px-6 text-2xl font-bold tracking-[10px] inline-block">
                                 {validationCode}
                             </Text>
                         </Section>

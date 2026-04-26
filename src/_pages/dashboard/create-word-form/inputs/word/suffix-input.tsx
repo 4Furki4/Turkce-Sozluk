@@ -18,7 +18,7 @@ export default function WordSuffixInput({
             render={({ field }) => (
                 <Input
                     {...field}
-                    radius='sm'
+                    radius='md'
                     label={t('Suffix')}
                     placeholder={t('EnterSuffix')}
                     labelPlacement='outside'

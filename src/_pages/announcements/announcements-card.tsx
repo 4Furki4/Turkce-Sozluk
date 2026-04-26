@@ -32,7 +32,7 @@ export default function Announcement({
     return (
         <Card classNames={{
             base: "bg-background/10",
-        }} key={announcement.id} className="border border-border rounded-sm p-2 w-full" isBlurred={isBlurEnabled}>
+        }} key={announcement.id} className="border border-border rounded-md p-2 w-full" isBlurred={isBlurEnabled}>
             <CardHeader className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold">{announcement.title}</h2>
                 <span className="text-sm text-gray-500">
@@ -47,7 +47,7 @@ export default function Announcement({
                             src={announcement.imageUrl}
                             alt={announcement.title || ""}
                             fill
-                            className="object-cover rounded-sm"
+                            className="object-cover rounded-md"
                         />
                     </div>
                 )}

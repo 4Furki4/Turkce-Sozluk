@@ -63,7 +63,7 @@ export default function MeaningExampleSentenceAuthorInput({
                         onChange={handleSelectionChange}
                         selectedKeys={value}
                         selectionMode='single'
-                        radius='sm'
+                        radius='md'
                         label={t('Author')}
                         labelPlacement='outside'
                         placeholder={t('SelectAuthor')}

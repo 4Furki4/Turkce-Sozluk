@@ -95,7 +95,7 @@ export default function MeaningFormSection({
     : [];
 
   return (
-    <div key={meaningIndex} className="p-4 border rounded-sm space-y-4">
+    <div key={meaningIndex} className="p-4 border rounded-md space-y-4">
       <div className="flex justify-between items-center">
         <h4 className="font-medium">{t("meaning")} {meaningIndex + 1}</h4>
         {!isFirstMeaning && (

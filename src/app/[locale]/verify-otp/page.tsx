@@ -79,7 +79,7 @@ export default function VerifyOtpPage() {
     return (
         <div className="max-md:h-lvh w-full flex flex-col items-center justify-center">
 
-            <div className="flex flex-col items-center gap-2 w-11/12 sm:w-full max-w-2xl shadow-md bg-background/10 backdrop-saturate-150 p-6 sm:p-12 rounded-sm border-2 border-border">
+            <div className="flex flex-col items-center gap-2 w-11/12 sm:w-full max-w-2xl shadow-md bg-background/10 backdrop-saturate-150 p-6 sm:p-12 rounded-md border-2 border-border">
                 <div className="flex flex-col items-center gap-2 text-center">
                     <h1 className="text-2xl font-bold">{t("title")}</h1>
                     <p className="text-muted-foreground">
