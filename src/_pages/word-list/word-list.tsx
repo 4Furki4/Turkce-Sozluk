@@ -87,15 +87,27 @@ export default function WordList() {
 
     const debouncedSearch = useDebounce(watch("search"), 500);
     const isFirstRender = useRef(true);
+    const didInitializeFilterReset = useRef(false);
+    const skipNextUrlSync = useRef(false);
+    const searchParamsString = searchParams.toString();
 
     // reset to first page when search changes
     useEffect(() => {
+        if (skipNextUrlSync.current) return;
+
+        if (!didInitializeFilterReset.current) {
+            didInitializeFilterReset.current = true;
+            return;
+        }
+
         setPageNumber(1);
     }, [debouncedSearch, selectedPos, selectedLang, selectedAttr, sortBy, sortOrder, selectedLetter, viewMode]);
 
     // update state on URL param changes (back/forward)
     useEffect(() => {
         if (isFirstRender.current) return;
+        skipNextUrlSync.current = true;
+
         const paramPage = Number(searchParams.get('page')) || 1;
         const paramPer = Number(searchParams.get('per_page')) || 10;
 
@@ -121,7 +133,7 @@ export default function WordList() {
 
         setValue('search', paramSearch, { shouldDirty: false });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchParams, setValue]);
+    }, [searchParamsString, setValue]);
 
     // sync state to URL, enable back/forward history
     useEffect(() => {
@@ -129,6 +141,12 @@ export default function WordList() {
             isFirstRender.current = false;
             return;
         }
+
+        if (skipNextUrlSync.current) {
+            skipNextUrlSync.current = false;
+            return;
+        }
+
         const params = new URLSearchParams();
         if (debouncedSearch) params.set('search', debouncedSearch);
         if (selectedPos.length > 0) params.set('pos', selectedPos.join(','));
@@ -141,8 +159,12 @@ export default function WordList() {
 
         params.set('page', pageNumber.toString());
         params.set('per_page', wordsPerPage.toString());
-        router.push(`${pathname}?${params.toString()}`);
-    }, [pageNumber, wordsPerPage, debouncedSearch, selectedPos, selectedLang, selectedAttr, sortBy, sortOrder, selectedLetter, viewMode, pathname, router]);
+        const nextSearch = params.toString();
+
+        if (nextSearch === searchParamsString) return;
+
+        router.push(`${pathname}?${nextSearch}`);
+    }, [pageNumber, wordsPerPage, debouncedSearch, selectedPos, selectedLang, selectedAttr, sortBy, sortOrder, selectedLetter, viewMode, pathname, router, searchParamsString]);
 
     const { data: wordCount } = api.word.getWordCount.useQuery({
         search: debouncedSearch,
