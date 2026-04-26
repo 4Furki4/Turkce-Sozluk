@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useMemo } from "react";
 import { useRouter as useNextRouter } from "next/navigation";
 
 import { startNavigationProgress } from "@/src/lib/navigation-progress";
@@ -29,33 +30,52 @@ function shouldStartForStringHref(href: string) {
 export function useProgressRouter() {
   const router = useNextRouter();
 
-  return {
-    ...router,
-    push(href: string, options?: Parameters<typeof router.push>[1]) {
+  const push = useCallback(
+    (href: string, options?: Parameters<typeof router.push>[1]) => {
       if (shouldStartForStringHref(href)) {
         startNavigationProgress();
       }
 
       return router.push(href, options);
     },
-    replace(href: string, options?: Parameters<typeof router.replace>[1]) {
+    [router],
+  );
+
+  const replace = useCallback(
+    (href: string, options?: Parameters<typeof router.replace>[1]) => {
       if (shouldStartForStringHref(href)) {
         startNavigationProgress();
       }
 
       return router.replace(href, options);
     },
-    back() {
-      startNavigationProgress();
-      return router.back();
-    },
-    forward() {
-      startNavigationProgress();
-      return router.forward();
-    },
-    refresh() {
-      startNavigationProgress();
-      return router.refresh();
-    },
-  };
+    [router],
+  );
+
+  const back = useCallback(() => {
+    startNavigationProgress();
+    return router.back();
+  }, [router]);
+
+  const forward = useCallback(() => {
+    startNavigationProgress();
+    return router.forward();
+  }, [router]);
+
+  const refresh = useCallback(() => {
+    startNavigationProgress();
+    return router.refresh();
+  }, [router]);
+
+  return useMemo(
+    () => ({
+      ...router,
+      push,
+      replace,
+      back,
+      forward,
+      refresh,
+    }),
+    [router, push, replace, back, forward, refresh],
+  );
 }
