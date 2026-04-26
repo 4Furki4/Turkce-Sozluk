@@ -291,7 +291,8 @@ function ReaderWordCard({
           isWordFetching={isWordFetching}
           onCapture={onCapture}
           onShare={onShare}
-          className="sm:absolute sm:right-8 sm:top-8"
+          showOnMobile
+          className="mb-4 ml-auto sm:absolute sm:right-8 sm:top-8 sm:mb-0"
         />
 
         <div className="grid gap-4">
@@ -764,6 +765,7 @@ function WordUtilityActions({
   onShare,
   compact = false,
   showPronunciation = true,
+  showOnMobile = false,
   className,
 }: {
   word_data: WordEntryData;
@@ -774,6 +776,7 @@ function WordUtilityActions({
   onShare: () => void;
   compact?: boolean;
   showPronunciation?: boolean;
+  showOnMobile?: boolean;
   className?: string;
 }) {
   const t = useTranslations("WordCard");
@@ -786,7 +789,8 @@ function WordUtilityActions({
   return (
     <div
       className={cn(
-        "hidden shrink-0 items-center gap-1 sm:flex",
+        "shrink-0 items-center gap-1",
+        compact || showOnMobile ? "flex" : "hidden sm:flex",
         className,
       )}
     >

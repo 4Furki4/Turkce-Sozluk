@@ -247,6 +247,24 @@ describe("SearchWordCardVariantGroup", () => {
     expect(screen.getByRole("radio", { name: "Compact" })).toHaveAttribute("aria-checked", "false");
   });
 
+  it("keeps reader utility actions visible without the mobile-hidden class", () => {
+    initializePreferences();
+
+    render(
+      <SearchWordCardVariantGroup
+        data={[sampleWord]}
+        locale="en"
+        session={null}
+        headingLevel="h1"
+      />,
+    );
+
+    const actionRow = screen.getByRole("button", { name: "Screenshot" }).parentElement;
+
+    expect(actionRow).toHaveClass("flex");
+    expect(actionRow).not.toHaveClass("hidden");
+  });
+
   it("updates the selected layout and persists the choice", async () => {
     initializePreferences();
 
@@ -302,6 +320,25 @@ describe("SearchWordCardVariantGroup", () => {
     expect(screen.getAllByRole("button", { name: "Request pronunciation" }).length).toBeGreaterThan(0);
     expect(screen.getByText("No pronunciations yet.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /View count updated/ })).toBeInTheDocument();
+  });
+
+  it("keeps compact utility actions visible without the mobile-hidden class", () => {
+    localStorage.setItem(SEARCH_WORD_CARD_VARIANT_STORAGE_KEY, "magazine");
+    initializePreferences();
+
+    render(
+      <SearchWordCardVariantGroup
+        data={[sampleWord]}
+        locale="en"
+        session={null}
+        headingLevel="h1"
+      />,
+    );
+
+    const actionRow = screen.getByRole("button", { name: "Screenshot" }).parentElement;
+
+    expect(actionRow).toHaveClass("flex");
+    expect(actionRow).not.toHaveClass("hidden");
   });
 
   it("scrolls to and highlights a compact meaning from a tag", () => {
