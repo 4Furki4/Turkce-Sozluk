@@ -63,7 +63,7 @@ export default function MobileSearchDrawer({
                         >
                             <ModalHeader className="flex flex-col gap-1 text-center items-center justify-center pt-6 pb-4 select-none">
                                 {SearchIntl}
-                                <div className="w-12 h-1 bg-zinc-700/50 rounded-full mt-2" />
+                                <div className="w-12 h-1 bg-zinc-700/50 rounded-md mt-2" />
                             </ModalHeader>
                         </motion.div>
                         <ModalBody className="pt-6">

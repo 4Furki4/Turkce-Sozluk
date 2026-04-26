@@ -179,7 +179,7 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                                                 <div className="p-3 bg-zinc-500/5 hover:bg-zinc-500/10 rounded-md border border-transparent hover:border-zinc-500/20 transition-all duration-200 group">
                                                     <div className="flex justify-between items-start">
                                                         <span className="font-medium text-foreground group-hover:text-primary transition-colors">{savedWord.wordName}</span>
-                                                        <span className="text-[10px] text-muted-foreground bg-zinc-500/10 px-1.5 py-0.5 rounded-full">
+                                                        <span className="text-[10px] text-muted-foreground bg-zinc-500/10 px-1.5 py-0.5 rounded-md">
                                                             {new Date(savedWord.savedAt).toLocaleDateString(locale, { month: 'short', day: 'numeric' })}
                                                         </span>
                                                     </div>
@@ -232,7 +232,7 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                                                         </span>
                                                     </div>
                                                     <div className="flex-shrink-0">
-                                                        <span className={`text-[10px] font-mono px-2 py-1 rounded-full uppercase tracking-wider border ${contribution.status === 'APPROVED' ? 'bg-green-500/10 text-green-600 border-green-500/20' :
+                                                        <span className={`text-[10px] font-mono px-2 py-1 rounded-md uppercase tracking-wider border ${contribution.status === 'APPROVED' ? 'bg-green-500/10 text-green-600 border-green-500/20' :
                                                             contribution.status === 'REJECTED' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
                                                                 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20'
                                                             }`}>

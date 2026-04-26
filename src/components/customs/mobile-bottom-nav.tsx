@@ -71,7 +71,7 @@ export default function MobileBottomNav({
                                     aria-label={item.label}
                                 >
                                     <div className={cn(
-                                        "flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95",
+                                        "flex items-center justify-center w-14 h-14 rounded-md shadow-lg transition-transform hover:scale-105 active:scale-95",
                                         "bg-primary text-primary-foreground",
                                         item.isActive && "ring-2 ring-offset-2 ring-primary ring-offset-background"
                                     )}>

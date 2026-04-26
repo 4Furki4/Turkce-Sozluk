@@ -313,7 +313,7 @@ export default function SearchContainer({
                             ]
                         }}
                         startContent={
-                            <button type="submit" className="p-2 hover:bg-white/5 rounded-full transition-colors mr-2" aria-label="search button">
+                            <button type="submit" className="p-2 hover:bg-white/5 rounded-md transition-colors mr-2" aria-label="search button">
                                 <SearchIcon className="w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             </button>
                         }
@@ -442,7 +442,7 @@ export default function SearchContainer({
                             setSelectedIndex(-1);
                         }}
                         className={cn(
-                            "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200",
+                            "flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-sm font-medium transition-all duration-200",
                             searchMode === "meaning"
                                 ? "bg-primary/15 text-primary shadow-sm"
                                 : "text-zinc-500 hover:text-zinc-300"

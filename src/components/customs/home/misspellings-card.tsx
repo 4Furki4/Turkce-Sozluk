@@ -23,7 +23,7 @@ export function MisspellingsCard() {
         return (
             <CustomCard className="h-full border-default-200 dark:border-default-100">
                 <CardHeader className="flex items-center gap-2 pb-2 pt-4 px-4">
-                    <Skeleton className="w-4 h-4 rounded-full" />
+                    <Skeleton className="w-4 h-4 rounded-md" />
                     <Skeleton className="w-32 h-3 rounded-md" />
                 </CardHeader>
 
@@ -37,7 +37,7 @@ export function MisspellingsCard() {
                             >
                                 {/* Incorrect Side Skeleton */}
                                 <div className="flex items-center gap-2 w-1/2">
-                                    <Skeleton className="w-3 h-3 rounded-full shrink-0" />
+                                    <Skeleton className="w-3 h-3 rounded-md shrink-0" />
                                     <Skeleton className="w-24 h-3 rounded-md" />
                                 </div>
 
@@ -49,7 +49,7 @@ export function MisspellingsCard() {
                                 {/* Correct Side Skeleton */}
                                 <div className="flex items-center gap-2 w-1/2 justify-end">
                                     <Skeleton className="w-24 h-3 rounded-md" />
-                                    <Skeleton className="w-3 h-3 rounded-full shrink-0" />
+                                    <Skeleton className="w-3 h-3 rounded-md shrink-0" />
                                 </div>
                             </div>
                         ))}

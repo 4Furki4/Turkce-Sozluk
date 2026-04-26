@@ -78,7 +78,7 @@ export function CustomMultiSelect({
                             onClear();
                         }}
                         onPointerDown={(e) => e.stopPropagation()}
-                        className="p-1 hover:bg-default-100 rounded-full transition-colors cursor-pointer"
+                        className="p-1 hover:bg-default-100 rounded-md transition-colors cursor-pointer"
                     >
                         <X size={14} className="text-default-500" />
                     </button>

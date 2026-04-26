@@ -9,10 +9,10 @@ export default function WordLoadingSkeleton() {
       >
         <header className="w-full flex flex-col items-start">
           <div className="flex w-full items-center gap-4 mb-4">
-            <div className="bg-foreground/20 w-10 h-10 rounded-full"></div>
-            <div className="bg-foreground/20 w-10 h-10 rounded-full ml-auto"></div>
-            <div className="bg-foreground/20 w-10 h-10 rounded-full"></div>
-            <div className="bg-foreground/20 w-10 h-10 rounded-full"></div>
+            <div className="bg-foreground/20 w-10 h-10 rounded-md"></div>
+            <div className="bg-foreground/20 w-10 h-10 rounded-md ml-auto"></div>
+            <div className="bg-foreground/20 w-10 h-10 rounded-md"></div>
+            <div className="bg-foreground/20 w-10 h-10 rounded-md"></div>
           </div>
 
           <div className="w-full flex items-center justify-between mb-4">

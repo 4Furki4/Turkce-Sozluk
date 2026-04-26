@@ -39,7 +39,7 @@ export function FeedbackTableSkeleton({ rowCount = 10 }: FeedbackTableSkeletonPr
             </TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
-                <Skeleton className="flex rounded-full w-8 h-8" />
+                <Skeleton className="flex rounded-md w-8 h-8" />
                 <Skeleton className="h-4 w-20 rounded-md" />
               </div>
             </TableCell>

@@ -144,20 +144,20 @@ export function CustomAudioPlayer({ src, className }: CustomAudioPlayerProps) {
                     value={volume}
                     onChange={handleVolumeChange}
                     // Custom styling for the range input
-                    className="h-1.5 w-10 sm:w-20 cursor-pointer appearance-none rounded-full
+                    className="h-1.5 w-10 sm:w-20 cursor-pointer appearance-none rounded-md
                     bg-linear-to-r
                     from-primary/10
                     to-primary/100
                     [&::-webkit-slider-thumb]:h-3.5
                     [&::-webkit-slider-thumb]:w-3.5
                     [&::-webkit-slider-thumb]:appearance-none
-                    [&::-webkit-slider-thumb]:rounded-full
+                    [&::-webkit-slider-thumb]:rounded-md
                     [&::-webkit-slider-thumb]:bg-primary
                     [&::-webkit-slider-container]:appearance-none
                     [&::-webkit-slider-runnable-track]:appearance-none
                     [&::-moz-range-thumb]:h-3.5
                     [&::-moz-range-thumb]:w-3.5
-                    [&::-moz-range-thumb]:rounded-full
+                    [&::-moz-range-thumb]:rounded-md
                     [&::-moz-range-thumb]:border-none
                     [&::-moz-range-thumb]:bg-primary
                     [&::-moz-range-progress]:bg-primary/80

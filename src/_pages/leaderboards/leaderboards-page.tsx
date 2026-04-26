@@ -208,7 +208,7 @@ export default function LeaderboardsPage({ session, locale }: LeaderboardsPagePr
                                         <span className="font-medium truncate flex items-center">
                                             {entry.userName || t("anonymous")}
                                             {entry.userId === session?.user?.id && (
-                                                <Chip size="sm" color="primary" variant="flat" className="ml-2">
+                                                <Chip radius="md" size="sm" color="primary" variant="flat" className="ml-2">
                                                     {t("you")}
                                                 </Chip>
                                             )}

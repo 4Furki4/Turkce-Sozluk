@@ -19,7 +19,7 @@ export function FeedbackSkeleton({ count = 3 }: FeedbackSkeletonProps) {
           <CardHeader className="flex flex-col sm:flex-row gap-3 items-start">
             <div className="flex gap-2 md:gap-4">
               {/* Avatar skeleton */}
-              <Skeleton className="flex rounded-full w-10 h-10" />
+              <Skeleton className="flex rounded-md w-10 h-10" />
               <div className="flex flex-col gap-2">
                 {/* User name skeleton */}
                 <Skeleton className="h-3 w-20 rounded-md" />

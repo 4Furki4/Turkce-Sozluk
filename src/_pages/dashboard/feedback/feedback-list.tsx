@@ -145,13 +145,13 @@ export function FeedbackList() {
                 return feedbackItem.title;
             case "type":
                 return (
-                    <Chip size="sm" variant="flat">
+                    <Chip radius="md" size="sm" variant="flat">
                         {t(`types.${feedbackItem.type}`)}
                     </Chip>
                 );
             case "status":
                 return (
-                    <Chip color={statusColorMap[feedbackItem.status]} size="sm" variant="flat">
+                    <Chip radius="md" color={statusColorMap[feedbackItem.status]} size="sm" variant="flat">
                         {t(`statuses.${feedbackItem.status}`)}
                     </Chip>
                 );

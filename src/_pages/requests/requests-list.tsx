@@ -145,14 +145,14 @@ export default function RequestsList() {
         return entityTypeLabels[request.entityType] || request.entityType;
       case "action":
         return (
-          <Chip color={actionColors[request.action]} variant="flat">
+          <Chip radius="md" color={actionColors[request.action]} variant="flat">
             {actionLabels[request.action] || request.action}
           </Chip>
         );
       case "status":
         return (
           <div className="flex items-center gap-2">
-            <Chip color={statusColors[request.status]} variant="flat">
+            <Chip radius="md" color={statusColors[request.status]} variant="flat">
               {statusLabels[request.status] || request.status}
             </Chip>
             {request.status !== "pending" && (

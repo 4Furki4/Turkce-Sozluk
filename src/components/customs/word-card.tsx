@@ -140,7 +140,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
 
           {/* View count indicator - elegant chip style */}
           {word_data.view_count !== undefined && word_data.view_count > 0 && (
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-primary/10 text-primary text-xs font-medium">
               <Eye className="w-3.5 h-3.5" />
               <span>{formatViewCount(word_data.view_count)} {t("views")}</span>
             </div>
@@ -150,7 +150,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
           {word_data.attributes && word_data.attributes.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2 font-mono">
               {word_data.attributes.map((attribute) => (
-                <Chip
+                <Chip radius="md"
                   key={attribute.attribute_id}
                   size="sm"
                   variant="solid"

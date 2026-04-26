@@ -178,7 +178,7 @@ export default function VerbBuilder() {
                 <CardBody className="gap-6 p-6 sm:p-8">
                     <div className="flex flex-col items-center gap-4 text-center">
                         <Badge color="primary" content={t("badgeLive")} placement="top-right" showOutline={false}>
-                            <div className="rounded-full border border-primary/20 bg-primary/10 p-4 text-primary">
+                            <div className="rounded-md border border-primary/20 bg-primary/10 p-4 text-primary">
                                 <WandSparkles className="h-6 w-6" />
                             </div>
                         </Badge>
@@ -211,7 +211,7 @@ export default function VerbBuilder() {
                     <div className="flex flex-wrap justify-center gap-2">
                         {result.parts.length > 0 ? (
                             result.parts.map((part) => (
-                                <Chip
+                                <Chip radius="md"
                                     key={`${part.category}-${part.id}`}
                                     color={getChipColor(part.category)}
                                     variant={part.category === "root" ? "solid" : "flat"}
@@ -224,7 +224,7 @@ export default function VerbBuilder() {
                                 </Chip>
                             ))
                         ) : (
-                            <Chip color="default" variant="flat">
+                            <Chip radius="md" color="default" variant="flat">
                                 {t("emptyState")}
                             </Chip>
                         )}
@@ -236,7 +236,7 @@ export default function VerbBuilder() {
                 <Card className="border border-primary/10 bg-background/80 shadow-md">
                     <CardHeader className="flex items-center gap-3 px-6 pb-0 pt-6">
                         <Badge color="primary" content="1" shape="circle" showOutline={false}>
-                            <div className="rounded-full bg-primary/10 p-3 text-primary">
+                            <div className="rounded-md bg-primary/10 p-3 text-primary">
                                 <Sparkles className="h-5 w-5" />
                             </div>
                         </Badge>
@@ -273,7 +273,7 @@ export default function VerbBuilder() {
                                     </p>
                                 </div>
                                 {exactDictionaryMatch ? (
-                                    <Chip color="success" variant="flat">
+                                    <Chip radius="md" color="success" variant="flat">
                                         {t("dictionary.connected", { word: exactDictionaryMatch.name })}
                                     </Chip>
                                 ) : null}
@@ -281,15 +281,15 @@ export default function VerbBuilder() {
 
                             <div className="mt-4 flex flex-wrap gap-2">
                                 {normalizedRoot.length < 2 ? (
-                                    <Chip color="default" variant="flat">
+                                    <Chip radius="md" color="default" variant="flat">
                                         {t("dictionary.typeMore")}
                                     </Chip>
                                 ) : hasRootError ? (
-                                    <Chip color="danger" variant="flat">
+                                    <Chip radius="md" color="danger" variant="flat">
                                         {validationMessage}
                                     </Chip>
                                 ) : isVerbSuggestionsLoading ? (
-                                    <Chip color="secondary" variant="flat">
+                                    <Chip radius="md" color="secondary" variant="flat">
                                         {t("dictionary.loading")}
                                     </Chip>
                                 ) : verbSuggestions.length > 0 ? (
@@ -319,7 +319,7 @@ export default function VerbBuilder() {
                                         );
                                     })
                                 ) : (
-                                    <Chip color="warning" variant="flat">
+                                    <Chip radius="md" color="warning" variant="flat">
                                         {t("dictionary.empty")}
                                     </Chip>
                                 )}
@@ -328,12 +328,12 @@ export default function VerbBuilder() {
 
                         <div className="flex flex-wrap gap-2">
                             {selection.negation && (
-                                <Chip color="warning" variant="flat" onClose={() => updateSelection({ negation: null })}>
+                                <Chip radius="md" color="warning" variant="flat" onClose={() => updateSelection({ negation: null })}>
                                     {t("active.negation")}
                                 </Chip>
                             )}
                             {activeTense && (
-                                <Chip
+                                <Chip radius="md"
                                     color="primary"
                                     variant="flat"
                                     onClose={() => updateSelection({ tense: null, person: null, question: false })}
@@ -342,17 +342,17 @@ export default function VerbBuilder() {
                                 </Chip>
                             )}
                             {selection.person && (
-                                <Chip color="success" variant="flat" onClose={() => updateSelection({ person: null })}>
+                                <Chip radius="md" color="success" variant="flat" onClose={() => updateSelection({ person: null })}>
                                     {optionLabels[selection.person]}
                                 </Chip>
                             )}
                             {selection.question && (
-                                <Chip color="secondary" variant="flat" onClose={() => updateSelection({ question: false })}>
+                                <Chip radius="md" color="secondary" variant="flat" onClose={() => updateSelection({ question: false })}>
                                     {t("active.question")}
                                 </Chip>
                             )}
                             {!selection.negation && !selection.tense && !selection.person && !selection.question && (
-                                <Chip color="default" variant="flat">
+                                <Chip radius="md" color="default" variant="flat">
                                     {t("active.none")}
                                 </Chip>
                             )}
@@ -366,7 +366,7 @@ export default function VerbBuilder() {
                                 {hasRootError ? t("nextSteps.invalidRoot") : nextStepLabel}
                             </p>
                             {activeTense && (
-                                <Chip className="mt-3" color="primary" variant="flat">
+                                <Chip radius="md" className="mt-3" color="primary" variant="flat">
                                     {t("personEndings.label", {
                                         set:
                                             personEndingType === "type2"
@@ -380,11 +380,11 @@ export default function VerbBuilder() {
                         </div>
 
                         <div className="flex flex-wrap gap-2">
-                            <Chip color="danger" variant="flat">{t("phonology.softening")}</Chip>
-                            <Chip color="warning" variant="flat">{t("phonology.hardening")}</Chip>
-                            <Chip color="success" variant="flat">{t("phonology.twoWay")}</Chip>
-                            <Chip color="secondary" variant="flat">{t("phonology.fourWay")}</Chip>
-                            <Chip color="default" variant="flat">{t("phonology.buffer")}</Chip>
+                            <Chip radius="md" color="danger" variant="flat">{t("phonology.softening")}</Chip>
+                            <Chip radius="md" color="warning" variant="flat">{t("phonology.hardening")}</Chip>
+                            <Chip radius="md" color="success" variant="flat">{t("phonology.twoWay")}</Chip>
+                            <Chip radius="md" color="secondary" variant="flat">{t("phonology.fourWay")}</Chip>
+                            <Chip radius="md" color="default" variant="flat">{t("phonology.buffer")}</Chip>
                         </div>
 
                         <Button
@@ -401,7 +401,7 @@ export default function VerbBuilder() {
                 <Card className="border border-primary/10 bg-background/80 shadow-md">
                     <CardHeader className="flex items-center gap-3 px-6 pb-0 pt-6">
                         <Badge color="secondary" content="2" shape="circle" showOutline={false}>
-                            <div className="rounded-full bg-secondary/10 p-3 text-secondary">
+                            <div className="rounded-md bg-secondary/10 p-3 text-secondary">
                                 <Clock3 className="h-5 w-5" />
                             </div>
                         </Badge>
@@ -596,7 +596,7 @@ function OptionButton({
             <div className="flex w-full flex-col items-start gap-2">
                 <div className="flex w-full items-center justify-between gap-3">
                     <span className="font-semibold">{title}</span>
-                    <Chip size="sm" variant={selected ? "solid" : "flat"}>
+                    <Chip radius="md" size="sm" variant={selected ? "solid" : "flat"}>
                         {detail}
                     </Chip>
                 </div>

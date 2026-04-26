@@ -281,7 +281,7 @@ export default function FlashcardGame({ session, locale }: FlashcardGameProps) {
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-bold">{t("title")}</h1>
-                <Chip color="primary" variant="flat">
+                <Chip radius="md" color="primary" variant="flat">
                     {t("progress", { current: currentIndex + 1, total: words.length })}
                 </Chip>
             </div>
@@ -334,7 +334,7 @@ export default function FlashcardGame({ session, locale }: FlashcardGameProps) {
                                                 {t("meaning")}
                                             </span>
                                             {currentWord.partOfSpeech && (
-                                                <Chip size="sm" variant="flat" className="mb-4">
+                                                <Chip radius="md" size="sm" variant="flat" className="mb-4">
                                                     {currentWord.partOfSpeech}
                                                 </Chip>
                                             )}

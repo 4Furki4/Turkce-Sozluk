@@ -68,7 +68,7 @@ export default function SearchHistory({ userId }: SearchHistoryProps) {
         </div>
 
         <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-zinc-800 rounded-md bg-zinc-900/20">
-          <div className="w-16 h-16 bg-zinc-800/50 rounded-full flex items-center justify-center mb-4">
+          <div className="w-16 h-16 bg-zinc-800/50 rounded-md flex items-center justify-center mb-4">
             <Clock className="w-8 h-8 text-zinc-500" />
           </div>
           <h3 className="text-lg font-medium text-foreground mb-2">{t('emptyHistory')}</h3>

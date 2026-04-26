@@ -53,7 +53,7 @@ export function ForeignTermSuggestionVote({
                 color={userVote === 1 ? "success" : "default"}
                 onPress={() => handleVote("up")}
                 isDisabled={voteMutation.isPending}
-                className={cn("rounded-full", {
+                className={cn("rounded-md", {
                     "bg-success/20 text-success": userVote === 1,
                 })}
             >
@@ -75,7 +75,7 @@ export function ForeignTermSuggestionVote({
                 color={userVote === -1 ? "danger" : "default"}
                 onPress={() => handleVote("down")}
                 isDisabled={voteMutation.isPending}
-                className={cn("rounded-full", {
+                className={cn("rounded-md", {
                     "bg-danger/20 text-danger": userVote === -1,
                 })}
             >

@@ -137,7 +137,7 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
   return (
     <CustomCard className="h-full min-h-[300px] shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
       {/* Background Decoration */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors duration-500" />
+      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-md blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors duration-500" />
 
       <CardHeader className="flex flex-row justify-between items-start pt-6 px-8 relative z-10">
         <div className="space-y-1">
@@ -159,7 +159,7 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
             {/* Only show phonetic if it exists */}
             {wordData.phonetic && <span>/{wordData.phonetic}/</span>}
             {/* Divider */}
-            {wordData.phonetic && wordData.origin && <span className="w-1 h-1 bg-zinc-700 rounded-full" />}
+            {wordData.phonetic && wordData.origin && <span className="w-1 h-1 bg-zinc-700 rounded-md" />}
             {wordData.origin && <span>{wordData.origin}</span>}
           </div>
         </div>
@@ -212,7 +212,7 @@ function BentoCommonMistake() {
           href="/sik-yapilan-yanlislar"
           className="flex items-center gap-2 text-xs font-mono text-zinc-500 uppercase tracking-widest hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
         >
-          <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+          <div className="w-2 h-2 rounded-md bg-orange-500 animate-pulse" />
           {t("HomeExtras.misspellingsTitle")}
         </Link>
       </CardHeader>

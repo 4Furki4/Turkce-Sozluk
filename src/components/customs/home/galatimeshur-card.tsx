@@ -24,7 +24,7 @@ export function GalatiMeshurCard() {
             <CustomCard className="h-full border-default-200 dark:border-default-100">
                 <CardHeader className="flex flex-col items-start pb-0 pt-4 px-4 gap-2">
                     <div className="flex items-center gap-2 mb-1 w-full">
-                        <Skeleton className="w-4 h-4 rounded-full" />
+                        <Skeleton className="w-4 h-4 rounded-md" />
                         <Skeleton className="w-24 h-3 rounded-md" />
                     </div>
                     <Skeleton className="w-3/4 h-8 rounded-md" />

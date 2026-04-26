@@ -216,13 +216,13 @@ export default function AdminRequestDetail({ requestId }: AdminRequestDetailProp
                   : t("details.unknownDate")}
               </div>
               <div className="flex flex-wrap items-center gap-3">
-                <Chip
+                <Chip radius="md"
                   color={statusColors[request.status]}
                   radius="md"
                 >
                   {statusLabels[request.status]}
                 </Chip>
-                <Chip
+                <Chip radius="md"
                   color={actionColors[request.action]}
                   variant="flat"
                   radius="md"

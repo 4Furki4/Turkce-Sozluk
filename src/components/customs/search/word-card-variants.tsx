@@ -167,7 +167,7 @@ function WordCardVariantToggle({
               aria-checked={isSelected}
               onClick={() => onVariantChange(value)}
               className={cn(
-                "relative inline-flex min-h-7 items-center justify-center gap-2 rounded-md px-3 text-sm font-medium transition-all duration-200 sm:min-w-36",
+                "relative inline-flex min-h-7 items-center justify-center gap-2 rounded-sm px-3 text-sm font-medium transition-all duration-200 sm:min-w-36",
                 isSelected
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
@@ -580,7 +580,7 @@ function WordMetadata({
       {hasAttributes ? (
         <div className="flex flex-wrap gap-2">
           {word_data.attributes?.map((attribute) => (
-            <Chip
+            <Chip radius="md"
               key={attribute.attribute_id}
               size="sm"
               variant="flat"
@@ -684,7 +684,7 @@ function CompactPronunciationPopover({
           <div className="mb-3 flex items-center justify-between gap-3">
             <p className="text-sm font-semibold text-foreground">{tWord("Pronunciations")}</p>
             {pronunciationCount > 0 ? (
-              <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+              <span className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                 {pronunciationCount}
               </span>
             ) : null}
