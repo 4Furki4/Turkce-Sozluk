@@ -67,7 +67,7 @@ export default function SearchHistory({ userId }: SearchHistoryProps) {
           <h1 className="text-3xl font-bold font-serif text-foreground">{navT('SearchHistory')}</h1>
         </div>
 
-        <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-zinc-800 rounded-lg bg-zinc-900/20">
+        <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-zinc-800 rounded-sm bg-zinc-900/20">
           <div className="w-16 h-16 bg-zinc-800/50 rounded-full flex items-center justify-center mb-4">
             <Clock className="w-8 h-8 text-zinc-500" />
           </div>
@@ -132,7 +132,7 @@ export default function SearchHistory({ userId }: SearchHistoryProps) {
               }
             }}
             key={`${item.wordId}-${index}`}
-            className="group relative flex flex-col justify-between p-4 bg-background/60 border border-border rounded-xl hover:bg-background/90 hover:border-border transition-all duration-300"
+            className="group relative flex flex-col justify-between p-4 bg-background/60 border border-border rounded-sm hover:bg-background/90 hover:border-border transition-all duration-300"
           >
             <div className="flex items-start justify-between mb-3">
               <p

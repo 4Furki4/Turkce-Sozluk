@@ -178,7 +178,7 @@ export function RequestDetails({ requestId }: { requestId: number }) {
             {request.reason && (
               <div>
                 <p className="text-sm text-gray-500">Reason</p>
-                <p className="whitespace-pre-wrap rounded-md bg-gray-100 p-2 dark:bg-gray-800">
+                <p className="whitespace-pre-wrap rounded-sm bg-gray-100 p-2 dark:bg-gray-800">
                   {request.reason}
                 </p>
               </div>
@@ -210,7 +210,7 @@ export function RequestDetails({ requestId }: { requestId: number }) {
             {request.action === "update" && entityData && (
               <div className="mb-4">
                 <p className="mb-2 text-sm font-medium text-gray-500">Current Data:</p>
-                <pre className="max-h-40 overflow-auto rounded-md bg-gray-100 p-3 text-sm dark:bg-gray-800">
+                <pre className="max-h-40 overflow-auto rounded-sm bg-gray-100 p-3 text-sm dark:bg-gray-800">
                   {formatData(entityData as Record<string, unknown>)}
                 </pre>
               </div>
@@ -221,7 +221,7 @@ export function RequestDetails({ requestId }: { requestId: number }) {
                 <p className="mb-2 text-sm font-medium text-gray-500">
                   {request.action === "update" ? "New Data:" : "Data:"}
                 </p>
-                <pre className="max-h-60 overflow-auto rounded-md bg-gray-100 p-3 text-sm dark:bg-gray-800">
+                <pre className="max-h-60 overflow-auto rounded-sm bg-gray-100 p-3 text-sm dark:bg-gray-800">
                   {formatData(request.newData)}
                 </pre>
               </div>
@@ -230,7 +230,7 @@ export function RequestDetails({ requestId }: { requestId: number }) {
             {!request.newData && request.action === "delete" && entityData && (
               <div>
                 <p className="mb-2 text-sm font-medium text-gray-500">Data to Delete:</p>
-                <pre className="max-h-60 overflow-auto rounded-md bg-gray-100 p-3 text-sm dark:bg-gray-800">
+                <pre className="max-h-60 overflow-auto rounded-sm bg-gray-100 p-3 text-sm dark:bg-gray-800">
                   {formatData(entityData as Record<string, unknown>)}
                 </pre>
               </div>

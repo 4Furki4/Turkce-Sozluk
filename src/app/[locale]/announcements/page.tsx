@@ -72,11 +72,10 @@ export default async function AnnouncementsPage({
                   key={targetPage}
                   href={`/${locale}/announcements?page=${targetPage}`}
                   aria-current={isCurrentPage ? "page" : undefined}
-                  className={`inline-flex min-w-10 items-center justify-center rounded-md border px-3 py-2 text-sm transition-colors ${
-                    isCurrentPage
+                  className={`inline-flex min-w-10 items-center justify-center rounded-sm border px-3 py-2 text-sm transition-colors ${isCurrentPage
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-border bg-background/40 hover:bg-background/60"
-                  }`}
+                    }`}
                 >
                   {targetPage}
                 </a>

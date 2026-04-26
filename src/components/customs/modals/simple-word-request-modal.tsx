@@ -98,7 +98,7 @@ export default function SimpleWordRequestModal({
               </p>
             </div>
 
-            <div className="bg-primary/10 rounded-lg p-4">
+            <div className="bg-primary/10 rounded-sm p-4">
               <p className="text-sm text-default-700 mb-3">
                 {t("whatHappensNext")}
               </p>

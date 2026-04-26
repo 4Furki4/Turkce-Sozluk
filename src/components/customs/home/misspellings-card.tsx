@@ -24,7 +24,7 @@ export function MisspellingsCard() {
             <CustomCard className="h-full border-default-200 dark:border-default-100">
                 <CardHeader className="flex items-center gap-2 pb-2 pt-4 px-4">
                     <Skeleton className="w-4 h-4 rounded-full" />
-                    <Skeleton className="w-32 h-3 rounded-lg" />
+                    <Skeleton className="w-32 h-3 rounded-sm" />
                 </CardHeader>
 
                 <CardBody className="py-2 px-0">
@@ -38,17 +38,17 @@ export function MisspellingsCard() {
                                 {/* Incorrect Side Skeleton */}
                                 <div className="flex items-center gap-2 w-1/2">
                                     <Skeleton className="w-3 h-3 rounded-full shrink-0" />
-                                    <Skeleton className="w-24 h-3 rounded-lg" />
+                                    <Skeleton className="w-24 h-3 rounded-sm" />
                                 </div>
 
                                 {/* Arrow Skeleton */}
                                 <div className="px-2">
-                                    <Skeleton className="w-4 h-3 rounded-lg" />
+                                    <Skeleton className="w-4 h-3 rounded-sm" />
                                 </div>
 
                                 {/* Correct Side Skeleton */}
                                 <div className="flex items-center gap-2 w-1/2 justify-end">
-                                    <Skeleton className="w-24 h-3 rounded-lg" />
+                                    <Skeleton className="w-24 h-3 rounded-sm" />
                                     <Skeleton className="w-3 h-3 rounded-full shrink-0" />
                                 </div>
                             </div>

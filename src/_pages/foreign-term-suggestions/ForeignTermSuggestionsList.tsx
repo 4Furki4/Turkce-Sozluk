@@ -96,8 +96,8 @@ export function ForeignTermSuggestionsList({ session }: ForeignTermSuggestionsLi
                 {isLoading ? (
                     // Skeleton loading
                     Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="h-64 rounded-lg">
-                            <Skeleton className="h-full w-full rounded-lg" />
+                        <div key={i} className="h-64 rounded-sm">
+                            <Skeleton className="h-full w-full rounded-sm" />
                         </div>
                     ))
                 ) : allItems.length === 0 ? (

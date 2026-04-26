@@ -154,7 +154,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                   key={attribute.attribute_id}
                   size="sm"
                   variant="solid"
-                  className="flex rounded-lg dark:text-primary-50 bg-primary-100 dark:bg-primary/50"
+                  className="flex rounded-sm dark:text-primary-50 bg-primary-100 dark:bg-primary/50"
                 >
                   {attribute.attribute}
                 </Chip>
@@ -227,14 +227,14 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                           )}
                         </div>
                         {meaning.imageUrl && (
-                          <div className="md:w-1/3 h-auto rounded-md overflow-hidden">
+                          <div className="md:w-1/3 h-auto rounded-sm overflow-hidden">
 
                             <Image
                               src={meaning.imageUrl}
                               alt={meaning.meaning}
                               width={300}
                               height={200}
-                              className="w-full h-auto object-cover rounded-md"
+                              className="w-full h-auto object-cover rounded-sm"
                             />
                           </div>
                         )}
@@ -247,7 +247,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                 </ul>
               ) : (
                 // Handle navigation-only words (words with no meanings but with related words)
-                <div className="p-4 border border-primary/20 rounded-md bg-primary/5">
+                <div className="p-4 border border-primary/20 rounded-sm bg-primary/5">
                   {word_data.relatedWords && word_data.relatedWords.length > 0 ? (
                     <div className="space-y-4">
                       <p className="text-fs-1">{t("NavigationWord")}</p>
@@ -259,7 +259,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                               pathname: '/search/[word]',
                               params: { word: related.related_word_name }
                             }}
-                            className="text-primary px-3 py-1 bg-primary/10 hover:bg-primary/20 rounded-md transition-colors"
+                            className="text-primary px-3 py-1 bg-primary/10 hover:bg-primary/20 rounded-sm transition-colors"
                             prefetch={false}
                           >
                             {related.related_word_name}

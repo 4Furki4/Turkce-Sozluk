@@ -51,7 +51,7 @@ const DataDisplay: React.FC<DataDisplayProps> = ({ data, title, isNested = false
 
   const containerClasses = isNested
     ? "mt-2"
-    : "border rounded-lg";
+    : "border rounded-sm";
 
   return (
     <div className={containerClasses}>

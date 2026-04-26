@@ -32,7 +32,7 @@ export default function WordLoadingSkeleton() {
             </div>
 
             <div className="flex flex-wrap gap-2 mt-2">
-              <div className="bg-primary/30 h-6 w-16 rounded-lg"></div>
+              <div className="bg-primary/30 h-6 w-16 rounded-sm"></div>
             </div>
           </div>
         </header>
@@ -70,7 +70,7 @@ export default function WordLoadingSkeleton() {
                   </div>
                 </div>
 
-                <div className="md:w-1/3 bg-foreground/20 h-32 rounded-md"></div>
+                <div className="md:w-1/3 bg-foreground/20 h-32 rounded-sm"></div>
               </div>
             </div>
 

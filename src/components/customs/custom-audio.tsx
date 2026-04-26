@@ -98,7 +98,7 @@ export function CustomAudioPlayer({ src, className }: CustomAudioPlayerProps) {
     return (
         <div
             className={cn(
-                'flex w-full items-center gap-2 rounded-lg bg-background/10',
+                'flex w-full items-center gap-2 rounded-sm bg-background/10',
                 className,
             )}
         >

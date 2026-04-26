@@ -87,7 +87,7 @@ export function ForeignTermSuggestionCard({
                         <span className="text-muted-foreground text-sm">{t("meaning")}:</span>
                         <p className="text-foreground mt-1">{suggestion.foreignMeaning}</p>
                     </div>
-                    <div className="flex items-center gap-2 bg-primary/10 p-3 rounded-lg">
+                    <div className="flex items-center gap-2 bg-primary/10 p-3 rounded-sm">
                         <span className="text-muted-foreground text-sm">{t("suggestedWord")}:</span>
                         {suggestion.isNewWord ? (
                             // New word: show plain text with badge

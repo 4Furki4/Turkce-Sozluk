@@ -116,22 +116,22 @@ export default async function AnnouncementDetailPage({
         <div className="mb-6">
           <Link
             href={{ pathname: "/announcements" }}
-            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            className="inline-flex items-center gap-2 rounded-sm bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
           >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-              {t("backToAnnouncements")}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            {t("backToAnnouncements")}
           </Link>
         </div>
 
@@ -151,7 +151,7 @@ export default async function AnnouncementDetailPage({
                 src={announcement.imageUrl}
                 alt={announcement.title || ""}
                 fill
-                className="object-cover rounded-md"
+                className="object-cover rounded-sm"
               />
             </div>
           )}
@@ -171,7 +171,7 @@ export default async function AnnouncementDetailPage({
                   href={announcement.actionUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center rounded-md bg-primary px-5 py-3 text-sm font-medium text-primary-foreground"
+                  className="inline-flex items-center rounded-sm bg-primary px-5 py-3 text-sm font-medium text-primary-foreground"
                 >
                   {announcement.actionTextKey
                     ? t(announcement.actionTextKey)

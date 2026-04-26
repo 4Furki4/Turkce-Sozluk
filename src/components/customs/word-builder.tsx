@@ -127,7 +127,7 @@ function renderDiff(segments: DiffSegment[], mode: "before" | "after") {
     return (
       <span
         key={`${mode}-${index}-${content}`}
-        className={segment.changed ? "rounded-md bg-primary/15 px-1.5 py-0.5 text-primary" : undefined}
+        className={segment.changed ? "rounded-sm bg-primary/15 px-1.5 py-0.5 text-primary" : undefined}
       >
         {content}
       </span>
@@ -990,7 +990,7 @@ export default function WordBuilder() {
         key={action.id}
         type="button"
         onClick={() => applyAction(action.id)}
-        className="group rounded-lg border border-border/70 bg-background/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/6"
+        className="group rounded-sm border border-border/70 bg-background/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/6"
       >
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -1110,7 +1110,7 @@ export default function WordBuilder() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-lg border border-primary/15 bg-background/70 p-4">
+              <div className="rounded-sm border border-primary/15 bg-background/70 p-4">
                 <div className="mb-2 flex items-center gap-2 text-primary">
                   <Languages className="h-4 w-4" />
                   <span className="text-xs font-semibold uppercase tracking-[0.18em]">
@@ -1119,7 +1119,7 @@ export default function WordBuilder() {
                 </div>
                 <p className="text-sm text-foreground/75">{t("featureHarmonyBody")}</p>
               </div>
-              <div className="rounded-lg border border-primary/15 bg-background/70 p-4">
+              <div className="rounded-sm border border-primary/15 bg-background/70 p-4">
                 <div className="mb-2 flex items-center gap-2 text-primary">
                   <Orbit className="h-4 w-4" />
                   <span className="text-xs font-semibold uppercase tracking-[0.18em]">
@@ -1128,7 +1128,7 @@ export default function WordBuilder() {
                 </div>
                 <p className="text-sm text-foreground/75">{t("featurePhonologyBody")}</p>
               </div>
-              <div className="rounded-lg border border-primary/15 bg-background/70 p-4">
+              <div className="rounded-sm border border-primary/15 bg-background/70 p-4">
                 <div className="mb-2 flex items-center gap-2 text-primary">
                   <Blocks className="h-4 w-4" />
                   <span className="text-xs font-semibold uppercase tracking-[0.18em]">
@@ -1137,7 +1137,7 @@ export default function WordBuilder() {
                 </div>
                 <p className="text-sm text-foreground/75">{t("featurePosBody")}</p>
               </div>
-              <div className="rounded-lg border border-primary/15 bg-background/70 p-4">
+              <div className="rounded-sm border border-primary/15 bg-background/70 p-4">
                 <div className="mb-2 flex items-center gap-2 text-primary">
                   <Sparkles className="h-4 w-4" />
                   <span className="text-xs font-semibold uppercase tracking-[0.18em]">
@@ -1211,7 +1211,7 @@ export default function WordBuilder() {
             </Autocomplete>
 
             {selectedDictionaryWord ? (
-              <div className="rounded-lg border border-primary/20 bg-primary/8 p-4">
+              <div className="rounded-sm border border-primary/20 bg-primary/8 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <div className="text-sm font-semibold text-foreground">
@@ -1282,7 +1282,7 @@ export default function WordBuilder() {
             )}
 
             {selectedDictionaryWord && dictionaryPosOptions.length > 1 ? (
-              <p className="rounded-lg border border-border/60 bg-background/60 px-4 py-3 text-sm leading-6 text-foreground/65">
+              <p className="rounded-sm border border-border/60 bg-background/60 px-4 py-3 text-sm leading-6 text-foreground/65">
                 {t("dictionaryPosRequired")}
               </p>
             ) : null}
@@ -1318,7 +1318,7 @@ export default function WordBuilder() {
               </Select>
             </div>
 
-            <p className="rounded-lg border border-border/60 bg-background/60 px-4 py-3 text-sm leading-6 text-foreground/65">
+            <p className="rounded-sm border border-border/60 bg-background/60 px-4 py-3 text-sm leading-6 text-foreground/65">
               {t("mutationHint")}
             </p>
 
@@ -1380,7 +1380,7 @@ export default function WordBuilder() {
           </div>
 
           {showInflectionLockNotice ? (
-            <div className="rounded-lg border border-primary/20 bg-primary/8 px-4 py-3 text-sm text-foreground/80">
+            <div className="rounded-sm border border-primary/20 bg-primary/8 px-4 py-3 text-sm text-foreground/80">
               {t("lockedInflection")}
             </div>
           ) : null}
@@ -1393,7 +1393,7 @@ export default function WordBuilder() {
               </span>
             </div>
             <div className="overflow-x-auto pb-1">
-              <div className="flex min-h-16 min-w-max items-center gap-2 rounded-lg border border-dashed border-border/70 bg-background/55 p-3">
+              <div className="flex min-h-16 min-w-max items-center gap-2 rounded-sm border border-dashed border-border/70 bg-background/55 p-3">
                 {builderState.history.length > 0 ? (
                   builderState.history.map((step) => (
                     <Badge
@@ -1528,7 +1528,7 @@ export default function WordBuilder() {
                           ) : null}
 
                           {rareActions.length > 0 ? (
-                            <div className="space-y-3 rounded-lg border border-dashed border-border/60 bg-background/45 p-4">
+                            <div className="space-y-3 rounded-sm border border-dashed border-border/60 bg-background/45 p-4">
                               <div className="flex flex-wrap items-center justify-between gap-3">
                                 <div className="space-y-1">
                                   <div className="text-sm font-medium text-foreground/80">
@@ -1571,7 +1571,7 @@ export default function WordBuilder() {
                   </div>
                 ))
               ) : (
-                <div className="rounded-lg border border-dashed border-border/70 bg-background/55 px-4 py-5 text-sm text-foreground/55">
+                <div className="rounded-sm border border-dashed border-border/70 bg-background/55 px-4 py-5 text-sm text-foreground/55">
                   {t("noAvailableSuffixes")}
                 </div>
               )}
@@ -1603,7 +1603,7 @@ export default function WordBuilder() {
                         type="button"
                         onClick={() => setSelectedStepNumber(step.step)}
                         className={cn(
-                          "w-full rounded-lg border p-4 text-left transition-colors",
+                          "w-full rounded-sm border p-4 text-left transition-colors",
                           selectedHistoryEntry?.step === step.step
                             ? "border-primary/25 bg-primary/8 shadow-[0_12px_25px_-20px_rgba(194,65,12,0.8)]"
                             : "border-border/70 bg-background/60 hover:border-primary/20 hover:bg-background/80",
@@ -1647,7 +1647,7 @@ export default function WordBuilder() {
                   </div>
 
                   {selectedHistoryEntry ? (
-                    <div className="rounded-xl border border-border/70 bg-background/60 p-6 shadow-[0_10px_35px_-28px_rgba(15,23,42,0.9)]">
+                    <div className="rounded-sm border border-border/70 bg-background/60 p-6 shadow-[0_10px_35px_-28px_rgba(15,23,42,0.9)]">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
                           <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">
@@ -1686,7 +1686,7 @@ export default function WordBuilder() {
                       </div>
 
                       <div className="mt-5 grid gap-3 md:grid-cols-2">
-                        <div className="rounded-lg border border-border/70 bg-background/70 p-4">
+                        <div className="rounded-sm border border-border/70 bg-background/70 p-4">
                           <div className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-foreground/45">
                             {t("before")}
                           </div>
@@ -1694,7 +1694,7 @@ export default function WordBuilder() {
                             {renderDiff(selectedHistoryEntry.log.diff.segments, "before")}
                           </div>
                         </div>
-                        <div className="rounded-lg border border-primary/20 bg-primary/8 p-4">
+                        <div className="rounded-sm border border-primary/20 bg-primary/8 p-4">
                           <div className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary/75">
                             {t("after")}
                           </div>
@@ -1730,7 +1730,7 @@ export default function WordBuilder() {
                             <li
                               key={`${selectedHistoryEntry.step}-${event.code}-${index}`}
                               className={cn(
-                                "rounded-lg border border-border/65 px-4 py-3 text-sm leading-6 text-foreground/75",
+                                "rounded-sm border border-border/65 px-4 py-3 text-sm leading-6 text-foreground/75",
                                 index === 0
                                   ? "border-primary/20 bg-primary/8 text-foreground"
                                   : "bg-background/55",
@@ -1743,14 +1743,14 @@ export default function WordBuilder() {
                       </div>
                     </div>
                   ) : (
-                    <div className="rounded-xl border border-dashed border-border/70 bg-background/55 px-5 py-10 text-center text-sm text-foreground/55">
+                    <div className="rounded-sm border border-dashed border-border/70 bg-background/55 px-5 py-10 text-center text-sm text-foreground/55">
                       {t("selectStepHint")}
                     </div>
                   )}
                 </div>
               </div>
             ) : (
-              <div className="rounded-xl border border-dashed border-border/70 bg-background/55 px-5 py-10 text-center text-sm text-foreground/55">
+              <div className="rounded-sm border border-dashed border-border/70 bg-background/55 px-5 py-10 text-center text-sm text-foreground/55">
                 {t("noSteps")}
               </div>
             )}

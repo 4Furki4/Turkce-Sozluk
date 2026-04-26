@@ -259,7 +259,7 @@ export default function SearchContainer({
                 <div className="relative group">
                     {/* Search Glow Effect - Only show if not in custom container (implied by default wrapper) */}
                     {!inputWrapperClassName && (
-                        <div className="absolute -inset-1 bg-gradient-to-r from-primary/15 via-primary/8 to-primary/15 rounded-lg blur-lg opacity-0 group-focus-within:opacity-70 transition-opacity duration-500" />
+                        <div className="absolute -inset-1 bg-gradient-to-r from-primary/15 via-primary/8 to-primary/15 rounded-sm blur-lg opacity-0 group-focus-within:opacity-70 transition-opacity duration-500" />
                     )}
 
                     <Input
@@ -349,11 +349,11 @@ export default function SearchContainer({
 
                     {/* Recommendations Dropdown */}
                     {showRecommendations && (
-                        <div className="absolute z-[999] w-full mt-2 bg-background/95 backdrop-blur-xl border border-zinc-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[400px] overflow-y-auto">
+                        <div className="absolute z-[999] w-full mt-2 bg-background/95 backdrop-blur-xl border border-zinc-800 rounded-sm shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[400px] overflow-y-auto">
                             {(isLoading || (searchMode === "meaning" && isMeaningFetching)) ? (
                                 <div className="p-2">
                                     {Array.from({ length: 3 }).map((_, idx) => (
-                                        <div key={idx} className="h-10 mx-2 my-1 bg-white/5 rounded-lg animate-pulse" />
+                                        <div key={idx} className="h-10 mx-2 my-1 bg-white/5 rounded-sm animate-pulse" />
                                     ))}
                                 </div>
                             ) : searchMode === "meaning" ? (
@@ -412,7 +412,7 @@ export default function SearchContainer({
 
             {/* Search Mode Toggle */}
             <div className="flex justify-center mt-3">
-                <div className="inline-flex items-center rounded-lg bg-background/50 backdrop-blur-md border border-zinc-800 p-0.5 gap-0.5">
+                <div className="inline-flex items-center rounded-sm bg-background/50 backdrop-blur-md border border-zinc-800 p-0.5 gap-0.5">
                     <button
                         type="button"
                         onClick={() => {
@@ -423,7 +423,7 @@ export default function SearchContainer({
                             setSelectedIndex(-1);
                         }}
                         className={cn(
-                            "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200",
+                            "flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-sm font-medium transition-all duration-200",
                             searchMode === "word"
                                 ? "bg-primary/15 text-primary shadow-sm"
                                 : "text-zinc-500 hover:text-zinc-300"
@@ -442,7 +442,7 @@ export default function SearchContainer({
                             setSelectedIndex(-1);
                         }}
                         className={cn(
-                            "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200",
+                            "flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-sm font-medium transition-all duration-200",
                             searchMode === "meaning"
                                 ? "bg-primary/15 text-primary shadow-sm"
                                 : "text-zinc-500 hover:text-zinc-300"
@@ -463,7 +463,7 @@ export default function SearchContainer({
                     {isTrendingLoading ? (
                         <>
                             {Array.from({ length: 4 }).map((_, i) => (
-                                <div key={i} className="h-8 w-24 bg-zinc-800/50 rounded-lg animate-pulse border border-zinc-800/50" />
+                                <div key={i} className="h-8 w-24 bg-zinc-800/50 rounded-sm animate-pulse border border-zinc-800/50" />
                             ))}
                         </>
                     ) : (
@@ -471,7 +471,7 @@ export default function SearchContainer({
                             <button
                                 key={tag.id}
                                 onClick={() => handleRecommendationClick(tag.name)}
-                                className="px-4 py-1.5 rounded-md bg-background shadow-sm border border-border  text-sm cursor-pointer hover:text-primary transition-all duration-200"
+                                className="px-4 py-1.5 rounded-sm bg-background shadow-sm border border-border  text-sm cursor-pointer hover:text-primary transition-all duration-200"
                             >
                                 {tag.name}
                             </button>

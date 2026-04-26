@@ -47,7 +47,7 @@ export default function Announcement({
                             src={announcement.imageUrl}
                             alt={announcement.title || ""}
                             fill
-                            className="object-cover rounded-md"
+                            className="object-cover rounded-sm"
                         />
                     </div>
                 )}

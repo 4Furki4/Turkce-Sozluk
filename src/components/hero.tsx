@@ -95,21 +95,21 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
     return (
       <Card className="h-full min-h-[300px] dark:bg-background/60 bg-background/90 shadow-sm">
         <CardHeader className="flex flex-row justify-between items-start pt-6 px-8 relative z-10">
-          <div className="w-32 h-6 bg-primary/10 rounded-md animate-pulse" />
-          <div className="w-20 h-4 bg-zinc-800/50 rounded-md animate-pulse" />
+          <div className="w-32 h-6 bg-primary/10 rounded-sm animate-pulse" />
+          <div className="w-20 h-4 bg-zinc-800/50 rounded-sm animate-pulse" />
         </CardHeader>
         <CardBody className="px-8 py-4 flex flex-col justify-center gap-6 relative z-10">
           <div className="space-y-4">
-            <div className="w-3/4 h-16 sm:h-20 bg-zinc-800/50 rounded-xl animate-pulse" />
+            <div className="w-3/4 h-16 sm:h-20 bg-zinc-800/50 rounded-sm animate-pulse" />
             <div className="flex gap-2">
-              <div className="w-16 h-4 bg-zinc-800/50 rounded-md animate-pulse" />
-              <div className="w-16 h-4 bg-zinc-800/50 rounded-md animate-pulse" />
+              <div className="w-16 h-4 bg-zinc-800/50 rounded-sm animate-pulse" />
+              <div className="w-16 h-4 bg-zinc-800/50 rounded-sm animate-pulse" />
             </div>
           </div>
           <div className="space-y-3">
-            <div className="w-full h-4 bg-zinc-800/50 rounded-md animate-pulse" />
-            <div className="w-full h-4 bg-zinc-800/50 rounded-md animate-pulse" />
-            <div className="w-2/3 h-4 bg-zinc-800/50 rounded-md animate-pulse" />
+            <div className="w-full h-4 bg-zinc-800/50 rounded-sm animate-pulse" />
+            <div className="w-full h-4 bg-zinc-800/50 rounded-sm animate-pulse" />
+            <div className="w-2/3 h-4 bg-zinc-800/50 rounded-sm animate-pulse" />
           </div>
         </CardBody>
         <CardFooter className="px-8 pb-8 pt-0 relative z-10">
@@ -141,7 +141,7 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
 
       <CardHeader className="flex flex-row justify-between items-start pt-6 px-8 relative z-10">
         <div className="space-y-1">
-          <span className="text-xs font-mono text-primary uppercase tracking-widest bg-primary/10 px-2 py-1 rounded-md">
+          <span className="text-xs font-mono text-primary uppercase tracking-widest bg-primary/10 px-2 py-1 rounded-sm">
             {t("hero.WordOfTheDay.title")}
           </span>
         </div>
@@ -324,7 +324,7 @@ function BentoGalatiMeshur() {
           </div>
         ) : item ? (
           <>
-            <div className="rounded-md border border-amber-500/20 bg-amber-500/5 px-3 py-2 pr-10">
+            <div className="rounded-sm border border-amber-500/20 bg-amber-500/5 px-3 py-2 pr-10">
               <p className="text-lg font-serif font-semibold text-foreground line-clamp-1 mb-2">
                 {item.word}
               </p>
@@ -382,19 +382,19 @@ function BentoFeatures() {
     {
       title: t("hero.offlineFeature.title"),
       description: t("hero.offlineFeature.description"),
-      icon: <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500"><Wifi className="w-6 h-6" /></div>,
+      icon: <div className="w-10 h-10 rounded-sm bg-blue-500/10 flex items-center justify-center text-blue-500"><Wifi className="w-6 h-6" /></div>,
       gradient: "from-blue-500/10 to-transparent"
     },
     {
       title: t("hero.pwaFeature.title"),
       description: t("hero.pwaFeature.description"),
-      icon: <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500"><Download className="w-6 h-6" /></div>,
+      icon: <div className="w-10 h-10 rounded-sm bg-red-500/10 flex items-center justify-center text-red-500"><Download className="w-6 h-6" /></div>,
       gradient: "from-red-500/10 to-transparent"
     },
     {
       title: t("hero.feature1.title"),
       description: t("hero.feature1.description"),
-      icon: <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500"><HeartHandshake className="w-6 h-6" /></div>,
+      icon: <div className="w-10 h-10 rounded-sm bg-green-500/10 flex items-center justify-center text-green-500"><HeartHandshake className="w-6 h-6" /></div>,
       gradient: "from-green-500/10 to-transparent"
     }
   ];

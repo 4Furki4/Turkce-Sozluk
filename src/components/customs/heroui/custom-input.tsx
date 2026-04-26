@@ -11,7 +11,6 @@ import { preferencesState } from '@/src/store/preferences';
 const customInputStyles = tv({
     slots: {
         inputWrapper: [
-            "rounded-sm",
             "border-2",
             "border-primary/40",
             "shadow-xl",
@@ -21,7 +20,7 @@ const customInputStyles = tv({
             "text-base",
             "text-foreground",
             "placeholder:text-muted-foreground",
-        ],
+        ]
     },
     variants: {
         isBlurred: {
@@ -43,6 +42,7 @@ export const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
 
         return (
             <Input
+                radius='sm'
                 ref={ref}
                 color="primary"
                 variant="bordered"

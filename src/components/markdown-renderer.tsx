@@ -43,7 +43,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           {children ? String(children) : ''}
         </code>
       ) : (
-        <code className="block bg-gray-100 dark:bg-gray-800 p-3 rounded-md text-sm overflow-x-auto my-4" {...props}>
+        <code className="block bg-gray-100 dark:bg-gray-800 p-3 rounded-sm text-sm overflow-x-auto my-4" {...props}>
           {children ? String(children) : ''}
         </code>
       );
@@ -51,7 +51,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     pre: ({ node, ...props }) => <pre className="bg-transparent p-0" {...props} />,
     hr: ({ node, ...props }) => <hr className="my-6 border-gray-300 dark:border-gray-700" {...props} />,
     img: ({ node, alt, ...props }) => (
-      <img alt={alt} className="rounded-md max-w-full my-4" {...props} />
+      <img alt={alt} className="rounded-sm max-w-full my-4" {...props} />
     ),
     table: ({ node, ...props }) => (
       <div className="overflow-x-auto my-6">
@@ -68,10 +68,10 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400" {...props} />
     ),
   };
-  
+
   return (
     <div className={cn("prose prose-slate dark:prose-invert max-w-none", className)}>
-      <ReactMarkdown 
+      <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={components}
       >

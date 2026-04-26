@@ -88,7 +88,7 @@ export default function MobileBottomNav({
                                 key={index}
                                 href={item.href as any}
                                 className={cn(
-                                    "flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-200",
+                                    "flex flex-col items-center justify-center p-2 rounded-sm transition-all duration-200",
                                     "text-muted-foreground hover:text-foreground",
                                     item.isActive && "text-primary hover:text-primary"
                                 )}
@@ -110,7 +110,7 @@ export default function MobileBottomNav({
                     {/* Menu Button */}
                     <button
                         onClick={() => setIsSidebarOpen(true)}
-                        className="flex flex-col items-center justify-center p-2 rounded-xl text-muted-foreground hover:text-foreground transition-all duration-200"
+                        className="flex flex-col items-center justify-center p-2 rounded-sm text-muted-foreground hover:text-foreground transition-all duration-200"
                         aria-label={ariaMenu}
                     >
                         <Menu className="w-6 h-6 mb-1 max-[420px]:mb-0" strokeWidth={2} />

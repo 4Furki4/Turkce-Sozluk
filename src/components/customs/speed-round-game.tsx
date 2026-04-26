@@ -81,7 +81,7 @@ function WordReviewItem({
     };
 
     return (
-        <div className={`flex items-start gap-3 p-3 rounded-lg border ${isCorrect ? "border-success/30 bg-success/5" : "border-danger/30 bg-danger/5"
+        <div className={`flex items-start gap-3 p-3 rounded-sm border ${isCorrect ? "border-success/30 bg-success/5" : "border-danger/30 bg-danger/5"
             }`}>
             <div className="flex-shrink-0 mt-0.5">
                 {isCorrect ? (
@@ -421,21 +421,21 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
                             <p className="text-default-500">{t("points")}</p>
 
                             <div className="grid grid-cols-2 gap-4 mt-6">
-                                <div className="p-4 bg-success/10 rounded-lg">
+                                <div className="p-4 bg-success/10 rounded-sm">
                                     <p className="text-sm text-default-500">{t("correct")}</p>
                                     <p className="text-2xl font-bold text-success">
                                         {stats.correctCount}/{results.length}
                                     </p>
                                 </div>
-                                <div className="p-4 bg-primary/10 rounded-lg">
+                                <div className="p-4 bg-primary/10 rounded-sm">
                                     <p className="text-sm text-default-500">{t("accuracy")}</p>
                                     <p className="text-2xl font-bold text-primary">{stats.accuracy}%</p>
                                 </div>
-                                <div className="p-4 bg-warning/10 rounded-lg">
+                                <div className="p-4 bg-warning/10 rounded-sm">
                                     <p className="text-sm text-default-500">{t("maxStreak")}</p>
                                     <p className="text-2xl font-bold text-warning">{maxStreak}🔥</p>
                                 </div>
-                                <div className="p-4 bg-secondary/10 rounded-lg">
+                                <div className="p-4 bg-secondary/10 rounded-sm">
                                     <p className="text-sm text-default-500">{t("avgTime")}</p>
                                     <p className="text-2xl font-bold">{stats.avgTime}s</p>
                                 </div>
@@ -472,7 +472,7 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
                                 <motion.div
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
-                                    className="mt-6 p-4 bg-primary/10 rounded-lg"
+                                    className="mt-6 p-4 bg-primary/10 rounded-sm"
                                 >
                                     <p className="text-sm text-default-500">{t("yourRank")}</p>
                                     <p className="text-3xl font-bold text-primary">#{userRank}</p>
@@ -490,7 +490,7 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
                                         {leaderboardData.leaderboard.slice(0, 5).map((entry) => (
                                             <div
                                                 key={entry.userId}
-                                                className={`flex items-center gap-3 p-2 rounded-lg ${entry.userId === session?.user?.id ? "bg-primary/20" : "bg-default-100"
+                                                className={`flex items-center gap-3 p-2 rounded-sm ${entry.userId === session?.user?.id ? "bg-primary/20" : "bg-default-100"
                                                     }`}
                                             >
                                                 <span className={`w-6 text-center font-bold ${entry.rank === 1 ? "text-warning" :

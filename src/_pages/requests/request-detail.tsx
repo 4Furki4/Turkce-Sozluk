@@ -257,7 +257,7 @@ export default function RequestDetail({ requestId }: RequestDetailProps) {
         <CardBody className="px-6 py-5">
           {/* Resolution Metadata */}
           {!isPending && (
-            <div className="mb-8 rounded-lg border border-default p-4">
+            <div className="mb-8 rounded-sm border border-default p-4">
               <h3 className="mb-2 text-sm uppercase text-default-500">{t("details.resolution")}</h3>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div>
@@ -281,7 +281,7 @@ export default function RequestDetail({ requestId }: RequestDetailProps) {
           )}
           {/* Request Reason */}
           {request.reason && (
-            <div className="mb-8 rounded-lg border border-default p-4">
+            <div className="mb-8 rounded-sm border border-default p-4">
               <h3 className="mb-2 text-sm uppercase text-default-500">{t("details.reason")}</h3>
               <p className="text-foreground">{request.reason}</p>
             </div>

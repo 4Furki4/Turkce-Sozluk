@@ -149,7 +149,7 @@ export default function RelatedWordsList({
         }
       } else {
         // Handle case where the set is empty (e.g., if deselection is possible and no item is selected)
-        setNewRelationTypeForEdit(""); 
+        setNewRelationTypeForEdit("");
       }
     } else if (keys === "all") {
       // This case is typically for "Select All" in multi-select scenarios.
@@ -199,7 +199,7 @@ export default function RelatedWordsList({
                     isDisabled={isUpdateMutationInProgress(relatedItem.id)}
                     className="w-full"
                     classNames={{
-                      trigger: "p-2 border rounded-md text-sm bg-background text-foreground border-border focus:ring-primary focus:border-primary",
+                      trigger: "p-2 border rounded-sm text-sm bg-background text-foreground border-border focus:ring-primary focus:border-primary",
                       popoverContent: "bg-background border-border"
                     }}
                   >
@@ -218,9 +218,9 @@ export default function RelatedWordsList({
                     >
                       {isUpdateMutationInProgress(relatedItem.id) ? (
                         <div className="flex items-center gap-1">
-                          <Spinner size="sm" /> {t("editingButton", { defaultMessage: "Saving..."})}
+                          <Spinner size="sm" /> {t("editingButton", { defaultMessage: "Saving..." })}
                         </div>
-                      ) : t("saveButton", { defaultMessage: "Save"})}
+                      ) : t("saveButton", { defaultMessage: "Save" })}
                     </Button>
                     <Button
                       onPress={handleCancelEdit}
@@ -228,7 +228,7 @@ export default function RelatedWordsList({
                       variant="ghost"
                       size="sm"
                     >
-                      {t("cancelButton", { defaultMessage: "Cancel"})}
+                      {t("cancelButton", { defaultMessage: "Cancel" })}
                     </Button>
                   </div>
                 </div>
@@ -248,7 +248,7 @@ export default function RelatedWordsList({
                       variant="light"
                       size="sm"
                     >
-                      {t("editButton", { defaultMessage: "Edit"})}
+                      {t("editButton", { defaultMessage: "Edit" })}
                     </Button>
                     <Button
                       onPress={() => handleOpenDeleteModal(relatedItem)}
@@ -271,35 +271,35 @@ export default function RelatedWordsList({
         </div>
       </CardBody>
     </Card>
-      {isDeleteModalOpen && relationToDelete && (
-        <Modal isOpen={isDeleteModalOpen} onOpenChange={() => { setIsDeleteModalOpen(false); setRelationToDelete(null); }}>
-          <ModalContent>
-            {(onClose) => (
-              <>
-                <ModalHeader className="flex flex-col gap-1">
-                  {t("deleteModal.title")}
-                </ModalHeader>
-                <ModalBody>
-                  <p>
-                    {t("deleteModal.confirmationText", {
-                      wordName: relationToDelete!.name,
-                      relationType: getRelationTypeDisplay(relationToDelete!.relationType),
-                    })}
-                  </p>
-                </ModalBody>
-                <ModalFooter>
-                  <Button color="default" variant="light" onPress={() => { setIsDeleteModalOpen(false); setRelationToDelete(null); }}>
-                    {t("deleteModal.cancelButton")}
-                  </Button>
-                  <Button color="danger" onPress={confirmRemoveRelation} isLoading={removeRelatedWordMutation.status === 'pending' && removingId === relationToDelete!.id}>
-                    {t("deleteModal.confirmButton")}
-                  </Button>
-                </ModalFooter>
-              </>
-            )}
-          </ModalContent>
-        </Modal>
-      )}
-    </>
+    {isDeleteModalOpen && relationToDelete && (
+      <Modal isOpen={isDeleteModalOpen} onOpenChange={() => { setIsDeleteModalOpen(false); setRelationToDelete(null); }}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                {t("deleteModal.title")}
+              </ModalHeader>
+              <ModalBody>
+                <p>
+                  {t("deleteModal.confirmationText", {
+                    wordName: relationToDelete!.name,
+                    relationType: getRelationTypeDisplay(relationToDelete!.relationType),
+                  })}
+                </p>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="default" variant="light" onPress={() => { setIsDeleteModalOpen(false); setRelationToDelete(null); }}>
+                  {t("deleteModal.cancelButton")}
+                </Button>
+                <Button color="danger" onPress={confirmRemoveRelation} isLoading={removeRelatedWordMutation.status === 'pending' && removingId === relationToDelete!.id}>
+                  {t("deleteModal.confirmButton")}
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    )}
+  </>
   );
 }
