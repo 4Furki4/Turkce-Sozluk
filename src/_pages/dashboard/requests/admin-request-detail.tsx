@@ -218,14 +218,12 @@ export default function AdminRequestDetail({ requestId }: AdminRequestDetailProp
               <div className="flex flex-wrap items-center gap-3">
                 <Chip radius="md"
                   color={statusColors[request.status]}
-                  radius="md"
                 >
                   {statusLabels[request.status]}
                 </Chip>
                 <Chip radius="md"
                   color={actionColors[request.action]}
                   variant="flat"
-                  radius="md"
                   classNames={{
                     base: "px-3 py-1",
                     content: "font-medium"

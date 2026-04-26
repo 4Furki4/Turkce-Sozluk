@@ -127,11 +127,11 @@ function FeedbackCard({ item, session, queryFilters }: { item: FeedbackItem, ses
                 <div className="sm:ml-auto flex flex-col xs:flex-row gap-2">
                     <Chip radius="md"
                         color={statusColorMap[item.feedback.status]}
-                        variant="flat" radius="md" className="text-xs font-semibold uppercase px-2 py-1" size="sm"
+                        variant="flat" className="text-xs font-semibold uppercase px-2 py-1" size="sm"
                     >
                         {tDashboard(`statuses.${item.feedback.status}`)}
                     </Chip>
-                    <Chip radius="md" color={item.feedback.type === "feature" ? "success" : item.feedback.type === "bug" ? "danger" : "warning"} variant="flat" radius="md" className="text-xs font-semibold uppercase px-2 py-1" size="sm">
+                    <Chip radius="md" color={item.feedback.type === "feature" ? "success" : item.feedback.type === "bug" ? "danger" : "warning"} variant="flat" className="text-xs font-semibold uppercase px-2 py-1" size="sm">
                         {t(`types.${item.feedback.type}`)}
                     </Chip>
                 </div>

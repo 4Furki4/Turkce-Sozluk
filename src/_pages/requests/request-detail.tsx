@@ -234,11 +234,10 @@ export default function RequestDetail({ requestId }: RequestDetailProps) {
               <div className="flex flex-wrap items-center gap-3">
                 <Chip radius="md"
                   color={statusColors[request.status]}
-                  radius="md"
                 >
                   {statusLabels[request.status]}
                 </Chip>
-                <Chip radius="md"
+                <Chip
                   color={actionColors[request.action]}
                   variant="flat"
                   radius="md"
