@@ -16,7 +16,7 @@ export default function WordSuffixInput({
             render={({ field }) => (
                 <Input
                     {...field}
-                    radius='sm'
+                    radius='md'
                     label="Suffix"
                     labelPlacement='outside'
                     placeholder='You can enter a suffix for the word here'

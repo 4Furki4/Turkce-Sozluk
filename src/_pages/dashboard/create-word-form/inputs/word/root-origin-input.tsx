@@ -45,7 +45,7 @@ export default function WordRootOriginInput({
             render={({ field, fieldState: { error } }) => (
                 <Input
                     {...field}
-                    radius='sm'
+                    radius='md'
                     label={t('Root')}
                     placeholder={t('EnterRoot')}
                     labelPlacement='outside'

@@ -49,7 +49,7 @@ export function CustomModal({
                 // Merge the default styles with any overrides passed via props.
                 backdrop: cn("bg-black/50", classNames?.backdrop),
                 base: cn(
-                    "bg-background border-2 border-border rounded-sm",
+                    "bg-background border-2 border-border rounded-md",
                     {
                         "bg-background/70 shadow-medium backdrop-blur-md backdrop-saturate-150":
                             isBlurEnabled,

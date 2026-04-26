@@ -18,19 +18,19 @@ export function WordOfTheDayCard() {
         return (
             <CustomCard className="w-full min-h-[300px]">
                 <CardHeader className="flex justify-between items-center pb-0">
-                    <Skeleton className="w-24 h-4 rounded-lg" />
-                    <Skeleton className="w-20 h-4 rounded-lg" />
+                    <Skeleton className="w-24 h-4 rounded-md" />
+                    <Skeleton className="w-20 h-4 rounded-md" />
                 </CardHeader>
 
                 <CardBody className="flex flex-col items-center justify-center text-center py-8 gap-4 overflow-hidden">
-                    <Skeleton className="w-3/4 h-10 rounded-lg" />
-                    <Skeleton className="w-1/4 h-5 rounded-lg" />
-                    <Skeleton className="w-full h-16 rounded-lg mt-2" />
+                    <Skeleton className="w-3/4 h-10 rounded-md" />
+                    <Skeleton className="w-1/4 h-5 rounded-md" />
+                    <Skeleton className="w-full h-16 rounded-md mt-2" />
                 </CardBody>
 
                 <CardFooter className="flex justify-center gap-3 pt-0 pb-6">
-                    <Skeleton className="w-24 h-9 rounded-lg" />
-                    <Skeleton className="w-28 h-9 rounded-lg" />
+                    <Skeleton className="w-24 h-9 rounded-md" />
+                    <Skeleton className="w-28 h-9 rounded-md" />
                 </CardFooter>
             </CustomCard>
         );

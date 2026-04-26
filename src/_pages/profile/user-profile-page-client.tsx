@@ -97,25 +97,25 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                     </CardHeader>
                     <CardBody className="pt-0">
                         <div className="grid grid-cols-2 gap-3 h-full content-center">
-                            <div className="p-3 bg-zinc-500/10 rounded-xl border border-zinc-500/20 flex flex-col items-center justify-center gap-1 group hover:bg-zinc-500/20 transition-colors">
+                            <div className="p-3 bg-zinc-500/10 rounded-md border border-zinc-500/20 flex flex-col items-center justify-center gap-1 group hover:bg-zinc-500/20 transition-colors">
                                 <p className="text-2xl font-bold text-foreground">{totalPoints}</p>
                                 <p className="text-xs text-muted-foreground text-center line-clamp-1">{t('totalContributionPointsLabel')}</p>
                             </div>
-                            <div className="p-3 bg-green-500/10 rounded-xl border border-green-500/20 flex flex-col items-center justify-center gap-1 group hover:bg-green-500/20 transition-colors">
+                            <div className="p-3 bg-green-500/10 rounded-md border border-green-500/20 flex flex-col items-center justify-center gap-1 group hover:bg-green-500/20 transition-colors">
                                 <div className="flex items-center gap-1">
                                     <p className="text-2xl font-bold text-green-600 dark:text-green-400">{totalApprovedCount}</p>
                                     <CheckCheck className="h-4 w-4 text-green-500" />
                                 </div>
                                 <p className="text-xs text-muted-foreground text-center line-clamp-1">{t('approvedContributionsLabel')}</p>
                             </div>
-                            <div className="p-3 bg-yellow-500/10 rounded-xl border border-yellow-500/20 flex flex-col items-center justify-center gap-1 group hover:bg-yellow-500/20 transition-colors">
+                            <div className="p-3 bg-yellow-500/10 rounded-md border border-yellow-500/20 flex flex-col items-center justify-center gap-1 group hover:bg-yellow-500/20 transition-colors">
                                 <div className="flex items-center gap-1">
                                     <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{totalPendingCount}</p>
                                     <Clock className="h-4 w-4 text-yellow-500" />
                                 </div>
                                 <p className="text-xs text-muted-foreground text-center line-clamp-1">{t('pendingContributionsLabel')}</p>
                             </div>
-                            <div className="p-3 bg-red-500/10 rounded-xl border border-red-500/20 flex flex-col items-center justify-center gap-1 group hover:bg-red-500/20 transition-colors">
+                            <div className="p-3 bg-red-500/10 rounded-md border border-red-500/20 flex flex-col items-center justify-center gap-1 group hover:bg-red-500/20 transition-colors">
                                 <div className="flex items-center gap-1">
                                     <p className="text-2xl font-bold text-red-600 dark:text-red-400">{totalRejectedCount}</p>
                                     <X className="h-4 w-4 text-red-500" />
@@ -142,7 +142,7 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                                         key={badge.slug}
                                         content={badge.earned ? `${name}: ${description}` : `${t('lockedBadge')}: ${description}`}
                                     >
-                                        <div className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-200 hover:scale-105 cursor-help ${badge.earned ? 'bg-primary/10 border-primary/20' : 'bg-muted/50 border-muted grayscale opacity-60'}`}>
+                                        <div className={`flex flex-col items-center justify-center p-4 rounded-md border transition-all duration-200 hover:scale-105 cursor-help ${badge.earned ? 'bg-primary/10 border-primary/20' : 'bg-muted/50 border-muted grayscale opacity-60'}`}>
                                             <div className="text-4xl mb-2 filter drop-shadow-sm">{badge.icon}</div>
                                             <p className="font-semibold text-center text-sm">{name}</p>
                                             {badge.earned && (
@@ -176,10 +176,10 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                                     {savedWordsToRender.map((savedWord) => (
                                         <li key={savedWord.wordId}>
                                             <NextIntlLink href={{ pathname: '/search/[word]', params: { word: savedWord.wordName } }} className="block w-full text-left">
-                                                <div className="p-3 bg-zinc-500/5 hover:bg-zinc-500/10 rounded-lg border border-transparent hover:border-zinc-500/20 transition-all duration-200 group">
+                                                <div className="p-3 bg-zinc-500/5 hover:bg-zinc-500/10 rounded-md border border-transparent hover:border-zinc-500/20 transition-all duration-200 group">
                                                     <div className="flex justify-between items-start">
                                                         <span className="font-medium text-foreground group-hover:text-primary transition-colors">{savedWord.wordName}</span>
-                                                        <span className="text-[10px] text-muted-foreground bg-zinc-500/10 px-1.5 py-0.5 rounded-full">
+                                                        <span className="text-[10px] text-muted-foreground bg-zinc-500/10 px-1.5 py-0.5 rounded-md">
                                                             {new Date(savedWord.savedAt).toLocaleDateString(locale, { month: 'short', day: 'numeric' })}
                                                         </span>
                                                     </div>
@@ -224,7 +224,7 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                                                 pathname: '/my-requests/[id]',
                                                 params: { id: contribution.id }
                                             }}>
-                                                <div className="p-3 bg-zinc-500/5 hover:bg-zinc-500/10 rounded-lg border border-transparent hover:border-zinc-500/20 transition-all duration-200 group flex items-center justify-between gap-4">
+                                                <div className="p-3 bg-zinc-500/5 hover:bg-zinc-500/10 rounded-md border border-transparent hover:border-zinc-500/20 transition-all duration-200 group flex items-center justify-between gap-4">
                                                     <div className="truncate flex-1">
                                                         <span className="font-medium text-foreground group-hover:text-primary transition-colors block truncate">{displayText}</span>
                                                         <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
@@ -232,7 +232,7 @@ export function UserProfilePageClient({ profileData, session, locale }: UserProf
                                                         </span>
                                                     </div>
                                                     <div className="flex-shrink-0">
-                                                        <span className={`text-[10px] font-mono px-2 py-1 rounded-full uppercase tracking-wider border ${contribution.status === 'APPROVED' ? 'bg-green-500/10 text-green-600 border-green-500/20' :
+                                                        <span className={`text-[10px] font-mono px-2 py-1 rounded-md uppercase tracking-wider border ${contribution.status === 'APPROVED' ? 'bg-green-500/10 text-green-600 border-green-500/20' :
                                                             contribution.status === 'REJECTED' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
                                                                 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20'
                                                             }`}>

@@ -16,7 +16,7 @@ export default function WordPhoneticInput({
             render={({ field, fieldState: { error } }) => (
                 <Input
                     {...field}
-                    radius='sm'
+                    radius='md'
                     labelPlacement='outside'
                     label="Phonetic"
                     placeholder={`You can enter the word's phonetic here like ahva:li`}

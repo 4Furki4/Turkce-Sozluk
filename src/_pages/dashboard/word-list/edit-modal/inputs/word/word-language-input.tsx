@@ -19,7 +19,7 @@ export default function WordLanguageInput({
         <Controller name='language' control={control}
             render={({ field, fieldState: { error } }) => (
                 <Autocomplete
-                    radius='sm'
+                    radius='md'
                     {...field}
                     label="Language"
                     labelPlacement='outside'

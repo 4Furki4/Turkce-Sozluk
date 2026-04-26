@@ -27,15 +27,17 @@ type WordCardProps = {
   session: Session | null;
   isWordFetching?: boolean
   isOnline?: boolean
+  headingLevel?: "h1" | "h2";
 };
 
-export default function WordCard({ word_data, locale, session, isWordFetching, isOnline }: WordCardProps) {
+export default function WordCard({ word_data, locale, session, isWordFetching, isOnline, headingLevel = "h2" }: WordCardProps) {
 
   const { isOpen, onOpenChange, onClose } = useDisclosure()
   const t = useTranslations("WordCard");
   const router = useRouter();
   const pathname = usePathname();
   const isOffline = word_data.source === "offline";
+  const WordHeading = headingLevel;
 
   // Helper function to format view counts (e.g., 1500 → "1.5K")
   const formatViewCount = (count: number): string => {
@@ -101,9 +103,9 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                   <span aria-hidden>- </span>
                 </span>
               )}
-              <h2 className="text-fs-2 md:text-fs-3 text-start break-words hyphens-auto">
+              <WordHeading className="text-fs-2 md:text-fs-3 text-start break-words hyphens-auto">
                 {word_data.word_name}
-              </h2>
+              </WordHeading>
               {word_data.suffix && (
                 <span className="text-fs-0">
                   <span aria-hidden> -</span>
@@ -138,7 +140,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
 
           {/* View count indicator - elegant chip style */}
           {word_data.view_count !== undefined && word_data.view_count > 0 && (
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-primary/10 text-primary text-xs font-medium">
               <Eye className="w-3.5 h-3.5" />
               <span>{formatViewCount(word_data.view_count)} {t("views")}</span>
             </div>
@@ -148,11 +150,11 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
           {word_data.attributes && word_data.attributes.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2 font-mono">
               {word_data.attributes.map((attribute) => (
-                <Chip
+                <Chip radius="md"
                   key={attribute.attribute_id}
                   size="sm"
                   variant="solid"
-                  className="flex rounded-lg dark:text-primary-50 bg-primary-100 dark:bg-primary/50"
+                  className="flex rounded-md dark:text-primary-50 bg-primary-100 dark:bg-primary/50"
                 >
                   {attribute.attribute}
                 </Chip>

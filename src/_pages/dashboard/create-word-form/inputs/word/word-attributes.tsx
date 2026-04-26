@@ -36,7 +36,7 @@ export default function WordAttributesInput({
                         classNames={{
                             trigger: "pl-1",
                         }}
-                        radius='sm'
+                        radius='md'
                         as={'div'}
                         tabIndex={0}
                         placeholder={t('SelectAttributes')}

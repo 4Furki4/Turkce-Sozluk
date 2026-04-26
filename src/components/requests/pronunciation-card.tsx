@@ -158,12 +158,12 @@ export const PronunciationCard: FC<PronunciationCardProps> = ({ request, user, w
                         variant={userVote === 1 ? "solid" : "light"}
                         color={userVote === 1 ? "success" : "default"}
                         onPress={() => handleVote('up')}
-                        className={`rounded-full ${userVote === 1 ? "bg-success/20 text-success" : ""}`}
+                        className={`rounded-md ${userVote === 1 ? "bg-success/20 text-success" : ""}`}
                     >
                         <ThumbsUp className="w-4 h-4" />
                     </Button>
                     <span className={`font-semibold min-w-[2rem] text-center ${Number(voteCount) > 0 ? "text-success" :
-                            Number(voteCount) < 0 ? "text-danger" : "text-muted-foreground"
+                        Number(voteCount) < 0 ? "text-danger" : "text-muted-foreground"
                         }`}>{voteCount}</span>
                     <Button
                         isIconOnly
@@ -171,7 +171,7 @@ export const PronunciationCard: FC<PronunciationCardProps> = ({ request, user, w
                         variant={userVote === -1 ? "solid" : "light"}
                         color={userVote === -1 ? "danger" : "default"}
                         onPress={() => handleVote('down')}
-                        className={`rounded-full ${userVote === -1 ? "bg-danger/20 text-danger" : ""}`}
+                        className={`rounded-md ${userVote === -1 ? "bg-danger/20 text-danger" : ""}`}
                     >
                         <ThumbsDown className="w-4 h-4" />
                     </Button>

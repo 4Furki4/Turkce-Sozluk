@@ -15,24 +15,24 @@ function LoadingState() {
     return (
         <div className="container mx-auto p-4 md:p-8 py-12 md:py-20">
             <div className="flex items-center gap-2 mb-8">
-                <Skeleton className="w-8 h-8 rounded-lg" />
-                <Skeleton className="w-32 h-4 rounded-lg" />
+                <Skeleton className="w-8 h-8 rounded-md" />
+                <Skeleton className="w-32 h-4 rounded-md" />
             </div>
 
             <CustomCard className="w-full min-h-[400px]">
                 <CardHeader className="flex flex-col gap-4 p-8">
                     <div className="flex items-center justify-between w-full">
                         <div className="flex items-center gap-3">
-                            <Skeleton className="w-44 h-8 rounded-lg" />
+                            <Skeleton className="w-44 h-8 rounded-md" />
                         </div>
-                        <Skeleton className="w-24 h-8 rounded-lg" />
+                        <Skeleton className="w-24 h-8 rounded-md" />
                     </div>
-                    <Skeleton className="w-3/4 h-12 rounded-lg mt-4" />
+                    <Skeleton className="w-3/4 h-12 rounded-md mt-4" />
                 </CardHeader>
                 <CardBody className="p-8 gap-6">
-                    <Skeleton className="w-full h-4 rounded-lg" />
-                    <Skeleton className="w-full h-4 rounded-lg" />
-                    <Skeleton className="w-3/4 h-4 rounded-lg" />
+                    <Skeleton className="w-full h-4 rounded-md" />
+                    <Skeleton className="w-full h-4 rounded-md" />
+                    <Skeleton className="w-3/4 h-4 rounded-md" />
                 </CardBody>
             </CustomCard>
         </div>
@@ -72,7 +72,7 @@ export default function GalatiMeshurDetailPage({ params }: { params: Promise<{ i
             <CustomCard className="w-full border-none shadow-medium bg-background/60 backdrop-blur-lg">
                 <CardHeader className="flex flex-col items-start gap-6 p-6 md:p-10 border-b border-border/50">
                     <div className="flex flex-wrap items-center justify-between w-full gap-4">
-                        <div className="flex items-center gap-3 text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-4 py-2 rounded-full">
+                        <div className="flex items-center gap-3 text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-4 py-2 rounded-md">
                             <BookOpen className="w-5 h-5" />
                             <span className="font-bold tracking-wide uppercase text-sm">
                                 {t("galatiMeshurTitle")}
@@ -91,7 +91,7 @@ export default function GalatiMeshurDetailPage({ params }: { params: Promise<{ i
                     </h1>
 
                     {item.correctUsage && (
-                        <div className="flex items-center gap-2 text-success-600 bg-success-50 dark:bg-success-900/20 px-4 py-2 rounded-lg text-sm font-medium animate-in fade-in slide-in-from-left-2 duration-500">
+                        <div className="flex items-center gap-2 text-success-600 bg-success-50 dark:bg-success-900/20 px-4 py-2 rounded-md text-sm font-medium animate-in fade-in slide-in-from-left-2 duration-500">
                             <CheckCircle2 className="w-4 h-4" />
                             <span>{t("actually", { correctUsage: item.correctUsage })}</span>
                         </div>
@@ -101,7 +101,7 @@ export default function GalatiMeshurDetailPage({ params }: { params: Promise<{ i
                 <CardBody className="p-6 md:p-10 gap-8">
                     <div className="prose prose-lg dark:prose-invert max-w-none">
                         <h3 className="text-xl font-semibold mb-4 text-muted-foreground flex items-center gap-2">
-                            <span className="w-1 h-6 bg-primary rounded-full" />
+                            <span className="w-1 h-6 bg-primary rounded-md" />
                             {t("explanation")}
                         </h3>
                         <p className="whitespace-pre-wrap leading-relaxed text-foreground/90 font-light text-lg">

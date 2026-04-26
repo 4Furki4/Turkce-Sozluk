@@ -51,7 +51,7 @@ export default function RoleEditModal({
         }
     }
     return (
-        <Modal radius="sm" size="4xl" isOpen={isOpen} onOpenChange={onOpenChange} isDismissable>
+        <Modal radius="md" size="4xl" isOpen={isOpen} onOpenChange={onOpenChange} isDismissable>
             <ModalContent>
                 {(onClose) => (
                     <>
@@ -68,7 +68,7 @@ export default function RoleEditModal({
                                         onChange={handleSelectionChange}
                                         label="Role"
                                         disallowEmptySelection
-                                        radius="sm"
+                                        radius="md"
                                         isRequired
                                         labelPlacement="outside">
                                         {roles.map((role => (

@@ -24,26 +24,26 @@ export function GalatiMeshurCard() {
             <CustomCard className="h-full border-default-200 dark:border-default-100">
                 <CardHeader className="flex flex-col items-start pb-0 pt-4 px-4 gap-2">
                     <div className="flex items-center gap-2 mb-1 w-full">
-                        <Skeleton className="w-4 h-4 rounded-full" />
-                        <Skeleton className="w-24 h-3 rounded-lg" />
+                        <Skeleton className="w-4 h-4 rounded-md" />
+                        <Skeleton className="w-24 h-3 rounded-md" />
                     </div>
-                    <Skeleton className="w-3/4 h-8 rounded-lg" />
+                    <Skeleton className="w-3/4 h-8 rounded-md" />
                 </CardHeader>
 
                 <CardBody className="py-4 px-4 gap-2">
                     <div className="space-y-2">
-                        <Skeleton className="w-full h-3 rounded-lg" />
-                        <Skeleton className="w-5/6 h-3 rounded-lg" />
-                        <Skeleton className="w-4/6 h-3 rounded-lg" />
+                        <Skeleton className="w-full h-3 rounded-md" />
+                        <Skeleton className="w-5/6 h-3 rounded-md" />
+                        <Skeleton className="w-4/6 h-3 rounded-md" />
                     </div>
-                    <div className="mt-4 p-3 rounded-lg border border-default-200 dark:border-default-100 space-y-2">
-                        <Skeleton className="w-16 h-3 rounded-lg" />
-                        <Skeleton className="w-1/2 h-3 rounded-lg" />
+                    <div className="mt-4 p-3 rounded-md border border-default-200 dark:border-default-100 space-y-2">
+                        <Skeleton className="w-16 h-3 rounded-md" />
+                        <Skeleton className="w-1/2 h-3 rounded-md" />
                     </div>
                 </CardBody>
 
                 <CardFooter className="pt-0 pb-4 px-4">
-                    <Skeleton className="w-24 h-8 rounded-lg" />
+                    <Skeleton className="w-24 h-8 rounded-md" />
                 </CardFooter>
             </CustomCard>
         );
@@ -70,7 +70,7 @@ export function GalatiMeshurCard() {
                     {item.explanation}
                 </p>
                 {item.correctUsage && (
-                    <div className="mt-4 p-3 bg-background/50 rounded-lg text-xs">
+                    <div className="mt-4 p-3 bg-background/50 rounded-md text-xs">
                         <span className="font-semibold text-success-600 block mb-1">Doğrusu:</span>
                         {item.correctUsage}
                     </div>

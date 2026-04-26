@@ -81,7 +81,7 @@ function WordReviewItem({
     };
 
     return (
-        <div className={`flex items-start gap-3 p-3 rounded-lg border ${isCorrect ? "border-success/30 bg-success/5" : "border-danger/30 bg-danger/5"
+        <div className={`flex items-start gap-3 p-3 rounded-md border ${isCorrect ? "border-success/30 bg-success/5" : "border-danger/30 bg-danger/5"
             }`}>
             <div className="flex-shrink-0 mt-0.5">
                 {isCorrect ? (
@@ -421,21 +421,21 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
                             <p className="text-default-500">{t("points")}</p>
 
                             <div className="grid grid-cols-2 gap-4 mt-6">
-                                <div className="p-4 bg-success/10 rounded-lg">
+                                <div className="p-4 bg-success/10 rounded-md">
                                     <p className="text-sm text-default-500">{t("correct")}</p>
                                     <p className="text-2xl font-bold text-success">
                                         {stats.correctCount}/{results.length}
                                     </p>
                                 </div>
-                                <div className="p-4 bg-primary/10 rounded-lg">
+                                <div className="p-4 bg-primary/10 rounded-md">
                                     <p className="text-sm text-default-500">{t("accuracy")}</p>
                                     <p className="text-2xl font-bold text-primary">{stats.accuracy}%</p>
                                 </div>
-                                <div className="p-4 bg-warning/10 rounded-lg">
+                                <div className="p-4 bg-warning/10 rounded-md">
                                     <p className="text-sm text-default-500">{t("maxStreak")}</p>
                                     <p className="text-2xl font-bold text-warning">{maxStreak}🔥</p>
                                 </div>
-                                <div className="p-4 bg-secondary/10 rounded-lg">
+                                <div className="p-4 bg-secondary/10 rounded-md">
                                     <p className="text-sm text-default-500">{t("avgTime")}</p>
                                     <p className="text-2xl font-bold">{stats.avgTime}s</p>
                                 </div>
@@ -472,7 +472,7 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
                                 <motion.div
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
-                                    className="mt-6 p-4 bg-primary/10 rounded-lg"
+                                    className="mt-6 p-4 bg-primary/10 rounded-md"
                                 >
                                     <p className="text-sm text-default-500">{t("yourRank")}</p>
                                     <p className="text-3xl font-bold text-primary">#{userRank}</p>
@@ -490,7 +490,7 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
                                         {leaderboardData.leaderboard.slice(0, 5).map((entry) => (
                                             <div
                                                 key={entry.userId}
-                                                className={`flex items-center gap-3 p-2 rounded-lg ${entry.userId === session?.user?.id ? "bg-primary/20" : "bg-default-100"
+                                                className={`flex items-center gap-3 p-2 rounded-md ${entry.userId === session?.user?.id ? "bg-primary/20" : "bg-default-100"
                                                     }`}
                                             >
                                                 <span className={`w-6 text-center font-bold ${entry.rank === 1 ? "text-warning" :
@@ -503,10 +503,10 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
                                                     <img
                                                         src={entry.userImage}
                                                         alt={entry.userName || ""}
-                                                        className="w-6 h-6 rounded-full"
+                                                        className="w-6 h-6 rounded-md"
                                                     />
                                                 ) : (
-                                                    <div className="w-6 h-6 rounded-full bg-default-300" />
+                                                    <div className="w-6 h-6 rounded-md bg-default-300" />
                                                 )}
                                                 <span className="flex-1 truncate text-sm">
                                                     {entry.userName || t("anonymous")}
@@ -584,17 +584,17 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-4">
-                    <Chip color="primary" variant="flat">
+                    <Chip radius="md" color="primary" variant="flat">
                         {currentIndex + 1}/{questions.length}
                     </Chip>
                     {streak > 0 && (
-                        <Chip color="warning" variant="flat" startContent={<Flame className="w-4 h-4" />}>
+                        <Chip radius="md" color="warning" variant="flat" startContent={<Flame className="w-4 h-4" />}>
                             {streak}🔥
                         </Chip>
                     )}
                 </div>
                 <div className="flex items-center gap-4">
-                    <Chip
+                    <Chip radius="md"
                         color={timeLeft <= 3 ? "danger" : "secondary"}
                         variant="flat"
                         startContent={<Timer className="w-4 h-4" />}

@@ -184,7 +184,7 @@ export function FeedbackModal({
                 }
             }} classNames={{
                 base: cn(
-                    "bg-background border-2 border-border rounded-sm p-2 w-full",
+                    "bg-background border-2 border-border rounded-md p-2 w-full",
                     { "bg-background/60 shadow-medium backdrop-blur-md backdrop-saturate-150 transition-transform-background motion-reduce:transition-none": isBlurEnabled }
                 )
             }} size="2xl" scrollBehavior="inside" backdrop="opaque" isOpen={isOpen} onOpenChange={setIsOpen}>

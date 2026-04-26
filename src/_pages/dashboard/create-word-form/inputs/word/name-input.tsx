@@ -24,7 +24,7 @@ export default function WordNameInput({
             render={({ field, fieldState: { error } }) => (
                 <Input
                     {...field}
-                    radius='sm'
+                    radius='md'
                     label={t('WordName')}
                     placeholder={t('EnterWordName')}
                     labelPlacement='outside'

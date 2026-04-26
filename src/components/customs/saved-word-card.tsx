@@ -48,7 +48,7 @@ export default function SavedWordCard({ wordData, onUnsave, session, locale }: S
               </NextIntlLink>
             </h3>
             {wordData.root?.root && (
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+              <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20">
                 {wordData.root.root}
               </span>
             )}

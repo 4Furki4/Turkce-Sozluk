@@ -38,7 +38,7 @@ export default function AttributesInput({
                     onChange={handleSelectionChange}
                     selectedKeys={values}
                     selectionMode='multiple'
-                    radius='sm'
+                    radius='md'
                     label="Attributes"
                     labelPlacement='outside'
                     placeholder='You can select an attribute for this meaning'

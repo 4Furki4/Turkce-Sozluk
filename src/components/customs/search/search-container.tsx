@@ -4,16 +4,18 @@ import { useTranslations } from "next-intl";
 import { Search as SearchIcon, PuzzleIcon, KeyboardIcon, TrendingUpIcon, BookOpenIcon, TypeIcon } from "lucide-react";
 import { useRouter } from "@/src/i18n/routing";
 import { Input } from "@heroui/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@heroui/react";
 import { useDebounce } from "@uidotdev/usehooks";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { TurkishKeyboard } from "@/src/components/customs/utils/TurkishKeyboard";
-import { searchAutocompleteOffline, searchByPattern } from "@/src/lib/offline-db";
+import { getWordByNameOffline, searchAutocompleteOffline, searchByPattern } from "@/src/lib/offline-db";
 import { useTypewriter } from "@/src/hooks/use-typewriter";
 import { useOnlineStatus } from "@/src/hooks/use-online-status";
 import { api } from "@/src/trpc/react";
 import { startNavigationProgress } from "@/src/lib/navigation-progress";
+import { getOfflineWordSearchQueryKey, toOfflineWordSearchResult } from "@/src/hooks/useWordSearch";
 
 type SearchMode = "word" | "meaning";
 
@@ -41,6 +43,7 @@ export default function SearchContainer({
 }: SearchContainerProps) {
     const t = useTranslations("Home");
     const router = useRouter();
+    const queryClient = useQueryClient();
     const [wordInput, setWordInput] = useState<string>("");
     const [inputError, setInputError] = useState<string>("");
     const [showRecommendations, setShowRecommendations] = useState(false);
@@ -194,35 +197,60 @@ export default function SearchContainer({
         }
     };
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        const input = wordInput.trim();
+    const primeOfflineWordCache = useCallback(async (word: string) => {
+        if (!word || word.includes("_")) return;
+
+        try {
+            const offlineWord = await getWordByNameOffline(word);
+            if (!offlineWord) return;
+
+            const queryData = toOfflineWordSearchResult(offlineWord);
+            const cacheKeys = Array.from(new Set([
+                word,
+                offlineWord.word_name,
+                word.toLocaleLowerCase("tr"),
+                offlineWord.word_name.toLocaleLowerCase("tr"),
+            ]));
+
+            for (const cacheKey of cacheKeys) {
+                queryClient.setQueryData(getOfflineWordSearchQueryKey(cacheKey), queryData);
+            }
+        } catch (error) {
+            console.warn("[SearchContainer] Failed to prime offline word cache:", error);
+        }
+    }, [queryClient]);
+
+    const navigateToWord = useCallback(async (word: string) => {
+        const input = word.trim();
         if (!input) {
             setInputError(t("hero.searchError"));
             setWordInput("");
             return;
         }
+
         setWordInput("");
         setInputError("");
         setShowRecommendations(false);
         onSearchComplete?.();
         startNavigationProgress();
+
+        await primeOfflineWordCache(input);
+
         router.push({
             pathname: "/search/[word]",
             params: { word: encodeURIComponent(input) },
         });
+    }, [onSearchComplete, primeOfflineWordCache, router, t]);
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        void navigateToWord(wordInput);
     };
 
     const handleRecommendationClick = (word: string) => {
         isSelecting.current = true;
         setWordInput(word);
-        setShowRecommendations(false);
-        onSearchComplete?.();
-        startNavigationProgress();
-        router.push({
-            pathname: "/search/[word]",
-            params: { word: encodeURIComponent(word) },
-        });
+        void navigateToWord(word);
     };
 
     return (
@@ -231,10 +259,10 @@ export default function SearchContainer({
                 <div className="relative group">
                     {/* Search Glow Effect - Only show if not in custom container (implied by default wrapper) */}
                     {!inputWrapperClassName && (
-                        <div className="absolute -inset-1 bg-gradient-to-r from-primary/15 via-primary/8 to-primary/15 rounded-lg blur-lg opacity-0 group-focus-within:opacity-70 transition-opacity duration-500" />
+                        <div className="absolute -inset-1 bg-gradient-to-r from-primary/15 via-primary/8 to-primary/15 rounded-md blur-lg opacity-0 group-focus-within:opacity-70 transition-opacity duration-500" />
                     )}
 
-                    <Input
+                    <Input radius="md"
                         endContent={
                             <div className="flex items-center gap-1">
                                 <Popover placement="bottom" classNames={{ content: "bg-background" }}>
@@ -285,7 +313,7 @@ export default function SearchContainer({
                             ]
                         }}
                         startContent={
-                            <button type="submit" className="p-2 hover:bg-white/5 rounded-full transition-colors mr-2" aria-label="search button">
+                            <button type="submit" className="p-2 hover:bg-white/5 rounded-md transition-colors mr-2" aria-label="search button">
                                 <SearchIcon className="w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             </button>
                         }
@@ -321,11 +349,11 @@ export default function SearchContainer({
 
                     {/* Recommendations Dropdown */}
                     {showRecommendations && (
-                        <div className="absolute z-[999] w-full mt-2 bg-background/95 backdrop-blur-xl border border-zinc-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[400px] overflow-y-auto">
+                        <div className="absolute z-[999] w-full mt-2 bg-background/95 backdrop-blur-xl border border-zinc-800 rounded-md shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[400px] overflow-y-auto">
                             {(isLoading || (searchMode === "meaning" && isMeaningFetching)) ? (
                                 <div className="p-2">
                                     {Array.from({ length: 3 }).map((_, idx) => (
-                                        <div key={idx} className="h-10 mx-2 my-1 bg-white/5 rounded-lg animate-pulse" />
+                                        <div key={idx} className="h-10 mx-2 my-1 bg-white/5 rounded-md animate-pulse" />
                                     ))}
                                 </div>
                             ) : searchMode === "meaning" ? (
@@ -384,7 +412,7 @@ export default function SearchContainer({
 
             {/* Search Mode Toggle */}
             <div className="flex justify-center mt-3">
-                <div className="inline-flex items-center rounded-lg bg-background/50 backdrop-blur-md border border-zinc-800 p-0.5 gap-0.5">
+                <div className="inline-flex items-center rounded-md bg-background/50 backdrop-blur-md border border-zinc-800 p-0.5 gap-0.5">
                     <button
                         type="button"
                         onClick={() => {
@@ -395,7 +423,7 @@ export default function SearchContainer({
                             setSelectedIndex(-1);
                         }}
                         className={cn(
-                            "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200",
+                            "flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-sm font-medium transition-all duration-200",
                             searchMode === "word"
                                 ? "bg-primary/15 text-primary shadow-sm"
                                 : "text-zinc-500 hover:text-zinc-300"
@@ -414,7 +442,7 @@ export default function SearchContainer({
                             setSelectedIndex(-1);
                         }}
                         className={cn(
-                            "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200",
+                            "flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-sm font-medium transition-all duration-200",
                             searchMode === "meaning"
                                 ? "bg-primary/15 text-primary shadow-sm"
                                 : "text-zinc-500 hover:text-zinc-300"
@@ -435,7 +463,7 @@ export default function SearchContainer({
                     {isTrendingLoading ? (
                         <>
                             {Array.from({ length: 4 }).map((_, i) => (
-                                <div key={i} className="h-8 w-24 bg-zinc-800/50 rounded-lg animate-pulse border border-zinc-800/50" />
+                                <div key={i} className="h-8 w-24 bg-zinc-800/50 rounded-md animate-pulse border border-zinc-800/50" />
                             ))}
                         </>
                     ) : (

@@ -211,8 +211,8 @@ export default function EditWordModal({
                                     <WordSuffixInput control={control} />
                                 </div>
                                 {fields.length > 0 ? fields.map((field, index) => (
-                                    <Card radius='sm' className="flex-col gap-4" key={field.id}>
-                                        <Button radius='sm' variant='light' color='danger' isIconOnly
+                                    <Card radius='md' className="flex-col gap-4" key={field.id}>
+                                        <Button radius='md' variant='light' color='danger' isIconOnly
                                             className='absolute top-2 right-3 z-50'
                                             onPress={() => remove(index)}
                                         >
@@ -244,10 +244,10 @@ export default function EditWordModal({
                                 )}
                             </ModalBody>
                             <ModalFooter>
-                                <ButtonGroup radius='sm' className="w-full gap-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
+                                <ButtonGroup radius='md' className="w-full gap-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
                                     <Button
                                         type="button"
-                                        radius='sm'
+                                        radius='md'
                                         onPress={() => {
                                             prepend(emptyMeaningValues);
                                         }}
@@ -256,7 +256,7 @@ export default function EditWordModal({
                                         Prepend <span className="max-sm:hidden">Meaning</span>
                                     </Button>
                                     <Button
-                                        radius='sm'
+                                        radius='md'
                                         type="button"
                                         onPress={() => {
                                             append(emptyMeaningValues);

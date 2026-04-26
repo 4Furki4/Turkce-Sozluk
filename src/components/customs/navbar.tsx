@@ -158,7 +158,7 @@ export default function Navbar({
                   "capitalize p-0 bg-transparent data-[hover=true]:bg-transparent text-base max-h-6 font-semibold",
                   isContributeActive ? "text-primary" : "text-foreground",
                 )}
-                radius="sm"
+                radius="md"
                 variant="flat"
                 endContent={<ChevronDown aria-label={ContributeIntl} className="w-4 h-4" />}
               >
@@ -205,7 +205,7 @@ export default function Navbar({
                   "capitalize p-0 bg-transparent data-[hover=true]:bg-transparent text-base max-h-6 font-semibold",
                   isLearnActive ? "text-primary" : "text-foreground",
                 )}
-                radius="sm"
+                radius="md"
                 variant="flat"
                 endContent={<ChevronDown aria-label={LearnIntl} className="w-4 h-4" />}
               >
@@ -357,13 +357,13 @@ export default function Navbar({
                 }}
               >
                 <DropdownSection showDivider>
-                  <DropdownItem key={"profile"} className="rounded-sm py-0 pr-0" startContent={<UserIcon className="h-6 w-6" />}>
+                  <DropdownItem key={"profile"} className="rounded-md py-0 pr-0" startContent={<UserIcon className="h-6 w-6" />}>
                     <Link color="foreground" as={NextIntlLink} className="w-full py-1.5" href={`/profile/${session.user.id}`}>
                       {ProfileIntl}
                     </Link>
                   </DropdownItem>
                   {(session?.user as User & { role: string })?.role === "admin" ? (
-                    <DropdownItem key={"dashboard"} className="rounded-sm py-0 pr-0" startContent={<Layers className="h-6 w-6" />}>
+                    <DropdownItem key={"dashboard"} className="rounded-md py-0 pr-0" startContent={<Layers className="h-6 w-6" />}>
                       <Link color="foreground" as={NextIntlLink} className="w-full py-1.5" href="/dashboard">
                         {DashboardIntl}
                       </Link>
@@ -371,17 +371,17 @@ export default function Navbar({
                   ) : null}
                 </DropdownSection>
                 <DropdownSection showDivider>
-                  <DropdownItem key={"saved-words"} startContent={<StarIcon className="h-6 w-6" />} className="text-center rounded-sm py-0 pr-0">
+                  <DropdownItem key={"saved-words"} startContent={<StarIcon className="h-6 w-6" />} className="text-center rounded-md py-0 pr-0">
                     <Link color="foreground" as={NextIntlLink} className="w-full py-1.5" href="/saved-words">
                       {SavedWordsIntl}
                     </Link>
                   </DropdownItem>
-                  <DropdownItem key={"requests"} startContent={<GitPullRequestArrow className="h-6 w-6" />} className="text-center rounded-sm py-0 pr-0">
+                  <DropdownItem key={"requests"} startContent={<GitPullRequestArrow className="h-6 w-6" />} className="text-center rounded-md py-0 pr-0">
                     <Link color="foreground" as={NextIntlLink} className="w-full py-1.5" href="/my-requests">
                       {MyRequestsIntl}
                     </Link>
                   </DropdownItem>
-                  <DropdownItem startContent={<HistoryIcon className="h-6 w-6" />} key={"search-history"} className="text-center rounded-sm py-0 pr-0">
+                  <DropdownItem startContent={<HistoryIcon className="h-6 w-6" />} key={"search-history"} className="text-center rounded-md py-0 pr-0">
                     <Link color="foreground" as={NextIntlLink} className="w-full py-1.5" href="/search-history">
                       {SearchHistoryIntl}
                     </Link>
@@ -399,7 +399,7 @@ export default function Navbar({
                       "data-[hover=true]:text-foreground",
                     ]
                   }}
-                  className="rounded-sm text-destructive"
+                  className="rounded-md text-destructive"
                   key={"sign-out"}
                   color="danger"
                   onPress={() => handleSignOut()}

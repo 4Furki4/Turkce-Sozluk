@@ -216,16 +216,16 @@ export default function AdminRequestDetail({ requestId }: AdminRequestDetailProp
                   : t("details.unknownDate")}
               </div>
               <div className="flex flex-wrap items-center gap-3">
-                <Chip
+                <Chip radius="md"
                   color={statusColors[request.status]}
-                  radius="sm"
+                  radius="md"
                 >
                   {statusLabels[request.status]}
                 </Chip>
-                <Chip
+                <Chip radius="md"
                   color={actionColors[request.action]}
                   variant="flat"
-                  radius="sm"
+                  radius="md"
                   classNames={{
                     base: "px-3 py-1",
                     content: "font-medium"
@@ -248,7 +248,7 @@ export default function AdminRequestDetail({ requestId }: AdminRequestDetailProp
         <CardBody className="px-6 py-5">
           {/* Request Reason */}
           {request.reason && (
-            <div className="mb-8 rounded-lg border border-default p-4">
+            <div className="mb-8 rounded-md border border-default p-4">
               <h3 className="mb-2 text-sm uppercase text-default-500">{t("details.reason")}</h3>
               <p className="text-foreground">{request.reason}</p>
             </div>
@@ -321,7 +321,7 @@ export default function AdminRequestDetail({ requestId }: AdminRequestDetailProp
           </ModalHeader>
           <ModalBody>
             <p>Are you sure you want to approve this request?</p>
-            <div className="rounded-lg bg-success-50 p-3 text-sm text-success-700">
+            <div className="rounded-md bg-success-50 p-3 text-sm text-success-700">
               This action will apply the changes to the dictionary and cannot be undone.
             </div>
           </ModalBody>

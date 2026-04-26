@@ -33,11 +33,11 @@ export default function MeaningPartOfSpeechInput({
                     onChange={(e) => {
                         field.onChange(parseInt(e.target.value)) // Convert string to number to override react-hook-form behavior
                     }}
-                    radius='sm'
+                    radius='md'
                     classNames={{
-                        listboxWrapper: 'rounded-sm',
-                        popoverContent: 'rounded-sm',
-                        base: 'rounded-sm',
+                        listboxWrapper: 'rounded-md',
+                        popoverContent: 'rounded-md',
+                        base: 'rounded-md',
                     }}
                 >
                     {partOfSpeeches.map((key) => (

@@ -16,7 +16,7 @@ export default function WordPrefixInput({
             render={({ field }) => (
                 <Input
                     {...field}
-                    radius='sm'
+                    radius='md'
                     label="Prefix"
                     labelPlacement='outside'
                     placeholder='You can enter a prefix for the word here'

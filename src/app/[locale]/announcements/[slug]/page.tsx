@@ -118,24 +118,24 @@ export default async function AnnouncementDetailPage({
             href={{ pathname: "/announcements" }}
             className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
           >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-              {t("backToAnnouncements")}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            {t("backToAnnouncements")}
           </Link>
         </div>
 
-        <CustomCard className="border-2 border-border rounded-sm px-2 py-4 w-full">
+        <CustomCard className="border-2 border-border rounded-md px-2 py-4 w-full">
           <div className="px-4 pb-4">
             <div className="flex flex-col gap-2">
               <h1 className="text-3xl font-bold">{announcement.title}</h1>

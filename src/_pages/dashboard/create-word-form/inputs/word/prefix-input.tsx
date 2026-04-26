@@ -18,7 +18,7 @@ export default function WordPrefixInput({
             render={({ field }) => (
                 <Input
                     {...field}
-                    radius='sm'
+                    radius='md'
                     label={t('Prefix')}
                     labelPlacement='outside'
                     description={t('PrefixIsOptional')}

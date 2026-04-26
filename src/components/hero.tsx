@@ -13,7 +13,7 @@ import SearchContainer from "./customs/search/search-container";
 // Removes TRENDING_TAGS constant
 
 export default function Hero({ children }: {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }) {
   const t = useTranslations("Home");
   const locale = useLocale()
@@ -100,7 +100,7 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
         </CardHeader>
         <CardBody className="px-8 py-4 flex flex-col justify-center gap-6 relative z-10">
           <div className="space-y-4">
-            <div className="w-3/4 h-16 sm:h-20 bg-zinc-800/50 rounded-xl animate-pulse" />
+            <div className="w-3/4 h-16 sm:h-20 bg-zinc-800/50 rounded-md animate-pulse" />
             <div className="flex gap-2">
               <div className="w-16 h-4 bg-zinc-800/50 rounded-md animate-pulse" />
               <div className="w-16 h-4 bg-zinc-800/50 rounded-md animate-pulse" />
@@ -137,7 +137,7 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
   return (
     <CustomCard className="h-full min-h-[300px] shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
       {/* Background Decoration */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors duration-500" />
+      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-md blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors duration-500" />
 
       <CardHeader className="flex flex-row justify-between items-start pt-6 px-8 relative z-10">
         <div className="space-y-1">
@@ -159,7 +159,7 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
             {/* Only show phonetic if it exists */}
             {wordData.phonetic && <span>/{wordData.phonetic}/</span>}
             {/* Divider */}
-            {wordData.phonetic && wordData.origin && <span className="w-1 h-1 bg-zinc-700 rounded-full" />}
+            {wordData.phonetic && wordData.origin && <span className="w-1 h-1 bg-zinc-700 rounded-md" />}
             {wordData.origin && <span>{wordData.origin}</span>}
           </div>
         </div>
@@ -212,7 +212,7 @@ function BentoCommonMistake() {
           href="/sik-yapilan-yanlislar"
           className="flex items-center gap-2 text-xs font-mono text-zinc-500 uppercase tracking-widest hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
         >
-          <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+          <div className="w-2 h-2 rounded-md bg-orange-500 animate-pulse" />
           {t("HomeExtras.misspellingsTitle")}
         </Link>
       </CardHeader>
@@ -382,19 +382,19 @@ function BentoFeatures() {
     {
       title: t("hero.offlineFeature.title"),
       description: t("hero.offlineFeature.description"),
-      icon: <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500"><Wifi className="w-6 h-6" /></div>,
+      icon: <div className="w-10 h-10 rounded-md bg-blue-500/10 flex items-center justify-center text-blue-500"><Wifi className="w-6 h-6" /></div>,
       gradient: "from-blue-500/10 to-transparent"
     },
     {
       title: t("hero.pwaFeature.title"),
       description: t("hero.pwaFeature.description"),
-      icon: <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500"><Download className="w-6 h-6" /></div>,
+      icon: <div className="w-10 h-10 rounded-md bg-red-500/10 flex items-center justify-center text-red-500"><Download className="w-6 h-6" /></div>,
       gradient: "from-red-500/10 to-transparent"
     },
     {
       title: t("hero.feature1.title"),
       description: t("hero.feature1.description"),
-      icon: <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500"><HeartHandshake className="w-6 h-6" /></div>,
+      icon: <div className="w-10 h-10 rounded-md bg-green-500/10 flex items-center justify-center text-green-500"><HeartHandshake className="w-6 h-6" /></div>,
       gradient: "from-green-500/10 to-transparent"
     }
   ];

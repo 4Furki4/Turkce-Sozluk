@@ -60,7 +60,7 @@ export default function SavedWordsToolbar({ onSearch, onAlphabetSort, onDateSort
   }, [search, onSearch]);
 
   return (
-    <div className={cn("grid md:grid-cols-2 lg:grid-cols-4 items-center gap-4 px-4 py-2 bg-background/20 border-2 border-border rounded-sm")}>
+    <div className={cn("grid md:grid-cols-2 lg:grid-cols-4 items-center gap-4 px-4 py-2 bg-background/20 border-2 border-border rounded-md")}>
       <div className="w-full">
         <CustomInput
           value={search}

@@ -89,6 +89,7 @@ type WordSearchResult = {
     prefix: string;
     suffix: string;
     view_count?: number;
+    updated_at?: string | Date | null;
     attributes?: {
       attribute_id: number;
       attribute: string;

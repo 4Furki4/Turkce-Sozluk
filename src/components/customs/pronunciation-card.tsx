@@ -186,7 +186,7 @@ export const PronunciationCard: FC<PronunciationCardProps> = ({ wordId, session 
                                             color={pronunciation.userVote === 1 ? "success" : "default"}
                                             onPress={() => handleVote(pronunciation.id, 'up')}
                                             isDisabled={!session}
-                                            className={`rounded-full ${pronunciation.userVote === 1 ? "bg-success/20 text-success" : ""}`}
+                                            className={`rounded-md ${pronunciation.userVote === 1 ? "bg-success/20 text-success" : ""}`}
                                         >
                                             <ThumbsUp className="w-4 h-4" />
                                         </Button>
@@ -200,7 +200,7 @@ export const PronunciationCard: FC<PronunciationCardProps> = ({ wordId, session 
                                             color={pronunciation.userVote === -1 ? "danger" : "default"}
                                             onPress={() => handleVote(pronunciation.id, 'down')}
                                             isDisabled={!session}
-                                            className={`rounded-full ${pronunciation.userVote === -1 ? "bg-danger/20 text-danger" : ""}`}
+                                            className={`rounded-md ${pronunciation.userVote === -1 ? "bg-danger/20 text-danger" : ""}`}
                                         >
                                             <ThumbsDown className="w-4 h-4" />
                                         </Button>

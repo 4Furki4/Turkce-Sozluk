@@ -13,6 +13,7 @@ export default function CustomCard({ children, ...props }: CustomCardProps) {
     const { isBlurEnabled } = useSnapshot(preferencesState);
     return (
         <Card
+            radius='md'
             {...props}
             className={cn("border border-border p-2 w-full", props.className)}
             classNames={{

@@ -100,8 +100,8 @@ module.exports = ({
       prefix: "heroui-",
       layout: {
         radius: {
-          small: "calc(var(--radius) - 6px)",
-          medium: "calc(var(--radius) - 4px)",
+          small: "calc(var(--radius) - 4px)",
+          medium: "calc(var(--radius) - 2px)",
           large: "var(--radius)",
         },
       },

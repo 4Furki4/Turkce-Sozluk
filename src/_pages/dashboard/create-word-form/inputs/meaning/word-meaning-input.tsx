@@ -26,7 +26,7 @@ export default function WordMeaningInput({
             render={({ field, fieldState: { error } }) => (
                 <Input
                     {...field}
-                    radius='sm'
+                    radius='md'
                     label={t('Meaning')}
                     labelPlacement='outside'
                     description={t('Forms.Meanings.Required')}

@@ -44,7 +44,7 @@ export default function MeaningFieldArray({
         return fields.map((field, index) => (
             <div key={field.id} className="w-full">
                 <h2 className="text-center text-fs-1">{t('Meaning')}</h2>
-                <Card className="mb-4 rounded-sm">
+                <Card className="mb-4 rounded-md">
                     <CardBody>
                         <WordMeaningInput index={index} control={control} />
                         <div className="sm:grid sm:grid-cols-2 gap-2">
@@ -56,7 +56,7 @@ export default function MeaningFieldArray({
                         <div className="grid gap-2">
                             <MeaningImageInput index={index} control={control} formState={formState} clearErrors={clearErrors} field={field} setImagePreviewUrls={setImagePreviewUrls} imagePreviewUrls={imagePreviewUrls} />
                         </div>
-                        <Button className="rounded-sm" onPress={() => remove(index)}>{t('RemoveMeaning')}</Button>
+                        <Button className="rounded-md" onPress={() => remove(index)}>{t('RemoveMeaning')}</Button>
                     </CardBody>
                 </Card>
             </div>

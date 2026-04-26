@@ -212,7 +212,7 @@ export function ForeignTermSuggestionModal({
                     },
                 }}
                 classNames={{
-                    base: cn("bg-background border-2 border-border rounded-sm p-2 w-full", {
+                    base: cn("bg-background border-2 border-border rounded-md p-2 w-full", {
                         "bg-background/60 shadow-medium backdrop-blur-md backdrop-saturate-150 transition-transform-background motion-reduce:transition-none":
                             isBlurEnabled,
                     }),
@@ -255,7 +255,7 @@ export function ForeignTermSuggestionModal({
                                             control={control}
                                             render={({ field, fieldState: { error } }) => (
                                                 <Autocomplete
-                                                    radius="sm"
+                                                    radius="md"
                                                     label={t("language")}
                                                     placeholder={t("selectLanguage")}
                                                     labelPlacement="outside"
@@ -266,9 +266,9 @@ export function ForeignTermSuggestionModal({
                                                         field.onChange(key?.toString() || "");
                                                     }}
                                                     classNames={{
-                                                        listboxWrapper: "rounded-sm",
-                                                        popoverContent: "rounded-sm",
-                                                        base: "rounded-sm mt-2",
+                                                        listboxWrapper: "rounded-md",
+                                                        popoverContent: "rounded-md",
+                                                        base: "rounded-md mt-2",
                                                     }}
                                                     errorMessage={error?.message ? t(error.message as any) : ""}
                                                     isInvalid={error !== undefined}
@@ -348,7 +348,7 @@ export function ForeignTermSuggestionModal({
                                                 control={control}
                                                 render={({ field, fieldState: { error } }) => (
                                                     <Autocomplete
-                                                        radius="sm"
+                                                        radius="md"
                                                         label={t("turkishWord")}
                                                         placeholder={t("existingWordPlaceholder")}
                                                         labelPlacement="outside"
@@ -364,9 +364,9 @@ export function ForeignTermSuggestionModal({
                                                             }
                                                         }}
                                                         classNames={{
-                                                            listboxWrapper: "rounded-sm",
-                                                            popoverContent: "rounded-sm",
-                                                            base: "rounded-sm mt-2",
+                                                            listboxWrapper: "rounded-md",
+                                                            popoverContent: "rounded-md",
+                                                            base: "rounded-md mt-2",
                                                         }}
                                                         errorMessage={error?.message ? t(error.message as any) : ""}
                                                         isInvalid={error !== undefined}

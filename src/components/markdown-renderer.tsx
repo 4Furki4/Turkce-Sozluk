@@ -68,10 +68,10 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400" {...props} />
     ),
   };
-  
+
   return (
     <div className={cn("prose prose-slate dark:prose-invert max-w-none", className)}>
-      <ReactMarkdown 
+      <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={components}
       >

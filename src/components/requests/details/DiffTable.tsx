@@ -29,7 +29,7 @@ const DiffTable: React.FC<DiffTableProps> = ({ oldData, newData }) => {
   };
 
   return (
-    <div className="border rounded-lg">
+    <div className="border rounded-md">
       {/* Desktop Header */}
       <div className="hidden md:grid md:grid-cols-3 gap-4 px-4 py-2 bg-muted/50 font-semibold text-sm border-b border-border">
         <div>{t("field")}</div>

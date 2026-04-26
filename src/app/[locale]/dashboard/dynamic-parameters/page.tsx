@@ -39,12 +39,12 @@ export default function DynamicParameters() {
       {parameterPages.map((page) => (
         <div
           key={page.href}
-          className="rounded-lg border border-border bg-background/40 p-4 transition-transform hover:scale-105"
+          className="rounded-md border border-border bg-background/40 p-4 transition-transform hover:scale-105"
         >
-            <Link href={page.href} className="text-xl font-bold">
-              {page.title}
-            </Link>
-            <p className="text-gray-600 mt-2">{page.description}</p>
+          <Link href={page.href} className="text-xl font-bold">
+            {page.title}
+          </Link>
+          <p className="text-gray-600 mt-2">{page.description}</p>
         </div>
       ))}
     </div>

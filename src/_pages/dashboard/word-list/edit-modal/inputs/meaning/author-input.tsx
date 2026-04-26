@@ -40,7 +40,7 @@ export default function AuthorInput({
                     onChange={handleSelectionChange}
                     selectedKeys={value}
                     selectionMode='single'
-                    radius='sm'
+                    radius='md'
                     label="Author"
                     labelPlacement='outside'
                     placeholder='You can select an author for the example sentence'

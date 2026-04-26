@@ -409,21 +409,21 @@ export default function WordMatchingGame({ session, locale }: WordMatchingGamePr
                             </h2>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 bg-primary/10 rounded-lg">
+                                <div className="p-4 bg-primary/10 rounded-md">
                                     <p className="text-sm text-muted-foreground">{t("matchedPairs")}</p>
                                     <p className="text-2xl font-bold text-primary">
                                         {matchedPairs.size}/{pairCountNum}
                                     </p>
                                 </div>
-                                <div className="p-4 bg-success/10 rounded-lg">
+                                <div className="p-4 bg-success/10 rounded-md">
                                     <p className="text-sm text-muted-foreground">{t("score")}</p>
                                     <p className="text-2xl font-bold text-success">{score}</p>
                                 </div>
-                                <div className="p-4 bg-danger/10 rounded-lg">
+                                <div className="p-4 bg-danger/10 rounded-md">
                                     <p className="text-sm text-muted-foreground">{t("mistakes")}</p>
                                     <p className="text-2xl font-bold text-danger">{incorrectAttempts}</p>
                                 </div>
-                                <div className="p-4 bg-secondary/10 rounded-lg">
+                                <div className="p-4 bg-secondary/10 rounded-md">
                                     <p className="text-sm text-muted-foreground">{t("time")}</p>
                                     <p className="text-2xl font-bold">
                                         {gameMode === "timed"
@@ -455,17 +455,17 @@ export default function WordMatchingGame({ session, locale }: WordMatchingGamePr
             {/* Header with timer and stats */}
             <div className="w-full flex items-center justify-between mb-6">
                 <div className="flex items-center gap-4">
-                    <Chip color="primary" variant="flat" startContent={<CheckCircle className="w-4 h-4" />}>
+                    <Chip radius="md" color="primary" variant="flat" startContent={<CheckCircle className="w-4 h-4" />}>
                         {matchedPairs.size}/{pairCountNum}
                     </Chip>
-                    <Chip color="danger" variant="flat" startContent={<XCircle className="w-4 h-4" />}>
+                    <Chip radius="md" color="danger" variant="flat" startContent={<XCircle className="w-4 h-4" />}>
                         {incorrectAttempts}
                     </Chip>
                 </div>
 
                 <div className="flex items-center gap-4">
                     {gameMode === "timed" ? (
-                        <Chip
+                        <Chip radius="md"
                             color={timeLeft <= 10 ? "danger" : "secondary"}
                             variant="flat"
                             startContent={<Timer className="w-4 h-4" />}
@@ -474,7 +474,7 @@ export default function WordMatchingGame({ session, locale }: WordMatchingGamePr
                             {formatTime(timeLeft)}
                         </Chip>
                     ) : (
-                        <Chip color="secondary" variant="flat" startContent={<Clock className="w-4 h-4" />} className="font-mono">
+                        <Chip radius="md" color="secondary" variant="flat" startContent={<Clock className="w-4 h-4" />} className="font-mono">
                             {formatTime(elapsedTime)}
                         </Chip>
                     )}

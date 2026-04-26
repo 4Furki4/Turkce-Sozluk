@@ -18,7 +18,7 @@ export default function WordPhoneticInput({
             render={({ field, fieldState: { error } }) => (
                 <Input
                     {...field}
-                    radius='sm'
+                    radius='md'
                     label={t('Phonetic')}
                     placeholder={t('EnterPhonetic')}
                     labelPlacement='outside'

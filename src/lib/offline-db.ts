@@ -19,6 +19,15 @@ import {
 
 let dbPromise: Promise<IDBPDatabase<OfflineDB>> | null = null;
 
+const toAutocompleteKey = (value: string) => value.toLocaleLowerCase("tr");
+
+const getLookupCandidates = (wordName: string): string[] =>
+    Array.from(new Set([
+        wordName,
+        wordName.toLocaleLowerCase("tr"),
+        wordName.toLowerCase(),
+    ]));
+
 const getDb = (): Promise<IDBPDatabase<OfflineDB>> => {
     if (!dbPromise) {
         dbPromise = openDB<OfflineDB>(DB_NAME, DB_VERSION, {
@@ -119,7 +128,33 @@ export const getWordByNameOffline = async (
     wordName: string
 ): Promise<WordData | undefined> => {
     const db = await getDb();
-    return db.getFromIndex(WORDS_STORE, WORD_NAME_INDEX, wordName);
+    const candidates = getLookupCandidates(wordName);
+
+    const autocompleteKeys = Array.from(new Set([
+        toAutocompleteKey(wordName),
+        wordName.toLowerCase(),
+    ]));
+
+    for (const key of autocompleteKeys) {
+        const autocompleteWord = await db.getFromIndex(
+            AUTOCOMPLETE_STORE,
+            AUTOCOMPLETE_NAME_INDEX,
+            key,
+        );
+
+        if (autocompleteWord?.displayName) {
+            candidates.push(...getLookupCandidates(autocompleteWord.displayName));
+        }
+    }
+
+    for (const candidate of Array.from(new Set(candidates))) {
+        const word = await db.getFromIndex(WORDS_STORE, WORD_NAME_INDEX, candidate);
+        if (word) {
+            return word;
+        }
+    }
+
+    return undefined;
 };
 
 export async function getLocalAutocompleteVersion(): Promise<string | undefined> {
@@ -145,7 +180,7 @@ export async function updateLocalAutocompleteList(
 
     // Create the new object with lowercase key
     const wordsToStore: AutocompleteWord[] = words.map(displayName => ({
-        key: displayName.toLowerCase(),
+        key: toAutocompleteKey(displayName),
         displayName: displayName,
     }));
 
@@ -177,19 +212,30 @@ export async function searchAutocompleteOffline(
 
     const db = await getDb();
 
-    // Always search using the lowercase query
-    const lowerCaseQuery = query.toLowerCase();
+    const prefixes = Array.from(new Set([
+        toAutocompleteKey(query),
+        query.toLowerCase(),
+    ]));
+    const results = new Map<string, string>();
 
-    const lowerBound = lowerCaseQuery;
-    const upperBound = lowerCaseQuery + "\uffff";
-    const range = IDBKeyRange.bound(lowerBound, upperBound);
+    for (const prefix of prefixes) {
+        const range = IDBKeyRange.bound(prefix, prefix + "\uffff");
+        const matches = await db.getAllFromIndex(
+            AUTOCOMPLETE_STORE,
+            AUTOCOMPLETE_NAME_INDEX,
+            range,
+            10,
+        );
 
-    // Query the index (which is on the lowercase 'key')
-    const results = await db
-        .getAllFromIndex(AUTOCOMPLETE_STORE, AUTOCOMPLETE_NAME_INDEX, range, 10);
+        for (const word of matches) {
+            results.set(toAutocompleteKey(word.displayName), word.displayName);
+            if (results.size >= 10) break;
+        }
 
-    // Return the 'displayName' which has the original casing
-    return results.map((word) => word.displayName);
+        if (results.size >= 10) break;
+    }
+
+    return Array.from(results.values());
 }
 
 /**
@@ -242,7 +288,7 @@ export const searchByPattern = async (
     let range: IDBKeyRange | null = null;
     const firstUnderscoreIndex = pattern.indexOf('_');
     if (firstUnderscoreIndex > 0) {
-        const prefix = pattern.substring(0, firstUnderscoreIndex).toLowerCase();
+        const prefix = toAutocompleteKey(pattern.substring(0, firstUnderscoreIndex));
         range = IDBKeyRange.bound(prefix, prefix + '\uffff');
     }
 

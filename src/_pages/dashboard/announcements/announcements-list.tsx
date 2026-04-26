@@ -170,7 +170,7 @@ export default function AnnouncementsList() {
         );
       case "status":
         return (
-          <Chip
+          <Chip radius="md"
             color={getStatusColor(item.status) as any}
             size="sm"
           >

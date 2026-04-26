@@ -105,7 +105,7 @@ function FeedbackCard({ item, session, queryFilters }: { item: FeedbackItem, ses
     return (
         <Card classNames={{
             base: "bg-background/10",
-        }} className="border border-border rounded-sm p-2 w-full mb-4" isBlurred >
+        }} className="border border-border rounded-md p-2 w-full mb-4" isBlurred >
             <CardHeader className="flex flex-col sm:flex-row gap-3 items-start">
                 <div className="flex gap-2 md:gap-4">
                     <Avatar
@@ -125,13 +125,13 @@ function FeedbackCard({ item, session, queryFilters }: { item: FeedbackItem, ses
                     </div>
                 </div>
                 <div className="sm:ml-auto flex flex-col xs:flex-row gap-2">
-                    <Chip
+                    <Chip radius="md"
                         color={statusColorMap[item.feedback.status]}
-                        variant="flat" radius="sm" className="text-xs font-semibold uppercase px-2 py-1" size="sm"
+                        variant="flat" radius="md" className="text-xs font-semibold uppercase px-2 py-1" size="sm"
                     >
                         {tDashboard(`statuses.${item.feedback.status}`)}
                     </Chip>
-                    <Chip color={item.feedback.type === "feature" ? "success" : item.feedback.type === "bug" ? "danger" : "warning"} variant="flat" radius="sm" className="text-xs font-semibold uppercase px-2 py-1" size="sm">
+                    <Chip radius="md" color={item.feedback.type === "feature" ? "success" : item.feedback.type === "bug" ? "danger" : "warning"} variant="flat" radius="md" className="text-xs font-semibold uppercase px-2 py-1" size="sm">
                         {t(`types.${item.feedback.type}`)}
                     </Chip>
                 </div>
@@ -149,12 +149,12 @@ function FeedbackCard({ item, session, queryFilters }: { item: FeedbackItem, ses
                         color={item.userVote === 1 ? "success" : "default"}
                         onPress={() => handleVote('up')}
                         isDisabled={!session || isUpvoteDisabled(item.feedback.status)}
-                        className={`rounded-full ${item.userVote === 1 ? "bg-success/20 text-success" : ""}`}
+                        className={`rounded-md ${item.userVote === 1 ? "bg-success/20 text-success" : ""}`}
                     >
                         <ThumbsUp className="w-4 h-4" />
                     </Button>
                     <span className={`font-semibold min-w-[2rem] text-center ${Number(item.voteCount) > 0 ? "text-success" :
-                            Number(item.voteCount) < 0 ? "text-danger" : "text-muted-foreground"
+                        Number(item.voteCount) < 0 ? "text-danger" : "text-muted-foreground"
                         }`}>{item.voteCount}</span>
                     <Button
                         isIconOnly
@@ -163,7 +163,7 @@ function FeedbackCard({ item, session, queryFilters }: { item: FeedbackItem, ses
                         color={item.userVote === -1 ? "danger" : "default"}
                         onPress={() => handleVote('down')}
                         isDisabled={!session || isUpvoteDisabled(item.feedback.status)}
-                        className={`rounded-full ${item.userVote === -1 ? "bg-danger/20 text-danger" : ""}`}
+                        className={`rounded-md ${item.userVote === -1 ? "bg-danger/20 text-danger" : ""}`}
                     >
                         <ThumbsDown className="w-4 h-4" />
                     </Button>

@@ -16,7 +16,7 @@ export default function SigninButton({ provider, IntlMessage, startContent, redi
                     callbackURL: absoluteUrl
                 });
             }}
-            className="rounded-sm w-full"
+            className="rounded-md w-full"
             variant="flat"
             color="primary"
             type="submit"

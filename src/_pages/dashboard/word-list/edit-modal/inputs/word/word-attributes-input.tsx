@@ -47,7 +47,7 @@ export default function WordAttributesInput({
                 render={({ field }) => (
                     <Select
                         labelPlacement='outside'
-                        radius='sm'
+                        radius='md'
                         selectedKeys={values}
                         items={wordAttributes}
                         as={"div"}

@@ -18,7 +18,7 @@ export default function WordRootInput({
                     // placeholder="Type the root word"
                     label="Root"
                     labelPlacement='outside'
-                    radius='sm'
+                    radius='md'
                     placeholder={`You can enter the word's root here`}
                     isInvalid={error !== undefined}
                     errorMessage={error?.message}

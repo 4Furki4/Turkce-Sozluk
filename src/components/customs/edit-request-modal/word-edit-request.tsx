@@ -1,5 +1,6 @@
 "use client"
 import { Button } from "@heroui/button"
+import { useEffect, useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -42,17 +43,21 @@ const getWordEditRequestIntlSchema = (wordNameRequired: string, reasonRequired: 
 })
 
 export type WordEditRequestForm = z.infer<typeof wordEditRequestSchema>
+export type WordEditRequestInitialTab = "edit" | "pronunciation"
 
 export default function WordEditRequest({
   data: { word_data },
   onClose,
+  initialTab = "edit",
 }: {
   data: WordSearchResult
   onClose: () => void
+  initialTab?: WordEditRequestInitialTab
 }) {
   const locale = useLocale();
   const t = useTranslations();
   const tRequests = useTranslations("Requests");
+  const [selectedTab, setSelectedTab] = useState<WordEditRequestInitialTab>(initialTab);
   const { executeRecaptcha } = useGoogleReCaptcha();
   const { data: languages, isLoading: languagesIsLoading } = api.params.getLanguages.useQuery()
   const { data: wordAttributesWithRequested, isLoading: wordAttributesWithRequestedIsLoading } = api.request.getWordAttributesWithRequested.useQuery()
@@ -117,9 +122,18 @@ export default function WordEditRequest({
     }
   }
 
+  useEffect(() => {
+    setSelectedTab(initialTab);
+  }, [initialTab]);
+
   return (
     <div className="flex w-full flex-col">
-      <CustomTabs disableAnimation aria-label="Word Edit Options">
+      <CustomTabs
+        disableAnimation
+        aria-label="Word Edit Options"
+        selectedKey={selectedTab}
+        onSelectionChange={(key) => setSelectedTab(String(key) as WordEditRequestInitialTab)}
+      >
         <Tab key="edit" title={t("Requests.EditWord")}>
           <CustomCard>
             <CardBody>
@@ -179,7 +193,7 @@ export default function WordEditRequest({
                     control={control}
                     render={({ field, fieldState: { error } }) => (
                       <CustomAutocomplete
-                        radius='sm'
+                        radius='md'
                         {...field}
                         label={t("Language")}
                         isLoading={languagesIsLoading}

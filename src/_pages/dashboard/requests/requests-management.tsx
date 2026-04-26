@@ -125,7 +125,7 @@ export default function RequestsManagement() {
         return entityTypeLabels[request.entityType] || request.entityType;
       case "action":
         return (
-          <Chip color={actionColors[request.action]} variant="flat">
+          <Chip radius="md" color={actionColors[request.action]} variant="flat">
             {actionLabels[request.action] || request.action}
           </Chip>
         );

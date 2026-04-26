@@ -990,7 +990,7 @@ export default function WordBuilder() {
         key={action.id}
         type="button"
         onClick={() => applyAction(action.id)}
-        className="group rounded-lg border border-border/70 bg-background/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/6"
+        className="group rounded-md border border-border/70 bg-background/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/6"
       >
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -1001,7 +1001,7 @@ export default function WordBuilder() {
               {section.kind === "derivational" && attestation?.matched ? (
                 <Badge
                   variant="outline"
-                  className="rounded-full border-primary/20 bg-primary/8 px-2 py-0.5 text-[11px] text-primary"
+                  className="rounded-md border-primary/20 bg-primary/8 px-2 py-0.5 text-[11px] text-primary"
                 >
                   {t("attestedBadge")}
                 </Badge>
@@ -1011,7 +1011,7 @@ export default function WordBuilder() {
                 !attestation.matched ? (
                 <Badge
                   variant="outline"
-                  className="rounded-full border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-700 dark:text-amber-300"
+                  className="rounded-md border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-700 dark:text-amber-300"
                 >
                   {t("candidateUnattestedBadge")}
                 </Badge>
@@ -1028,10 +1028,10 @@ export default function WordBuilder() {
           {section.kind === "derivational" ||
             section.kind === "analytic" ? (
             <>
-              <span className="rounded-full border border-border/70 px-2.5 py-1">
+              <span className="rounded-md border border-border/70 px-2.5 py-1">
                 {getLocalizedPos(t, action.sourcePos)}
               </span>
-              <span className="rounded-full border border-border/70 px-2.5 py-1">
+              <span className="rounded-md border border-border/70 px-2.5 py-1">
                 {getLocalizedPos(t, action.targetPos)}
               </span>
             </>
@@ -1039,10 +1039,10 @@ export default function WordBuilder() {
 
           {section.kind === "nonfinite" ? (
             <>
-              <span className="rounded-full border border-border/70 px-2.5 py-1">
+              <span className="rounded-md border border-border/70 px-2.5 py-1">
                 {getLocalizedCategory(t, builderState.currentCategory)}
               </span>
-              <span className="rounded-full border border-border/70 px-2.5 py-1">
+              <span className="rounded-md border border-border/70 px-2.5 py-1">
                 {section.key === "VerbalNoun"
                   ? t("categoryVerbalNoun")
                   : section.key === "Participle"
@@ -1054,22 +1054,22 @@ export default function WordBuilder() {
 
           {section.kind === "inflectional" ? (
             <>
-              <span className="rounded-full border border-border/70 px-2.5 py-1">
+              <span className="rounded-md border border-border/70 px-2.5 py-1">
                 {getLocalizedPos(t, builderState.currentPos)}
               </span>
-              <span className="rounded-full border border-border/70 px-2.5 py-1">
+              <span className="rounded-md border border-border/70 px-2.5 py-1">
                 {t(section.titleKey)}
               </span>
             </>
           ) : null}
 
           {section.kind === "postfinite" ? (
-            <span className="rounded-full border border-border/70 px-2.5 py-1">
+            <span className="rounded-md border border-border/70 px-2.5 py-1">
               {getLocalizedPos(t, action.sourcePos)}
             </span>
           ) : null}
 
-          <span className="rounded-full border border-border/70 px-2.5 py-1">
+          <span className="rounded-md border border-border/70 px-2.5 py-1">
             {section.kind === "derivational"
               ? t("phaseDerivation")
               : section.kind === "analytic"
@@ -1092,10 +1092,10 @@ export default function WordBuilder() {
           <CardBody className="gap-6 p-2 sm:p-8">
             <div className="space-y-3">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge className="rounded-full border-primary/25 bg-primary/12 px-3 py-1 text-primary" variant="outline">
+                <Badge className="rounded-md border-primary/25 bg-primary/12 px-3 py-1 text-primary" variant="outline">
                   {t("titleBadge")}
                 </Badge>
-                <Badge className="rounded-full border-border/60 bg-background/60 px-3 py-1" variant="outline">
+                <Badge className="rounded-md border-border/60 bg-background/60 px-3 py-1" variant="outline">
                   {t("phaseAware")}
                 </Badge>
               </div>
@@ -1110,7 +1110,7 @@ export default function WordBuilder() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-lg border border-primary/15 bg-background/70 p-4">
+              <div className="rounded-md border border-primary/15 bg-background/70 p-4">
                 <div className="mb-2 flex items-center gap-2 text-primary">
                   <Languages className="h-4 w-4" />
                   <span className="text-xs font-semibold uppercase tracking-[0.18em]">
@@ -1119,7 +1119,7 @@ export default function WordBuilder() {
                 </div>
                 <p className="text-sm text-foreground/75">{t("featureHarmonyBody")}</p>
               </div>
-              <div className="rounded-lg border border-primary/15 bg-background/70 p-4">
+              <div className="rounded-md border border-primary/15 bg-background/70 p-4">
                 <div className="mb-2 flex items-center gap-2 text-primary">
                   <Orbit className="h-4 w-4" />
                   <span className="text-xs font-semibold uppercase tracking-[0.18em]">
@@ -1128,7 +1128,7 @@ export default function WordBuilder() {
                 </div>
                 <p className="text-sm text-foreground/75">{t("featurePhonologyBody")}</p>
               </div>
-              <div className="rounded-lg border border-primary/15 bg-background/70 p-4">
+              <div className="rounded-md border border-primary/15 bg-background/70 p-4">
                 <div className="mb-2 flex items-center gap-2 text-primary">
                   <Blocks className="h-4 w-4" />
                   <span className="text-xs font-semibold uppercase tracking-[0.18em]">
@@ -1137,7 +1137,7 @@ export default function WordBuilder() {
                 </div>
                 <p className="text-sm text-foreground/75">{t("featurePosBody")}</p>
               </div>
-              <div className="rounded-lg border border-primary/15 bg-background/70 p-4">
+              <div className="rounded-md border border-primary/15 bg-background/70 p-4">
                 <div className="mb-2 flex items-center gap-2 text-primary">
                   <Sparkles className="h-4 w-4" />
                   <span className="text-xs font-semibold uppercase tracking-[0.18em]">
@@ -1150,7 +1150,7 @@ export default function WordBuilder() {
 
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <Badge className="rounded-full bg-background/70 px-3 py-1" variant="outline">
+                <Badge className="rounded-md bg-background/70 px-3 py-1" variant="outline">
                   {t("samples")}
                 </Badge>
               </div>
@@ -1160,7 +1160,7 @@ export default function WordBuilder() {
                     key={`${sample.surface}-${sample.pos}`}
                     type="button"
                     onClick={() => applySample(sample)}
-                    className="rounded-full border border-border/70 bg-background/75 px-4 py-2 text-sm font-medium text-foreground/80 transition-colors hover:border-primary/40 hover:text-primary"
+                    className="rounded-md border border-border/70 bg-background/75 px-4 py-2 text-sm font-medium text-foreground/80 transition-colors hover:border-primary/40 hover:text-primary"
                   >
                     {sample.surface}
                     <span className="ml-2 text-xs text-foreground/50">
@@ -1211,7 +1211,7 @@ export default function WordBuilder() {
             </Autocomplete>
 
             {selectedDictionaryWord ? (
-              <div className="rounded-lg border border-primary/20 bg-primary/8 p-4">
+              <div className="rounded-md border border-primary/20 bg-primary/8 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <div className="text-sm font-semibold text-foreground">
@@ -1229,12 +1229,12 @@ export default function WordBuilder() {
                 <div className="mt-3 flex flex-wrap gap-2">
                   {dictionaryPosOptions.length > 0 ? (
                     dictionaryPosOptions.map((pos) => (
-                      <Chip key={pos} variant="flat">
+                      <Chip radius="md" key={pos} variant="flat">
                         {getLocalizedPos(t, pos)}
                       </Chip>
                     ))
                   ) : (
-                    <Chip variant="flat">{t("dictionaryPosLoading")}</Chip>
+                    <Chip radius="md" variant="flat">{t("dictionaryPosLoading")}</Chip>
                   )}
                 </div>
               </div>
@@ -1282,7 +1282,7 @@ export default function WordBuilder() {
             )}
 
             {selectedDictionaryWord && dictionaryPosOptions.length > 1 ? (
-              <p className="rounded-lg border border-border/60 bg-background/60 px-4 py-3 text-sm leading-6 text-foreground/65">
+              <p className="rounded-md border border-border/60 bg-background/60 px-4 py-3 text-sm leading-6 text-foreground/65">
                 {t("dictionaryPosRequired")}
               </p>
             ) : null}
@@ -1318,7 +1318,7 @@ export default function WordBuilder() {
               </Select>
             </div>
 
-            <p className="rounded-lg border border-border/60 bg-background/60 px-4 py-3 text-sm leading-6 text-foreground/65">
+            <p className="rounded-md border border-border/60 bg-background/60 px-4 py-3 text-sm leading-6 text-foreground/65">
               {t("mutationHint")}
             </p>
 
@@ -1354,7 +1354,7 @@ export default function WordBuilder() {
                           word: currentAttestation.wordName ?? realization.surface,
                         },
                       }}
-                      className="inline-flex items-center rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-sm text-primary transition-colors hover:bg-primary/12"
+                      className="inline-flex items-center rounded-md border border-primary/20 bg-primary/8 px-3 py-1 text-sm text-primary transition-colors hover:bg-primary/12"
                     >
                       {t("attestedBadge")}
                     </NextIntlLink>
@@ -1363,16 +1363,16 @@ export default function WordBuilder() {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <Chip color="primary" variant="flat">
+                <Chip radius="md" color="primary" variant="flat">
                   {t("currentPos")}: {getLocalizedPos(t, builderState.currentPos)}
                 </Chip>
-                <Chip variant="flat">
+                <Chip radius="md" variant="flat">
                   {getLocalizedCategory(t, builderState.currentCategory)}
                 </Chip>
-                <Chip variant="flat">
+                <Chip radius="md" variant="flat">
                   {t("currentPhase")}: {getLocalizedPhase(t, builderState.phase)}
                 </Chip>
-                <Chip variant="flat">
+                <Chip radius="md" variant="flat">
                   {t("stepCount")}: {builderState.history.length}
                 </Chip>
               </div>
@@ -1380,7 +1380,7 @@ export default function WordBuilder() {
           </div>
 
           {showInflectionLockNotice ? (
-            <div className="rounded-lg border border-primary/20 bg-primary/8 px-4 py-3 text-sm text-foreground/80">
+            <div className="rounded-md border border-primary/20 bg-primary/8 px-4 py-3 text-sm text-foreground/80">
               {t("lockedInflection")}
             </div>
           ) : null}
@@ -1393,14 +1393,14 @@ export default function WordBuilder() {
               </span>
             </div>
             <div className="overflow-x-auto pb-1">
-              <div className="flex min-h-16 min-w-max items-center gap-2 rounded-lg border border-dashed border-border/70 bg-background/55 p-3">
+              <div className="flex min-h-16 min-w-max items-center gap-2 rounded-md border border-dashed border-border/70 bg-background/55 p-3">
                 {builderState.history.length > 0 ? (
                   builderState.history.map((step) => (
                     <Badge
                       key={step.step}
                       variant="outline"
                       className={cn(
-                        "rounded-full px-3 py-1 text-sm",
+                        "rounded-md px-3 py-1 text-sm",
                         step.action.kind === "derivational"
                           ? "border-primary/20 bg-primary/8 text-primary"
                           : step.action.kind === "analytic"
@@ -1453,7 +1453,7 @@ export default function WordBuilder() {
                 <h2 className="text-xl font-semibold">{t("actionDockTitle")}</h2>
                 <p className="text-sm text-foreground/65">{t("actionDockHint")}</p>
               </div>
-              <Badge variant="outline" className="rounded-full px-3 py-1">
+              <Badge variant="outline" className="rounded-md px-3 py-1">
                 {availableActions.length} {t("availableNow")}
               </Badge>
             </div>
@@ -1466,14 +1466,14 @@ export default function WordBuilder() {
                     type="button"
                     onClick={() => setActiveActionTab(tab)}
                     className={cn(
-                      "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                      "inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors",
                       activeActionTab === tab
                         ? "border-primary/25 bg-primary/10 text-primary"
                         : "border-border/70 bg-background/70 text-foreground/70 hover:border-primary/20 hover:text-foreground",
                     )}
                   >
                     <span>{t(getActionTabLabelKey(tab))}</span>
-                    <span className="rounded-full bg-background/80 px-2 py-0.5 text-xs text-foreground/55">
+                    <span className="rounded-md bg-background/80 px-2 py-0.5 text-xs text-foreground/55">
                       {actionTabCounts[tab]}
                     </span>
                   </button>
@@ -1506,13 +1506,13 @@ export default function WordBuilder() {
                       return (
                         <>
                           <div className="flex items-center gap-2 pb-0.5">
-                            <Badge variant="outline" className="rounded-full px-3 py-1">
+                            <Badge variant="outline" className="rounded-md px-3 py-1">
                               {t(section.titleKey)}
                             </Badge>
                             {rareActions.length > 0 ? (
                               <Badge
                                 variant="outline"
-                                className="rounded-full border-border/60 bg-background/60 px-2.5 py-1 text-[11px] text-foreground/55"
+                                className="rounded-md border-border/60 bg-background/60 px-2.5 py-1 text-[11px] text-foreground/55"
                               >
                                 {t("rareOptionsLabel")}
                               </Badge>
@@ -1528,7 +1528,7 @@ export default function WordBuilder() {
                           ) : null}
 
                           {rareActions.length > 0 ? (
-                            <div className="space-y-3 rounded-lg border border-dashed border-border/60 bg-background/45 p-4">
+                            <div className="space-y-3 rounded-md border border-dashed border-border/60 bg-background/45 p-4">
                               <div className="flex flex-wrap items-center justify-between gap-3">
                                 <div className="space-y-1">
                                   <div className="text-sm font-medium text-foreground/80">
@@ -1546,7 +1546,7 @@ export default function WordBuilder() {
                                       [sectionStorageKey]: !showRareActions,
                                     }))
                                   }
-                                  className="inline-flex items-center rounded-full border border-border/70 bg-background/75 px-3 py-1.5 text-sm font-medium text-foreground/75 transition-colors hover:border-primary/20 hover:text-foreground"
+                                  className="inline-flex items-center rounded-md border border-border/70 bg-background/75 px-3 py-1.5 text-sm font-medium text-foreground/75 transition-colors hover:border-primary/20 hover:text-foreground"
                                 >
                                   {showRareActions
                                     ? t("hideRareOptions")
@@ -1571,7 +1571,7 @@ export default function WordBuilder() {
                   </div>
                 ))
               ) : (
-                <div className="rounded-lg border border-dashed border-border/70 bg-background/55 px-4 py-5 text-sm text-foreground/55">
+                <div className="rounded-md border border-dashed border-border/70 bg-background/55 px-4 py-5 text-sm text-foreground/55">
                   {t("noAvailableSuffixes")}
                 </div>
               )}
@@ -1603,7 +1603,7 @@ export default function WordBuilder() {
                         type="button"
                         onClick={() => setSelectedStepNumber(step.step)}
                         className={cn(
-                          "w-full rounded-lg border p-4 text-left transition-colors",
+                          "w-full rounded-md border p-4 text-left transition-colors",
                           selectedHistoryEntry?.step === step.step
                             ? "border-primary/25 bg-primary/8 shadow-[0_12px_25px_-20px_rgba(194,65,12,0.8)]"
                             : "border-border/70 bg-background/60 hover:border-primary/20 hover:bg-background/80",
@@ -1621,7 +1621,7 @@ export default function WordBuilder() {
                           {step.attestation?.matched ? (
                             <Badge
                               variant="outline"
-                              className="shrink-0 rounded-full border-primary/20 bg-primary/8 px-2 py-0.5 text-xs text-primary"
+                              className="shrink-0 rounded-md border-primary/20 bg-primary/8 px-2 py-0.5 text-xs text-primary"
                             >
                               {t("attestedBadge")}
                             </Badge>
@@ -1647,7 +1647,7 @@ export default function WordBuilder() {
                   </div>
 
                   {selectedHistoryEntry ? (
-                    <div className="rounded-xl border border-border/70 bg-background/60 p-6 shadow-[0_10px_35px_-28px_rgba(15,23,42,0.9)]">
+                    <div className="rounded-md border border-border/70 bg-background/60 p-6 shadow-[0_10px_35px_-28px_rgba(15,23,42,0.9)]">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
                           <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">
@@ -1671,13 +1671,13 @@ export default function WordBuilder() {
                                     selectedHistoryEntry.log.afterSurface,
                                 },
                               }}
-                              className="inline-flex items-center rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-sm text-primary transition-colors hover:bg-primary/12"
+                              className="inline-flex items-center rounded-md border border-primary/20 bg-primary/8 px-3 py-1 text-sm text-primary transition-colors hover:bg-primary/12"
                             >
                               {t("attestedBadge")}
                             </NextIntlLink>
                           ) : null}
                           <Badge
-                            className="rounded-full border-primary/20 bg-primary/8 px-3 py-1 text-primary"
+                            className="rounded-md border-primary/20 bg-primary/8 px-3 py-1 text-primary"
                             variant="outline"
                           >
                             {t(selectedHistoryEntry.action.labelKey)}
@@ -1686,7 +1686,7 @@ export default function WordBuilder() {
                       </div>
 
                       <div className="mt-5 grid gap-3 md:grid-cols-2">
-                        <div className="rounded-lg border border-border/70 bg-background/70 p-4">
+                        <div className="rounded-md border border-border/70 bg-background/70 p-4">
                           <div className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-foreground/45">
                             {t("before")}
                           </div>
@@ -1694,7 +1694,7 @@ export default function WordBuilder() {
                             {renderDiff(selectedHistoryEntry.log.diff.segments, "before")}
                           </div>
                         </div>
-                        <div className="rounded-lg border border-primary/20 bg-primary/8 p-4">
+                        <div className="rounded-md border border-primary/20 bg-primary/8 p-4">
                           <div className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary/75">
                             {t("after")}
                           </div>
@@ -1705,16 +1705,16 @@ export default function WordBuilder() {
                       </div>
 
                       <div className="mt-5 flex flex-wrap gap-2">
-                        <Chip variant="flat">
+                        <Chip radius="md" variant="flat">
                           {getLocalizedPos(t, selectedHistoryEntry.beforeState.currentPos)}{" "}
                           <ArrowRight className="mx-1 inline h-3.5 w-3.5" />{" "}
                           {getLocalizedPos(t, selectedHistoryEntry.afterState.currentPos)}
                         </Chip>
-                        <Chip variant="flat">
+                        <Chip radius="md" variant="flat">
                           {t("surfaceSuffix")}:{" "}
                           {selectedHistoryEntry.surfaceSuffix || t("zeroMorpheme")}
                         </Chip>
-                        <Chip variant="flat">
+                        <Chip radius="md" variant="flat">
                           {t("archiphoneme")}:{" "}
                           {selectedHistoryEntry.log.suffixArchiphoneme ??
                             selectedHistoryEntry.action.preview}
@@ -1730,7 +1730,7 @@ export default function WordBuilder() {
                             <li
                               key={`${selectedHistoryEntry.step}-${event.code}-${index}`}
                               className={cn(
-                                "rounded-lg border border-border/65 px-4 py-3 text-sm leading-6 text-foreground/75",
+                                "rounded-md border border-border/65 px-4 py-3 text-sm leading-6 text-foreground/75",
                                 index === 0
                                   ? "border-primary/20 bg-primary/8 text-foreground"
                                   : "bg-background/55",
@@ -1743,14 +1743,14 @@ export default function WordBuilder() {
                       </div>
                     </div>
                   ) : (
-                    <div className="rounded-xl border border-dashed border-border/70 bg-background/55 px-5 py-10 text-center text-sm text-foreground/55">
+                    <div className="rounded-md border border-dashed border-border/70 bg-background/55 px-5 py-10 text-center text-sm text-foreground/55">
                       {t("selectStepHint")}
                     </div>
                   )}
                 </div>
               </div>
             ) : (
-              <div className="rounded-xl border border-dashed border-border/70 bg-background/55 px-5 py-10 text-center text-sm text-foreground/55">
+              <div className="rounded-md border border-dashed border-border/70 bg-background/55 px-5 py-10 text-center text-sm text-foreground/55">
                 {t("noSteps")}
               </div>
             )}

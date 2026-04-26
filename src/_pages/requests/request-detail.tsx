@@ -232,16 +232,16 @@ export default function RequestDetail({ requestId }: RequestDetailProps) {
                   : t("details.unknownDate")}
               </div>
               <div className="flex flex-wrap items-center gap-3">
-                <Chip
+                <Chip radius="md"
                   color={statusColors[request.status]}
-                  radius="sm"
+                  radius="md"
                 >
                   {statusLabels[request.status]}
                 </Chip>
-                <Chip
+                <Chip radius="md"
                   color={actionColors[request.action]}
                   variant="flat"
-                  radius="sm"
+                  radius="md"
                   classNames={{
                     base: "px-3 py-1",
                     content: "font-medium"
@@ -257,7 +257,7 @@ export default function RequestDetail({ requestId }: RequestDetailProps) {
         <CardBody className="px-6 py-5">
           {/* Resolution Metadata */}
           {!isPending && (
-            <div className="mb-8 rounded-lg border border-default p-4">
+            <div className="mb-8 rounded-md border border-default p-4">
               <h3 className="mb-2 text-sm uppercase text-default-500">{t("details.resolution")}</h3>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div>
@@ -281,7 +281,7 @@ export default function RequestDetail({ requestId }: RequestDetailProps) {
           )}
           {/* Request Reason */}
           {request.reason && (
-            <div className="mb-8 rounded-lg border border-default p-4">
+            <div className="mb-8 rounded-md border border-default p-4">
               <h3 className="mb-2 text-sm uppercase text-default-500">{t("details.reason")}</h3>
               <p className="text-foreground">{request.reason}</p>
             </div>

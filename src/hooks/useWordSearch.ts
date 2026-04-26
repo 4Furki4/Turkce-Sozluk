@@ -5,9 +5,23 @@ import { useState, useEffect } from "react";
 import { api } from "@/src/trpc/react";
 import { WordData } from "../lib/db-config";
 
+type WordDataWithSource = WordData & { source: "online" | "offline" };
+
+type WordQueryData =
+    | { data: WordData; source: "online" | "offline" }
+    | { data: WordData[]; source: "offline" };
+
+export const getOfflineWordSearchQueryKey = (wordName: string) =>
+    ["word-offline", wordName] as const;
+
+export const toOfflineWordSearchResult = (data: WordData): WordQueryData => ({
+    data,
+    source: "offline",
+});
+
 // Define a unified result type for our hook
 type UseWordSearchResult = {
-    data: (WordData | WordData[]) & { source: "online" | "offline" } | undefined;
+    data: WordDataWithSource | WordDataWithSource[] | undefined;
     isLoading: boolean;    // For the initial page skeleton
     isFetching: boolean;   // For the background "revalidate" spinner
     isError: boolean;      // For the "not found" state
@@ -48,7 +62,7 @@ export function useWordSearch(wordName: string): UseWordSearchResult {
 
     // --- 1. OFFLINE QUERY ---
     const { data: offlineData, isLoading: isOfflineLoading } = useQuery({
-        queryKey: ["word-offline", wordName],
+        queryKey: getOfflineWordSearchQueryKey(wordName),
         queryFn: async () => {
             if (!wordName) return undefined;
             try {
@@ -105,7 +119,7 @@ export function useWordSearch(wordName: string): UseWordSearchResult {
 
     // Prioritize "fresh" online data, fall back to "stale" offline data.
     // If pattern search, onlineQuery.data will be undefined (disabled).
-    const data = (onlineQuery.data as any) ?? (offlineData as any);
+    const data = (onlineQuery.data ?? offlineData) as WordQueryData | undefined;
 
     // We are "loading" ONLY if we have NO data to show yet,
     // and the relevant query is still running.
@@ -123,8 +137,14 @@ export function useWordSearch(wordName: string): UseWordSearchResult {
     // (This includes the background revalidation)
     const isFetching = isOnline && onlineQuery.isFetching;
 
+    const resolvedData = data?.data
+        ? Array.isArray(data.data)
+            ? data.data.map((item) => ({ ...item, source: data.source }))
+            : { ...data.data, source: data.source }
+        : undefined;
+
     return {
-        data: data?.data ? { ...data.data, source: data.source } : undefined,
+        data: resolvedData as UseWordSearchResult["data"],
         isLoading,    // Use this for the main page skeleton
         isFetching,   // Use this for the small loading icon
         isError,      // Use this for "Not Found"

@@ -143,10 +143,10 @@ export function RequestDetails({ requestId }: { requestId: number }) {
           <CardHeader className="flex flex-col gap-2">
             <h2 className="text-xl font-semibold">Request Information</h2>
             <div className="flex flex-wrap gap-2">
-              <Chip color={actionColors[request.action]}>
+              <Chip radius="md" color={actionColors[request.action]}>
                 {actionLabels[request.action]}
               </Chip>
-              <Chip variant="flat" color="secondary">
+              <Chip radius="md" variant="flat" color="secondary">
                 {entityTypeLabels[request.entityType]}
               </Chip>
             </div>

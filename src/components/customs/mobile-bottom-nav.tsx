@@ -71,7 +71,7 @@ export default function MobileBottomNav({
                                     aria-label={item.label}
                                 >
                                     <div className={cn(
-                                        "flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95",
+                                        "flex items-center justify-center w-14 h-14 rounded-md shadow-lg transition-transform hover:scale-105 active:scale-95",
                                         "bg-primary text-primary-foreground",
                                         item.isActive && "ring-2 ring-offset-2 ring-primary ring-offset-background"
                                     )}>
@@ -87,8 +87,9 @@ export default function MobileBottomNav({
                             <Link
                                 key={index}
                                 href={item.href as any}
+                                aria-label={item.label}
                                 className={cn(
-                                    "flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-200",
+                                    "flex min-w-0 w-full flex-col items-center justify-center rounded-md p-2 transition-all duration-200",
                                     "text-muted-foreground hover:text-foreground",
                                     item.isActive && "text-primary hover:text-primary"
                                 )}
@@ -100,7 +101,7 @@ export default function MobileBottomNav({
                                     )}
                                     strokeWidth={item.isActive ? 2.5 : 2}
                                 />
-                                <span className="text-[10px] font-medium opacity-80 max-[420px]:hidden">
+                                <span className="block max-w-full truncate whitespace-nowrap text-center text-[10px] font-medium opacity-80 max-[420px]:hidden">
                                     {item.label}
                                 </span>
                             </Link>
@@ -110,11 +111,11 @@ export default function MobileBottomNav({
                     {/* Menu Button */}
                     <button
                         onClick={() => setIsSidebarOpen(true)}
-                        className="flex flex-col items-center justify-center p-2 rounded-xl text-muted-foreground hover:text-foreground transition-all duration-200"
+                        className="flex min-w-0 w-full flex-col items-center justify-center rounded-md p-2 text-muted-foreground transition-all duration-200 hover:text-foreground"
                         aria-label={ariaMenu}
                     >
                         <Menu className="w-6 h-6 mb-1 max-[420px]:mb-0" strokeWidth={2} />
-                        <span className="text-[10px] font-medium opacity-80 max-[420px]:hidden">
+                        <span className="block max-w-full truncate whitespace-nowrap text-center text-[10px] font-medium opacity-80 max-[420px]:hidden">
                             {ariaMenu}
                         </span>
                     </button>

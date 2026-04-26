@@ -6,7 +6,7 @@ export const PronunciationCardSkeleton = () => {
         <CustomCard>
             <CardHeader className="justify-between">
                 <div className="flex gap-5">
-                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <Skeleton className="h-12 w-12 rounded-md" />
                     <div className="flex flex-col gap-2 items-start justify-center">
                         <Skeleton className="h-4 w-24" />
                         <Skeleton className="h-3 w-20" />

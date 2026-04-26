@@ -60,11 +60,11 @@ export function ForeignTermSuggestionCard({
                 {/* Header with status and language */}
                 <div className="flex items-center justify-between flex-wrap gap-2">
                     <div className="flex items-center gap-2">
-                        <Chip size="sm" color={statusColors[suggestion.status]} variant="flat">
+                        <Chip radius="md" size="sm" color={statusColors[suggestion.status]} variant="flat">
                             {t(suggestion.status)}
                         </Chip>
                         {language && (
-                            <Chip size="sm" variant="bordered">
+                            <Chip radius="md" size="sm" variant="bordered">
                                 {languageName}
                             </Chip>
                         )}
@@ -87,7 +87,7 @@ export function ForeignTermSuggestionCard({
                         <span className="text-muted-foreground text-sm">{t("meaning")}:</span>
                         <p className="text-foreground mt-1">{suggestion.foreignMeaning}</p>
                     </div>
-                    <div className="flex items-center gap-2 bg-primary/10 p-3 rounded-lg">
+                    <div className="flex items-center gap-2 bg-primary/10 p-3 rounded-md">
                         <span className="text-muted-foreground text-sm">{t("suggestedWord")}:</span>
                         {suggestion.isNewWord ? (
                             // New word: show plain text with badge
@@ -95,7 +95,7 @@ export function ForeignTermSuggestionCard({
                                 <span className="font-bold text-xl text-primary">
                                     {suggestion.suggestedTurkishWord}
                                 </span>
-                                <Chip size="sm" color="secondary" variant="flat">
+                                <Chip radius="md" size="sm" color="secondary" variant="flat">
                                     {t("newWord")}
                                 </Chip>
                             </div>

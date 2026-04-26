@@ -34,7 +34,7 @@ export function WordCard({ id, name, meanings, partOfSpeech, origin, relatedWord
                             {name}
                         </h3>
                         {partOfSpeech && (
-                            <Chip
+                            <Chip radius="md"
                                 size="sm"
                                 variant="flat"
                                 color="secondary"
