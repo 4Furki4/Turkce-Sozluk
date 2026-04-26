@@ -36,7 +36,9 @@ import { captureElementScreenshot } from "@/src/utils/screenshot";
 
 import CustomCard from "@/src/components/customs/heroui/custom-card";
 import { CustomAudioPlayer } from "@/src/components/customs/custom-audio";
-import WordCardRequestModal from "@/src/components/customs/modals/word-card-request-modal";
+import WordCardRequestModal, {
+  type WordCardRequestModalInitialView,
+} from "@/src/components/customs/modals/word-card-request-modal";
 import { PronunciationCard } from "@/src/components/customs/pronunciation-card";
 import SaveWord from "@/src/components/customs/save-word";
 import WordNotFoundCard from "@/src/components/customs/word-not-found-card";
@@ -91,6 +93,7 @@ type WordCardVariantBodyProps = SearchWordCardVariantProps & {
   onCapture: () => void;
   onShare: () => void;
   onEditOpen: () => void;
+  onPronunciationRequestOpen: () => void;
 };
 
 export function SearchWordCardVariantGroup({
@@ -192,6 +195,7 @@ function SearchWordCardVariant({
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const t = useTranslations("WordCard");
   const cardRef = useRef<HTMLDivElement>(null);
+  const [requestModalInitialView, setRequestModalInitialView] = useState<WordCardRequestModalInitialView>("word");
 
   const handleCapture = async () => {
     if (!cardRef.current) return;
@@ -219,7 +223,14 @@ function SearchWordCardVariant({
         successMessage: t("urlCopiedDescription"),
       });
     },
-    onEditOpen: onOpen,
+    onEditOpen: () => {
+      setRequestModalInitialView("word");
+      onOpen();
+    },
+    onPronunciationRequestOpen: () => {
+      setRequestModalInitialView("pronunciation");
+      onOpen();
+    },
   };
 
   return (
@@ -244,6 +255,7 @@ function SearchWordCardVariant({
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         onClose={onClose}
+        initialView={requestModalInitialView}
       />
 
       <div
@@ -318,6 +330,7 @@ function MagazineWordCard({
   onCapture,
   onShare,
   onEditOpen,
+  onPronunciationRequestOpen,
 }: WordCardVariantBodyProps) {
   const WordHeading = headingLevel;
   const compactTags = getCompactTags(word_data);
@@ -379,7 +392,7 @@ function MagazineWordCard({
               <CompactPronunciationPopover
                 word_data={word_data}
                 session={session}
-                onEditOpen={onEditOpen}
+                onPronunciationRequestOpen={onPronunciationRequestOpen}
               />
 
               {hasRoot ? (
@@ -618,15 +631,16 @@ function CompactBadge({
 function CompactPronunciationPopover({
   word_data,
   session,
-  onEditOpen,
+  onPronunciationRequestOpen,
 }: {
   word_data: WordEntryData;
   session: Session | null;
-  onEditOpen: () => void;
+  onPronunciationRequestOpen: () => void;
 }) {
   const tWord = useTranslations("WordCard");
   const tPronunciation = useTranslations("Pronunciations");
   const router = useRouter();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { data: pronunciations, isLoading } = api.word.getPronunciationsForWord.useQuery({
     wordId: word_data.word_id,
   });
@@ -635,8 +649,10 @@ function CompactPronunciationPopover({
   const hasPronunciations = pronunciationCount > 0;
 
   const handleRequestPronunciation = () => {
+    setIsPopoverOpen(false);
+
     if (session) {
-      onEditOpen();
+      onPronunciationRequestOpen();
       return;
     }
 
@@ -650,7 +666,7 @@ function CompactPronunciationPopover({
   };
 
   return (
-    <Popover showArrow placement="bottom-start">
+    <Popover showArrow placement="bottom-start" isOpen={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger>
         <button
           type="button"

@@ -160,7 +160,12 @@ jest.mock("@/src/components/customs/pronunciation-card", () => ({
 jest.mock("@/src/components/customs/custom-audio", () => ({
   CustomAudioPlayer: ({ src }: { src: string }) => <audio src={src} />,
 }));
-jest.mock("@/src/components/customs/modals/word-card-request-modal", () => () => null);
+jest.mock("@/src/components/customs/modals/word-card-request-modal", () => ({
+  __esModule: true,
+  default: ({ initialView }: { initialView: string }) => (
+    <div data-testid="request-modal-initial-view">{initialView}</div>
+  ),
+}));
 jest.mock("@/src/components/customs/word-not-found-card", () => () => <div>Not Found</div>);
 jest.mock("@/src/utils/clipboard", () => ({
   copyPageUrl: jest.fn(),
@@ -320,5 +325,26 @@ describe("SearchWordCardVariantGroup", () => {
       behavior: "smooth",
       block: "center",
     });
+  });
+
+  it("opens the request modal on the pronunciation request view from compact CTA", () => {
+    localStorage.setItem(SEARCH_WORD_CARD_VARIANT_STORAGE_KEY, "magazine");
+    initializePreferences();
+
+    render(
+      <SearchWordCardVariantGroup
+        data={[sampleWord]}
+        locale="en"
+        session={{ user: { id: "user-1" } } as any}
+        headingLevel="h1"
+      />,
+    );
+
+    expect(screen.getByTestId("request-modal-initial-view")).toHaveTextContent("word");
+
+    const requestPronunciationButtons = screen.getAllByRole("button", { name: "Request pronunciation" });
+    fireEvent.click(requestPronunciationButtons[requestPronunciationButtons.length - 1]);
+
+    expect(screen.getByTestId("request-modal-initial-view")).toHaveTextContent("pronunciation");
   });
 });

@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure, Tabs, Tab, Button } from "@heroui/react";
 import WordEditRequest from '../edit-request-modal/word-edit-request';
 import MeaningsEditRequest from '../edit-request-modal/meanings-edit-request';
@@ -14,15 +14,38 @@ import { useSnapshot } from "valtio"
 import { preferencesState } from "@/src/store/preferences"
 import { cn } from '@/lib/utils';
 type RelatedWordItemType = NonNullable<WordSearchResult['word_data']['relatedWords']>[number];
+export type WordCardRequestModalInitialView = "word" | "pronunciation";
+type WordCardRequestModalTab = "words" | "meanings" | "related_words" | "related_phrases";
 
-export default function WordCardRequestModal({ word: { word_data }, session, isOpen, onOpenChange, onClose }: { word: WordSearchResult, session: Session | null, isOpen: boolean, onOpenChange: (isOpen: boolean) => void, onClose: () => void }) {
+export default function WordCardRequestModal({
+    word: { word_data },
+    session,
+    isOpen,
+    onOpenChange,
+    onClose,
+    initialView = "word",
+}: {
+    word: WordSearchResult,
+    session: Session | null,
+    isOpen: boolean,
+    onOpenChange: (isOpen: boolean) => void,
+    onClose: () => void,
+    initialView?: WordCardRequestModalInitialView,
+}) {
     const t = useTranslations("WordCard");
     const tRequests = useTranslations("Requests");
     const [selectedRelatedWord, setSelectedRelatedWord] = useState<{ id: number; related_word_id: number; related_word_name: string; relation_type?: string | undefined; } | null>(null);
+    const [selectedTab, setSelectedTab] = useState<WordCardRequestModalTab>("words");
     const { isBlurEnabled } = useSnapshot(preferencesState);
     const { isOpen: isEditRelOpen, onOpen: onEditRelOpen, onClose: onEditRelClose, onOpenChange: onEditRelOpenChange } = useDisclosure();
     const { isOpen: isCreateRelOpen, onOpen: onCreateRelOpen, onClose: onCreateRelClose, onOpenChange: onCreateRelOpenChange } = useDisclosure();
     const { isOpen: isDeleteRelOpen, onOpen: onDeleteRelOpen, onClose: onDeleteRelClose, onOpenChange: onDeleteRelOpenChange } = useDisclosure();
+
+    useEffect(() => {
+        if (isOpen) {
+            setSelectedTab("words");
+        }
+    }, [initialView, isOpen]);
 
     const handleEditRelatedWord = (relatedWord: RelatedWordItemType) => {
         setSelectedRelatedWord({ id: relatedWord.related_word_id, ...relatedWord });
@@ -65,18 +88,22 @@ export default function WordCardRequestModal({ word: { word_data }, session, isO
                                 {t("EditWord")}
                             </ModalHeader>
                             <ModalBody>
-                                <Tabs color="primary" disableAnimation classNames={{
+                                <Tabs color="primary" disableAnimation selectedKey={selectedTab} onSelectionChange={(key) => setSelectedTab(String(key) as WordCardRequestModalTab)} classNames={{
                                     tabList: "w-full bg-primary/10 border border-primary",
                                     tabContent: "text-primary md:w-full",
                                     tab: "data-[selected=true]:bg-primary/60",
                                 }}>
-                                    <Tab value={"words"} title={t("Words")}>
-                                        <WordEditRequest data={{ word_data }} onClose={onClose} />
+                                    <Tab key="words" title={t("Words")}>
+                                        <WordEditRequest
+                                            data={{ word_data }}
+                                            onClose={onClose}
+                                            initialTab={initialView === "pronunciation" ? "pronunciation" : "edit"}
+                                        />
                                     </Tab>
-                                    <Tab value={"meanings"} title={t("Meanings")}>
+                                    <Tab key="meanings" title={t("Meanings")}>
                                         <MeaningsEditRequest meanings={word_data.meanings} />
                                     </Tab>
-                                    <Tab value={"related_words"} title={tRequests("RelatedWordsTabTitle")}>
+                                    <Tab key="related_words" title={tRequests("RelatedWordsTabTitle")}>
                                         <RelatedWordsEditTabContent
                                             relatedWords={word_data.relatedWords?.map(rw => ({
                                                 id: rw.related_word_id,
@@ -114,7 +141,7 @@ export default function WordCardRequestModal({ word: { word_data }, session, isO
                                             session={session}
                                         />
                                     </Tab>
-                                    <Tab value={"related_phrases"} title={tRequests("RelatedPhrasesTabTitle")}>
+                                    <Tab key="related_phrases" title={tRequests("RelatedPhrasesTabTitle")}>
                                         <RelatedPhrasesEditTabContent
                                             currentWordId={word_data.word_id}
                                             relatedPhrases={word_data.relatedPhrases || []}
