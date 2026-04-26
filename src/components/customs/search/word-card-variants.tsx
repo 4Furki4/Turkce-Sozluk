@@ -48,9 +48,9 @@ const WORD_CARD_VARIANTS: {
   labelKey: "ReadingLayout" | "MagazineLayout";
   icon: LucideIcon;
 }[] = [
-  { value: "reader", labelKey: "ReadingLayout", icon: BookOpen },
-  { value: "magazine", labelKey: "MagazineLayout", icon: Blocks },
-];
+    { value: "reader", labelKey: "ReadingLayout", icon: BookOpen },
+    { value: "magazine", labelKey: "MagazineLayout", icon: Blocks },
+  ];
 
 type WordEntryData = WordSearchResult["word_data"] & {
   source?: "online" | "offline";
@@ -154,7 +154,7 @@ function WordCardVariantToggle({
       <div
         role="radiogroup"
         aria-label={t("Layout")}
-        className="grid w-full grid-cols-2 rounded-lg border border-border/80 bg-background/90 p-1 shadow-sm shadow-black/5 sm:w-auto"
+        className="grid w-full grid-cols-2 rounded-sm border border-border/80 bg-background/90 p-1 shadow-sm shadow-black/5 sm:w-auto"
       >
         {WORD_CARD_VARIANTS.map(({ value, labelKey, icon: Icon }) => {
           const isSelected = variant === value;
@@ -167,7 +167,7 @@ function WordCardVariantToggle({
               aria-checked={isSelected}
               onClick={() => onVariantChange(value)}
               className={cn(
-                "relative inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-3 text-sm font-medium transition-all duration-200 sm:min-w-36",
+                "relative inline-flex min-h-7 items-center justify-center gap-2 rounded-sm px-3 text-sm font-medium transition-all duration-200 sm:min-w-36",
                 isSelected
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
@@ -282,7 +282,7 @@ function ReaderWordCard({
   const t = useTranslations("WordCard");
 
   return (
-    <div className="bg-background">
+    <div className="bg-background/40">
       <header className="relative border-b border-border/70 bg-muted/15 px-5 py-6 sm:px-8 sm:py-8 sm:pr-52">
         <WordUtilityActions
           word_data={word_data}
@@ -364,7 +364,7 @@ function MagazineWordCard({
   };
 
   return (
-    <div className="bg-background">
+    <div className="bg-background/40">
       <header className="relative border-b border-border/70 px-5 py-4 sm:px-6 sm:py-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 flex-1">
@@ -714,9 +714,9 @@ function CompactPronunciationPopover({
                 const userName = pronunciation.user?.name || "User";
                 const profileTarget = pronunciation.user?.id
                   ? {
-                      pathname: "/profile/[id]" as const,
-                      params: { id: pronunciation.user.id },
-                    }
+                    pathname: "/profile/[id]" as const,
+                    params: { id: pronunciation.user.id },
+                  }
                   : null;
                 const owner = (
                   <>
@@ -1063,7 +1063,7 @@ function CompactConnectionBlock({
   children: ReactNode;
 }) {
   return (
-    <section>
+    <section className="space-y-2">
       <h3 className="mb-2.5 flex items-center gap-2 text-sm font-semibold text-foreground/85">
         <Icon className="h-4 w-4 text-primary" />
         {title}
