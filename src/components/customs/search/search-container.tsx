@@ -423,7 +423,7 @@ export default function SearchContainer({
                             setSelectedIndex(-1);
                         }}
                         className={cn(
-                            "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200",
+                            "flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-sm font-medium transition-all duration-200",
                             searchMode === "word"
                                 ? "bg-primary/15 text-primary shadow-sm"
                                 : "text-zinc-500 hover:text-zinc-300"
