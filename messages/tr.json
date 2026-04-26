@@ -2,7 +2,7 @@
   "Navbar": {
     "Home": "Ana Sayfa",
     "Word List": "Kelime Listesi",
-    "WordBuilder": "Kelime İnşası",
+    "WordBuilder": "Kelime Sihirbazı",
     "Sign In": "Giriş Yap",
     "Title": "Türkçe Sözlük",
     "Profile": "Profil",
@@ -26,7 +26,6 @@
     "FlashcardGame": "Kelime Kartları",
     "Learn": "Öğren",
     "WordMatchingGame": "Kelime Eşleştirme",
-    "WordBuilder": "Fiil Çekimi",
     "SpeedRoundGame": "Hızlı Tur",
     "ForeignTermSuggestions": "Yabancı Terim Önerileri"
   },
