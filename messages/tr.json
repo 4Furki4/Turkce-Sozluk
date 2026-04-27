@@ -21,6 +21,7 @@
     "ariaBlur": "Blur Etkilerini Açma/Kapatma Butonu",
     "Contribute": "Katkıda Bulun",
     "Feedback": "Geri Bildirim",
+    "Donate": "Destek Ol",
     "Search": "Ara",
     "OfflineDictionary": "Çevrim Dışı Sözlük",
     "FlashcardGame": "Kelime Kartları",
@@ -354,6 +355,7 @@
       "privacy": "Gizlilik Politikası",
       "terms": "Kullanım Şartları",
       "contributeWord": "Kelime Katkısı",
+      "donate": "Destek Ol",
       "pronunciations": "Telaffuzlar",
       "flashcardGame": "Kelime Kartları Oyunu",
       "wordMatchingGame": "Kelime Eşleştirme",
@@ -361,6 +363,32 @@
       "leaderboards": "Sıralama Tabloları",
       "foreignTermSuggestions": "Yabancı Terim Önerileri"
     }
+  },
+  "Donation": {
+    "metaTitle": "Türkçe Sözlük'e Destek Ol",
+    "metaDescription": "Açık kaynak Türkçe Sözlük'ü GitHub Sponsors veya Patreon üzerinden destekleyin.",
+    "eyebrow": "Açık kaynak dil çalışması",
+    "title": "Türkçe Sözlük ücretsiz, hızlı ve toplulukla gelişen bir kaynak olarak kalsın.",
+    "subtitle": "Desteğiniz sözlüğün, oyunların, çevrim dışı verilerin ve katkı araçlarının arkasındaki altyapı ve bakım giderlerine katkı sağlar.",
+    "githubCta": "GitHub'da sponsor ol",
+    "patreonCta": "Patreon'da destek ol",
+    "patreonUnavailable": "Patreon yakında",
+    "visualLabel": "Proje sağlığı",
+    "visualTitle": "Topluluk desteğiyle sürüyor",
+    "visualNoteLabel": "Ödeme yöntemi",
+    "visualNote": "Yalnızca harici destek platformları",
+    "supportEyebrow": "Bağışlar neyi destekler",
+    "supportTitle": "Küçük katkılar hizmeti kullanılabilir tutar.",
+    "supportDescription": "Bağışlar herkese açık bir sözlüğü çalıştırmanın ve kullanımı keyifli tutmanın pratik giderlerine katkı sağlar.",
+    "supportItems": [
+      "Hosting ve veritabanı giderleri",
+      "Arama altyapısı",
+      "Çevrim dışı sözlük verisi",
+      "Bakım ve moderasyon",
+      "Topluluk özellikleri"
+    ],
+    "finalTitle": "Size uygun platformu seçin.",
+    "externalNote": "Türkçe Sözlük ödemeleri doğrudan işlemez. GitHub Sponsors ve Patreon ödeme adımlarını, makbuzları, para birimlerini ve ödeme güvenliğini kendi sitelerinde yönetir."
   },
   "SigninForm": {
     "Sign in with Google": "Google ile Giriş Yap",

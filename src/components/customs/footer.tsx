@@ -26,6 +26,7 @@ export default async function Footer({ session }: { session: Session | null }) {
         ],
         community: [
             { href: "/contribute-word" as const, label: t("links.contributeWord") },
+            { href: "/donate" as const, label: t("links.donate") },
             { href: "/pronunciation-voting" as const, label: t("links.pronunciations") },
             { href: "/feedback" as const, label: t("links.seeFeedback") },
             { href: "/foreign-term-suggestions" as const, label: t("links.foreignTermSuggestions") },

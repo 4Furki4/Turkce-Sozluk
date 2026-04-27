@@ -21,6 +21,7 @@ export default function NavbarAndSidebar({
     LogoutIntl,
     AnnouncementsIntl,
     ContributeWordIntl,
+    DonateIntl,
     PronunciationsIntl,
     ariaAvatar,
     ariaMenu,
@@ -51,6 +52,7 @@ export default function NavbarAndSidebar({
     LogoutIntl: string
     AnnouncementsIntl: string
     ContributeWordIntl: string
+    DonateIntl: string
     PronunciationsIntl: string,
     ariaAvatar: string,
     ariaMenu: string,
@@ -87,6 +89,7 @@ export default function NavbarAndSidebar({
                 LogoutIntl={LogoutIntl}
                 AnnouncementsIntl={AnnouncementsIntl}
                 ContributeWordIntl={ContributeWordIntl}
+                DonateIntl={DonateIntl}
                 PronunciationsIntl={PronunciationsIntl}
                 setIsSidebarOpen={setIsSidebarOpen}
                 ariaAvatar={ariaAvatar}

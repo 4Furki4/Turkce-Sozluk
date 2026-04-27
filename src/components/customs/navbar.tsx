@@ -11,7 +11,7 @@ import {
   NavbarBrand,
   DropdownSection
 } from "@heroui/react";
-import { Blocks, BookOpen, ChevronDown, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, Link2, LogOut, Mic, Monitor, Moon, Search, StarIcon, Sun, UserIcon, Zap } from "lucide-react";
+import { Blocks, BookOpen, ChevronDown, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, Link2, LogOut, Mic, Monitor, Moon, Search, StarIcon, Sun, UserIcon, WalletCards, Zap } from "lucide-react";
 import { Input } from "@heroui/input";
 // import { signIn, signOut } from "next-auth/react"; // Removed
 import { authClient, type User } from "@/src/lib/auth-client"; // Added
@@ -33,7 +33,7 @@ import { startNavigationProgress } from "@/src/lib/navigation-progress";
 
 type NavbarProps = {
   session: Session | null;
-} & Record<"TitleIntl" | "WordListIntl" | "WordBuilderIntl" | "SignInIntl" | "HomeIntl" | "ProfileIntl" | "SavedWordsIntl" | "MyRequestsIntl" | "SearchHistoryIntl" | "LogoutIntl" | "AnnouncementsIntl" | "ContributeWordIntl" | "PronunciationsIntl" | "ariaAvatar" | "ariaMenu" | "ariaLanguages" | "ariaSwitchTheme" | "ariaBlur" | "ContributeIntl" | "FeedbackIntl" | "LearnIntl" | "FlashcardGameIntl" | "WordMatchingGameIntl" | "SpeedRoundGameIntl" | "ForeignTermSuggestionsIntl" | "SearchIntl" | "DashboardIntl", string>;
+} & Record<"TitleIntl" | "WordListIntl" | "WordBuilderIntl" | "SignInIntl" | "HomeIntl" | "ProfileIntl" | "SavedWordsIntl" | "MyRequestsIntl" | "SearchHistoryIntl" | "LogoutIntl" | "AnnouncementsIntl" | "ContributeWordIntl" | "DonateIntl" | "PronunciationsIntl" | "ariaAvatar" | "ariaMenu" | "ariaLanguages" | "ariaSwitchTheme" | "ariaBlur" | "ContributeIntl" | "FeedbackIntl" | "LearnIntl" | "FlashcardGameIntl" | "WordMatchingGameIntl" | "SpeedRoundGameIntl" | "ForeignTermSuggestionsIntl" | "SearchIntl" | "DashboardIntl", string>;
 
 export default function Navbar({
   session,
@@ -48,6 +48,7 @@ export default function Navbar({
   LogoutIntl,
   AnnouncementsIntl,
   ContributeWordIntl,
+  DonateIntl,
   PronunciationsIntl,
   ariaAvatar,
   setIsSidebarOpen,
@@ -76,7 +77,7 @@ export default function Navbar({
     pathName
   );
   const snap = useSnapshot(preferencesState);
-  const isContributeActive = ["/contribute-word", "/pronunciation-voting", "/feedback", "/foreign-term-suggestions"].some((route) => pathName.startsWith(route));
+  const isContributeActive = ["/contribute-word", "/donate", "/pronunciation-voting", "/feedback", "/foreign-term-suggestions"].some((route) => pathName.startsWith(route));
   const isLearnActive = ["/word-list", "/word-builder", "/flashcard-game", "/word-matching", "/speed-round"].some((route) => pathName.startsWith(route));
   const isHomeRoute = pathName === "/";
   const isSearchRoute =
@@ -175,6 +176,9 @@ export default function Navbar({
             }}>
             <DropdownItem key="contribute-word" as={NextIntlLink} href="/contribute-word" startContent={<HeartHandshake aria-label={ContributeWordIntl} className="w-4 h-4" />}>
               {ContributeWordIntl}
+            </DropdownItem>
+            <DropdownItem key="donate" as={NextIntlLink} href="/donate" startContent={<WalletCards aria-label={DonateIntl} className="w-4 h-4" />}>
+              {DonateIntl}
             </DropdownItem>
             <DropdownItem key="pronunciation-voting" as={NextIntlLink} href="/pronunciation-voting" startContent={<Mic aria-label={PronunciationsIntl} className="w-4 h-4" />}>
               {PronunciationsIntl}

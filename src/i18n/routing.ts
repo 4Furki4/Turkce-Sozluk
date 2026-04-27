@@ -40,6 +40,10 @@ export const routing = defineRouting({
       "en": "/contribute-word",
       "tr": "/kelime-katkisi",
     },
+    "/donate": {
+      "en": "/donate",
+      "tr": "/destek-ol",
+    },
     "/dashboard": {
       "en": "/dashboard",
       "tr": "/panel",
