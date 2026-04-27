@@ -21,6 +21,7 @@
     "ariaBlur": "Toggle Blur Efects",
     "Contribute": "Contribute",
     "Feedback": "Feedback",
+    "Donate": "Donate",
     "Search": "Search",
     "OfflineDictionary": "Offline Dictionary",
     "ForeignTermSuggestions": "Foreign Term Suggestions",
@@ -352,6 +353,7 @@
       "announcements": "Announcements",
       "seeFeedback": "See Feedback",
       "contributeWord": "Contribute Word",
+      "donate": "Donate",
       "pronunciations": "Pronunciations",
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
@@ -361,6 +363,32 @@
       "leaderboards": "Leaderboards",
       "foreignTermSuggestions": "Foreign Term Suggestions"
     }
+  },
+  "Donation": {
+    "metaTitle": "Support Turkish Dictionary",
+    "metaDescription": "Support the open-source Turkish Dictionary through GitHub Sponsors or Patreon.",
+    "eyebrow": "Open-source language work",
+    "title": "Keep Turkish Dictionary free, fast, and community-run.",
+    "subtitle": "Your support helps cover the infrastructure and maintenance behind the dictionary, games, offline data, and contribution tools.",
+    "githubCta": "Sponsor on GitHub",
+    "patreonCta": "Support on Patreon",
+    "patreonUnavailable": "Patreon coming soon",
+    "visualLabel": "Project health",
+    "visualTitle": "Sustained by the community",
+    "visualNoteLabel": "Payment handling",
+    "visualNote": "External sponsor platforms only",
+    "supportEyebrow": "What donations support",
+    "supportTitle": "Small contributions keep the service useful.",
+    "supportDescription": "Donations go toward the practical parts of running a public dictionary and keeping it pleasant to use.",
+    "supportItems": [
+      "Hosting and database costs",
+      "Search infrastructure",
+      "Offline dictionary data",
+      "Maintenance and moderation",
+      "Community features"
+    ],
+    "finalTitle": "Choose the platform that works for you.",
+    "externalNote": "Turkish Dictionary does not process payments directly. GitHub Sponsors and Patreon handle checkout, receipts, currencies, and payment security on their own websites."
   },
   "SigninForm": {
     "Sign in with Google": "Sign in with Google",

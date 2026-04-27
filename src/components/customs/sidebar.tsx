@@ -1,4 +1,4 @@
-import { BellIcon, Blocks, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, HomeIcon, LayoutDashboard, Layers, Link2, ListTree, LogIn, MicIcon, Monitor, StarIcon, UserIcon, WifiOff, Sun, Moon, Sparkles, Sparkle, Languages, LogOut, Zap } from 'lucide-react'
+import { BellIcon, Blocks, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, HomeIcon, LayoutDashboard, Layers, Link2, ListTree, LogIn, MicIcon, Monitor, StarIcon, UserIcon, WifiOff, Sun, Moon, Sparkles, Sparkle, Languages, LogOut, WalletCards, Zap } from 'lucide-react'
 import React from 'react'
 import { Link as NextIntlLink } from "@/src/i18n/routing";
 import { useRouter } from "@/src/i18n/routing";
@@ -109,6 +109,11 @@ export default function Sidebar(
                             <li>
                                 <NextIntlLink className='flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 rounded-md' href={'/contribute-word'} onClick={() => setIsSidebarOpen(false)}>
                                     <HeartHandshake className="h-6 w-6" /> <span className={`text-nowrap`}>{t("Navbar.ContributeWord")}</span>
+                                </NextIntlLink>
+                            </li>
+                            <li>
+                                <NextIntlLink className='flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 rounded-md' href={'/donate'} onClick={() => setIsSidebarOpen(false)}>
+                                    <WalletCards className="h-6 w-6" /> <span className={`text-nowrap`}>{t("Navbar.Donate")}</span>
                                 </NextIntlLink>
                             </li>
                             <li>
