@@ -1,8 +1,14 @@
 import { MetadataRoute } from "next";
 import { getBaseUrl } from '@/src/lib/seo-utils';
 
+const WORD_SITEMAP_PAGE_COUNT = 20;
+
 export default function robots(): MetadataRoute.Robots {
   const baseUrl = getBaseUrl();
+  const wordSitemaps = Array.from(
+    { length: WORD_SITEMAP_PAGE_COUNT },
+    (_, index) => `${baseUrl}/sitemap-words/sitemap/${index + 1}.xml`,
+  );
 
   return {
     rules: [{
@@ -30,6 +36,10 @@ export default function robots(): MetadataRoute.Robots {
       disallow: "/",
     }
     ],
-    sitemap: [`${baseUrl}/sitemap.xml`],
+    sitemap: [
+      `${baseUrl}/sitemap.xml`,
+      `${baseUrl}/sitemap-static.xml`,
+      ...wordSitemaps,
+    ],
   };
 }
