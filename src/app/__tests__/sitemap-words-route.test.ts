@@ -10,16 +10,17 @@ jest.mock("@/db", () => ({
   db: {
     select: jest.fn(() => ({
       from: jest.fn(() => ({
-        orderBy: jest.fn(() => ({
-          offset: jest.fn(() => ({
-            limit: jest.fn(() => ({
-              execute: jest.fn(async () => [
-                {
-                  name: "boncukluk",
-                  updatedAt: "2026-03-29T00:00:00.000Z",
-                  createdAt: "2026-03-20T00:00:00.000Z",
-                },
-              ]),
+        groupBy: jest.fn(() => ({
+          orderBy: jest.fn(() => ({
+            offset: jest.fn(() => ({
+              limit: jest.fn(() => ({
+                execute: jest.fn(async () => [
+                  {
+                    name: "boncukluk",
+                    lastModified: "2026-03-29T00:00:00.000Z",
+                  },
+                ]),
+              })),
             })),
           })),
         })),
@@ -33,7 +34,6 @@ jest.mock("@/db/schema/words", () => ({
     name: "name",
     updated_at: "updated_at",
     created_at: "created_at",
-    id: "id",
   },
 }));
 

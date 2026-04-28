@@ -10,22 +10,43 @@ jest.mock("@/db", () => ({
   db: {
     select: jest.fn(() => ({
       from: jest.fn(() => ({
-        execute: jest.fn(async () => [{ count: 10001 }]),
+        groupBy: jest.fn(() => ({
+          orderBy: jest.fn(() => ({
+            limit: jest.fn(() => ({
+              execute: jest.fn(async () => [
+                {
+                  name: "boncukluk",
+                  lastModified: "2026-03-29T00:00:00.000Z",
+                },
+              ]),
+            })),
+          })),
+        })),
       })),
     })),
+  },
+}));
+
+jest.mock("@/db/schema/words", () => ({
+  words: {
+    name: "name",
+    updated_at: "updated_at",
+    created_at: "created_at",
   },
 }));
 
 import { GET } from "@/src/app/sitemap.xml/route";
 
 describe("sitemap.xml route", () => {
-  it("only points to the static sitemap plus Turkish word sitemap chunks", async () => {
+  it("emits directly discoverable Turkish static and word URLs", async () => {
     const response = await GET();
     const xml = await response.text();
 
-    expect(xml).toContain("<loc>https://turkce-sozluk.com/sitemap-static.xml</loc>");
-    expect(xml).toContain("<loc>https://turkce-sozluk.com/sitemap-words/sitemap/1.xml</loc>");
-    expect(xml).toContain("<loc>https://turkce-sozluk.com/sitemap-words/sitemap/2.xml</loc>");
-    expect(xml).not.toContain("sitemap-index.xml");
+    expect(response.headers.get("Content-Type")).toContain("application/xml");
+    expect(xml).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
+    expect(xml).toContain("<loc>https://turkce-sozluk.com/tr</loc>");
+    expect(xml).toContain("<loc>https://turkce-sozluk.com/tr/arama/boncukluk</loc>");
+    expect(xml).not.toContain("<sitemapindex");
+    expect(xml).not.toContain("/sitemap-words/sitemap/");
   });
 });

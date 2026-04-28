@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { words } from "@/db/schema/words";
 import { escapeXml, getWordCanonicalUrl } from '@/src/lib/seo-utils';
+import { sql } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 
 const PAGE_SIZE = 5000;
@@ -11,11 +12,11 @@ const getWordsForPage = unstable_cache(
         return await db
             .select({
                 name: words.name,
-                updatedAt: words.updated_at,
-                createdAt: words.created_at,
+                lastModified: sql<string>`max(coalesce(${words.updated_at}, ${words.created_at}))`,
             })
             .from(words)
-            .orderBy(words.id)
+            .groupBy(words.name)
+            .orderBy(words.name)
             .offset(offset)
             .limit(PAGE_SIZE)
             .execute();
@@ -45,8 +46,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
-    for (const { name, updatedAt, createdAt } of rows) {
-        const rawLastModified = updatedAt ?? createdAt;
+    for (const { name, lastModified: rawLastModified } of rows) {
         const lastModified = rawLastModified
             ? new Date(rawLastModified).toISOString()
             : new Date().toISOString();

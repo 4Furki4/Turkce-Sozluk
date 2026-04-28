@@ -1,44 +1,56 @@
 import { db } from '@/db';
 import { words } from '@/db/schema/words';
-import { getBaseUrl } from '@/src/lib/seo-utils';
-import { count } from 'drizzle-orm';
+import {
+  INDEXABLE_STATIC_ROUTE_KEYS,
+  escapeXml,
+  getStaticRouteCanonicalUrl,
+  getWordCanonicalUrl,
+} from '@/src/lib/seo-utils';
+import { sql } from 'drizzle-orm';
 import { unstable_cache } from 'next/cache';
 
-const PAGE_SIZE = 5000;
+const MAIN_SITEMAP_WORD_LIMIT = 49000;
 
-const getWordCount = unstable_cache(
+const getMainSitemapWords = unstable_cache(
   async () => {
-    const totalResult = await db.select({ count: count() }).from(words).execute();
-    return totalResult[0].count;
+    return await db
+      .select({
+        name: words.name,
+        lastModified: sql<string>`max(coalesce(${words.updated_at}, ${words.created_at}))`,
+      })
+      .from(words)
+      .groupBy(words.name)
+      .orderBy(words.name)
+      .limit(MAIN_SITEMAP_WORD_LIMIT)
+      .execute();
   },
-  ['sitemap-word-count'],
+  ['main-sitemap-words'],
   { revalidate: 86400 } // 24 hours
 );
 
 export async function GET() {
-  const baseUrl = getBaseUrl();
-  const lastmod = new Date().toISOString();
-
-  // Fetch total count to calculate pages using cached function
-  const totalWords = await getWordCount();
-  const totalPages = Math.ceil(totalWords / PAGE_SIZE);
+  const lastModified = new Date().toISOString();
+  const wordRows = await getMainSitemapWords();
 
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-  xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
-  // 1. Point to the static sitemap
-  xml += `<sitemap><loc>${baseUrl}/sitemap-static.xml</loc><lastmod>${lastmod}</lastmod></sitemap>\n`;
-
-  // 2. Point to the sitemap-words chunks directly
-  for (let i = 1; i <= totalPages; i++) {
-    // User preferred format: /sitemap-words/sitemap/1.xml
-    // CRITICAL: No whitespace between tags
-    xml += `<sitemap><loc>${baseUrl}/sitemap-words/sitemap/${i}.xml</loc><lastmod>${lastmod}</lastmod></sitemap>\n`;
+  for (const routeKey of INDEXABLE_STATIC_ROUTE_KEYS) {
+    const url = getStaticRouteCanonicalUrl(routeKey, "tr");
+    xml += `<url><loc>${escapeXml(url)}</loc><lastmod>${lastModified}</lastmod></url>\n`;
   }
 
-  xml += '</sitemapindex>';
+  for (const { name, lastModified: rawLastModified } of wordRows) {
+    const wordLastModified = rawLastModified
+      ? new Date(rawLastModified).toISOString()
+      : lastModified;
+    const url = getWordCanonicalUrl(name, "tr");
+    xml += `<url><loc>${escapeXml(url)}</loc><lastmod>${wordLastModified}</lastmod></url>\n`;
+  }
+
+  xml += '</urlset>';
 
   return new Response(xml, {
-    headers: { 'Content-Type': 'application/xml' },
+    headers: { 'Content-Type': 'application/xml; charset=utf-8' },
   });
 }

@@ -13,6 +13,8 @@ describe("sitemap-static.xml route", () => {
     expect(xml).toContain("<loc>https://turkce-sozluk.com/tr</loc>");
     expect(xml).toContain("<loc>https://turkce-sozluk.com/tr/kelime-listesi</loc>");
     expect(xml).toContain("<loc>https://turkce-sozluk.com/tr/arama</loc>");
+    expect(xml).toContain("<loc>https://turkce-sozluk.com/tr/kelime-insa</loc>");
+    expect(xml).not.toContain("/fiil-cekim-olusturucu");
     expect(xml).not.toContain("/en/");
     expect(xml).not.toContain("saved-words");
     expect(xml).not.toContain("my-requests");
