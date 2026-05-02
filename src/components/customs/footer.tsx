@@ -34,7 +34,7 @@ export default async function Footer({ session }: { session: Session | null }) {
         legal: [
             { href: "/privacy-policy" as const, label: t("links.privacy") },
             { href: "/terms-of-service" as const, label: t("links.terms") },
-        ]
+        ],
     };
 
     return (
@@ -80,6 +80,16 @@ export default async function Footer({ session }: { session: Session | null }) {
                                         </NextIntlLink>
                                     </li>
                                 ))}
+                                <li>
+                                    <a
+                                        href="https://durum.turkce-sozluk.com"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                                    >
+                                        {t("links.status")}
+                                    </a>
+                                </li>
                             </ul>
                         </div>
 
