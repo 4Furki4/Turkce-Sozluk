@@ -4,7 +4,7 @@ import {
   createTRPCRouter,
   publicProcedure,
 } from "../trpc";
-import { eq, sql, inArray, max } from "drizzle-orm";
+import { count, desc, eq, gte, sql, inArray, max } from "drizzle-orm";
 import { words } from "@/db/schema/words";
 import { pronunciations } from "@/db/schema/pronunciations";
 import { pronunciationVotes } from "@/db/schema/pronunciation_votes";
@@ -550,45 +550,55 @@ export const wordRouter = createTRPCRouter({
   getPopularWords: publicProcedure
     .input(
       z.object({
-        limit: z.number().optional().default(10),
+        limit: z.number().int().min(1).max(50).optional().default(10),
         period: z.enum(['allTime', 'last7Days', 'last30Days']).optional().default('allTime'),
       })
     )
     .query(async ({ input, ctx: { db } }) => {
-      let periodFilter = sql`TRUE`; // Default for 'allTime', effectively no date filter
-
-      if (input.period === 'last7Days') {
-        periodFilter = sql`sl.search_timestamp >= NOW() - INTERVAL '7 days'`;
-      } else if (input.period === 'last30Days') {
-        periodFilter = sql`sl.search_timestamp >= NOW() - INTERVAL '30 days'`;
-      }
-
-      const query = sql`
-        SELECT
-            w.id AS id,
-            w.name AS name,
-            COUNT(sl.word_id)::integer AS search_count
-        FROM
-            search_logs sl
-        JOIN
-            words w ON sl.word_id = w.id
-        WHERE
-            ${periodFilter}
-        GROUP BY
-            w.id, w.name
-        ORDER BY
-            search_count DESC
-        LIMIT ${input.limit};
-      `;
-
       try {
-        const popularWords = await db.execute(query) as Array<{ id: number; name: string; search_count: number }>;
-        return popularWords;
+        const cutoff =
+          input.period === "last7Days"
+            ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+            : input.period === "last30Days"
+              ? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+              : null;
+
+        const searchCount = count(searchLogs.wordId).mapWith(Number);
+
+        const popularWords = await db
+          .select({
+            id: words.id,
+            name: words.name,
+            search_count: searchCount,
+          })
+          .from(searchLogs)
+          .innerJoin(words, eq(searchLogs.wordId, words.id))
+          .where(cutoff ? gte(searchLogs.searchTimestamp, cutoff) : undefined)
+          .groupBy(words.id, words.name)
+          .orderBy(desc(searchCount))
+          .limit(input.limit);
+
+        if (popularWords.length > 0) {
+          return popularWords;
+        }
+
+        return db
+          .select({
+            id: words.id,
+            name: words.name,
+            search_count: sql<number>`COALESCE(${words.viewCount}, 0)`.mapWith(Number),
+          })
+          .from(words)
+          .where(sql`COALESCE(${words.viewCount}, 0) > 0`)
+          .orderBy(desc(sql<number>`COALESCE(${words.viewCount}, 0)`))
+          .limit(input.limit);
       } catch (error) {
         console.error("Error fetching popular words:", error);
-        // Optionally, throw a TRPCError or return a specific error structure
-        // For now, returning empty array on error to prevent breaking frontend
-        return [];
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "An unexpected error occurred while fetching popular words.",
+          cause: error,
+        });
       }
     }),
 
