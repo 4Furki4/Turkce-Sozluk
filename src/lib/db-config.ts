@@ -26,6 +26,7 @@ export interface CachedPopularData {
     key: string; // "popular-allTime", "trending-7days", etc.
     data: PopularWord[];
     timestamp: number;
+    period?: "allTime" | "last7Days" | "last30Days";
 }
 
 export interface OfflineDB extends DBSchema {

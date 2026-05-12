@@ -11,6 +11,7 @@ import { preferencesState } from '@/src/store/preferences';
 import { cn } from '@/lib/utils';
 // 1. --- IMPORT IDB HELPERS ---
 import { getCachedPopularData, setCachedPopularData } from '@/src/lib/offline-db';
+import { isUsableCachedPopularData, POPULAR_CACHE_MAX_AGE } from '@/src/lib/popular-cache';
 import PopularSearchesSkeleton from './popular-searches-skeleton';
 import { useOnlineStatus } from '@/src/hooks/use-online-status';
 
@@ -24,7 +25,7 @@ interface TrendingSearchesProps {
 }
 
 // Define the cache max age
-const cacheMaxAge = 24 * 60 * 60 * 1000; // 24 hours (in ms)
+const cacheMaxAge = POPULAR_CACHE_MAX_AGE; // 24 hours (in ms)
 
 export default function TrendingSearches({ period = '7days' }: TrendingSearchesProps) {
     const t = useTranslations('Components.TrendingSearches');
@@ -45,12 +46,12 @@ export default function TrendingSearches({ period = '7days' }: TrendingSearchesP
     useEffect(() => {
         let isMounted = true;
         getCachedPopularData(cacheKey).then((cached) => {
-            if (isMounted && cached) {
+            if (isMounted && isUsableCachedPopularData(cached, queryPeriod)) {
                 setDisplayedWords(cached.data);
             }
         });
         return () => { isMounted = false; };
-    }, [cacheKey]); // Dependency: re-run if the period (and thus key) changes
+    }, [cacheKey, queryPeriod]); // Dependency: re-run if the period (and thus key) changes
 
     // 5. --- USE `useQuery` (v5 syntax) ---
     const {
@@ -76,11 +77,11 @@ export default function TrendingSearches({ period = '7days' }: TrendingSearchesP
             setDisplayedWords(freshData); // Update UI
 
             // Save fresh data to IDB
-            setCachedPopularData(cacheKey, freshData).catch(err => {
+            setCachedPopularData(cacheKey, freshData, queryPeriod).catch(err => {
                 console.error(`Failed to save ${cacheKey} to IndexedDB`, err);
             });
         }
-    }, [freshData, cacheKey]); // Dependency: run when fresh data or the key changes
+    }, [freshData, cacheKey, queryPeriod]); // Dependency: run when fresh data or the key changes
 
     // 7. --- EFFECT FOR HANDLING NETWORK ERRORS ---
     useEffect(() => {

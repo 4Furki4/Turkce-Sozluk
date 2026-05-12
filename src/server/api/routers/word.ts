@@ -18,6 +18,11 @@ import { generateAccentVariations } from "@/src/lib/search-utils";
 import { partOfSpeechs } from "@/db/schema/part_of_speechs";
 import { languages } from "@/db/schema/languages";
 import { wordAttributes } from "@/db/schema/word_attributes";
+import {
+  getPopularWordsCutoff,
+  popularWordPeriods,
+  shouldFallbackToAllTimeViews,
+} from "./word-popularity";
 
 export const wordRouter = createTRPCRouter({
   searchWordsSimple: publicProcedure
@@ -551,17 +556,12 @@ export const wordRouter = createTRPCRouter({
     .input(
       z.object({
         limit: z.number().int().min(1).max(50).optional().default(10),
-        period: z.enum(['allTime', 'last7Days', 'last30Days']).optional().default('allTime'),
+        period: z.enum(popularWordPeriods).optional().default("allTime"),
       })
     )
     .query(async ({ input, ctx: { db } }) => {
       try {
-        const cutoff =
-          input.period === "last7Days"
-            ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-            : input.period === "last30Days"
-              ? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-              : null;
+        const cutoff = getPopularWordsCutoff(input.period);
 
         const searchCount = count(searchLogs.wordId).mapWith(Number);
 
@@ -580,6 +580,10 @@ export const wordRouter = createTRPCRouter({
 
         if (popularWords.length > 0) {
           return popularWords;
+        }
+
+        if (!shouldFallbackToAllTimeViews(input.period)) {
+          return [];
         }
 
         return db

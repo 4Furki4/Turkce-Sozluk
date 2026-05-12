@@ -79,7 +79,7 @@ export default function PopularSearches() {
             setDisplayedWords(freshData); // Update UI
 
             // Save fresh data to IDB for the next visit
-            setCachedPopularData(cacheKey, freshData).catch(err => {
+            setCachedPopularData(cacheKey, freshData, "allTime").catch(err => {
                 console.error("Failed to save popular words to IndexedDB", err);
             });
         }

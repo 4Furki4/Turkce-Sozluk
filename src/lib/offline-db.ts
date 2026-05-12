@@ -253,13 +253,15 @@ export const getCachedPopularData = async (
  */
 export const setCachedPopularData = async (
     key: string,
-    data: PopularWord[]
+    data: PopularWord[],
+    period?: CachedPopularData["period"]
 ): Promise<void> => {
     const db = await getDb();
     const cacheEntry: CachedPopularData = {
         key,
         data,
         timestamp: Date.now(),
+        period,
     };
     await db.put(POPULAR_TRENDS_STORE, cacheEntry);
 };
