@@ -9,6 +9,13 @@ import { render } from "@react-email/render";
 import OtpEmail from "@/src/emails/otp-email";
 import { cookies } from "next/headers";
 
+const authBaseUrl = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL;
+const trustedOrigins = [
+    authBaseUrl,
+    process.env.NEXT_PUBLIC_APP_URL,
+    process.env.NEXT_PUBLIC_URL,
+].filter((origin): origin is string => Boolean(origin));
+
 const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_SERVER_HOST,
     port: parseInt(process.env.EMAIL_SERVER_PORT || "587"),
@@ -19,6 +26,8 @@ const transporter = nodemailer.createTransport({
 });
 
 export const auth = betterAuth({
+    ...(authBaseUrl ? { baseURL: authBaseUrl } : {}),
+    trustedOrigins,
     user: {
         additionalFields: {
             username: { type: "string", required: true, unique: true }
