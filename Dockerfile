@@ -21,8 +21,8 @@ ARG CACHE_BUST=1
 COPY . .
 RUN npm run build -- --webpack
 
-# Stage 3: Run with Bun (Fast Startup)
-FROM base AS runner
+# Stage 3: Run with Node
+FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -38,4 +38,4 @@ COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
 
-CMD ["bun", "server.js"]
+CMD ["node", "server.js"]
