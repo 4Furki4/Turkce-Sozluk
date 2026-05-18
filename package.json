@@ -26,6 +26,8 @@
     "db:backup": "bash ./scripts/postgres-weekly-backup.sh",
     "db:backup:install": "bash ./scripts/install-backup-launch-agent.sh",
     "db:backup:uninstall": "bash ./scripts/uninstall-backup-launch-agent.sh",
+    "docker:build-pi:development": "docker buildx build --platform linux/arm64 -t furki4/turkish-dictionary-app:development --push .",
+    "docker:build-pi:latest": "docker buildx build --platform linux/arm64 -t furki4/turkish-dictionary-app:latest --push .",
     "studio": "drizzle-kit studio",
     "studio:local": "drizzle-kit studio --config ./drizzle.local.config.ts",
     "studio:live": "drizzle-kit studio --config ./drizzle.production.config.ts",

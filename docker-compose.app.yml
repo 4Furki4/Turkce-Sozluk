@@ -18,6 +18,8 @@ services:
     image: ${APP_IMAGE:-furki4/turkish-dictionary-app:latest}
     container_name: app-1
     restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     env_file:
       - .env.pi
     environment:
@@ -60,7 +62,14 @@ services:
       - POSTGRES_INITDB_ARGS=--auth=md5
     volumes:
       - pgdata:/var/lib/postgresql/data
-    
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower-1
+    restart: unless-stopped
+    command: --label-enable --cleanup --interval 300
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
   pgdata:
