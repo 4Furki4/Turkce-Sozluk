@@ -34,6 +34,9 @@ ss -ltnp
 The app ports should be bound to `127.0.0.1`; Postgres and PgBouncer should not
 publish host ports.
 
+Watchtower is pinned to Docker API `1.40` in Compose so it can talk to newer
+Docker daemons that reject old client API versions.
+
 ## SSH
 
 Keep SSH LAN/VPN-only. Recommended `/etc/ssh/sshd_config.d/hardening.conf`:
