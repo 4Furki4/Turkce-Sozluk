@@ -3,6 +3,18 @@ services:
     image: ${APP_IMAGE:-furki4/turkish-dictionary-app:development}
     container_name: turkish-dictionary-app-development
     restart: unless-stopped
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     labels:
       - com.centurylinklabs.watchtower.enable=true
     env_file:
@@ -25,6 +37,13 @@ services:
     image: edoburu/pgbouncer:latest
     container_name: turkish-dictionary-pgbouncer-development
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     environment:
       - DB_USER=${POSTGRES_USER:-postgres}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
@@ -40,6 +59,13 @@ services:
     image: postgres:17-alpine
     container_name: turkish-dictionary-db-development
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
