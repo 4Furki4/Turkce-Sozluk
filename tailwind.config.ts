@@ -23,8 +23,8 @@ module.exports = ({
 
     extend: {
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "sans-serif"],
-        mono: ["var(--font-geist-mono)", "monospace"],
+        sans: ["var(--font-ibm-plex-sans)", "sans-serif"],
+        mono: ["var(--font-ibm-plex-mono)", "monospace"],
       },
       fontSize: {
         "fs--2": "var(--step--2)",

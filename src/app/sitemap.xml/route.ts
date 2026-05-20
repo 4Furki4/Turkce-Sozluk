@@ -6,6 +6,8 @@ import { unstable_cache } from 'next/cache';
 
 const PAGE_SIZE = 5000;
 
+export const dynamic = 'force-dynamic';
+
 const getWordCount = unstable_cache(
   async () => {
     const totalResult = await db.select({ count: count() }).from(words).execute();
@@ -19,8 +21,13 @@ export async function GET() {
   const baseUrl = getBaseUrl();
   const lastmod = new Date().toISOString();
 
-  // Fetch total count to calculate pages using cached function
-  const totalWords = await getWordCount();
+  // Fetch total count to calculate pages using cached function. If the database
+  // is unavailable, still return the static sitemap instead of failing builds
+  // or returning a 500 to crawlers.
+  const totalWords = await getWordCount().catch((error) => {
+    console.error("Failed to generate word sitemap index entries", error);
+    return 0;
+  });
   const totalPages = Math.ceil(totalWords / PAGE_SIZE);
 
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
