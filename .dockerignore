@@ -1,5 +1,6 @@
 .git
 .gitignore
+.env*
 .cursor
 .vscode
 .vercel
@@ -10,6 +11,7 @@ npm-debug.log
 .DS_Store
 coverage
 backups
+*.dump
 Dockerfile
 docker-compose*.yml
 docker-compose*.yaml
