@@ -19,10 +19,17 @@ ingress:
   - hostname: development.turkce-sozluk.com
     service: http://localhost:3002
 
+  - hostname: netdata.turkce-sozluk.com
+    service: http://localhost:19999
+
+  - hostname: logs.turkce-sozluk.com
+    service: http://localhost:9999
+
   - service: http_status:404
 ```
 
-Apply Cloudflare Access only to `development.turkce-sozluk.com`.
+Apply Cloudflare Access to `development.turkce-sozluk.com`,
+`netdata.turkce-sozluk.com`, and `logs.turkce-sozluk.com`.
 
 Verify local Docker exposure:
 
@@ -34,8 +41,27 @@ ss -ltnp
 The app ports should be bound to `127.0.0.1`; Postgres and PgBouncer should not
 publish host ports.
 
+Monitoring dashboards should also be loopback-only:
+
+```text
+netdata   127.0.0.1:19999->19999/tcp
+dozzle    127.0.0.1:9999->8080/tcp
+```
+
 Watchtower is pinned to Docker API `1.40` in Compose so it can talk to newer
 Docker daemons that reject old client API versions.
+
+## Monitoring
+
+Use the separate monitoring stack for local metrics and searchable logs:
+
+```bash
+docker compose -f docker-compose.monitoring.yml up -d
+```
+
+Netdata and Dozzle both read `/var/run/docker.sock`; Netdata also uses host
+mounts for metrics. Keep both dashboards behind Cloudflare Access and never
+publish their ports on `0.0.0.0`.
 
 ## SSH
 

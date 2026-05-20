@@ -50,10 +50,28 @@ ingress:
   - hostname: development.turkce-sozluk.com
     service: http://localhost:3002
 
+  - hostname: netdata.turkce-sozluk.com
+    service: http://localhost:19999
+
+  - hostname: logs.turkce-sozluk.com
+    service: http://localhost:9999
+
   - service: http_status:404
 ```
 
-Apply Cloudflare Access only to `development.turkce-sozluk.com`.
+Apply Cloudflare Access to `development.turkce-sozluk.com`,
+`netdata.turkce-sozluk.com`, and `logs.turkce-sozluk.com`.
+
+## Monitoring
+
+Monitoring runs as a separate stack:
+
+```bash
+docker compose -f docker-compose.monitoring.yml up -d
+```
+
+See `docs/raspberry-pi-monitoring.md` for Netdata, Dozzle, Cloudflare Access,
+and Uptime Kuma alert setup.
 
 ## Watchtower
 
