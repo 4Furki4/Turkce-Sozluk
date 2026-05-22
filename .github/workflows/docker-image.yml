@@ -13,7 +13,8 @@ env:
 jobs:
   build:
     name: Build and push ARM64 image
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 60
     permissions:
       contents: read
 
