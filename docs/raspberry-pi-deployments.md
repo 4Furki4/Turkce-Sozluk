@@ -84,3 +84,11 @@ Start production first, or start Watchtower explicitly with:
 ```bash
 docker compose --env-file .env.production.pi -f docker-compose.production.yml up -d watchtower
 ```
+
+## Rollback
+
+If a bad image is deployed, stop Watchtower before changing the app container so
+it does not immediately pull the bad floating tag again.
+
+See `docs/raspberry-pi-rollback.md` for the production and development rollback
+commands.

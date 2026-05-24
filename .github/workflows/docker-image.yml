@@ -26,14 +26,24 @@ jobs:
         id: image
         run: |
           if [ "${GITHUB_REF_NAME}" = "main" ]; then
-            echo "tag=latest" >> "$GITHUB_OUTPUT"
+            {
+              echo "tags<<EOF"
+              echo "${IMAGE_NAME}:latest"
+              echo "${IMAGE_NAME}:main-${GITHUB_SHA::7}"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
             echo "push=true" >> "$GITHUB_OUTPUT"
           elif [ "${GITHUB_REF_NAME}" = "develop" ]; then
-            echo "tag=development" >> "$GITHUB_OUTPUT"
+            {
+              echo "tags<<EOF"
+              echo "${IMAGE_NAME}:development"
+              echo "${IMAGE_NAME}:develop-${GITHUB_SHA::7}"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
             echo "push=true" >> "$GITHUB_OUTPUT"
           else
             SAFE_BRANCH="$(echo "${GITHUB_REF_NAME}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9._-]+/-/g; s/^-+|-+$//g' | cut -c1-80)"
-            echo "tag=ci-${SAFE_BRANCH}-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+            echo "tags=${IMAGE_NAME}:ci-${SAFE_BRANCH}-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
             echo "push=false" >> "$GITHUB_OUTPUT"
           fi
 
@@ -54,6 +64,6 @@ jobs:
           file: ./Dockerfile
           platforms: linux/arm64
           push: ${{ steps.image.outputs.push }}
-          tags: ${{ env.IMAGE_NAME }}:${{ steps.image.outputs.tag }}
+          tags: ${{ steps.image.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
