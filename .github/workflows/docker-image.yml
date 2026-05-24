@@ -33,6 +33,7 @@ jobs:
               echo "EOF"
             } >> "$GITHUB_OUTPUT"
             echo "push=true" >> "$GITHUB_OUTPUT"
+            echo "app_url=https://turkce-sozluk.com" >> "$GITHUB_OUTPUT"
           elif [ "${GITHUB_REF_NAME}" = "develop" ]; then
             {
               echo "tags<<EOF"
@@ -41,10 +42,12 @@ jobs:
               echo "EOF"
             } >> "$GITHUB_OUTPUT"
             echo "push=true" >> "$GITHUB_OUTPUT"
+            echo "app_url=https://development.turkce-sozluk.com" >> "$GITHUB_OUTPUT"
           else
             SAFE_BRANCH="$(echo "${GITHUB_REF_NAME}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9._-]+/-/g; s/^-+|-+$//g' | cut -c1-80)"
             echo "tags=${IMAGE_NAME}:ci-${SAFE_BRANCH}-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
             echo "push=false" >> "$GITHUB_OUTPUT"
+            echo "app_url=https://development.turkce-sozluk.com" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Set up Docker Buildx
@@ -65,5 +68,10 @@ jobs:
           platforms: linux/arm64
           push: ${{ steps.image.outputs.push }}
           tags: ${{ steps.image.outputs.tags }}
+          build-args: |
+            NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
+            NEXT_PUBLIC_APP_URL=${{ steps.image.outputs.app_url }}
+            NEXT_PUBLIC_URL=${{ steps.image.outputs.app_url }}
+            NEXT_PUBLIC_PATREON_URL=${{ vars.NEXT_PUBLIC_PATREON_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
