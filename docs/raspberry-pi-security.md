@@ -110,14 +110,9 @@ Store separate values in `.env.production.pi` and `.env.development.pi`.
 
 ## Cron
 
-Call cron endpoints locally only:
+Call cron endpoints locally only and use the script-based cron runbook:
 
-```cron
-CRON_SECRET=replace-with-production-hex-secret
-
-0 0 * * * curl -fsS -H "Authorization: Bearer ${CRON_SECRET}" http://127.0.0.1:3000/api/generate-daily-words >/var/log/turkish-dictionary-generate-daily-words.log 2>&1
-0 5 * * * curl -fsS -H "Authorization: Bearer ${CRON_SECRET}" http://127.0.0.1:3000/api/update-view-counts >/var/log/turkish-dictionary-update-view-counts.log 2>&1
-```
+`docs/raspberry-pi-cron.md`
 
 Test that the right secret returns `200` and a wrong secret returns `401`.
 
