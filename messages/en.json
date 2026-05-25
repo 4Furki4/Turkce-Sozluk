@@ -513,6 +513,8 @@
     "RequestEdit": "Request Edit",
     "RelatedWords": "Related Words",
     "RelatedPhrases": "Related Phrases",
+    "ShowMore": "Show more ({count})",
+    "ShowLess": "Show less",
     "Pronunciations": "Pronunciations",
     "NavigationWord": "Navigation Word",
     "Root": "Root",

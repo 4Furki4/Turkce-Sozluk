@@ -5,6 +5,8 @@ import {
   BookOpen,
   Blocks,
   Camera,
+  ChevronDown,
+  ChevronUp,
   Eye,
   Link as LinkIcon,
   PenLine,
@@ -51,6 +53,7 @@ const WORD_CARD_VARIANTS: {
     { value: "reader", labelKey: "ReadingLayout", icon: BookOpen },
     { value: "magazine", labelKey: "MagazineLayout", icon: Blocks },
   ];
+const RELATED_LINK_COLLAPSE_LIMIT = 24;
 
 type WordEntryData = WordSearchResult["word_data"] & {
   source?: "online" | "offline";
@@ -1022,8 +1025,11 @@ function CompactConnections({ word_data }: { word_data: WordEntryData }) {
     <div className="space-y-4 border-t border-border/70 pt-4">
       {relatedPhrases.length > 0 ? (
         <CompactConnectionBlock icon={BookOpen} title={t("RelatedPhrases")}>
-          <ul className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
-            {relatedPhrases.map((relatedPhrase) => (
+          <ExpandableConnectionList
+            as="ul"
+            items={relatedPhrases}
+            className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2"
+            renderItem={(relatedPhrase) => (
               <li key={relatedPhrase.related_phrase_id} className="min-w-0">
                 <Link
                   href={{
@@ -1039,18 +1045,20 @@ function CompactConnections({ word_data }: { word_data: WordEntryData }) {
                   <span className="truncate">{relatedPhrase.related_phrase}</span>
                 </Link>
               </li>
-            ))}
-          </ul>
+            )}
+          />
         </CompactConnectionBlock>
       ) : null}
 
       {relatedWords.length > 0 ? (
         <CompactConnectionBlock icon={LinkIcon} title={t("RelatedWords")}>
-          <div className="flex flex-wrap gap-x-3 gap-y-3">
-            {relatedWords.map((relatedWord) => (
+          <ExpandableConnectionList
+            items={relatedWords}
+            className="flex flex-wrap gap-x-3 gap-y-3"
+            renderItem={(relatedWord) => (
               <CompactRelatedWordLink key={relatedWord.related_word_id} relatedWord={relatedWord} />
-            ))}
-          </div>
+            )}
+          />
         </CompactConnectionBlock>
       ) : null}
     </div>
@@ -1125,30 +1133,38 @@ function ConnectionsSection({
       >
         {relatedWords.length > 0 ? (
           <ConnectionGroup title={t("RelatedWords")}>
-            {relatedWords.map((relatedWord) => (
-              <RelatedWordLink key={relatedWord.related_word_id} relatedWord={relatedWord} compact={compact} />
-            ))}
+            <ExpandableConnectionList
+              items={relatedWords}
+              className="flex flex-wrap gap-x-4 gap-y-2"
+              renderItem={(relatedWord) => (
+                <RelatedWordLink key={relatedWord.related_word_id} relatedWord={relatedWord} compact={compact} />
+              )}
+            />
           </ConnectionGroup>
         ) : null}
 
         {relatedPhrases.length > 0 ? (
           <ConnectionGroup title={t("RelatedPhrases")}>
-            {relatedPhrases.map((relatedPhrase) => (
-              <Link
-                key={relatedPhrase.related_phrase_id}
-                href={{
-                  pathname: "/search/[word]",
-                  params: { word: relatedPhrase.related_phrase },
-                }}
-                prefetch={false}
-                className={cn(
-                  "text-sm text-primary underline decoration-primary/60 underline-offset-4 transition-colors hover:decoration-primary hover:text-primary/80",
-                  compact && "text-xs",
-                )}
-              >
-                {relatedPhrase.related_phrase}
-              </Link>
-            ))}
+            <ExpandableConnectionList
+              items={relatedPhrases}
+              className="flex flex-wrap gap-x-4 gap-y-2"
+              renderItem={(relatedPhrase) => (
+                <Link
+                  key={relatedPhrase.related_phrase_id}
+                  href={{
+                    pathname: "/search/[word]",
+                    params: { word: relatedPhrase.related_phrase },
+                  }}
+                  prefetch={false}
+                  className={cn(
+                    "text-sm text-primary underline decoration-primary/60 underline-offset-4 transition-colors hover:decoration-primary hover:text-primary/80",
+                    compact && "text-xs",
+                  )}
+                >
+                  {relatedPhrase.related_phrase}
+                </Link>
+              )}
+            />
           </ConnectionGroup>
         ) : null}
       </div>
@@ -1160,8 +1176,45 @@ function ConnectionGroup({ title, children }: { title: string; children: ReactNo
   return (
     <div>
       <h3 className="text-sm font-semibold text-muted-foreground">{title}</h3>
-      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">{children}</div>
+      <div className="mt-3">{children}</div>
     </div>
+  );
+}
+
+function ExpandableConnectionList<T>({
+  as = "div",
+  items,
+  className,
+  renderItem,
+}: {
+  as?: "div" | "ul";
+  items: readonly T[];
+  className: string;
+  renderItem: (item: T) => ReactNode;
+}) {
+  const t = useTranslations("WordCard");
+  const [isExpanded, setIsExpanded] = useState(false);
+  const hasOverflow = items.length > RELATED_LINK_COLLAPSE_LIMIT;
+  const visibleItems = hasOverflow && !isExpanded ? items.slice(0, RELATED_LINK_COLLAPSE_LIMIT) : items;
+  const hiddenCount = Math.max(items.length - RELATED_LINK_COLLAPSE_LIMIT, 0);
+  const ToggleIcon = isExpanded ? ChevronUp : ChevronDown;
+  const Container = as;
+
+  return (
+    <>
+      <Container className={className}>{visibleItems.map(renderItem)}</Container>
+      {hasOverflow ? (
+        <button
+          type="button"
+          aria-expanded={isExpanded}
+          onClick={() => setIsExpanded((current) => !current)}
+          className="mt-3 inline-flex min-h-8 items-center gap-1.5 rounded-md border border-border/70 bg-background/40 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+        >
+          <span>{isExpanded ? t("ShowLess") : t("ShowMore", { count: hiddenCount })}</span>
+          <ToggleIcon className="h-3.5 w-3.5" aria-hidden />
+        </button>
+      ) : null}
+    </>
   );
 }
 
