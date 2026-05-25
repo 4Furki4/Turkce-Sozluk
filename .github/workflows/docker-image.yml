@@ -60,6 +60,15 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Validate public build environment
+        env:
+          NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
+        run: |
+          if [ -z "${NEXT_PUBLIC_RECAPTCHA_SITE_KEY}" ]; then
+            echo "NEXT_PUBLIC_RECAPTCHA_SITE_KEY is missing from GitHub Actions secrets." >&2
+            exit 1
+          fi
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
