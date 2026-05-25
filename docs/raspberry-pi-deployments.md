@@ -19,6 +19,18 @@ cp .env.development.pi.example .env.development.pi
 
 Keep the production and development Postgres passwords different.
 
+Runtime env files are not enough for `NEXT_PUBLIC_*` variables. Next.js embeds
+public variables into browser JavaScript during `next build`, so GitHub Actions
+must also receive them while building the Docker image.
+
+Required GitHub secret:
+
+- `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`
+
+Optional GitHub variable:
+
+- `NEXT_PUBLIC_PATREON_URL`
+
 ## Start Development
 
 ```bash
@@ -50,10 +62,36 @@ ingress:
   - hostname: development.turkce-sozluk.com
     service: http://localhost:3002
 
+  - hostname: netdata.turkce-sozluk.com
+    service: http://localhost:19999
+
+  - hostname: logs.turkce-sozluk.com
+    service: http://localhost:9999
+
   - service: http_status:404
 ```
 
-Apply Cloudflare Access only to `development.turkce-sozluk.com`.
+Apply Cloudflare Access to `development.turkce-sozluk.com`,
+`netdata.turkce-sozluk.com`, and `logs.turkce-sozluk.com`.
+
+## Monitoring
+
+Monitoring runs as a separate stack:
+
+```bash
+docker compose -f docker-compose.monitoring.yml up -d
+```
+
+See `docs/raspberry-pi-monitoring.md` for Netdata, Dozzle, Cloudflare Access,
+and Uptime Kuma alert setup.
+
+## Cron
+
+Production cron jobs run locally against `127.0.0.1:3000` and write logs plus
+last-success markers.
+
+See `docs/raspberry-pi-cron.md` for install, test, crontab, and Uptime Kuma push
+monitor setup.
 
 ## Watchtower
 
@@ -66,3 +104,11 @@ Start production first, or start Watchtower explicitly with:
 ```bash
 docker compose --env-file .env.production.pi -f docker-compose.production.yml up -d watchtower
 ```
+
+## Rollback
+
+If a bad image is deployed, stop Watchtower before changing the app container so
+it does not immediately pull the bad floating tag again.
+
+See `docs/raspberry-pi-rollback.md` for the production and development rollback
+commands.

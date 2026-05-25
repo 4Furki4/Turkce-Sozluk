@@ -13,7 +13,8 @@ env:
 jobs:
   build:
     name: Build and push ARM64 image
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 60
     permissions:
       contents: read
 
@@ -25,22 +26,48 @@ jobs:
         id: image
         run: |
           if [ "${GITHUB_REF_NAME}" = "main" ]; then
-            echo "tag=latest" >> "$GITHUB_OUTPUT"
+            {
+              echo "tags<<EOF"
+              echo "${IMAGE_NAME}:latest"
+              echo "${IMAGE_NAME}:main-${GITHUB_SHA::7}"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+            echo "push=true" >> "$GITHUB_OUTPUT"
+            echo "app_url=https://turkce-sozluk.com" >> "$GITHUB_OUTPUT"
           elif [ "${GITHUB_REF_NAME}" = "develop" ]; then
-            echo "tag=development" >> "$GITHUB_OUTPUT"
+            {
+              echo "tags<<EOF"
+              echo "${IMAGE_NAME}:development"
+              echo "${IMAGE_NAME}:develop-${GITHUB_SHA::7}"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+            echo "push=true" >> "$GITHUB_OUTPUT"
+            echo "app_url=https://development.turkce-sozluk.com" >> "$GITHUB_OUTPUT"
           else
-            echo "Unsupported branch: ${GITHUB_REF_NAME}" >&2
-            exit 1
+            SAFE_BRANCH="$(echo "${GITHUB_REF_NAME}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9._-]+/-/g; s/^-+|-+$//g' | cut -c1-80)"
+            echo "tags=${IMAGE_NAME}:ci-${SAFE_BRANCH}-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+            echo "push=false" >> "$GITHUB_OUTPUT"
+            echo "app_url=https://development.turkce-sozluk.com" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to Docker Hub
+        if: steps.image.outputs.push == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Validate public build environment
+        env:
+          NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
+        run: |
+          if [ -z "${NEXT_PUBLIC_RECAPTCHA_SITE_KEY}" ]; then
+            echo "NEXT_PUBLIC_RECAPTCHA_SITE_KEY is missing from GitHub Actions secrets." >&2
+            exit 1
+          fi
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -48,7 +75,12 @@ jobs:
           context: .
           file: ./Dockerfile
           platforms: linux/arm64
-          push: true
-          tags: ${{ env.IMAGE_NAME }}:${{ steps.image.outputs.tag }}
+          push: ${{ steps.image.outputs.push }}
+          tags: ${{ steps.image.outputs.tags }}
+          build-args: |
+            NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
+            NEXT_PUBLIC_APP_URL=${{ steps.image.outputs.app_url }}
+            NEXT_PUBLIC_URL=${{ steps.image.outputs.app_url }}
+            NEXT_PUBLIC_PATREON_URL=${{ vars.NEXT_PUBLIC_PATREON_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

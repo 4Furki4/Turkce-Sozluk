@@ -46,7 +46,7 @@ export default async function SearchResultPage(
     const session = await auth.api.getSession({
         headers: await headers()
     });
-    const [serverResult] = await api.word.getWord({ name: decodedWordName, skipLogging: true });
+    const [serverResult] = await api.word.getWord({ name: decodedWordName, skipLogging: false });
     const wordData = serverResult?.word_data as WordSearchResult["word_data"] | undefined;
     const jsonLd = wordData ? buildWordJsonLd(wordData, locale) : null;
 

@@ -5,6 +5,8 @@ import { unstable_cache } from "next/cache";
 
 const PAGE_SIZE = 5000;
 
+export const dynamic = 'force-dynamic';
+
 const getWordsForPage = unstable_cache(
     async (page: number) => {
         const offset = (page - 1) * PAGE_SIZE;
