@@ -31,6 +31,8 @@ jest.mock("next-intl", () => ({
         Pronunciations: "Pronunciations",
         RelatedWords: "Related Words",
         RelatedPhrases: "Related Phrases",
+        ShowMore: "Show more ({count})",
+        ShowLess: "Show less",
         Root: "Root",
         views: "views",
         RequestEdit: "Request Edit",
@@ -222,6 +224,29 @@ const sampleWord = {
   },
 };
 
+function buildWordWithRelatedLinks({
+  phraseCount,
+  wordCount = 0,
+}: {
+  phraseCount: number;
+  wordCount?: number;
+}) {
+  return {
+    word_data: {
+      ...sampleWord.word_data,
+      relatedWords: Array.from({ length: wordCount }, (_, index) => ({
+        related_word_id: index + 100,
+        related_word_name: `related word ${index + 1}`,
+        relation_type: "relatedWord",
+      })),
+      relatedPhrases: Array.from({ length: phraseCount }, (_, index) => ({
+        related_phrase_id: index + 200,
+        related_phrase: `related phrase ${index + 1}`,
+      })),
+    },
+  };
+}
+
 describe("SearchWordCardVariantGroup", () => {
   beforeEach(() => {
     localStorage.clear();
@@ -383,5 +408,81 @@ describe("SearchWordCardVariantGroup", () => {
     fireEvent.click(requestPronunciationButtons[requestPronunciationButtons.length - 1]);
 
     expect(screen.getByTestId("request-modal-initial-view")).toHaveTextContent("pronunciation");
+  });
+
+  it("collapses long related phrase lists to the first 24 items", () => {
+    initializePreferences();
+
+    render(
+      <SearchWordCardVariantGroup
+        data={[buildWordWithRelatedLinks({ phraseCount: 30 })]}
+        locale="en"
+        session={null}
+        headingLevel="h1"
+      />,
+    );
+
+    expect(screen.getByText("related phrase 24")).toBeInTheDocument();
+    expect(screen.queryByText("related phrase 25")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Show more (6)" })).toBeInTheDocument();
+  });
+
+  it("expands and collapses long related phrase lists", () => {
+    initializePreferences();
+
+    render(
+      <SearchWordCardVariantGroup
+        data={[buildWordWithRelatedLinks({ phraseCount: 30 })]}
+        locale="en"
+        session={null}
+        headingLevel="h1"
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Show more (6)" }));
+
+    expect(screen.getByText("related phrase 30")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Show less" }));
+
+    expect(screen.queryByText("related phrase 25")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Show more (6)" })).toBeInTheDocument();
+  });
+
+  it("does not show the related links toggle for lists at the limit", () => {
+    initializePreferences();
+
+    render(
+      <SearchWordCardVariantGroup
+        data={[buildWordWithRelatedLinks({ phraseCount: 24 })]}
+        locale="en"
+        session={null}
+        headingLevel="h1"
+      />,
+    );
+
+    expect(screen.getByText("related phrase 24")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Show more/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Show less" })).not.toBeInTheDocument();
+  });
+
+  it("collapses long related phrase lists in compact layout", () => {
+    localStorage.setItem(SEARCH_WORD_CARD_VARIANT_STORAGE_KEY, "magazine");
+    initializePreferences();
+
+    render(
+      <SearchWordCardVariantGroup
+        data={[buildWordWithRelatedLinks({ phraseCount: 30 })]}
+        locale="en"
+        session={null}
+        headingLevel="h1"
+      />,
+    );
+
+    expect(screen.getByText("related phrase 24")).toBeInTheDocument();
+    expect(screen.queryByText("related phrase 25")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Show more (6)" }));
+
+    expect(screen.getByText("related phrase 30")).toBeInTheDocument();
   });
 });

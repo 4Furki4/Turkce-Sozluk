@@ -513,6 +513,8 @@
     "RequestEdit": "Düzenleme Talep Et",
     "RelatedWords": "İlgili Kelimeler",
     "RelatedPhrases": "İlgili Atasözleri ve Deyimler",
+    "ShowMore": "Daha fazla göster ({count})",
+    "ShowLess": "Daha az göster",
     "Pronunciations": "Telaffuzlar",
     "NavigationWord": "Yönlendirilen Kelime",
     "Root": "Köken",
