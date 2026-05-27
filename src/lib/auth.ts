@@ -4,7 +4,7 @@ import { db } from "@/db"; // Ensure this path is correct
 import { schema } from "@/db/index";
 import { nextCookies } from "better-auth/next-js";
 import { admin, emailOTP } from "better-auth/plugins";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { render } from "@react-email/render";
 import OtpEmail from "@/src/emails/otp-email";
 import { cookies } from "next/headers";
@@ -16,14 +16,7 @@ const trustedOrigins = [
     process.env.NEXT_PUBLIC_URL,
 ].filter((origin): origin is string => Boolean(origin));
 
-const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_SERVER_HOST,
-    port: parseInt(process.env.EMAIL_SERVER_PORT || "587"),
-    auth: {
-        user: process.env.EMAIL_SERVER_USER,
-        pass: process.env.EMAIL_SERVER_PASSWORD,
-    },
-});
+const resendEmailFrom = process.env.RESEND_EMAIL_FROM || "Türkçe Sözlük <no-reply@turkce-sozluk.com>";
 
 export const auth = betterAuth({
     ...(authBaseUrl ? { baseURL: authBaseUrl } : {}),
@@ -79,8 +72,13 @@ export const auth = betterAuth({
                             subject = type === "sign-in" ? "Your Login Code - Turkish Dictionary" : "Email Verification - Turkish Dictionary";
                         }
 
-                        await transporter.sendMail({
-                            from: process.env.EMAIL_FROM,
+                        if (!process.env.RESEND_API_KEY) {
+                            throw new Error("RESEND_API_KEY is not configured");
+                        }
+
+                        const resend = new Resend(process.env.RESEND_API_KEY);
+                        await resend.emails.send({
+                            from: resendEmailFrom,
                             to: email,
                             subject,
                             text: `Your OTP is ${otp}`,
