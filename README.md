@@ -98,12 +98,9 @@ AUTH_GOOGLE_ID=
 AUTH_GOOGLE_SECRET=
 AUTH_TRUST_HOST=true
 
-# Login via Email (Magic Link)
-EMAIL_SERVER_USER=
-EMAIL_SERVER_PASSWORD=
-EMAIL_SERVER_HOST=
-EMAIL_SERVER_PORT=
-EMAIL_FROM=
+# Login via Email (OTP)
+RESEND_API_KEY=           # Replace re_xxxxxxxxx with your real Resend API key
+RESEND_EMAIL_FROM=        # e.g. "Türkçe Sözlük <no-reply@turkce-sozluk.com>"
 
 # File Upload
 UPLOADTHING_SECRET=       # From uploadthing.com
@@ -303,5 +300,3 @@ You can contact me at muhammedfurkancengiz@gmail.com
    docker-compose up -d    # PostgreSQL veritabanını başlatır
    npm install             # Bağımlılıkları kurar
    npm run dev             # Geliştirme sunucusunu çalıştırır
-
-
