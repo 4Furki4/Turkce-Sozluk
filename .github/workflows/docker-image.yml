@@ -82,5 +82,6 @@ jobs:
             NEXT_PUBLIC_APP_URL=${{ steps.image.outputs.app_url }}
             NEXT_PUBLIC_URL=${{ steps.image.outputs.app_url }}
             NEXT_PUBLIC_PATREON_URL=${{ vars.NEXT_PUBLIC_PATREON_URL }}
+            NEXT_PUBLIC_R2_CUSTOM_URL=https://data.turkce-sozluk.com
           cache-from: type=gha
           cache-to: type=gha,mode=max
