@@ -18,6 +18,32 @@ const trustedOrigins = [
 
 const resendEmailFrom = process.env.RESEND_EMAIL_FROM || "Türkçe Sözlük <no-reply@turkce-sozluk.com>";
 
+function getOtpEmailSubject(type: "sign-in" | "email-verification" | "forget-password", locale: string) {
+    if (locale === "tr") {
+        switch (type) {
+            case "sign-in":
+                return "Giriş Kodunuz - Türkçe Sözlük";
+            case "email-verification":
+                return "E-posta Doğrulama - Türkçe Sözlük";
+            case "forget-password":
+                return "Şifre Sıfırlama - Türkçe Sözlük";
+        }
+    }
+
+    switch (type) {
+        case "sign-in":
+            return "Your Login Code - Turkish Dictionary";
+        case "email-verification":
+            return "Email Verification - Turkish Dictionary";
+        case "forget-password":
+            return "Password Reset - Turkish Dictionary";
+    }
+}
+
+function getErrorMessage(error: unknown) {
+    return error instanceof Error ? error.message : "Unknown error";
+}
+
 export const auth = betterAuth({
     ...(authBaseUrl ? { baseURL: authBaseUrl } : {}),
     trustedOrigins,
@@ -59,34 +85,39 @@ export const auth = betterAuth({
         nextCookies(),
         emailOTP({
             async sendVerificationOTP({ email, otp, type }) {
-                if (type === "sign-in" || type === "email-verification") {
-                    try {
-                        const cookieStore = await cookies();
-                        const locale = cookieStore.get("NEXT_LOCALE")?.value || "tr";
-                        const view = await render(OtpEmail({ validationCode: otp, locale }));
+                try {
+                    const cookieStore = await cookies();
+                    const locale = cookieStore.get("NEXT_LOCALE")?.value || "tr";
+                    const view = await render(OtpEmail({ validationCode: otp, locale }));
+                    const subject = getOtpEmailSubject(type, locale);
 
-                        let subject = "";
-                        if (locale === "tr") {
-                            subject = type === "sign-in" ? "Giriş Kodunuz - Türkçe Sözlük" : "E-posta Doğrulama - Türkçe Sözlük";
-                        } else {
-                            subject = type === "sign-in" ? "Your Login Code - Turkish Dictionary" : "Email Verification - Turkish Dictionary";
-                        }
-
-                        if (!process.env.RESEND_API_KEY) {
-                            throw new Error("RESEND_API_KEY is not configured");
-                        }
-
-                        const resend = new Resend(process.env.RESEND_API_KEY);
-                        await resend.emails.send({
-                            from: resendEmailFrom,
-                            to: email,
-                            subject,
-                            text: `Your OTP is ${otp}`,
-                            html: view
-                        });
-                    } catch (e) {
-                        console.error("Failed to send OTP", e);
+                    if (!process.env.RESEND_API_KEY) {
+                        throw new Error("RESEND_API_KEY is not configured");
                     }
+
+                    const resend = new Resend(process.env.RESEND_API_KEY);
+                    const { data, error } = await resend.emails.send({
+                        from: resendEmailFrom,
+                        to: email,
+                        subject,
+                        text: `Your OTP is ${otp}`,
+                        html: view
+                    });
+
+                    if (error) {
+                        throw new Error(`Resend rejected OTP email: ${error.message}`);
+                    }
+
+                    if (!data?.id) {
+                        throw new Error("Resend did not return an email id");
+                    }
+                } catch (error) {
+                    console.error("Failed to send OTP", {
+                        email,
+                        type,
+                        error: getErrorMessage(error),
+                    });
+                    throw new Error("Failed to send verification code");
                 }
             },
         }),
