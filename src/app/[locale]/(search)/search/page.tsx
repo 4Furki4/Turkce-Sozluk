@@ -1,5 +1,6 @@
 import { redirect } from "@/src/i18n/routing";
 import SearchPageClient from "./_pages/search-page-client";
+import { normalizeSearchWord } from "@/src/lib/search-route";
 
 export default async function Page(
   props: {
@@ -12,7 +13,7 @@ export default async function Page(
 
   // Handle query parameter based search (normal online flow)
   if (searchParams.word !== undefined) {
-    const parsedWord = decodeURIComponent(searchParams.word as string);
+    const parsedWord = normalizeSearchWord(searchParams.word);
     if (!parsedWord) {
       // redirect to home page if word param is empty
       redirect({

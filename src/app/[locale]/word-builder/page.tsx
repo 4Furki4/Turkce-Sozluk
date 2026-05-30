@@ -1,4 +1,5 @@
 import WordBuilder from "@/src/components/customs/word-builder";
+import { NoScriptNotice } from "@/src/components/progressive-enhancement/no-script-notice";
 import { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -29,8 +30,12 @@ export default async function WordBuilderPage({ params }: Props) {
 
   return (
     <section className="w-full">
+      <NoScriptNotice>
+        {locale === "en"
+          ? "JavaScript is required for the interactive word builder."
+          : "Etkileşimli kelime oluşturucu için JavaScript gerekir."}
+      </NoScriptNotice>
       <WordBuilder />
     </section>
   );
 }
-

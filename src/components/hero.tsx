@@ -7,13 +7,29 @@ import { Button, Card, CardBody, CardFooter, CardHeader, Divider, } from "@herou
 import { useOnlineStatus } from "@/src/hooks/use-online-status";
 
 import { api } from "@/src/trpc/react";
+import type { RouterOutputs } from "@/src/trpc/shared";
 import CustomCard from "./customs/heroui/custom-card";
 import SearchContainer from "./customs/search/search-container";
 
 // Removes TRENDING_TAGS constant
 
-export default function Hero({ children }: {
+type PopularWords = RouterOutputs["word"]["getPopularWords"];
+type WordOfTheDay = RouterOutputs["word"]["getWordOfTheDay"];
+type MisspellingsData = RouterOutputs["extras"]["getMisspellings"];
+type GalatiMeshurData = RouterOutputs["extras"]["getGalatiMeshur"];
+
+export default function Hero({
+  children,
+  initialPopularWords,
+  initialWordOfTheDay,
+  initialMisspellings,
+  initialGalatiMeshur,
+}: {
   children?: React.ReactNode;
+  initialPopularWords?: PopularWords;
+  initialWordOfTheDay?: WordOfTheDay;
+  initialMisspellings?: MisspellingsData;
+  initialGalatiMeshur?: GalatiMeshurData;
 }) {
   const t = useTranslations("Home");
   const locale = useLocale()
@@ -49,7 +65,7 @@ export default function Hero({ children }: {
           {/* Search Form */}
           {/* Search Form */}
           <div className="max-w-4xl mx-auto w-full">
-            <SearchContainer className="w-full" />
+            <SearchContainer className="w-full" initialTrendingWords={initialPopularWords} />
           </div>
         </div>
         {/* Children Render (if any specifics needed, though Layout usually handles main content) */}
@@ -61,13 +77,13 @@ export default function Hero({ children }: {
 
           {/* Word of the Day - Spans 2 Columns */}
           <div className="md:col-span-2">
-            <BentoWordOfTheDay locale={locale} />
+            <BentoWordOfTheDay locale={locale} initialWordOfTheDay={initialWordOfTheDay} />
           </div>
 
           {/* Utility Stack - Spans 1 Column */}
           <div className="flex flex-col gap-6">
-            <BentoCommonMistake />
-            <BentoGalatiMeshur />
+            <BentoCommonMistake initialData={initialMisspellings} />
+            <BentoGalatiMeshur initialData={initialGalatiMeshur} />
           </div>
 
           {/* Features Row - Spans 3 Columns */}
@@ -84,11 +100,12 @@ export default function Hero({ children }: {
 
 // --- Bento Components ---
 
-function BentoWordOfTheDay({ locale }: { locale: string }) {
+function BentoWordOfTheDay({ locale, initialWordOfTheDay }: { locale: string; initialWordOfTheDay?: WordOfTheDay }) {
   const t = useTranslations("Home");
   const isOnline = useOnlineStatus();
   const { data: wordOfTheDay, isLoading } = api.word.getWordOfTheDay.useQuery(undefined, {
-    enabled: isOnline
+    enabled: isOnline,
+    initialData: initialWordOfTheDay,
   });
 
   if (isLoading) {
@@ -176,15 +193,15 @@ function BentoWordOfTheDay({ locale }: { locale: string }) {
   );
 }
 
-function BentoCommonMistake() {
+function BentoCommonMistake({ initialData }: { initialData?: MisspellingsData }) {
   const t = useTranslations("Home");
   const [offset, setOffset] = useState(0);
-  const [randomSeed] = useState(() => Math.random().toString(36).slice(2));
   const isOnline = useOnlineStatus();
   const { data, isLoading } = api.extras.getMisspellings.useQuery(
-    { limit: 1, offset, randomSeed },
+    { limit: 1, offset },
     {
       enabled: isOnline,
+      initialData: offset === 0 ? initialData : undefined,
     },
   );
 
@@ -263,15 +280,15 @@ function BentoCommonMistake() {
   )
 }
 
-function BentoGalatiMeshur() {
+function BentoGalatiMeshur({ initialData }: { initialData?: GalatiMeshurData }) {
   const t = useTranslations("Home");
   const [offset, setOffset] = useState(0);
-  const [randomSeed] = useState(() => Math.random().toString(36).slice(2));
   const isOnline = useOnlineStatus();
   const { data, isLoading } = api.extras.getGalatiMeshur.useQuery(
-    { limit: 1, offset, randomSeed },
+    { limit: 1, offset },
     {
       enabled: isOnline,
+      initialData: offset === 0 ? initialData : undefined,
     },
   );
 

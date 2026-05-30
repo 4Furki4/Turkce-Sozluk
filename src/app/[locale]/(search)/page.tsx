@@ -12,10 +12,29 @@ export default async function Page({
 
   void api.word.getPopularWords.prefetch({ period: "last7Days", limit: 5 });
   void api.word.getWordOfTheDay.prefetch();
+  void api.extras.getMisspellings.prefetch({ limit: 1, offset: 0 });
+  void api.extras.getGalatiMeshur.prefetch({ limit: 1, offset: 0 });
+
+  const [
+    initialPopularWords,
+    initialWordOfTheDay,
+    initialMisspellings,
+    initialGalatiMeshur,
+  ] = await Promise.all([
+    api.word.getPopularWords({ period: "last7Days", limit: 5 }),
+    api.word.getWordOfTheDay(),
+    api.extras.getMisspellings({ limit: 1, offset: 0 }),
+    api.extras.getGalatiMeshur({ limit: 1, offset: 0 }),
+  ]);
 
   return (
     <HydrateClient>
-      <Hero />
+      <Hero
+        initialPopularWords={initialPopularWords}
+        initialWordOfTheDay={initialWordOfTheDay}
+        initialMisspellings={initialMisspellings}
+        initialGalatiMeshur={initialGalatiMeshur}
+      />
     </HydrateClient>
   );
 }

@@ -6,6 +6,7 @@ import React from "react";
 
 import { headers } from "next/headers";
 import FlashcardGame from "@/src/components/customs/flashcard-game";
+import { NoScriptNotice } from "@/src/components/progressive-enhancement/no-script-notice";
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
     const { locale } = await params;
@@ -33,6 +34,11 @@ export default async function FlashcardGamePage(
 
     return (
         <HydrateClient>
+            <NoScriptNotice>
+                {locale === "en"
+                    ? "JavaScript is required to play the flashcard game."
+                    : "Kelime kartları oyununu oynamak için JavaScript gerekir."}
+            </NoScriptNotice>
             <FlashcardGame
                 session={session}
                 locale={locale as "en" | "tr"}
