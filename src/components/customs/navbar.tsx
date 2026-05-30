@@ -30,6 +30,7 @@ import { Session } from "@/src/lib/auth-client";
 import { useLocaleSwitchHref } from "@/src/hooks/useLocaleSwitchHref";
 import { useState } from "react";
 import { startNavigationProgress } from "@/src/lib/navigation-progress";
+import { getPlainSearchAction } from "@/src/lib/search-route";
 
 type NavbarProps = {
   session: Session | null;
@@ -85,6 +86,7 @@ export default function Navbar({
     pathName === "/search/[word]" ||
     pathName.startsWith("/search/");
   const shouldShowNavbarSearch = !isHomeRoute && !isSearchRoute;
+  const homeHref = locale === "en" ? "/en" : "/tr";
 
   const handleSignOut = async () => {
     await authClient.signOut();
@@ -141,10 +143,10 @@ export default function Navbar({
     >
       <NavbarItem>
         <NavbarBrand>
-          <NextIntlLink as={Link as any} href="/" className="hidden md:flex items-center gap-2">
+          <a href={homeHref} className="hidden md:flex items-center gap-2">
             <Image src={logo} alt="Turkish Dictionary Logo" className="h-8 w-8" />
             <span className="text-fs-1 font-bold text-primary">{TitleIntl}</span>
-          </NextIntlLink>
+          </a>
           {/* Mobile menu button moved to bottom nav */}
         </NavbarBrand>
       </NavbarItem>
@@ -236,12 +238,13 @@ export default function Navbar({
         {shouldShowNavbarSearch ? (
           <NavbarContent justify="center" className="hidden lg:flex max-w-md">
             <NavbarItem className="w-full">
-              <form onSubmit={handleNavbarSearch} className="w-full">
+              <form action={getPlainSearchAction(locale)} method="get" onSubmit={handleNavbarSearch} className="w-full">
                 <Input
                   value={navbarSearchQuery}
                   onValueChange={setNavbarSearchQuery}
                   aria-label={SearchIntl}
                   placeholder={`${SearchIntl}...`}
+                  name="word"
                   startContent={<Search className="w-4 h-4 text-primary/75 transition-colors group-data-[focus=true]:text-primary" />}
                   classNames={{
                     base: "group",

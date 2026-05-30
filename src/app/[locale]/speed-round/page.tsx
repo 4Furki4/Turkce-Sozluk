@@ -5,6 +5,7 @@ import { Params } from "next/dist/server/request/params";
 import React from "react";
 import { headers } from "next/headers";
 import SpeedRoundGame from "@/src/components/customs/speed-round-game";
+import { NoScriptNotice } from "@/src/components/progressive-enhancement/no-script-notice";
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
     const { locale } = await params;
@@ -32,6 +33,11 @@ export default async function SpeedRoundPage(
 
     return (
         <HydrateClient>
+            <NoScriptNotice>
+                {locale === "en"
+                    ? "JavaScript is required to play speed round."
+                    : "Hızlı tur oyununu oynamak için JavaScript gerekir."}
+            </NoScriptNotice>
             <SpeedRoundGame
                 session={session}
                 locale={locale as "en" | "tr"}

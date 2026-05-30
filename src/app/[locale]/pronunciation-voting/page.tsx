@@ -4,6 +4,7 @@ import { PronunciationVotingPage } from "@/src/_pages/requests/pronunciation-vot
 import { redirect } from "next/navigation";
 import { auth } from "@/src/lib/auth";
 import { headers } from "next/headers";
+import { NoScriptNotice } from "@/src/components/progressive-enhancement/no-script-notice";
 
 export default async function Pronunciations() {
 
@@ -28,6 +29,9 @@ export default async function Pronunciations() {
 
   return (
     <HydrateClient>
+      <NoScriptNotice>
+        JavaScript is required for pronunciation voting.
+      </NoScriptNotice>
       <PronunciationVotingPage />
     </HydrateClient>
   );

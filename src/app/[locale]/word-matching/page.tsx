@@ -5,6 +5,7 @@ import { Params } from "next/dist/server/request/params";
 import React from "react";
 import { headers } from "next/headers";
 import WordMatchingGame from "@/src/components/customs/word-matching-game";
+import { NoScriptNotice } from "@/src/components/progressive-enhancement/no-script-notice";
 
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
@@ -33,6 +34,11 @@ export default async function WordMatchingGamePage(
 
     return (
         <HydrateClient>
+            <NoScriptNotice>
+                {locale === "en"
+                    ? "JavaScript is required to play the word matching game."
+                    : "Kelime eşleştirme oyununu oynamak için JavaScript gerekir."}
+            </NoScriptNotice>
             <WordMatchingGame
                 session={session}
                 locale={locale as "en" | "tr"}

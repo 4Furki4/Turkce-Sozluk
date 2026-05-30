@@ -8,6 +8,8 @@ import { buildWordJsonLd, buildWordMetadata } from './word-seo';
 import type { WordSearchResult } from '@/types';
 import WordDetailShell from './word-detail-shell';
 import WordRouteTransitionBoundary from './word-route-transition-boundary';
+import { NoScriptNotice } from '@/src/components/progressive-enhancement/no-script-notice';
+import WordPageFallback from './word-page-fallback';
 
 // This is the updated metadata generation function
 export async function generateMetadata({
@@ -49,6 +51,7 @@ export default async function SearchResultPage(
     const [serverResult] = await api.word.getWord({ name: decodedWordName, skipLogging: false });
     const wordData = serverResult?.word_data as WordSearchResult["word_data"] | undefined;
     const jsonLd = wordData ? buildWordJsonLd(wordData, locale) : null;
+    const resolvedLocale = locale === "en" ? "en" : "tr";
 
     return (
         <WordDetailShell>
@@ -59,12 +62,18 @@ export default async function SearchResultPage(
                 />
             ) : null}
 
-            <WordRouteTransitionBoundary>
+            <WordPageFallback
+                locale={resolvedLocale}
+                wordName={decodedWordName}
+                wordData={wordData}
+            />
+            <div className="js-enhanced-word-result">
+                <WordRouteTransitionBoundary>
                 {wordData ? (
                     <HydrateClient>
                         <WordCardWrapper
                             data={[{ word_data: wordData }]}
-                            locale={locale === "en" ? "en" : "tr"}
+                            locale={resolvedLocale}
                             session={session as any}
                             isOnline={true}
                             headingLevel="h1"
@@ -72,10 +81,16 @@ export default async function SearchResultPage(
                     </HydrateClient>
                 ) : (
                     <HydrateClient>
+                        <NoScriptNotice>
+                            {locale === "en"
+                                ? `No server-rendered dictionary entry was found for "${decodedWordName}". Offline and pattern search require JavaScript.`
+                                : `"${decodedWordName}" için sunucuda oluşturulmuş sözlük kaydı bulunamadı. Çevrim dışı arama ve desen arama JavaScript gerektirir.`}
+                        </NoScriptNotice>
                         <WordResultClient session={session} wordName={decodedWordName} />
                     </HydrateClient>
                 )}
-            </WordRouteTransitionBoundary>
+                </WordRouteTransitionBoundary>
+            </div>
         </WordDetailShell>
     )
 }
