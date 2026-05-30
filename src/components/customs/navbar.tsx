@@ -30,7 +30,8 @@ import { Session } from "@/src/lib/auth-client";
 import { useLocaleSwitchHref } from "@/src/hooks/useLocaleSwitchHref";
 import { useState } from "react";
 import { startNavigationProgress } from "@/src/lib/navigation-progress";
-import { getPlainSearchAction } from "@/src/lib/search-route";
+import { getOfflineSearchHref, getPlainSearchAction } from "@/src/lib/search-route";
+import { useOnlineStatus } from "@/src/hooks/use-online-status";
 
 type NavbarProps = {
   session: Session | null;
@@ -73,6 +74,7 @@ export default function Navbar({
   const locale = useLocale();
   const router = useRouter();
   const [navbarSearchQuery, setNavbarSearchQuery] = useState("");
+  const isOnline = useOnlineStatus();
   const languageSwitchHref = useLocaleSwitchHref();
   const isAuthPage = ["/signup", "/signin", "/forgot-password"].includes(
     pathName
@@ -99,6 +101,17 @@ export default function Navbar({
     if (!input) return;
     setNavbarSearchQuery("");
     startNavigationProgress();
+    const offlineSearchHref = getOfflineSearchHref(locale, input);
+    if (!isOnline) {
+      window.location.assign(offlineSearchHref);
+      return;
+    }
+
+    if (input.includes("_")) {
+      window.location.assign(offlineSearchHref);
+      return;
+    }
+
     router.push({
       pathname: "/search/[word]",
       params: { word: encodeURIComponent(input) },

@@ -16,7 +16,7 @@ import { useOnlineStatus } from "@/src/hooks/use-online-status";
 import { api } from "@/src/trpc/react";
 import { startNavigationProgress } from "@/src/lib/navigation-progress";
 import { getOfflineWordSearchQueryKey, toOfflineWordSearchResult } from "@/src/hooks/useWordSearch";
-import { getPlainSearchAction } from "@/src/lib/search-route";
+import { getOfflineSearchHref, getPlainSearchAction } from "@/src/lib/search-route";
 import type { RouterOutputs } from "@/src/trpc/shared";
 
 type SearchMode = "word" | "meaning";
@@ -242,11 +242,22 @@ export default function SearchContainer({
 
         await primeOfflineWordCache(input);
 
+        const offlineSearchHref = getOfflineSearchHref(locale, input);
+        if (!isOnline) {
+            window.location.assign(offlineSearchHref);
+            return;
+        }
+
+        if (input.includes("_")) {
+            window.location.assign(offlineSearchHref);
+            return;
+        }
+
         router.push({
             pathname: "/search/[word]",
             params: { word: encodeURIComponent(input) },
         });
-    }, [onSearchComplete, primeOfflineWordCache, router, t]);
+    }, [isOnline, locale, onSearchComplete, primeOfflineWordCache, router, t]);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();

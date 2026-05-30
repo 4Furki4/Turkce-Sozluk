@@ -13,15 +13,26 @@ import Hero from "@/src/components/hero";
 import SearchContainer from "@/src/components/customs/search/search-container";
 import { useNavigationProgress } from "@/src/lib/navigation-progress";
 
-export default function SearchPageClient() {
+type SearchPageClientProps = {
+    initialWord?: string;
+    offlineOnly?: boolean;
+};
+
+export default function SearchPageClient({
+    initialWord = "",
+    offlineOnly = false,
+}: SearchPageClientProps) {
     const pathname = usePathname();
     const { data: session } = authClient.useSession();
     const locale = useLocale();
-    const wordName = extractSearchWordFromPathname(pathname) ?? null;
+    const wordName = initialWord || extractSearchWordFromPathname(pathname) || null;
     const { phase } = useNavigationProgress();
 
     // The word search hook with offline support
-    const { data, isLoading, isFetching, isError, isOnline } = useWordSearch(wordName || '');
+    const { data, isLoading, isFetching, isError, isOnline } = useWordSearch(
+        wordName || '',
+        { offlineOnly },
+    );
 
     if (!wordName) {
         return <Hero />;
@@ -40,7 +51,7 @@ export default function SearchPageClient() {
     if (isError || !data) {
         return (
             <WordClientShell>
-                <WordNotFoundCard session={session} />
+                <WordNotFoundCard session={session} searchedWord={wordName} />
             </WordClientShell>
         );
     }

@@ -34,6 +34,7 @@ module.exports = async (phase) => {
         const withSerwist = (await import("@serwist/next")).default({
             swSrc: "src/app/sw.ts",
             swDest: "public/sw.js",
+            register: false,
             cacheOnNavigation: true,
             reloadOnOnline: true,
             additionalPrecacheEntries: [

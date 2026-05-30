@@ -24,6 +24,7 @@ import NavigationProgressBar from "@/src/components/customs/navigation-progress-
 import { AutocompleteSync } from "@/src/components/customs/complete-sync";
 import ProfileGuard from "@/src/components/customs/profile-guard";
 import { getBaseUrl, getCanonicalPathname } from "@/src/lib/seo-utils";
+import PWAServiceWorker from "@/src/components/pwa-service-worker";
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -184,6 +185,7 @@ export default async function RootLayout({
           <NextIntlClientProvider messages={messages}>
             <CaptchaProvider>
               <Providers>
+                <PWAServiceWorker />
                 <NavigationProgressBar />
                 <AutocompleteSync />
                 <ProfileGuard />

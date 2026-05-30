@@ -29,7 +29,14 @@ type UseWordSearchResult = {
     error: Error | null;
 };
 
-export function useWordSearch(wordName: string): UseWordSearchResult {
+type UseWordSearchOptions = {
+    offlineOnly?: boolean;
+};
+
+export function useWordSearch(
+    wordName: string,
+    options: UseWordSearchOptions = {},
+): UseWordSearchResult {
     // State to track the network connection status
     const [isOnline, setIsOnline] = useState(() => {
         if (typeof window !== "undefined") {
@@ -59,6 +66,7 @@ export function useWordSearch(wordName: string): UseWordSearchResult {
     }, []);
 
     const isPatternSearch = wordName.includes("_");
+    const canUseOnlineSearch = isOnline && !!wordName && !isPatternSearch && !options.offlineOnly;
 
     // --- 1. OFFLINE QUERY ---
     const { data: offlineData, isLoading: isOfflineLoading } = useQuery({
@@ -94,6 +102,10 @@ export function useWordSearch(wordName: string): UseWordSearchResult {
         queryKey: ["word-online", wordName],
         queryFn: async () => {
             if (!wordName) return undefined;
+            if (typeof navigator !== "undefined" && !navigator.onLine) {
+                return undefined;
+            }
+
             try {
                 console.log(`Fetching online for: "${wordName}"`);
                 const onlineResult = await trpcClient.word.getWord.query({
@@ -110,9 +122,15 @@ export function useWordSearch(wordName: string): UseWordSearchResult {
                 throw e; // Propagate the error so isError becomes true
             }
         },
-        enabled: isOnline && !!wordName && !isPatternSearch,
+        enabled: canUseOnlineSearch,
         staleTime: 1000 * 60 * 5, // 5 minutes
-        retry: 1,
+        retry: (failureCount) => {
+            if (typeof navigator !== "undefined" && !navigator.onLine) {
+                return false;
+            }
+
+            return failureCount < 1;
+        },
     });
 
     // --- 3. COMBINE RESULTS ---
@@ -124,7 +142,7 @@ export function useWordSearch(wordName: string): UseWordSearchResult {
     // We are "loading" ONLY if we have NO data to show yet,
     // and the relevant query is still running.
     const isLoading =
-        !data && (isOnline && !isPatternSearch ? onlineQuery.isLoading : isOfflineLoading);
+        !data && (canUseOnlineSearch ? onlineQuery.isLoading : isOfflineLoading);
 
     // We are in an "error" state ONLY if the online query failed
     // AND we also have no offline data to show as a fallback.
