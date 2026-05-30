@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Search as SearchIcon, PuzzleIcon, KeyboardIcon, TrendingUpIcon, BookOpenIcon, TypeIcon } from "lucide-react";
 import { useRouter } from "@/src/i18n/routing";
 import { Input } from "@heroui/react";
@@ -16,6 +16,8 @@ import { useOnlineStatus } from "@/src/hooks/use-online-status";
 import { api } from "@/src/trpc/react";
 import { startNavigationProgress } from "@/src/lib/navigation-progress";
 import { getOfflineWordSearchQueryKey, toOfflineWordSearchResult } from "@/src/hooks/useWordSearch";
+import { getPlainSearchAction } from "@/src/lib/search-route";
+import type { RouterOutputs } from "@/src/trpc/shared";
 
 type SearchMode = "word" | "meaning";
 
@@ -32,6 +34,7 @@ interface SearchContainerProps {
     autoFocus?: boolean;
     onSearchComplete?: () => void;
     showTrending?: boolean;
+    initialTrendingWords?: RouterOutputs["word"]["getPopularWords"];
 }
 
 export default function SearchContainer({
@@ -39,9 +42,11 @@ export default function SearchContainer({
     inputWrapperClassName,
     autoFocus = false,
     onSearchComplete,
-    showTrending = true
+    showTrending = true,
+    initialTrendingWords,
 }: SearchContainerProps) {
     const t = useTranslations("Home");
+    const locale = useLocale();
     const router = useRouter();
     const queryClient = useQueryClient();
     const [wordInput, setWordInput] = useState<string>("");
@@ -56,7 +61,8 @@ export default function SearchContainer({
         period: 'last7Days'
     }, {
         staleTime: 1000 * 60 * 60 * 24, // 24 hours
-        enabled: showTrending && isOnline
+        enabled: showTrending && isOnline,
+        initialData: initialTrendingWords,
     });
 
     const debouncedInput = useDebounce(wordInput, 300);
@@ -255,7 +261,7 @@ export default function SearchContainer({
 
     return (
         <div className={cn("w-full", className)} ref={containerRef}>
-            <form onSubmit={handleSearch}>
+            <form action={getPlainSearchAction(locale)} method="get" onSubmit={handleSearch}>
                 <div className="relative group">
                     {/* Search Glow Effect - Only show if not in custom container (implied by default wrapper) */}
                     {!inputWrapperClassName && (
@@ -340,7 +346,7 @@ export default function SearchContainer({
                         }}
                         color="primary"
                         variant="flat"
-                        name="search"
+                        name="word"
                         placeholder={activePlaceholder}
                         isInvalid={!!inputError}
                         errorMessage={inputError}

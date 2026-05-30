@@ -1,4 +1,5 @@
 const SEARCH_ROUTE_SEGMENTS = new Set(["search", "arama"]);
+export type SearchLocale = "en" | "tr";
 
 export const toSingleRouteParam = (
     value: string | string[] | undefined,
@@ -33,3 +34,11 @@ export const extractSearchWordFromPathname = (
     const maybeWord = segments[searchIndex + 1];
     return maybeWord ? decodePathSegment(maybeWord) : undefined;
 };
+
+export const normalizeSearchWord = (value: string | string[] | undefined): string => {
+    const rawValue = Array.isArray(value) ? value[0] : value;
+    return (rawValue ?? "").replace(/\s+/g, " ").trim();
+};
+
+export const getPlainSearchAction = (locale: string): string =>
+    locale === "en" ? "/en/search" : "/tr/arama";
