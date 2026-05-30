@@ -1,6 +1,7 @@
 /** @jest-environment node */
 
 import {
+    getOfflineSearchHref,
     getPlainSearchAction,
     normalizeSearchWord,
 } from "@/src/lib/search-route";
@@ -16,5 +17,14 @@ describe("search-route progressive enhancement helpers", () => {
         expect(normalizeSearchWord("  güzel   sanatlar  ")).toBe("güzel sanatlar");
         expect(normalizeSearchWord(["  kalem  "])).toBe("kalem");
         expect(normalizeSearchWord(undefined)).toBe("");
+    });
+
+    it("builds client-only offline search URLs", () => {
+        expect(getOfflineSearchHref("tr", "kıyım")).toBe(
+            "/tr/arama?offlineWord=k%C4%B1y%C4%B1m",
+        );
+        expect(getOfflineSearchHref("en", "güzel sanatlar")).toBe(
+            "/en/search?offlineWord=g%C3%BCzel+sanatlar",
+        );
     });
 });

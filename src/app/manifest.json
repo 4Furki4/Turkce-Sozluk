@@ -4,7 +4,7 @@
     "description": "Topluluk ile gelişen, açık kaynak ve çağdaş Türkçe sözlüğü.",
     "id": "/",
     "scope": "/",
-    "start_url": "/",
+    "start_url": "/tr",
     "display": "standalone",
     "handle_links": "preferred",
     "launch_handler": {

@@ -1,6 +1,6 @@
 import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { Serwist } from "serwist";
+import { NavigationRoute, NetworkFirst, Serwist } from "serwist";
 
 // This declares the value of `injectionPoint` to TypeScript.
 // `injectionPoint` is the string that will be replaced by the
@@ -13,7 +13,7 @@ declare global {
 }
 
 // Service Worker version for debugging
-const SW_VERSION = "v1.2.0";
+const SW_VERSION = "v1.3.0";
 console.log(`[SW] Service Worker ${SW_VERSION} starting...`);
 
 declare const self: ServiceWorkerGlobalScope;
@@ -91,10 +91,8 @@ const serwist = new Serwist({
                 },
             },
             {
-                url: "/~offline",
+                url: "/tr/~%C3%A7evrim-d%C4%B1%C5%9F%C4%B1",
                 matcher({ request }) {
-                    // Only redirect to offline page for document requests that are NOT search pages
-                    // This allows search pages to load normally and use IndexedDB for offline queries
                     if (!isDocumentRequest(request)) {
                         return false;
                     }
@@ -112,21 +110,9 @@ const serwist = new Serwist({
                         return false;
                     }
 
-                    // Allow offline dictionary page to load
-                    if (startsWithAny(pathname, OFFLINE_DICTIONARY_PREFIXES)) {
-                        console.log(`[SW] Allowing offline dictionary: ${pathname}`);
-                        return false;
-                    }
-
                     // Never fallback on the fallback page itself
                     if (startsWithAny(pathname, OFFLINE_PAGE_PREFIXES)) {
                         console.log(`[SW] Allowing offline page route: ${pathname}`);
-                        return false;
-                    }
-
-                    // Allow home page and locale pages to load (they're precached)
-                    if (pathname === "/" || pathname === "/en" || pathname === "/tr") {
-                        console.log(`[SW] Allowing home/locale page: ${pathname}`);
                         return false;
                     }
 
@@ -142,6 +128,23 @@ const serwist = new Serwist({
     //     navigateFallbackDenylist: [/^\/api/],
     // }
 });
+
+serwist.registerRoute(
+    new NavigationRoute(
+        new NetworkFirst({
+            cacheName: "document-pages",
+        }),
+        {
+            denylist: [
+                /^\/api(?:\/|$)/,
+                /^\/_next(?:\/|$)/,
+                /^\/_vercel(?:\/|$)/,
+                /^\/sw\.js$/,
+                /^\/swe-worker-[^/]+\.js$/,
+            ],
+        },
+    ),
+);
 
 self.addEventListener("push", (event) => {
     const data = JSON.parse(event.data?.text() ?? '{ title: "" }');

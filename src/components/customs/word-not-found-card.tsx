@@ -9,6 +9,7 @@ import { Plus, Search, BookOpen } from "lucide-react";
 import SimpleWordRequestModal from "./modals/simple-word-request-modal";
 
 import { useParams, usePathname as useRawPathname } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import { useSnapshot } from "valtio";
 import { preferencesState } from "@/src/store/preferences";
@@ -16,24 +17,31 @@ import { Session } from "@/src/lib/auth-client";
 import {
   decodePathSegment,
   extractSearchWordFromPathname,
+  normalizeSearchWord,
+  OFFLINE_SEARCH_PARAM,
   toSingleRouteParam,
 } from "@/src/lib/search-route";
 import { startNavigationProgress } from "@/src/lib/navigation-progress";
 
 interface WordNotFoundCardProps {
   session: Session | null;
+  searchedWord?: string | null;
 }
 
-export default function WordNotFoundCard({ session }: WordNotFoundCardProps) {
+export default function WordNotFoundCard({ session, searchedWord }: WordNotFoundCardProps) {
   const params = useParams<{ word?: string | string[] }>();
   const rawPathname = useRawPathname();
+  const searchParams = useSearchParams();
   const t = useTranslations("WordNotFound");
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const routeWord = toSingleRouteParam(params.word);
   const pathWord = extractSearchWordFromPathname(rawPathname);
-  const wordName = routeWord
+  const offlineWord = normalizeSearchWord(
+    searchParams.get(OFFLINE_SEARCH_PARAM) ?? undefined,
+  );
+  const wordName = searchedWord || (routeWord
     ? decodePathSegment(routeWord)
-    : (pathWord ?? "Unknown");
+    : (offlineWord || pathWord || "Unknown"));
   const { isBlurEnabled } = useSnapshot(preferencesState)
   const router = useRouter();
   const pathname = usePathname();

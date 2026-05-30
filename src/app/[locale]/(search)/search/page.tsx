@@ -1,6 +1,6 @@
 import { redirect } from "@/src/i18n/routing";
 import SearchPageClient from "./_pages/search-page-client";
-import { normalizeSearchWord } from "@/src/lib/search-route";
+import { normalizeSearchWord, OFFLINE_SEARCH_PARAM } from "@/src/lib/search-route";
 
 export default async function Page(
   props: {
@@ -33,7 +33,9 @@ export default async function Page(
     }
   }
 
+  const offlineWord = normalizeSearchWord(searchParams[OFFLINE_SEARCH_PARAM]);
+
   // If no query parameter, render the client component that can handle offline routing
   // This handles the case where service worker serves this page for dynamic routes like /en/search/word
-  return <SearchPageClient />;
+  return <SearchPageClient initialWord={offlineWord} offlineOnly={Boolean(offlineWord)} />;
 }
