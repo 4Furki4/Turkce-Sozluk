@@ -19,7 +19,7 @@ declare global {
 
 // Service Worker version for debugging
 
-const SW_VERSION = "v1.6.0";
+const SW_VERSION = "v1.6.2";
 
 console.log(`[SW] Service Worker ${SW_VERSION} starting...`);
 
@@ -61,6 +61,29 @@ const isBaseSearchPath = (pathname: string) =>
     pathname === "/en/search" ||
     pathname === "/tr/arama" ||
     pathname === "/tr/search";
+
+const isSearchQueryNavigation = (url: URL) =>
+    isBaseSearchPath(url.pathname) &&
+    (url.searchParams.has("word") || url.searchParams.has("offlineWord"));
+
+const getSearchQueryRedirectUrl = (url: URL) => {
+    if (!isSearchQueryNavigation(url)) {
+        return null;
+    }
+
+    const rawWord = url.searchParams.get("word") ?? url.searchParams.get("offlineWord") ?? "";
+    const word = rawWord.replace(/\s+/g, " ").trim();
+
+    if (!word || word.includes("_")) {
+        return null;
+    }
+
+    const redirectUrl = new URL(url.href);
+    redirectUrl.pathname = `${url.pathname.replace(/\/$/, "")}/${encodeURIComponent(word)}`;
+    redirectUrl.search = "";
+    redirectUrl.hash = "";
+    return redirectUrl;
+};
 
 const isHomeShellPath = (pathname: string) =>
     pathname === "/" || pathname === "/tr" || pathname === "/en";
@@ -176,11 +199,21 @@ const handleNavigationRequest = async ({
     url,
 }: RouteHandlerCallbackOptions) => {
     const fetchEvent = event as FetchEvent;
-    const fallbackUrl = getNavigationFallbackUrl(url);
-    const isShellNavigation = isAppShellNavigationPath(url.pathname);
-    const skipRequestMatch = Boolean(isDynamicSearchPath(url.pathname));
+    const searchQueryRedirectUrl = getSearchQueryRedirectUrl(url);
 
-    if (isShellNavigation) {
+    if (searchQueryRedirectUrl) {
+        return Response.redirect(searchQueryRedirectUrl, 307);
+    }
+
+    const fallbackUrl = getNavigationFallbackUrl(url);
+    const isShellNavigation =
+        isAppShellNavigationPath(url.pathname) && !isSearchQueryNavigation(url);
+    const skipRequestMatch = Boolean(isDynamicSearchPath(url.pathname));
+    const shouldServeShellFirst =
+        isShellNavigation &&
+        (!self.navigator.onLine || !isDynamicSearchPath(url.pathname));
+
+    if (shouldServeShellFirst) {
         const cachedShell = await getCachedNavigationResponse(request, fallbackUrl, {
             skipRequestMatch,
         });

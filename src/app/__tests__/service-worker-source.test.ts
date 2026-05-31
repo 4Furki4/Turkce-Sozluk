@@ -18,4 +18,17 @@ describe("service worker navigation fallbacks", () => {
     expect(source).toContain("return \"/tr/arama\"");
     expect(source).toContain("return \"/en/search\"");
   });
+
+  it("does not serve cached base search shell before SSR can redirect query searches", () => {
+    expect(source).toContain("isSearchQueryNavigation");
+    expect(source).toContain('url.searchParams.has("word")');
+    expect(source).toContain("getSearchQueryRedirectUrl");
+    expect(source).toContain("Response.redirect(searchQueryRedirectUrl, 307)");
+    expect(source).toContain("!isSearchQueryNavigation(url)");
+  });
+
+  it("keeps dynamic word pages network-first while online for no-JS SSR refreshes", () => {
+    expect(source).toContain("shouldServeShellFirst");
+    expect(source).toContain("!self.navigator.onLine || !isDynamicSearchPath(url.pathname)");
+  });
 });
