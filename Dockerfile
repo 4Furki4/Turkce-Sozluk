@@ -1,11 +1,11 @@
-FROM oven/bun:1-alpine AS base
+FROM node:22-alpine AS base
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Stage 1: Install deps with Bun (Fast)
+# Stage 1: Install deps with npm
 FROM base AS deps
-COPY package.json bun.lock* ./
-RUN bun install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci --legacy-peer-deps
 
 # Stage 2: Build with Node (Memory Safe)
 FROM node:22-alpine AS builder
