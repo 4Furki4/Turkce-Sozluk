@@ -1,88 +1,334 @@
-import { openDB, IDBPDatabase } from "idb";
 import { decode } from "@msgpack/msgpack";
+import { deleteDB, IDBPDatabase, openDB } from "idb";
+
 import {
+    AUTOCOMPLETE_VERSION_KEY,
+    CachedPopularData,
     DB_NAME,
     DB_VERSION,
-    WORDS_STORE,
     METADATA_STORE,
-    WORD_NAME_INDEX,
-    AUTOCOMPLETE_STORE,
-    AUTOCOMPLETE_NAME_INDEX,
-    AUTOCOMPLETE_VERSION_KEY,
-    POPULAR_TRENDS_STORE,
+    OFFLINE_METADATA_KEY,
+    OFFLINE_SCHEMA_VERSION,
     OfflineDB,
+    OfflineMetadata,
+    OfflineWordRecord,
+    POPULAR_TRENDS_STORE,
+    PopularWord,
+    WORD_DATASET_LOOKUP_INDEX,
+    WORD_DATASET_SORT_INDEX,
+    WORD_DATASET_VERSION_INDEX,
+    WORDS_STORE,
     WordData,
-    AutocompleteWord,
-    CachedPopularData,
-    PopularWord
 } from "./db-config";
 
 let dbPromise: Promise<IDBPDatabase<OfflineDB>> | null = null;
 
-const toAutocompleteKey = (value: string) => value.toLocaleLowerCase("tr");
+export type OfflineDatasetManifest = {
+    version: number;
+    files: string[];
+    totalSize?: number | null;
+};
 
-const getLookupCandidates = (wordName: string): string[] =>
-    Array.from(new Set([
-        wordName,
-        wordName.toLocaleLowerCase("tr"),
-        wordName.toLowerCase(),
-    ]));
+export type OfflineInstallProgress = {
+    completedFiles: number;
+    totalFiles: number;
+    progress: number;
+    wordCount: number;
+};
+
+const LEGACY_WORDS_STORE = "words";
+const LEGACY_AUTOCOMPLETE_STORE = "autocompleteWords";
+const DATASET_KEY_SEPARATOR = "\u0000";
+const legacyStoreName = (storeName: string) => storeName as any;
+
+export const normalizeOfflineSearchKey = (value: string): string =>
+    value
+        .normalize("NFC")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLocaleLowerCase("tr");
+
+export const getOfflineWordRecordId = (
+    datasetVersion: number,
+    wordId: number,
+): string => `${datasetVersion}:${wordId}`;
+
+export const getDatasetLookupKey = (
+    datasetVersion: number,
+    lookupKey: string,
+): string => `${datasetVersion}${DATASET_KEY_SEPARATOR}${lookupKey}`;
+
+export const getDatasetSortKey = (
+    datasetVersion: number,
+    lookupKey: string,
+    wordId: number,
+): string =>
+    `${datasetVersion}${DATASET_KEY_SEPARATOR}${lookupKey}${DATASET_KEY_SEPARATOR}${String(wordId).padStart(10, "0")}`;
+
+const getDefaultMetadata = (): OfflineMetadata => ({
+    schemaVersion: OFFLINE_SCHEMA_VERSION,
+    activeVersion: null,
+    installingVersion: null,
+    status: "not-downloaded",
+    installedWordCount: 0,
+    installedAt: null,
+    totalSize: null,
+    lastError: null,
+});
+
+const createOfflineWordStore = (db: IDBPDatabase<OfflineDB>) => {
+    const store = db.createObjectStore(WORDS_STORE, { keyPath: "id" });
+    store.createIndex(WORD_DATASET_LOOKUP_INDEX, "datasetLookupKey", {
+        unique: false,
+    });
+    store.createIndex(WORD_DATASET_SORT_INDEX, "datasetSortKey", {
+        unique: true,
+    });
+    store.createIndex(WORD_DATASET_VERSION_INDEX, "datasetVersion", {
+        unique: false,
+    });
+};
 
 const getDb = (): Promise<IDBPDatabase<OfflineDB>> => {
     if (!dbPromise) {
         dbPromise = openDB<OfflineDB>(DB_NAME, DB_VERSION, {
-            upgrade(db, oldVersion, newVersion, transaction) {
-                console.log(`Upgrading database from version ${oldVersion} to ${newVersion}...`);
+            upgrade(db, oldVersion) {
+                if (oldVersion < 6) {
+                    if (db.objectStoreNames.contains(legacyStoreName(LEGACY_WORDS_STORE))) {
+                        db.deleteObjectStore(legacyStoreName(LEGACY_WORDS_STORE));
+                    }
 
-                if (oldVersion < 2) {
+                    if (db.objectStoreNames.contains(legacyStoreName(LEGACY_AUTOCOMPLETE_STORE))) {
+                        db.deleteObjectStore(legacyStoreName(LEGACY_AUTOCOMPLETE_STORE));
+                    }
+
                     if (db.objectStoreNames.contains(WORDS_STORE)) {
                         db.deleteObjectStore(WORDS_STORE);
                     }
-                    const store = db.createObjectStore(WORDS_STORE, { keyPath: "word_id" });
-                    store.createIndex(WORD_NAME_INDEX, "word_name", { unique: false });
 
                     if (db.objectStoreNames.contains(METADATA_STORE)) {
                         db.deleteObjectStore(METADATA_STORE);
                     }
+                }
+
+                if (!db.objectStoreNames.contains(WORDS_STORE)) {
+                    createOfflineWordStore(db);
+                }
+
+                if (!db.objectStoreNames.contains(METADATA_STORE)) {
                     db.createObjectStore(METADATA_STORE);
                 }
 
-                if (oldVersion < 3) {
-                    if (!db.objectStoreNames.contains(AUTOCOMPLETE_STORE)) {
-                        const store = db.createObjectStore(AUTOCOMPLETE_STORE, { keyPath: "name" });
-                        store.createIndex(AUTOCOMPLETE_NAME_INDEX, "name", { unique: true });
-                    }
-                }
-
-                if (oldVersion < 4) {
-                    if (db.objectStoreNames.contains(AUTOCOMPLETE_STORE)) {
-                        db.deleteObjectStore(AUTOCOMPLETE_STORE);
-                    }
-                    // Create the new store, keyPath is the lowercase 'key'
-                    const store = db.createObjectStore(AUTOCOMPLETE_STORE, { keyPath: "key" });
-                    // The index is also on the lowercase 'key'
-                    store.createIndex(AUTOCOMPLETE_NAME_INDEX, "key", { unique: true });
-                }
-                if (oldVersion < 5) {
-                    if (!db.objectStoreNames.contains(POPULAR_TRENDS_STORE)) {
-                        // Create the new store, keyPath is the 'key'
-                        db.createObjectStore(POPULAR_TRENDS_STORE, { keyPath: "key" });
-                    }
+                if (!db.objectStoreNames.contains(POPULAR_TRENDS_STORE)) {
+                    db.createObjectStore(POPULAR_TRENDS_STORE, { keyPath: "key" });
                 }
             },
         });
     }
+
     return dbPromise;
 };
 
-export const getLocalVersion = async (): Promise<number | null> => {
+const getErrorMessage = (error: unknown) =>
+    error instanceof Error ? error.message : String(error);
+
+const isValidWordData = (word: unknown): word is WordData => {
+    const maybeWord = word as Partial<WordData> | undefined;
+    return (
+        !!maybeWord &&
+        typeof maybeWord.word_id === "number" &&
+        typeof maybeWord.word_name === "string" &&
+        maybeWord.word_name.trim().length > 0
+    );
+};
+
+export const toOfflineWordRecord = (
+    datasetVersion: number,
+    word: WordData,
+): OfflineWordRecord => {
+    const lookupKey = normalizeOfflineSearchKey(word.word_name);
+
+    return {
+        id: getOfflineWordRecordId(datasetVersion, word.word_id),
+        datasetVersion,
+        datasetLookupKey: getDatasetLookupKey(datasetVersion, lookupKey),
+        datasetSortKey: getDatasetSortKey(datasetVersion, lookupKey, word.word_id),
+        lookupKey,
+        wordId: word.word_id,
+        wordName: word.word_name,
+        word,
+    };
+};
+
+export const getOfflineMetadata = async (): Promise<OfflineMetadata> => {
     const db = await getDb();
-    return db.get(METADATA_STORE, "version");
+    const metadata = await db.get(METADATA_STORE, OFFLINE_METADATA_KEY);
+
+    return {
+        ...getDefaultMetadata(),
+        ...(metadata ?? {}),
+        schemaVersion: OFFLINE_SCHEMA_VERSION,
+    };
+};
+
+const replaceOfflineMetadata = async (
+    metadata: OfflineMetadata,
+): Promise<OfflineMetadata> => {
+    const db = await getDb();
+    const nextMetadata = {
+        ...metadata,
+        schemaVersion: OFFLINE_SCHEMA_VERSION,
+    };
+
+    await db.put(METADATA_STORE, nextMetadata, OFFLINE_METADATA_KEY);
+
+    return nextMetadata;
+};
+
+const updateOfflineMetadata = async (
+    patch: Partial<OfflineMetadata>,
+): Promise<OfflineMetadata> => {
+    const current = await getOfflineMetadata();
+    return replaceOfflineMetadata({
+        ...current,
+        ...patch,
+        schemaVersion: OFFLINE_SCHEMA_VERSION,
+    });
+};
+
+const deleteWordsForVersion = async (datasetVersion: number): Promise<void> => {
+    const db = await getDb();
+    const tx = db.transaction(WORDS_STORE, "readwrite");
+    const index = tx.store.index(WORD_DATASET_VERSION_INDEX);
+    let cursor = await index.openCursor(datasetVersion);
+
+    while (cursor) {
+        await cursor.delete();
+        cursor = await cursor.continue();
+    }
+
+    await tx.done;
+};
+
+const deleteInactiveWordVersions = async (
+    activeVersion: number,
+): Promise<void> => {
+    const db = await getDb();
+    const tx = db.transaction(WORDS_STORE, "readwrite");
+    let cursor = await tx.store.openCursor();
+
+    while (cursor) {
+        if (cursor.value.datasetVersion !== activeVersion) {
+            await cursor.delete();
+        }
+
+        cursor = await cursor.continue();
+    }
+
+    await tx.done;
+};
+
+const putWordChunk = async (
+    datasetVersion: number,
+    words: WordData[],
+): Promise<number> => {
+    const db = await getDb();
+    const tx = db.transaction(WORDS_STORE, "readwrite");
+    let wordCount = 0;
+
+    for (const word of words) {
+        if (!isValidWordData(word)) {
+            continue;
+        }
+
+        await tx.store.put(toOfflineWordRecord(datasetVersion, word));
+        wordCount += 1;
+    }
+
+    await tx.done;
+
+    return wordCount;
+};
+
+export const installOfflineDatasetFromFiles = async ({
+    manifest,
+    baseUrl,
+    onProgress,
+}: {
+    manifest: OfflineDatasetManifest;
+    baseUrl: string;
+    onProgress?: (progress: OfflineInstallProgress) => void;
+}): Promise<OfflineMetadata> => {
+    const previousMetadata = await getOfflineMetadata();
+    let wordCount = 0;
+
+    await updateOfflineMetadata({
+        status: "downloading",
+        installingVersion: manifest.version,
+        lastError: null,
+        totalSize: manifest.totalSize ?? previousMetadata.totalSize ?? null,
+    });
+
+    try {
+        await deleteWordsForVersion(manifest.version);
+
+        for (let index = 0; index < manifest.files.length; index += 1) {
+            const file = manifest.files[index];
+            const response = await fetch(`${baseUrl}/${file}`);
+
+            if (!response.ok) {
+                throw new Error(`Failed to download file: ${file}`);
+            }
+
+            const words = decode(await response.arrayBuffer()) as WordData[];
+            wordCount += await putWordChunk(manifest.version, words);
+
+            onProgress?.({
+                completedFiles: index + 1,
+                totalFiles: manifest.files.length,
+                progress: ((index + 1) / manifest.files.length) * 100,
+                wordCount,
+            });
+        }
+
+        const readyMetadata = await updateOfflineMetadata({
+            activeVersion: manifest.version,
+            installingVersion: null,
+            status: "ready",
+            installedWordCount: wordCount,
+            installedAt: Date.now(),
+            totalSize: manifest.totalSize ?? null,
+            lastError: null,
+        });
+
+        await deleteInactiveWordVersions(manifest.version);
+
+        return readyMetadata;
+    } catch (error) {
+        await deleteWordsForVersion(manifest.version);
+        await replaceOfflineMetadata({
+            ...previousMetadata,
+            status: "failed",
+            installingVersion: null,
+            lastError: getErrorMessage(error),
+            schemaVersion: OFFLINE_SCHEMA_VERSION,
+        });
+
+        throw error;
+    }
+};
+
+export const getLocalVersion = async (): Promise<number | null> => {
+    const metadata = await getOfflineMetadata();
+    return metadata.activeVersion;
 };
 
 export const setLocalVersion = async (version: number): Promise<void> => {
-    const db = await getDb();
-    await db.put(METADATA_STORE, version, "version");
+    await updateOfflineMetadata({
+        activeVersion: version,
+        status: "ready",
+        installedAt: Date.now(),
+    });
 };
 
 export const clearOfflineData = async (): Promise<void> => {
@@ -90,170 +336,118 @@ export const clearOfflineData = async (): Promise<void> => {
     const tx = db.transaction([WORDS_STORE, METADATA_STORE], "readwrite");
     await tx.objectStore(WORDS_STORE).clear();
     await tx.objectStore(METADATA_STORE).clear();
+    await tx.objectStore(METADATA_STORE).put(
+        {
+            ...getDefaultMetadata(),
+            status: "cleared",
+        },
+        OFFLINE_METADATA_KEY,
+    );
     await tx.done;
 };
 
 export const processWordFile = async (fileUrl: string): Promise<void> => {
     const response = await fetch(fileUrl);
+
     if (!response.ok) {
         throw new Error(`Failed to download file: ${fileUrl}`);
     }
-    const arrayBuffer = await response.arrayBuffer();
-    const words = decode(arrayBuffer) as WordData[];
 
-    const db = await getDb();
-    const tx = db.transaction(WORDS_STORE, "readwrite");
+    const version = Date.now();
+    const words = decode(await response.arrayBuffer()) as WordData[];
+    const wordCount = await putWordChunk(version, words);
 
-    for (const word of words) {
-        try {
-            if (!word || typeof word.word_id !== 'number' || typeof word.word_name !== 'string' || word.word_name.length === 0) {
-                console.warn("Skipping invalid word object lacking a valid 'word_id' or 'word_name':", word);
-                continue;
-            }
-            await tx.store.put(word);
-        } catch (error) {
-            console.error("--- IndexedDB Error ---");
-            console.error("Failed to store the following word object in IndexedDB:");
-            console.error(word);
-            console.error("Original Error:", error);
-
-            throw new Error(`Failed to store word with ID: "${word?.word_id || 'unknown'}". Check the console for the problematic data object.`);
-        }
-    }
-
-    await tx.done;
+    await updateOfflineMetadata({
+        activeVersion: version,
+        status: "ready",
+        installedWordCount: wordCount,
+        installedAt: Date.now(),
+        lastError: null,
+    });
 };
 
 export const getWordByNameOffline = async (
-    wordName: string
+    wordName: string,
 ): Promise<WordData | undefined> => {
+    const metadata = await getOfflineMetadata();
+
+    if (!metadata.activeVersion) {
+        return undefined;
+    }
+
+    const lookupKey = normalizeOfflineSearchKey(wordName);
+
+    if (!lookupKey) {
+        return undefined;
+    }
+
     const db = await getDb();
-    const candidates = getLookupCandidates(wordName);
+    const matches = await db.getAllFromIndex(
+        WORDS_STORE,
+        WORD_DATASET_LOOKUP_INDEX,
+        getDatasetLookupKey(metadata.activeVersion, lookupKey),
+        1,
+    );
 
-    const autocompleteKeys = Array.from(new Set([
-        toAutocompleteKey(wordName),
-        wordName.toLowerCase(),
-    ]));
-
-    for (const key of autocompleteKeys) {
-        const autocompleteWord = await db.getFromIndex(
-            AUTOCOMPLETE_STORE,
-            AUTOCOMPLETE_NAME_INDEX,
-            key,
-        );
-
-        if (autocompleteWord?.displayName) {
-            candidates.push(...getLookupCandidates(autocompleteWord.displayName));
-        }
-    }
-
-    for (const candidate of Array.from(new Set(candidates))) {
-        const word = await db.getFromIndex(WORDS_STORE, WORD_NAME_INDEX, candidate);
-        if (word) {
-            return word;
-        }
-    }
-
-    return undefined;
+    return matches[0]?.word;
 };
 
 export async function getLocalAutocompleteVersion(): Promise<string | undefined> {
-    const db = await getDb();
-    return db.get(METADATA_STORE, AUTOCOMPLETE_VERSION_KEY);
+    const metadata = await getOfflineMetadata();
+    return metadata.autocompleteVersion;
 }
 
 export async function updateLocalAutocompleteList(
-    words: string[],
+    _words: string[],
     newVersion: string,
 ) {
-    const db = await getDb();
-
-    const tx = db.transaction(
-        [AUTOCOMPLETE_STORE, METADATA_STORE],
-        "readwrite",
-    );
-
-    const autocompleteStore = tx.objectStore(AUTOCOMPLETE_STORE);
-    const metadataStore = tx.objectStore(METADATA_STORE);
-
-    await autocompleteStore.clear();
-
-    // Create the new object with lowercase key
-    const wordsToStore: AutocompleteWord[] = words.map(displayName => ({
-        key: toAutocompleteKey(displayName),
-        displayName: displayName,
-    }));
-
-    // Use a Set to handle duplicate lowercase keys (e.g., "Kale" and "kale")
-    // We'll prefer the capitalized version if a duplicate exists.
-    const uniqueWords = new Map<string, AutocompleteWord>();
-    for (const word of wordsToStore) {
-        if (!uniqueWords.has(word.key) || word.displayName.charAt(0) === word.displayName.charAt(0).toUpperCase()) {
-            uniqueWords.set(word.key, word);
-        }
-    }
-
-    // Add all new words
-    await Promise.all(
-        Array.from(uniqueWords.values()).map((wordObject) =>
-            autocompleteStore.put(wordObject)
-        ),
-    );
-
-    await metadataStore.put(newVersion, AUTOCOMPLETE_VERSION_KEY);
-    await tx.done;
-    console.log(`[OfflineDB] Updated autocomplete list to version ${newVersion} with ${uniqueWords.size} words.`);
+    await updateOfflineMetadata({
+        autocompleteVersion: newVersion,
+    });
 }
 
 export async function searchAutocompleteOffline(
     query: string,
+    limit = 10,
 ): Promise<string[]> {
-    if (query.length < 2) return [];
+    const metadata = await getOfflineMetadata();
+    const prefix = normalizeOfflineSearchKey(query);
+
+    if (!metadata.activeVersion || prefix.length < 2) {
+        return [];
+    }
 
     const db = await getDb();
-
-    const prefixes = Array.from(new Set([
-        toAutocompleteKey(query),
-        query.toLowerCase(),
-    ]));
+    const range = IDBKeyRange.bound(
+        `${metadata.activeVersion}${DATASET_KEY_SEPARATOR}${prefix}`,
+        `${metadata.activeVersion}${DATASET_KEY_SEPARATOR}${prefix}\uffff`,
+    );
+    const tx = db.transaction(WORDS_STORE, "readonly");
+    const index = tx.store.index(WORD_DATASET_SORT_INDEX);
     const results = new Map<string, string>();
+    let cursor = await index.openCursor(range);
 
-    for (const prefix of prefixes) {
-        const range = IDBKeyRange.bound(prefix, prefix + "\uffff");
-        const matches = await db.getAllFromIndex(
-            AUTOCOMPLETE_STORE,
-            AUTOCOMPLETE_NAME_INDEX,
-            range,
-            10,
-        );
-
-        for (const word of matches) {
-            results.set(toAutocompleteKey(word.displayName), word.displayName);
-            if (results.size >= 10) break;
-        }
-
-        if (results.size >= 10) break;
+    while (cursor && results.size < limit) {
+        const word = cursor.value;
+        results.set(word.lookupKey, word.wordName);
+        cursor = await cursor.continue();
     }
+
+    await tx.done;
 
     return Array.from(results.values());
 }
 
-/**
- * Gets cached popular/trending data from IndexedDB.
- */
 export const getCachedPopularData = async (
-    key: string
+    key: string,
 ): Promise<CachedPopularData | undefined> => {
     const db = await getDb();
     return db.get(POPULAR_TRENDS_STORE, key);
 };
 
-/**
- * Sets cached popular/trending data in IndexedDB.
- */
 export const setCachedPopularData = async (
     key: string,
-    data: PopularWord[]
+    data: PopularWord[],
 ): Promise<void> => {
     const db = await getDb();
     const cacheEntry: CachedPopularData = {
@@ -266,48 +460,52 @@ export const setCachedPopularData = async (
 
 export const searchByPattern = async (
     pattern: string,
-    limit: number = 20
+    limit = 20,
 ): Promise<WordData[]> => {
-    const db = await getDb();
+    const metadata = await getOfflineMetadata();
+    const normalizedPattern = normalizeOfflineSearchKey(pattern);
 
-    // 1. Convert pattern to Regex
-    // Escape special regex characters except underscore
-    const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    // Replace underscore with dot (match any char)
-    const regexString = `^${escapedPattern.replace(/_/g, '.')}$`;
-    const regex = new RegExp(regexString, 'i'); // Case insensitive
-
-    const results: WordData[] = [];
-    let count = 0;
-
-    // 2. Iterate using a cursor on AUTOCOMPLETE_STORE
-    const tx = db.transaction(AUTOCOMPLETE_STORE, 'readonly');
-    const store = tx.objectStore(AUTOCOMPLETE_STORE);
-
-    // Optimization: If pattern starts with characters, use them as a range
-    let range: IDBKeyRange | null = null;
-    const firstUnderscoreIndex = pattern.indexOf('_');
-    if (firstUnderscoreIndex > 0) {
-        const prefix = toAutocompleteKey(pattern.substring(0, firstUnderscoreIndex));
-        range = IDBKeyRange.bound(prefix, prefix + '\uffff');
+    if (!metadata.activeVersion || normalizedPattern.length < 2) {
+        return [];
     }
 
-    let cursor = await store.openCursor(range);
+    const escapedPattern = normalizedPattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`^${escapedPattern.replace(/_/g, ".")}$`, "u");
+    const firstUnderscoreIndex = normalizedPattern.indexOf("_");
+    const prefix =
+        firstUnderscoreIndex > 0
+            ? normalizedPattern.substring(0, firstUnderscoreIndex)
+            : "";
 
-    while (cursor && count < limit) {
-        const word = cursor.value as AutocompleteWord;
+    const db = await getDb();
+    const tx = db.transaction(WORDS_STORE, "readonly");
+    const index = tx.store.index(WORD_DATASET_SORT_INDEX);
+    const range = IDBKeyRange.bound(
+        `${metadata.activeVersion}${DATASET_KEY_SEPARATOR}${prefix}`,
+        `${metadata.activeVersion}${DATASET_KEY_SEPARATOR}${prefix}\uffff`,
+    );
+    const results: WordData[] = [];
+    let cursor = await index.openCursor(range);
 
-        // Check against displayName (original casing)
-        if (regex.test(word.displayName)) {
-            results.push({
-                word_id: 0, // Placeholder ID since we are searching autocomplete
-                word_name: word.displayName,
-                // We don't have full data here, but it's enough for suggestions
-            } as unknown as WordData);
-            count++;
+    while (cursor && results.length < limit) {
+        if (regex.test(cursor.value.lookupKey)) {
+            results.push(cursor.value.word);
         }
+
         cursor = await cursor.continue();
     }
 
+    await tx.done;
+
     return results;
+};
+
+export const resetOfflineDbForTests = async (): Promise<void> => {
+    if (dbPromise) {
+        const db = await dbPromise.catch(() => null);
+        db?.close();
+    }
+
+    dbPromise = null;
+    await deleteDB(DB_NAME);
 };

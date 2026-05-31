@@ -6,36 +6,64 @@ import WordLoadingSkeleton from "../_components/word-loading-skeleton";
 import WordNotFoundCard from "@/src/components/customs/word-not-found-card";
 import WordCardWrapper from "@/src/components/customs/word-card-wrapper";
 import { useLocale } from "next-intl";
-import { usePathname } from "next/navigation";
-import { authClient } from "@/src/lib/auth-client";
-import { extractSearchWordFromPathname } from "@/src/lib/search-route";
-import Hero from "@/src/components/hero";
+import { usePathname, useSearchParams } from "next/navigation";
+import type { Session } from "@/src/lib/auth-client";
+import {
+    extractSearchWordFromPathname,
+    normalizeSearchWord,
+    OFFLINE_SEARCH_PARAM,
+    SEARCH_QUERY_PARAM,
+} from "@/src/lib/search-route";
 import SearchContainer from "@/src/components/customs/search/search-container";
 import { useNavigationProgress } from "@/src/lib/navigation-progress";
+import OfflineSearchStateCard from "@/src/components/customs/search/offline-search-state-card";
 
 type SearchPageClientProps = {
     initialWord?: string;
     offlineOnly?: boolean;
+    session?: Session | null;
+    children?: ReactNode;
 };
 
 export default function SearchPageClient({
     initialWord = "",
     offlineOnly = false,
+    session = null,
+    children,
 }: SearchPageClientProps) {
     const pathname = usePathname();
-    const { data: session } = authClient.useSession();
+    const searchParams = useSearchParams();
     const locale = useLocale();
-    const wordName = initialWord || extractSearchWordFromPathname(pathname) || null;
+    const queryWord = normalizeSearchWord(
+        searchParams.get(SEARCH_QUERY_PARAM) ??
+        searchParams.get(OFFLINE_SEARCH_PARAM) ??
+        undefined,
+    );
+    const wordName = initialWord || queryWord || extractSearchWordFromPathname(pathname) || null;
+    const shouldUseOfflineOnly =
+        offlineOnly ||
+        Boolean(searchParams.get(OFFLINE_SEARCH_PARAM)) ||
+        Boolean(wordName?.includes("_"));
     const { phase } = useNavigationProgress();
 
     // The word search hook with offline support
-    const { data, isLoading, isFetching, isError, isOnline } = useWordSearch(
+    const {
+        data,
+        isLoading,
+        isFetching,
+        isError,
+        isOnline,
+        hasOfflineDataset,
+        isOfflineLoading,
+        offlineStatus,
+        offlineError,
+    } = useWordSearch(
         wordName || '',
-        { offlineOnly },
+        { offlineOnly: shouldUseOfflineOnly },
     );
 
     if (!wordName) {
-        return <Hero />;
+        return <>{children}</>;
     }
 
     // Show loading while extracting word from URL or while searching
@@ -43,6 +71,26 @@ export default function SearchPageClient({
         return (
             <WordClientShell>
                 <WordLoadingSkeleton />
+            </WordClientShell>
+        );
+    }
+
+    if ((shouldUseOfflineOnly || !isOnline) && !hasOfflineDataset && !isOfflineLoading) {
+        return (
+            <WordClientShell>
+                <OfflineSearchStateCard
+                    wordName={wordName}
+                    state={offlineStatus === "failed" ? "failed" : "not-downloaded"}
+                    error={offlineError?.message ?? null}
+                />
+            </WordClientShell>
+        );
+    }
+
+    if ((shouldUseOfflineOnly || !isOnline) && hasOfflineDataset && !data && !isOfflineLoading) {
+        return (
+            <WordClientShell>
+                <OfflineSearchStateCard wordName={wordName} state="no-match" />
             </WordClientShell>
         );
     }

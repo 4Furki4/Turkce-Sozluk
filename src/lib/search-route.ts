@@ -1,6 +1,7 @@
 const SEARCH_ROUTE_SEGMENTS = new Set(["search", "arama"]);
 export type SearchLocale = "en" | "tr";
 export const OFFLINE_SEARCH_PARAM = "offlineWord";
+export const SEARCH_QUERY_PARAM = "word";
 
 export const toSingleRouteParam = (
     value: string | string[] | undefined,
@@ -44,11 +45,21 @@ export const normalizeSearchWord = (value: string | string[] | undefined): strin
 export const getPlainSearchAction = (locale: string): string =>
     locale === "en" ? "/en/search" : "/tr/arama";
 
-export const getOfflineSearchHref = (locale: string, word: string): string => {
+export const getSearchQueryHref = (locale: string, word: string): string => {
     const searchPath = getPlainSearchAction(locale);
     const params = new URLSearchParams({
-        [OFFLINE_SEARCH_PARAM]: word,
+        [SEARCH_QUERY_PARAM]: word,
     });
 
     return `${searchPath}?${params.toString()}`;
 };
+
+export const getDynamicWordHref = (locale: string, word: string): string => {
+    const searchPath = getPlainSearchAction(locale);
+    const encodedWord = encodeURIComponent(normalizeSearchWord(word));
+
+    return `${searchPath}/${encodedWord}`;
+};
+
+export const getOfflineSearchHref = getDynamicWordHref;
+export const getWordSearchHref = getDynamicWordHref;

@@ -467,11 +467,11 @@ describe("SearchWordCardVariantGroup", () => {
 
     expect(screen.getByText("defter").closest("a")).toHaveAttribute(
       "href",
-      "/tr/arama?offlineWord=defter",
+      "/tr/arama/defter",
     );
     expect(screen.getByText("kitap gibi").closest("a")).toHaveAttribute(
       "href",
-      "/tr/arama?offlineWord=kitap+gibi",
+      "/tr/arama/kitap%20gibi",
     );
   });
 

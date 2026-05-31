@@ -7,9 +7,31 @@ import WordCardWrapper from '@/src/components/customs/word-card-wrapper';
 import { buildWordJsonLd, buildWordMetadata } from './word-seo';
 import type { WordSearchResult } from '@/types';
 import WordDetailShell from './word-detail-shell';
-import WordRouteTransitionBoundary from './word-route-transition-boundary';
 import { NoScriptNotice } from '@/src/components/progressive-enhancement/no-script-notice';
 import WordPageFallback from './word-page-fallback';
+
+const isDynamicServerUsageError = (error: unknown) =>
+    typeof error === "object" &&
+    error !== null &&
+    "digest" in error &&
+    error.digest === "DYNAMIC_SERVER_USAGE";
+
+const safeServerRead = async <T,>(
+    label: string,
+    read: Promise<T>,
+    fallback: T,
+): Promise<T> => {
+    try {
+        return await read;
+    } catch (error) {
+        if (isDynamicServerUsageError(error)) {
+            throw error;
+        }
+
+        console.warn(`[SearchResultPage] ${label} unavailable; rendering offline-capable fallback.`);
+        return fallback;
+    }
+};
 
 // This is the updated metadata generation function
 export async function generateMetadata({
@@ -19,7 +41,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
     const { word, locale } = await params;
     const wordName = decodeURIComponent(word);
-    const [result] = await api.word.getWord({ name: wordName, skipLogging: true });
+    const [result] = await safeServerRead(
+        "metadata word lookup",
+        api.word.getWord({ name: wordName, skipLogging: true }),
+        [],
+    );
     return buildWordMetadata(wordName, locale, result?.word_data as WordSearchResult["word_data"] | undefined);
 }
 
@@ -45,10 +71,19 @@ export default async function SearchResultPage(
     // Properly decode URL parameters with special characters like commas
     const decodedWordName = decodeURIComponent(params.word);
 
-    const session = await auth.api.getSession({
-        headers: await headers()
-    });
-    const [serverResult] = await api.word.getWord({ name: decodedWordName, skipLogging: false });
+    const requestHeaders = await headers();
+    const session = await safeServerRead(
+        "session",
+        auth.api.getSession({
+            headers: requestHeaders
+        }),
+        null,
+    );
+    const [serverResult] = await safeServerRead(
+        "word lookup",
+        api.word.getWord({ name: decodedWordName, skipLogging: false }),
+        [],
+    );
     const wordData = serverResult?.word_data as WordSearchResult["word_data"] | undefined;
     const jsonLd = wordData ? buildWordJsonLd(wordData, locale) : null;
     const resolvedLocale = locale === "en" ? "en" : "tr";
@@ -68,7 +103,6 @@ export default async function SearchResultPage(
                 wordData={wordData}
             />
             <div className="js-enhanced-word-result">
-                <WordRouteTransitionBoundary>
                 {wordData ? (
                     <HydrateClient>
                         <WordCardWrapper
@@ -89,7 +123,6 @@ export default async function SearchResultPage(
                         <WordResultClient session={session} wordName={decodedWordName} />
                     </HydrateClient>
                 )}
-                </WordRouteTransitionBoundary>
             </div>
         </WordDetailShell>
     )

@@ -6,6 +6,7 @@ import MobileBottomNav from './mobile-bottom-nav'
 import { Session } from '@/src/lib/auth-client'
 
 import { authClient } from '@/src/lib/auth-client';
+import { useOnlineStatus } from '@/src/hooks/use-online-status'
 
 export default function NavbarAndSidebar({
 
@@ -69,10 +70,161 @@ export default function NavbarAndSidebar({
     SpeedRoundGameIntl: string,
     ForeignTermSuggestionsIntl: string
 }) {
-    // Render children if on client side, otherwise return null
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+    const isOnline = useOnlineStatus()
+
+    if (!isOnline) {
+        return (
+            <NavbarAndSidebarShell
+                session={serverSession}
+                isSidebarOpen={isSidebarOpen}
+                setIsSidebarOpen={setIsSidebarOpen}
+                HomeIntl={HomeIntl}
+                SignInIntl={SignInIntl}
+                WordListIntl={WordListIntl}
+                WordBuilderIntl={WordBuilderIntl}
+                TitleIntl={TitleIntl}
+                ProfileIntl={ProfileIntl}
+                SavedWordsIntl={SavedWordsIntl}
+                MyRequestsIntl={MyRequestsIntl}
+                SearchHistoryIntl={SearchHistoryIntl}
+                LogoutIntl={LogoutIntl}
+                AnnouncementsIntl={AnnouncementsIntl}
+                ContributeWordIntl={ContributeWordIntl}
+                DonateIntl={DonateIntl}
+                PronunciationsIntl={PronunciationsIntl}
+                ariaAvatar={ariaAvatar}
+                ariaMenu={ariaMenu}
+                ariaLanguages={ariaLanguages}
+                ariaSwitchTheme={ariaSwitchTheme}
+                ariaBlur={ariaBlur}
+                DashboardIntl={DashboardIntl}
+                ContributeIntl={ContributeIntl}
+                FeedbackIntl={FeedbackIntl}
+                SearchIntl={SearchIntl}
+                LearnIntl={LearnIntl}
+                FlashcardGameIntl={FlashcardGameIntl}
+                WordMatchingGameIntl={WordMatchingGameIntl}
+                SpeedRoundGameIntl={SpeedRoundGameIntl}
+                ForeignTermSuggestionsIntl={ForeignTermSuggestionsIntl}
+            />
+        )
+    }
+
+    return (
+        <OnlineNavbarAndSidebar
+            serverSession={serverSession}
+            isSidebarOpen={isSidebarOpen}
+            setIsSidebarOpen={setIsSidebarOpen}
+            HomeIntl={HomeIntl}
+            SignInIntl={SignInIntl}
+            WordListIntl={WordListIntl}
+            WordBuilderIntl={WordBuilderIntl}
+            TitleIntl={TitleIntl}
+            ProfileIntl={ProfileIntl}
+            SavedWordsIntl={SavedWordsIntl}
+            MyRequestsIntl={MyRequestsIntl}
+            SearchHistoryIntl={SearchHistoryIntl}
+            LogoutIntl={LogoutIntl}
+            AnnouncementsIntl={AnnouncementsIntl}
+            ContributeWordIntl={ContributeWordIntl}
+            DonateIntl={DonateIntl}
+            PronunciationsIntl={PronunciationsIntl}
+            ariaAvatar={ariaAvatar}
+            ariaMenu={ariaMenu}
+            ariaLanguages={ariaLanguages}
+            ariaSwitchTheme={ariaSwitchTheme}
+            ariaBlur={ariaBlur}
+            DashboardIntl={DashboardIntl}
+            ContributeIntl={ContributeIntl}
+            FeedbackIntl={FeedbackIntl}
+            SearchIntl={SearchIntl}
+            LearnIntl={LearnIntl}
+            FlashcardGameIntl={FlashcardGameIntl}
+            WordMatchingGameIntl={WordMatchingGameIntl}
+            SpeedRoundGameIntl={SpeedRoundGameIntl}
+            ForeignTermSuggestionsIntl={ForeignTermSuggestionsIntl}
+        />
+    )
+}
+
+type NavbarAndSidebarShellProps = {
+    session: Session | null
+    isSidebarOpen: boolean
+    setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>
+    HomeIntl: string
+    SignInIntl: string
+    WordListIntl: string
+    WordBuilderIntl: string
+    TitleIntl: string
+    ProfileIntl: string
+    SavedWordsIntl: string
+    MyRequestsIntl: string
+    SearchHistoryIntl: string
+    LogoutIntl: string
+    AnnouncementsIntl: string
+    ContributeWordIntl: string
+    DonateIntl: string
+    PronunciationsIntl: string,
+    ariaAvatar: string,
+    ariaMenu: string,
+    ariaLanguages: string,
+    ariaSwitchTheme: string,
+    ariaBlur: string,
+    DashboardIntl: string,
+    ContributeIntl: string,
+    FeedbackIntl: string,
+    SearchIntl: string,
+    LearnIntl: string,
+    FlashcardGameIntl: string,
+    WordMatchingGameIntl: string,
+    SpeedRoundGameIntl: string,
+    ForeignTermSuggestionsIntl: string
+}
+
+function OnlineNavbarAndSidebar({
+    serverSession,
+    ...props
+}: Omit<NavbarAndSidebarShellProps, "session"> & { serverSession: Session | null }) {
     const { data: clientSession, isPending } = authClient.useSession()
     const session = isPending ? serverSession : clientSession
+
+    return <NavbarAndSidebarShell {...props} session={session} />
+}
+
+function NavbarAndSidebarShell({
+    session,
+    isSidebarOpen,
+    setIsSidebarOpen,
+    HomeIntl,
+    SignInIntl,
+    WordListIntl,
+    TitleIntl,
+    ProfileIntl,
+    SavedWordsIntl,
+    MyRequestsIntl,
+    SearchHistoryIntl,
+    LogoutIntl,
+    AnnouncementsIntl,
+    ContributeWordIntl,
+    DonateIntl,
+    PronunciationsIntl,
+    ariaAvatar,
+    ariaMenu,
+    ariaLanguages,
+    ariaSwitchTheme,
+    ariaBlur,
+    DashboardIntl,
+    ContributeIntl,
+    FeedbackIntl,
+    SearchIntl,
+    LearnIntl,
+    FlashcardGameIntl,
+    WordMatchingGameIntl,
+    WordBuilderIntl,
+    SpeedRoundGameIntl,
+    ForeignTermSuggestionsIntl
+}: NavbarAndSidebarShellProps) {
     return (
         <>
             <Navbar

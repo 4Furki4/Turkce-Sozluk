@@ -1596,6 +1596,14 @@
     "signInToRequestWord": "Kelime Talep Etmek İçin Önce Giriş Yapmalısınız",
     "signIn": "Giriş Yap"
   },
+  "OfflineSearch": {
+    "searchedWord": "Aranan kelime",
+    "notDownloadedTitle": "Çevrim dışı sözlük indirilmedi",
+    "notDownloadedDescription": "Bağlantı yokken arama yapmadan önce çevrim dışı sözlüğü bu cihaza indirin.",
+    "noMatchTitle": "Çevrim dışı eşleşme yok",
+    "noMatchDescription": "Çevrim dışı sözlük hazır, ancak bu kelime indirilen veride bulunamadı.",
+    "manageOfflineDictionary": "Çevrim dışı sözlüğü yönet"
+  },
   "ContributeWord": {
     "title": "Yeni Kelime Katkısı",
     "description": "Detaylı bir kelime girişi katkısında bulunarak sözlüğümüzü genişletmeye yardımcı olun. Katkınız eklenmeden önce ekibimiz tarafından incelenecektir.",
@@ -1833,12 +1841,17 @@
       "update_available_desc": "Sözlüğün yeni bir sürümü mevcut. Yerel sürüm: {local}, Sunucu sürümü: {remote}.",
       "not_downloaded_title": "İndirilmedi",
       "not_downloaded_desc": "Çevrim dışı sözlük henüz indirilmedi.",
+      "cleared_title": "Çevrim Dışı Veri Silindi",
+      "cleared_desc": "Çevrim dışı sözlük bu cihazdan kaldırıldı.",
       "downloading": "Veri indiriliyor",
       "downloading_title": "İndiriliyor...",
       "downloading_desc": "Çevrim dışı sözlüğünüz indiriliyor.",
       "deleting_title": "Siliniyor...",
       "deleting_desc": "Çevrim dışı sözlüğünüz siliniyor.",
       "deleting": "Veri siliniyor",
+      "failed_title": "İndirme Başarısız",
+      "failed_desc": "Çevrim dışı sözlük kurulamadı.",
+      "failed_previous_kept_desc": "Güncelleme başarısız oldu, ancak önceki çevrim dışı sözlüğünüz kullanılabilir durumda. {error}",
       "error_title": "Bir Hata Oluştu"
     },
     "buttons": {
@@ -1856,6 +1869,7 @@
       "title": "İndirme Bilgileri",
       "files_count": "İndirilecek dosya sayısı",
       "files": "dosya",
+      "installed_words": "Yüklü kelime",
       "estimated_size": "Tahmini boyut",
       "calculating": "Hesaplanıyor...",
       "unknown": "Bilinmiyor",

@@ -13,18 +13,17 @@ import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/src/lib/auth";
 import { Params } from "next/dist/server/request/params";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Analytics } from "@vercel/analytics/next";
 import NavbarAndSidebar from "@/src/components/customs/navbar-and-sidebar";
 import { BackgroundGradient } from "@/src/components/customs/background-gradient";
 import { CaptchaProvider } from "@/src/components/customs/captcha-provider";
 import { PreferencesInitializer } from "@/src/components/customs/preferences-initializer";
 import NavigationProgressBar from "@/src/components/customs/navigation-progress-bar";
 // import { SessionProvider } from "next-auth/react"; // Removed
-import { AutocompleteSync } from "@/src/components/customs/complete-sync";
 import ProfileGuard from "@/src/components/customs/profile-guard";
 import { getBaseUrl, getCanonicalPathname } from "@/src/lib/seo-utils";
 import PWAServiceWorker from "@/src/components/pwa-service-worker";
+import OnlineStatusBridge from "@/src/components/online-status-bridge";
+import OnlineTelemetry from "@/src/components/online-telemetry";
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -164,9 +163,13 @@ export default async function RootLayout({
   params: Promise<Params>
 }) {
   const { locale } = await params;
+  const requestHeaders = await headers();
   const session = await auth.api.getSession({
-    headers: await headers()
-  })
+    headers: requestHeaders
+  }).catch(() => {
+    console.warn("[RootLayout] Session unavailable; rendering anonymous shell.");
+    return null;
+  });
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
@@ -185,9 +188,9 @@ export default async function RootLayout({
           <NextIntlClientProvider messages={messages}>
             <CaptchaProvider>
               <Providers>
+                <OnlineStatusBridge />
                 <PWAServiceWorker />
                 <NavigationProgressBar />
-                <AutocompleteSync />
                 <ProfileGuard />
                 <div className="flex flex-col min-h-screen">
                   <PreferencesInitializer />
@@ -229,8 +232,7 @@ export default async function RootLayout({
                   </main>
                   <Footer session={session} />
                 </div>
-                <SpeedInsights />
-                <Analytics />
+                <OnlineTelemetry />
               </Providers>
             </CaptchaProvider >
             <Toaster />

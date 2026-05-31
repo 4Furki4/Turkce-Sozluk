@@ -35,7 +35,7 @@ module.exports = async (phase) => {
             swSrc: "src/app/sw.ts",
             swDest: "public/sw.js",
             register: false,
-            cacheOnNavigation: true,
+            cacheOnNavigation: false,
             reloadOnOnline: true,
             additionalPrecacheEntries: [
                 { url: "/~offline", revision },
@@ -45,6 +45,7 @@ module.exports = async (phase) => {
                 { url: "/", revision },
                 { url: "/en", revision },
                 { url: "/tr", revision },
+                { url: "/manifest.json", revision },
                 // Precache search pages for offline functionality
                 { url: "/en/search", revision },
                 { url: "/tr/arama", revision },

@@ -6,6 +6,7 @@ import WordNotFoundCard from "@/src/components/customs/word-not-found-card";
 import { Session } from "@/src/lib/auth";
 import WordCardWrapper from "@/src/components/customs/word-card-wrapper";
 import { useLocale } from "next-intl";
+import OfflineSearchStateCard from "@/src/components/customs/search/offline-search-state-card";
 
 type WordResultClientProps = {
     session: Session | null;
@@ -16,11 +17,35 @@ export default function WordResultClient({ session, wordName }: WordResultClient
     const locale = useLocale();
     // The initial data from the server is passed directly to our hook.
     // TanStack Query will use this data immediately without refetching on the client.
-    const { data, isLoading, isFetching, isError, isOnline } = useWordSearch(wordName);
+    const {
+        data,
+        isLoading,
+        isFetching,
+        isError,
+        isOnline,
+        hasOfflineDataset,
+        isOfflineLoading,
+        offlineStatus,
+        offlineError,
+    } = useWordSearch(wordName);
 
     // The loading skeleton will only be shown on subsequent client-side navigation.
     if (isLoading) {
         return <WordLoadingSkeleton />;
+    }
+
+    if (!isOnline && !hasOfflineDataset && !isOfflineLoading) {
+        return (
+            <OfflineSearchStateCard
+                wordName={wordName}
+                state={offlineStatus === "failed" ? "failed" : "not-downloaded"}
+                error={offlineError?.message ?? null}
+            />
+        );
+    }
+
+    if (!isOnline && hasOfflineDataset && !data && !isOfflineLoading) {
+        return <OfflineSearchStateCard wordName={wordName} state="no-match" />;
     }
 
     // Show the "Not Found" component if there's an error or no data

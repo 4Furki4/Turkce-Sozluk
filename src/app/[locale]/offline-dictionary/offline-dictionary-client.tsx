@@ -8,19 +8,22 @@ import { Progress } from "@heroui/react";
 import { Alert } from "@heroui/react";
 import {
     getLocalVersion,
-    setLocalVersion,
     clearOfflineData,
+    getOfflineMetadata,
 } from "@/src/lib/offline-db";
 import { Download, Trash2, RefreshCw } from "lucide-react";
+import type { OfflineMetadata } from "@/src/lib/db-config";
 
 type Status =
     | "idle"
     | "checking"
-    | "up-to-date"
+    | "ready"
     | "update-available"
     | "not-downloaded"
     | "downloading"
     | "deleting"
+    | "failed"
+    | "cleared"
     | "error";
 
 type Metadata = {
@@ -59,6 +62,7 @@ export default function OfflineDictionaryClient() {
     const [status, setStatus] = useState<Status>("idle");
     const [localVersion, setLocalVersionState] = useState<number | null>(null);
     const [remoteVersion, setRemoteVersion] = useState<number | null>(null);
+    const [localMetadata, setLocalMetadata] = useState<OfflineMetadata | null>(null);
     const [metadata, setMetadata] = useState<Metadata | null>(null);
     const [progress, setProgress] = useState(0);
     const [error, setError] = useState<string | null>(null);
@@ -104,7 +108,9 @@ export default function OfflineDictionaryClient() {
             setRemoteVersion(remoteMeta.version);
             setMetadata(remoteMeta);
 
-            // Get local version
+            const offlineMetadata = await getOfflineMetadata();
+            setLocalMetadata(offlineMetadata);
+
             const localV = await getLocalVersion();
             setLocalVersionState(localV);
 
@@ -116,10 +122,12 @@ export default function OfflineDictionaryClient() {
                 await calculateDownloadSize(remoteMeta.files);
             }
 
-            if (!localV) {
-                setStatus("not-downloaded");
+            if (offlineMetadata.status === "failed") {
+                setStatus("failed");
+            } else if (!localV) {
+                setStatus(offlineMetadata.status === "cleared" ? "cleared" : "not-downloaded");
             } else if (localV === remoteMeta.version) {
-                setStatus("up-to-date");
+                setStatus("ready");
             } else {
                 setStatus("update-available");
             }
@@ -146,8 +154,6 @@ export default function OfflineDictionaryClient() {
         setError(null);
 
         try {
-            await clearOfflineData();
-
             const worker = new Worker(new URL('@/src/lib/workers/offline-download.worker.ts', import.meta.url));
 
             worker.onmessage = async (event) => {
@@ -155,19 +161,19 @@ export default function OfflineDictionaryClient() {
                 if (type === 'PROGRESS') {
                     setProgress(event.data.progress);
                 } else if (type === 'COMPLETE') {
-                    await setLocalVersion(metadata.version);
                     await checkStatus();
                     worker.terminate();
                 } else if (type === 'ERROR') {
                     setError(event.data.error);
-                    setStatus("error");
+                    setLocalMetadata(await getOfflineMetadata());
+                    setStatus("failed");
                     worker.terminate();
                 }
             };
 
             worker.postMessage({
                 type: 'START_DOWNLOAD',
-                files: metadata.files,
+                manifest: metadata,
                 baseUrl: `${DATA_BASE_URL}/${FOLDER_NAME}`
             });
 
@@ -198,7 +204,7 @@ export default function OfflineDictionaryClient() {
                 return (
                     <Alert color="default" title={t("status.checking")} description={t("status.checking_desc")} />
                 );
-            case "up-to-date":
+            case "ready":
                 return (
                     <Alert color="success" title={t("status.up_to_date_title")} description={t("status.up_to_date_desc")} />
                 );
@@ -209,6 +215,10 @@ export default function OfflineDictionaryClient() {
             case "not-downloaded":
                 return (
                     <Alert color="warning" title={t("status.not_downloaded_title")} description={t("status.not_downloaded_desc")} />
+                );
+            case "cleared":
+                return (
+                    <Alert color="default" title={t("status.cleared_title")} description={t("status.cleared_desc")} />
                 );
             case "downloading":
                 return (
@@ -224,6 +234,16 @@ export default function OfflineDictionaryClient() {
             case "deleting":
                 return (
                     <Alert color="default" title={t("status.deleting_title")} description={t("status.deleting_desc")} />
+                );
+            case "failed":
+                return (
+                    <Alert
+                        color="danger"
+                        title={t("status.failed_title")}
+                        description={localMetadata?.activeVersion
+                            ? t("status.failed_previous_kept_desc", { error: localMetadata.lastError ?? error ?? "" })
+                            : (localMetadata?.lastError ?? error ?? t("status.failed_desc"))}
+                    />
                 );
             case "error":
                 return (
@@ -244,7 +264,7 @@ export default function OfflineDictionaryClient() {
                 </div>
 
                 {/* File Size Information */}
-                {(status === "not-downloaded" || status === "update-available") && (
+                {(status === "not-downloaded" || status === "update-available" || status === "failed" || status === "cleared") && (
                     <div className="p-4 bg-background-50 rounded-md border ">
                         <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
                             <Download className="h-4 w-4" />
@@ -255,6 +275,12 @@ export default function OfflineDictionaryClient() {
                                 <div className="flex justify-between">
                                     <span>{t("download_info.files_count")}:</span>
                                     <span className="font-medium">{metadata.files.length} {t("download_info.files")}</span>
+                                </div>
+                            )}
+                            {localMetadata?.activeVersion && (
+                                <div className="flex justify-between">
+                                    <span>{t("download_info.installed_words")}:</span>
+                                    <span className="font-medium">{localMetadata.installedWordCount.toLocaleString()}</span>
                                 </div>
                             )}
                             <div className="flex justify-between">
@@ -282,9 +308,9 @@ export default function OfflineDictionaryClient() {
                 )}
             </CardBody>
             <CardFooter className="flex flex-col sm:grid-cols-2  justify-between items-center gap-2">
-                {(status === "not-downloaded" || status === "update-available") && (
+                {(status === "not-downloaded" || status === "update-available" || status === "failed" || status === "cleared") && (
                     <Button onPress={handleDownloadOrUpdate} disabled={isLoading} color="primary" className="w-full" startContent={<Download className="mr-2 h-4 w-4" />}>
-                        {status === "not-downloaded" ? t("buttons.download") : t("buttons.update")}
+                        {(status === "not-downloaded" || status === "cleared") ? t("buttons.download") : t("buttons.update")}
                     </Button>
                 )}
 

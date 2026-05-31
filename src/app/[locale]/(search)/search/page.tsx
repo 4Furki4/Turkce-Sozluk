@@ -1,6 +1,11 @@
 import { redirect } from "@/src/i18n/routing";
 import SearchPageClient from "./_pages/search-page-client";
-import { normalizeSearchWord, OFFLINE_SEARCH_PARAM } from "@/src/lib/search-route";
+import Hero from "@/src/components/hero";
+import {
+  normalizeSearchWord,
+  OFFLINE_SEARCH_PARAM,
+  SEARCH_QUERY_PARAM,
+} from "@/src/lib/search-route";
 
 export default async function Page(
   props: {
@@ -11,16 +16,13 @@ export default async function Page(
   const { locale } = await props.params;
   const searchParams = await props.searchParams;
 
-  // Handle query parameter based search (normal online flow)
-  if (searchParams.word !== undefined) {
-    const parsedWord = normalizeSearchWord(searchParams.word);
-    if (!parsedWord) {
-      // redirect to home page if word param is empty
-      redirect({
-        href: "/",
-        locale,
-      });
-    } else {
+  const parsedWord = normalizeSearchWord(
+    searchParams[SEARCH_QUERY_PARAM] ?? searchParams[OFFLINE_SEARCH_PARAM],
+  );
+
+  if (parsedWord) {
+    if (!parsedWord.includes("_")) {
+      // Handle query parameter based search (normal online progressive flow)
       redirect({
         href: {
           pathname: "/search/[word]",
@@ -31,11 +33,23 @@ export default async function Page(
         locale,
       });
     }
+
+    return <SearchPageClient initialWord={parsedWord} offlineOnly />;
   }
 
-  const offlineWord = normalizeSearchWord(searchParams[OFFLINE_SEARCH_PARAM]);
+  if (searchParams[SEARCH_QUERY_PARAM] !== undefined) {
+    const parsedEmptyWord = normalizeSearchWord(searchParams[SEARCH_QUERY_PARAM]);
+    if (!parsedEmptyWord) {
+      redirect({
+        href: "/",
+        locale,
+      });
+    }
+  }
 
-  // If no query parameter, render the client component that can handle offline routing
-  // This handles the case where service worker serves this page for dynamic routes like /en/search/word
-  return <SearchPageClient initialWord={offlineWord} offlineOnly={Boolean(offlineWord)} />;
+  return (
+    <SearchPageClient>
+      <Hero />
+    </SearchPageClient>
+  );
 }

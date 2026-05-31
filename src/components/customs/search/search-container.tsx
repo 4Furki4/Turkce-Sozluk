@@ -2,7 +2,6 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { Search as SearchIcon, PuzzleIcon, KeyboardIcon, TrendingUpIcon, BookOpenIcon, TypeIcon } from "lucide-react";
-import { useRouter } from "@/src/i18n/routing";
 import { Input } from "@heroui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@heroui/react";
@@ -16,7 +15,7 @@ import { useOnlineStatus } from "@/src/hooks/use-online-status";
 import { api } from "@/src/trpc/react";
 import { startNavigationProgress } from "@/src/lib/navigation-progress";
 import { getOfflineWordSearchQueryKey, toOfflineWordSearchResult } from "@/src/hooks/useWordSearch";
-import { getOfflineSearchHref, getPlainSearchAction } from "@/src/lib/search-route";
+import { getPlainSearchAction, getSearchQueryHref, getWordSearchHref } from "@/src/lib/search-route";
 import type { RouterOutputs } from "@/src/trpc/shared";
 
 type SearchMode = "word" | "meaning";
@@ -47,7 +46,6 @@ export default function SearchContainer({
 }: SearchContainerProps) {
     const t = useTranslations("Home");
     const locale = useLocale();
-    const router = useRouter();
     const queryClient = useQueryClient();
     const [wordInput, setWordInput] = useState<string>("");
     const [inputError, setInputError] = useState<string>("");
@@ -86,6 +84,14 @@ export default function SearchContainer({
 
     const isSelecting = useRef(false);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!isOnline && searchMode === "meaning") {
+            setSearchMode("word");
+            setMeaningResults([]);
+            setShowRecommendations(false);
+        }
+    }, [isOnline, searchMode]);
 
     // Handle meaning search results from tRPC
     useEffect(() => {
@@ -242,22 +248,19 @@ export default function SearchContainer({
 
         await primeOfflineWordCache(input);
 
-        const offlineSearchHref = getOfflineSearchHref(locale, input);
-        if (!isOnline) {
-            window.location.assign(offlineSearchHref);
-            return;
-        }
-
         if (input.includes("_")) {
-            window.location.assign(offlineSearchHref);
+            window.location.assign(getSearchQueryHref(locale, input));
             return;
         }
 
-        router.push({
-            pathname: "/search/[word]",
-            params: { word: encodeURIComponent(input) },
-        });
-    }, [isOnline, locale, onSearchComplete, primeOfflineWordCache, router, t]);
+        const dynamicWordHref = getWordSearchHref(locale, input);
+        if (!isOnline) {
+            window.location.assign(dynamicWordHref);
+            return;
+        }
+
+        window.location.assign(dynamicWordHref);
+    }, [isOnline, locale, onSearchComplete, primeOfflineWordCache, t]);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -452,17 +455,20 @@ export default function SearchContainer({
                     <button
                         type="button"
                         onClick={() => {
+                            if (!isOnline) return;
                             isSelecting.current = true;
                             setSearchMode("meaning");
                             setShowRecommendations(false);
                             setRecommendations([]);
                             setSelectedIndex(-1);
                         }}
+                        disabled={!isOnline}
                         className={cn(
                             "flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-sm font-medium transition-all duration-200",
                             searchMode === "meaning"
                                 ? "bg-primary/15 text-primary shadow-sm"
-                                : "text-zinc-500 hover:text-zinc-300"
+                                : "text-zinc-500 hover:text-zinc-300",
+                            !isOnline && "cursor-not-allowed opacity-50 hover:text-zinc-500"
                         )}
                     >
                         <BookOpenIcon className="w-3.5 h-3.5" />

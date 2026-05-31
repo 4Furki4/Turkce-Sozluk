@@ -4,9 +4,20 @@ import { authClient } from "@/src/lib/auth-client";
 import { usePathname } from "next/navigation";
 import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
 import { useEffect } from "react";
+import { useOnlineStatus } from "@/src/hooks/use-online-status";
 
 export default function ProfileGuard() {
-    const { data: session, isPending, refetch } = authClient.useSession();
+    const isOnline = useOnlineStatus();
+
+    if (!isOnline) {
+        return null;
+    }
+
+    return <OnlineProfileGuard />;
+}
+
+function OnlineProfileGuard() {
+    const { data: session, isPending } = authClient.useSession();
     const router = useRouter();
     const pathname = usePathname();
 

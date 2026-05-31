@@ -17,10 +17,12 @@ export function useOnlineStatus() {
 
     useEffect(() => {
         const updateOnlineStatus = () => {
+            onlineManager.setOnline(navigator.onLine);
             const online = navigator.onLine && onlineManager.isOnline();
             setIsOnline(online);
         };
 
+        updateOnlineStatus();
         window.addEventListener("online", updateOnlineStatus);
         window.addEventListener("offline", updateOnlineStatus);
         const unsubscribe = onlineManager.subscribe(updateOnlineStatus);

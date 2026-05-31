@@ -19,6 +19,7 @@ import {
   extractSearchWordFromPathname,
   normalizeSearchWord,
   OFFLINE_SEARCH_PARAM,
+  SEARCH_QUERY_PARAM,
   toSingleRouteParam,
 } from "@/src/lib/search-route";
 import { startNavigationProgress } from "@/src/lib/navigation-progress";
@@ -39,9 +40,12 @@ export default function WordNotFoundCard({ session, searchedWord }: WordNotFound
   const offlineWord = normalizeSearchWord(
     searchParams.get(OFFLINE_SEARCH_PARAM) ?? undefined,
   );
+  const queryWord = normalizeSearchWord(
+    searchParams.get(SEARCH_QUERY_PARAM) ?? undefined,
+  );
   const wordName = searchedWord || (routeWord
     ? decodePathSegment(routeWord)
-    : (offlineWord || pathWord || "Unknown"));
+    : (queryWord || offlineWord || pathWord || "Unknown"));
   const { isBlurEnabled } = useSnapshot(preferencesState)
   const router = useRouter();
   const pathname = usePathname();

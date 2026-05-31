@@ -12,6 +12,8 @@ describe("progressive search forms", () => {
         expect(source).toContain("action={getPlainSearchAction(locale)}");
         expect(source).toContain('method="get"');
         expect(source).toContain('name="word"');
+        expect(source).toContain("getWordSearchHref(locale, input)");
+        expect(source).not.toContain('name="offlineWord"');
     });
 
     it("keeps the navbar search form submittable without JavaScript", () => {
@@ -20,5 +22,7 @@ describe("progressive search forms", () => {
         expect(source).toContain("action={getPlainSearchAction(locale)}");
         expect(source).toContain('method="get"');
         expect(source).toContain('name="word"');
+        expect(source).toContain("getWordSearchHref(locale, input)");
+        expect(source).not.toContain('name="offlineWord"');
     });
 });

@@ -19,7 +19,7 @@ declare global {
 
 // Service Worker version for debugging
 
-const SW_VERSION = "v1.4.0";
+const SW_VERSION = "v1.6.0";
 
 console.log(`[SW] Service Worker ${SW_VERSION} starting...`);
 
@@ -53,6 +53,23 @@ const startsWithAny = (pathname: string, prefixes: readonly string[]) => {
     const normalizedPathname = pathname.toLowerCase();
     return prefixes.some((prefix) => normalizedPathname.startsWith(prefix.toLowerCase()));
 };
+
+const isDynamicSearchPath = (pathname: string) =>
+    pathname.match(EN_SEARCH_DYNAMIC_PATH) || pathname.match(TR_SEARCH_DYNAMIC_PATH);
+
+const isBaseSearchPath = (pathname: string) =>
+    pathname === "/en/search" ||
+    pathname === "/tr/arama" ||
+    pathname === "/tr/search";
+
+const isHomeShellPath = (pathname: string) =>
+    pathname === "/" || pathname === "/tr" || pathname === "/en";
+
+const isAppShellNavigationPath = (pathname: string) =>
+    isHomeShellPath(pathname) ||
+    isBaseSearchPath(pathname) ||
+    Boolean(isDynamicSearchPath(pathname)) ||
+    startsWithAny(pathname, OFFLINE_DICTIONARY_PREFIXES);
 
 const getNavigationFallbackUrl = (url: URL) => {
     const pathname = url.pathname;
@@ -99,6 +116,11 @@ const cacheNavigationResponse = async (
     responsePromise: Promise<Response | undefined>,
 ) => {
     try {
+        const url = new URL(request.url);
+        if (isDynamicSearchPath(url.pathname)) {
+            return;
+        }
+
         const response = await responsePromise;
 
         if (!response || !isUsableNavigationResponse(response)) {
@@ -112,9 +134,15 @@ const cacheNavigationResponse = async (
     }
 };
 
-const getCachedNavigationResponse = async (request: Request, fallbackUrl: string) => {
+const getCachedNavigationResponse = async (
+    request: Request,
+    fallbackUrl: string,
+    options: { skipRequestMatch?: boolean } = {},
+) => {
     const runtimeCache = await caches.open(DOCUMENT_CACHE_NAME);
-    const cachedRequest = await runtimeCache.match(request, { ignoreSearch: true });
+    const cachedRequest = options.skipRequestMatch
+        ? undefined
+        : await runtimeCache.match(request, { ignoreSearch: true });
 
     if (cachedRequest) {
         return cachedRequest;
@@ -148,6 +176,32 @@ const handleNavigationRequest = async ({
     url,
 }: RouteHandlerCallbackOptions) => {
     const fetchEvent = event as FetchEvent;
+    const fallbackUrl = getNavigationFallbackUrl(url);
+    const isShellNavigation = isAppShellNavigationPath(url.pathname);
+    const skipRequestMatch = Boolean(isDynamicSearchPath(url.pathname));
+
+    if (isShellNavigation) {
+        const cachedShell = await getCachedNavigationResponse(request, fallbackUrl, {
+            skipRequestMatch,
+        });
+
+        if (cachedShell) {
+            if (self.navigator.onLine) {
+                event.waitUntil(
+                    cacheNavigationResponse(
+                        request,
+                        (async () => {
+                            const preloadResponse = await fetchEvent.preloadResponse;
+                            return preloadResponse ?? fetch(request);
+                        })(),
+                    ),
+                );
+            }
+
+            return cachedShell;
+        }
+    }
+
     const networkResponsePromise = (async () => {
         const preloadResponse = await fetchEvent.preloadResponse;
         return preloadResponse ?? fetch(request);
@@ -188,7 +242,8 @@ const handleNavigationRequest = async ({
 
     const cachedResponse = await getCachedNavigationResponse(
         request,
-        getNavigationFallbackUrl(url),
+        fallbackUrl,
+        { skipRequestMatch },
     );
 
     if (cachedResponse) {

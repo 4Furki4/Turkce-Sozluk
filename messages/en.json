@@ -1631,6 +1631,14 @@
     "signInToRequestWord": "Sign in to request word",
     "signIn": "Sign in"
   },
+  "OfflineSearch": {
+    "searchedWord": "Searched word",
+    "notDownloadedTitle": "Offline dictionary is not downloaded",
+    "notDownloadedDescription": "Download the offline dictionary on this device before searching without a connection.",
+    "noMatchTitle": "No offline match",
+    "noMatchDescription": "The offline dictionary is available, but this word was not found in the downloaded data.",
+    "manageOfflineDictionary": "Manage offline dictionary"
+  },
   "ContributeWord": {
     "title": "Contribute New Word",
     "description": "Help expand our dictionary by contributing a detailed word entry. Your contribution will be reviewed by our team before being added.",
@@ -1867,12 +1875,17 @@
       "update_available_desc": "A new version of the dictionary is available. Local version: {local}, Server version: {remote}.",
       "not_downloaded_title": "Not Downloaded",
       "not_downloaded_desc": "The offline dictionary has not been downloaded yet.",
+      "cleared_title": "Offline Data Cleared",
+      "cleared_desc": "The offline dictionary was removed from this device.",
       "downloading": "Downloading data",
       "downloading_title": "Downloading...",
       "downloading_desc": "Your offline dictionary is being downloaded.",
       "deleting_title": "Deleting...",
       "deleting_desc": "Your offline dictionary is being deleted.",
       "deleting": "Deleting data",
+      "failed_title": "Download Failed",
+      "failed_desc": "The offline dictionary could not be installed.",
+      "failed_previous_kept_desc": "The update failed, but your previous offline dictionary is still available. {error}",
       "error_title": "An Error Occurred"
     },
     "buttons": {
@@ -1890,6 +1903,7 @@
       "title": "Download Information",
       "files_count": "Files to download",
       "files": "files",
+      "installed_words": "Installed words",
       "estimated_size": "Estimated size",
       "calculating": "Calculating...",
       "unknown": "Unknown",
