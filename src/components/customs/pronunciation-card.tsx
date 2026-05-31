@@ -25,17 +25,39 @@ import { CustomAudioPlayer } from "./custom-audio";
 interface PronunciationCardProps {
     wordId: number;
     session: Session | null;
+    enabled?: boolean;
+    initialPronunciations?: PronunciationItem[];
 }
 
-export const PronunciationCard: FC<PronunciationCardProps> = ({ wordId, session }) => {
+type PronunciationItem = {
+    id: number;
+    audioUrl: string;
+    user?: {
+        id?: string | null;
+        name?: string | null;
+        image?: string | null;
+    } | null;
+    voteCount?: number | string;
+    userVote?: number;
+};
+
+export const PronunciationCard: FC<PronunciationCardProps> = ({
+    wordId,
+    session,
+    enabled = true,
+    initialPronunciations = [],
+}) => {
     const locale = useLocale();
     const t = useTranslations("Pronunciations");
     const [playingId, setPlayingId] = useState<number | null>(null);
     const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
-    const { data: pronunciations, isLoading } = api.word.getPronunciationsForWord.useQuery({
+    const { data: fetchedPronunciations, isLoading } = api.word.getPronunciationsForWord.useQuery({
         wordId
+    }, {
+        enabled
     });
+    const pronunciations = (enabled ? fetchedPronunciations : undefined) ?? initialPronunciations;
 
     const utils = api.useUtils();
     const { mutate: toggleVote } = api.vote.togglePronunciationVote.useMutation({
@@ -121,7 +143,7 @@ export const PronunciationCard: FC<PronunciationCardProps> = ({ wordId, session 
         toggleVote({ pronunciationId, voteType });
     };
 
-    if (isLoading) {
+    if (enabled && isLoading) {
         return (
             <div className="p-4 text-center">
                 <div className="text-sm text-muted-foreground">{t("loading") || "Loading pronunciations..."}</div>

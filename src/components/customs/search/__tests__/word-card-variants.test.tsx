@@ -448,6 +448,33 @@ describe("SearchWordCardVariantGroup", () => {
     expect(screen.getByRole("button", { name: "Show more (6)" })).toBeInTheDocument();
   });
 
+  it("keeps related word links in the offline search flow for offline results", () => {
+    initializePreferences();
+
+    render(
+      <SearchWordCardVariantGroup
+        data={[{
+          word_data: {
+            ...sampleWord.word_data,
+            source: "offline",
+          },
+        }]}
+        locale="tr"
+        session={null}
+        headingLevel="h1"
+      />,
+    );
+
+    expect(screen.getByText("defter").closest("a")).toHaveAttribute(
+      "href",
+      "/tr/arama?offlineWord=defter",
+    );
+    expect(screen.getByText("kitap gibi").closest("a")).toHaveAttribute(
+      "href",
+      "/tr/arama?offlineWord=kitap+gibi",
+    );
+  });
+
   it("does not show the related links toggle for lists at the limit", () => {
     initializePreferences();
 

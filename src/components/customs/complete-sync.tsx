@@ -8,6 +8,7 @@ import {
     getLocalAutocompleteVersion,
     updateLocalAutocompleteList,
 } from "@/src/lib/offline-db";
+import { useOnlineStatus } from "@/src/hooks/use-online-status";
 
 /**
  * This component runs in the background on app load.
@@ -16,16 +17,19 @@ import {
  */
 export function AutocompleteSync() {
     const t = useTranslations("OfflineSync");
+    const isOnline = useOnlineStatus();
     // Get the tRPC client
     const trpcClient = api.useUtils().client;
 
     // 1. Get the server's version
     const { data: serverVersion } =
-        api.word.getAutocompleteListVersion.useQuery();
+        api.word.getAutocompleteListVersion.useQuery(undefined, {
+            enabled: isOnline,
+        });
 
     // 2. This effect runs when the serverVersion is loaded
     useEffect(() => {
-        if (!serverVersion) return; // Wait for the query to finish
+        if (!isOnline || !serverVersion) return; // Wait for the query to finish
 
         const syncData = async () => {
             // 3. Get our local version
@@ -53,7 +57,7 @@ export function AutocompleteSync() {
         };
 
         syncData();
-    }, [serverVersion, trpcClient, t]);
+    }, [isOnline, serverVersion, trpcClient, t]);
 
     return null; // This component renders nothing
 }
