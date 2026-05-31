@@ -18,7 +18,9 @@ declare global {
 }
 
 // Service Worker version for debugging
+
 const SW_VERSION = "v1.4.0";
+
 console.log(`[SW] Service Worker ${SW_VERSION} starting...`);
 
 declare const self: ServiceWorkerGlobalScope;
