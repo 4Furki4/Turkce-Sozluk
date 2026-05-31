@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { useSnapshot } from "valtio";
 
 import { cn } from "@/lib/utils";
@@ -33,6 +33,7 @@ import {
   setSearchWordCardVariant,
   type SearchWordCardVariant,
 } from "@/src/store/preferences";
+import { getOfflineSearchHref } from "@/src/lib/search-route";
 import { copyPageUrl } from "@/src/utils/clipboard";
 import { captureElementScreenshot } from "@/src/utils/screenshot";
 
@@ -54,6 +55,13 @@ const WORD_CARD_VARIANTS: {
     { value: "magazine", labelKey: "MagazineLayout", icon: Blocks },
   ];
 const RELATED_LINK_COLLAPSE_LIMIT = 24;
+const WordCardNavigationContext = createContext<{
+  locale: "en" | "tr";
+  offlineLinks: boolean;
+}>({
+  locale: "tr",
+  offlineLinks: false,
+});
 
 type WordEntryData = WordSearchResult["word_data"] & {
   source?: "online" | "offline";
@@ -72,6 +80,39 @@ type WordEntryData = WordSearchResult["word_data"] & {
 type Meaning = WordEntryData["meanings"][number];
 type RelatedWord = NonNullable<WordEntryData["relatedWords"]>[number];
 type WordCardTranslator = ReturnType<typeof useTranslations>;
+
+function WordRouteLink({
+  word,
+  children,
+  className,
+}: {
+  word: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  const { locale, offlineLinks } = useContext(WordCardNavigationContext);
+
+  if (offlineLinks) {
+    return (
+      <a href={getOfflineSearchHref(locale, word)} className={className}>
+        {children}
+      </a>
+    );
+  }
+
+  return (
+    <Link
+      href={{
+        pathname: "/search/[word]",
+        params: { word },
+      }}
+      prefetch={false}
+      className={className}
+    >
+      {children}
+    </Link>
+  );
+}
 
 type SearchWordCardVariantGroupProps = {
   data?: WordSearchResult[];
@@ -199,6 +240,7 @@ function SearchWordCardVariant({
   const t = useTranslations("WordCard");
   const cardRef = useRef<HTMLDivElement>(null);
   const [requestModalInitialView, setRequestModalInitialView] = useState<WordCardRequestModalInitialView>("word");
+  const offlineLinks = isOnline === false || word_data.source === "offline";
 
   const handleCapture = async () => {
     if (!cardRef.current) return;
@@ -245,11 +287,13 @@ function SearchWordCardVariant({
       className="overflow-hidden rounded-md p-0 shadow-sm shadow-black/5"
     >
       <div key={variant} className="animate-in fade-in-0 slide-in-from-bottom-1 duration-200">
-        {variant === "magazine" ? (
-          <MagazineWordCard {...bodyProps} />
-        ) : (
-          <ReaderWordCard {...bodyProps} />
-        )}
+        <WordCardNavigationContext.Provider value={{ locale, offlineLinks }}>
+          {variant === "magazine" ? (
+            <MagazineWordCard {...bodyProps} />
+          ) : (
+            <ReaderWordCard {...bodyProps} />
+          )}
+        </WordCardNavigationContext.Provider>
       </div>
 
       <WordCardRequestModal
@@ -645,10 +689,13 @@ function CompactPronunciationPopover({
   const tPronunciation = useTranslations("Pronunciations");
   const router = useRouter();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { offlineLinks } = useContext(WordCardNavigationContext);
   const { data: pronunciations, isLoading } = api.word.getPronunciationsForWord.useQuery({
     wordId: word_data.word_id,
+  }, {
+    enabled: !offlineLinks,
   });
-  const pronunciationItems = pronunciations ?? word_data.pronunciations ?? [];
+  const pronunciationItems = (offlineLinks ? undefined : pronunciations) ?? word_data.pronunciations ?? [];
   const pronunciationCount = pronunciationItems.length;
   const hasPronunciations = pronunciationCount > 0;
 
@@ -694,7 +741,7 @@ function CompactPronunciationPopover({
             ) : null}
           </div>
 
-          {isLoading ? (
+          {!offlineLinks && isLoading ? (
             <p className="py-3 text-sm text-muted-foreground">
               {tPronunciation("loading") || "Loading pronunciations..."}
             </p>
@@ -928,16 +975,12 @@ function MeaningContent({
               )}
             >
               <span className="text-muted-foreground">{locale === "en" ? "See also" : "Bakınız"}</span>
-              <Link
-                href={{
-                  pathname: "/search/[word]",
-                  params: { word: seeAlsoWord },
-                }}
-                prefetch={false}
+              <WordRouteLink
+                word={seeAlsoWord}
                 className="text-primary underline decoration-primary underline-offset-4"
               >
                 {seeAlsoWord}
-              </Link>
+              </WordRouteLink>
             </p>
           ) : (
             <p
@@ -1031,19 +1074,15 @@ function CompactConnections({ word_data }: { word_data: WordEntryData }) {
             className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2"
             renderItem={(relatedPhrase) => (
               <li key={relatedPhrase.related_phrase_id} className="min-w-0">
-                <Link
-                  href={{
-                    pathname: "/search/[word]",
-                    params: { word: relatedPhrase.related_phrase },
-                  }}
-                  prefetch={false}
+                <WordRouteLink
+                  word={relatedPhrase.related_phrase}
                   className="inline-flex min-w-0 items-baseline gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
                 >
                   <span className="text-border" aria-hidden>
                     -
                   </span>
                   <span className="truncate">{relatedPhrase.related_phrase}</span>
-                </Link>
+                </WordRouteLink>
               </li>
             )}
           />
@@ -1090,19 +1129,15 @@ function CompactRelatedWordLink({ relatedWord }: { relatedWord: RelatedWord }) {
   const relationLabel = getRelationLabel(relatedWord.relation_type, t);
 
   return (
-    <Link
-      href={{
-        pathname: "/search/[word]",
-        params: { word: relatedWord.related_word_name },
-      }}
-      prefetch={false}
+    <WordRouteLink
+      word={relatedWord.related_word_name}
       className="inline-flex min-h-8 items-center rounded-md border border-border/70 bg-muted/35 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
     >
       <span>{relatedWord.related_word_name}</span>
       {relationLabel && relatedWord.relation_type !== "relatedWord" ? (
         <span className="ml-1 text-muted-foreground/80">({relationLabel})</span>
       ) : null}
-    </Link>
+    </WordRouteLink>
   );
 }
 
@@ -1149,20 +1184,16 @@ function ConnectionsSection({
               items={relatedPhrases}
               className="flex flex-wrap gap-x-4 gap-y-2"
               renderItem={(relatedPhrase) => (
-                <Link
+                <WordRouteLink
                   key={relatedPhrase.related_phrase_id}
-                  href={{
-                    pathname: "/search/[word]",
-                    params: { word: relatedPhrase.related_phrase },
-                  }}
-                  prefetch={false}
+                  word={relatedPhrase.related_phrase}
                   className={cn(
                     "text-sm text-primary underline decoration-primary/60 underline-offset-4 transition-colors hover:decoration-primary hover:text-primary/80",
                     compact && "text-xs",
                   )}
                 >
                   {relatedPhrase.related_phrase}
-                </Link>
+                </WordRouteLink>
               )}
             />
           </ConnectionGroup>
@@ -1229,12 +1260,8 @@ function RelatedWordLink({
   const relationLabel = getRelationLabel(relatedWord.relation_type, t);
 
   return (
-    <Link
-      href={{
-        pathname: "/search/[word]",
-        params: { word: relatedWord.related_word_name },
-      }}
-      prefetch={false}
+    <WordRouteLink
+      word={relatedWord.related_word_name}
       className={cn(
         "inline-flex items-baseline text-sm text-primary underline decoration-primary/60 underline-offset-4 transition-colors hover:decoration-primary hover:text-primary/80",
         compact && "text-xs",
@@ -1244,7 +1271,7 @@ function RelatedWordLink({
       {relationLabel && relatedWord.relation_type !== "relatedWord" ? (
         <span className="ml-1 text-xs text-muted-foreground">({relationLabel})</span>
       ) : null}
-    </Link>
+    </WordRouteLink>
   );
 }
 
@@ -1258,12 +1285,18 @@ function PronunciationSection({
   compact?: boolean;
 }) {
   const t = useTranslations("WordCard");
+  const { offlineLinks } = useContext(WordCardNavigationContext);
 
   return (
     <section className={cn(compact ? "" : "border-t border-border/70 px-5 py-6 sm:px-8")}>
       <SectionHeader icon={Volume2} title={t("Pronunciations")} />
       <div className="mt-4">
-        <PronunciationCard wordId={word_data.word_id} session={session} />
+        <PronunciationCard
+          wordId={word_data.word_id}
+          session={session}
+          enabled={!offlineLinks}
+          initialPronunciations={word_data.pronunciations}
+        />
       </div>
     </section>
   );
