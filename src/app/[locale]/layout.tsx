@@ -178,7 +178,7 @@ export default async function RootLayout({
   const t = await getTranslations("Navbar");
 
   return (
-    <html suppressHydrationWarning lang={locale} className="dark">
+    <html suppressHydrationWarning lang={locale}>
       <head>
         <IOSPWAMeta />
       </head>
