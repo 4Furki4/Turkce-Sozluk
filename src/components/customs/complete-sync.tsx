@@ -2,13 +2,12 @@
 
 import { useEffect } from "react";
 import { api } from "@/src/trpc/react";
-import { toast } from "sonner";
-import { useTranslations } from "next-intl";
 import {
     getLocalAutocompleteVersion,
     updateLocalAutocompleteList,
 } from "@/src/lib/offline-db";
 import { useOnlineStatus } from "@/src/hooks/use-online-status";
+import { emitAutocompleteSyncStatus } from "@/src/lib/autocomplete-sync-status";
 
 /**
  * This component runs in the background on app load.
@@ -16,7 +15,6 @@ import { useOnlineStatus } from "@/src/hooks/use-online-status";
  * and updates it if necessary.
  */
 export function AutocompleteSync() {
-    const t = useTranslations("OfflineSync");
     const isOnline = useOnlineStatus();
     // Get the tRPC client
     const trpcClient = api.useUtils().client;
@@ -32,32 +30,33 @@ export function AutocompleteSync() {
         if (!isOnline || !serverVersion) return; // Wait for the query to finish
 
         const syncData = async () => {
+            const normalizedServerVersion = String(serverVersion);
             // 3. Get our local version
             const localVersion = await getLocalAutocompleteVersion();
 
             // 4. Compare versions
-            if (localVersion === serverVersion) {
+            if (localVersion === normalizedServerVersion) {
+                emitAutocompleteSyncStatus("ready");
                 return; // All good!
             }
 
             // 5. Versions are different. Fetch and update.
-            toast.info(t("downloading"));
             try {
+                emitAutocompleteSyncStatus("downloading");
                 // Use the tRPC client for a one-off call
                 const wordList = await trpcClient.word.getAllWordNames.query();
 
                 // 6. Save new data
-                await updateLocalAutocompleteList(wordList, serverVersion);
-
-                toast.success(t("success"));
+                await updateLocalAutocompleteList(wordList, normalizedServerVersion);
+                emitAutocompleteSyncStatus("ready");
             } catch (error) {
                 console.error("[AutocompleteSync] Failed to sync word list:", error);
-                toast.error(t("error"));
+                emitAutocompleteSyncStatus("error");
             }
         };
 
         syncData();
-    }, [isOnline, serverVersion, trpcClient, t]);
+    }, [isOnline, serverVersion, trpcClient]);
 
     return null; // This component renders nothing
 }

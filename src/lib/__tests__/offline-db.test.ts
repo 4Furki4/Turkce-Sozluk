@@ -5,6 +5,7 @@ import { encode } from "@msgpack/msgpack";
 import {
     getDatasetLookupKey,
     getOfflineMetadata,
+    getLocalAutocompleteVersion,
     getWordByNameOffline,
     installOfflineDatasetFromFiles,
     normalizeOfflineSearchKey,
@@ -12,6 +13,8 @@ import {
     searchAutocompleteOffline,
     searchByPattern,
     toOfflineWordRecord,
+    updateLocalAutocompleteList,
+    clearOfflineData,
 } from "@/src/lib/offline-db";
 import type { WordData } from "@/src/lib/db-config";
 
@@ -150,6 +153,38 @@ describe("offline dictionary database", () => {
         await expect(getWordByNameOffline("susuz")).resolves.toBeUndefined();
         await expect(searchAutocompleteOffline("su")).resolves.toEqual([]);
         await expect(searchByPattern("s_suz")).resolves.toEqual([]);
+    });
+
+    it("supports autocomplete suggestions without the full offline dataset", async () => {
+        await updateLocalAutocompleteList([
+            "çeviri",
+            "çeviri dili",
+            "çevirmek",
+            "kalem",
+        ], "autocomplete-v1");
+
+        await expect(getLocalAutocompleteVersion()).resolves.toBe("autocomplete-v1");
+        await expect(getOfflineMetadata()).resolves.toMatchObject({
+            activeVersion: null,
+            status: "not-downloaded",
+        });
+        await expect(searchAutocompleteOffline("çe")).resolves.toEqual([
+            "çeviri",
+            "çeviri dili",
+            "çevirmek",
+        ]);
+    });
+
+    it("keeps autocomplete suggestions when clearing full offline dictionary data", async () => {
+        await updateLocalAutocompleteList(["susuz", "suluk"], "autocomplete-v2");
+        await clearOfflineData();
+
+        await expect(getOfflineMetadata()).resolves.toMatchObject({
+            activeVersion: null,
+            status: "cleared",
+            autocompleteVersion: "autocomplete-v2",
+        });
+        await expect(searchAutocompleteOffline("su")).resolves.toEqual(["suluk", "susuz"]);
     });
 
     it("keeps the previous active dataset when an update fails", async () => {

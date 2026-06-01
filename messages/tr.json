@@ -433,6 +433,7 @@
       "searchByWord": "Kelime",
       "searchByMeaning": "Anlam",
       "searchByMeaningPlaceholder": "Anlam ile ara...",
+      "autocompleteLoading": "Kelime önerileri hazırlanıyor...",
       "feature1": {
         "title": "Katkıda Bulunun",
         "description": "Yeni kelimeler, anlamlar ve özellikler önererek ve telaffuzlar ekleyerek sözlüğe katkıda bulunabilirsiniz"

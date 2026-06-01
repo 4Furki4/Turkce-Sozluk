@@ -433,6 +433,7 @@
       "searchByWord": "Word",
       "searchByMeaning": "Meaning",
       "searchByMeaningPlaceholder": "Search by meaning...",
+      "autocompleteLoading": "Preparing word suggestions...",
       "feature1": {
         "title": "Contribute",
         "description": "You can contribute to the dictionary by suggesting new words, meanings, and features, and by adding pronunciations."

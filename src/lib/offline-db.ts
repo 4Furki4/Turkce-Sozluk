@@ -2,7 +2,10 @@ import { decode } from "@msgpack/msgpack";
 import { deleteDB, IDBPDatabase, openDB } from "idb";
 
 import {
+    AUTOCOMPLETE_NAME_INDEX,
+    AUTOCOMPLETE_STORE,
     AUTOCOMPLETE_VERSION_KEY,
+    AutocompleteWord,
     CachedPopularData,
     DB_NAME,
     DB_VERSION,
@@ -89,6 +92,13 @@ const createOfflineWordStore = (db: IDBPDatabase<OfflineDB>) => {
     });
 };
 
+const createAutocompleteStore = (db: IDBPDatabase<OfflineDB>) => {
+    const store = db.createObjectStore(AUTOCOMPLETE_STORE, { keyPath: "key" });
+    store.createIndex(AUTOCOMPLETE_NAME_INDEX, "key", {
+        unique: true,
+    });
+};
+
 const getDb = (): Promise<IDBPDatabase<OfflineDB>> => {
     if (!dbPromise) {
         dbPromise = openDB<OfflineDB>(DB_NAME, DB_VERSION, {
@@ -117,6 +127,10 @@ const getDb = (): Promise<IDBPDatabase<OfflineDB>> => {
 
                 if (!db.objectStoreNames.contains(METADATA_STORE)) {
                     db.createObjectStore(METADATA_STORE);
+                }
+
+                if (!db.objectStoreNames.contains(AUTOCOMPLETE_STORE)) {
+                    createAutocompleteStore(db);
                 }
 
                 if (!db.objectStoreNames.contains(POPULAR_TRENDS_STORE)) {
@@ -332,6 +346,7 @@ export const setLocalVersion = async (version: number): Promise<void> => {
 };
 
 export const clearOfflineData = async (): Promise<void> => {
+    const currentMetadata = await getOfflineMetadata();
     const db = await getDb();
     const tx = db.transaction([WORDS_STORE, METADATA_STORE], "readwrite");
     await tx.objectStore(WORDS_STORE).clear();
@@ -340,6 +355,7 @@ export const clearOfflineData = async (): Promise<void> => {
         {
             ...getDefaultMetadata(),
             status: "cleared",
+            autocompleteVersion: currentMetadata.autocompleteVersion,
         },
         OFFLINE_METADATA_KEY,
     );
@@ -398,26 +414,79 @@ export async function getLocalAutocompleteVersion(): Promise<string | undefined>
 }
 
 export async function updateLocalAutocompleteList(
-    _words: string[],
+    words: string[],
     newVersion: string,
 ) {
-    await updateOfflineMetadata({
-        autocompleteVersion: newVersion,
-    });
+    const db = await getDb();
+    const tx = db.transaction([AUTOCOMPLETE_STORE, METADATA_STORE], "readwrite");
+    const autocompleteStore = tx.objectStore(AUTOCOMPLETE_STORE);
+    const seenKeys = new Set<string>();
+
+    await autocompleteStore.clear();
+
+    for (const word of words) {
+        const displayName = word.replace(/\s+/g, " ").trim();
+        const key = normalizeOfflineSearchKey(displayName);
+
+        if (!key || seenKeys.has(key)) {
+            continue;
+        }
+
+        seenKeys.add(key);
+        await autocompleteStore.put({
+            key,
+            displayName,
+        } satisfies AutocompleteWord);
+    }
+
+    const currentMetadata = await tx.objectStore(METADATA_STORE).get(OFFLINE_METADATA_KEY);
+    await tx.objectStore(METADATA_STORE).put(
+        {
+            ...getDefaultMetadata(),
+            ...(currentMetadata ?? {}),
+            schemaVersion: OFFLINE_SCHEMA_VERSION,
+            autocompleteVersion: newVersion,
+        },
+        OFFLINE_METADATA_KEY,
+    );
+
+    await tx.done;
 }
 
 export async function searchAutocompleteOffline(
     query: string,
     limit = 10,
 ): Promise<string[]> {
-    const metadata = await getOfflineMetadata();
     const prefix = normalizeOfflineSearchKey(query);
 
-    if (!metadata.activeVersion || prefix.length < 2) {
+    if (prefix.length < 2) {
         return [];
     }
 
     const db = await getDb();
+    const autocompleteResults: string[] = [];
+    const autocompleteRange = IDBKeyRange.bound(prefix, `${prefix}\uffff`);
+    const autocompleteTx = db.transaction(AUTOCOMPLETE_STORE, "readonly");
+    const autocompleteIndex = autocompleteTx.store.index(AUTOCOMPLETE_NAME_INDEX);
+    let autocompleteCursor = await autocompleteIndex.openCursor(autocompleteRange);
+
+    while (autocompleteCursor && autocompleteResults.length < limit) {
+        autocompleteResults.push(autocompleteCursor.value.displayName);
+        autocompleteCursor = await autocompleteCursor.continue();
+    }
+
+    await autocompleteTx.done;
+
+    if (autocompleteResults.length > 0) {
+        return autocompleteResults;
+    }
+
+    const metadata = await getOfflineMetadata();
+
+    if (!metadata.activeVersion) {
+        return [];
+    }
+
     const range = IDBKeyRange.bound(
         `${metadata.activeVersion}${DATASET_KEY_SEPARATOR}${prefix}`,
         `${metadata.activeVersion}${DATASET_KEY_SEPARATOR}${prefix}\uffff`,

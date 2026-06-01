@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { Search as SearchIcon, PuzzleIcon, KeyboardIcon, TrendingUpIcon, BookOpenIcon, TypeIcon } from "lucide-react";
+import { Search as SearchIcon, PuzzleIcon, KeyboardIcon, TrendingUpIcon, BookOpenIcon, TypeIcon, LoaderCircleIcon } from "lucide-react";
 import { Input } from "@heroui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@heroui/react";
@@ -17,6 +17,10 @@ import { startNavigationProgress } from "@/src/lib/navigation-progress";
 import { getOfflineWordSearchQueryKey, toOfflineWordSearchResult } from "@/src/hooks/useWordSearch";
 import { getPlainSearchAction, getSearchQueryHref, getWordSearchHref } from "@/src/lib/search-route";
 import type { RouterOutputs } from "@/src/trpc/shared";
+import {
+    AUTOCOMPLETE_SYNC_STATUS_EVENT,
+    type AutocompleteSyncStatusDetail,
+} from "@/src/lib/autocomplete-sync-status";
 
 type SearchMode = "word" | "meaning";
 
@@ -67,6 +71,7 @@ export default function SearchContainer({
     const [recommendations, setRecommendations] = useState<string[]>([]);
     const [meaningResults, setMeaningResults] = useState<MeaningResult[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isAutocompleteSyncing, setIsAutocompleteSyncing] = useState(false);
     const { data: meaningSearchData, isFetching: isMeaningFetching } = api.search.searchByMeaning.useQuery(
         { query: debouncedInput },
         {
@@ -92,6 +97,19 @@ export default function SearchContainer({
             setShowRecommendations(false);
         }
     }, [isOnline, searchMode]);
+
+    useEffect(() => {
+        const handleAutocompleteSyncStatus = (event: Event) => {
+            const detail = (event as CustomEvent<AutocompleteSyncStatusDetail>).detail;
+            setIsAutocompleteSyncing(detail?.status === "downloading");
+        };
+
+        window.addEventListener(AUTOCOMPLETE_SYNC_STATUS_EVENT, handleAutocompleteSyncStatus);
+
+        return () => {
+            window.removeEventListener(AUTOCOMPLETE_SYNC_STATUS_EVENT, handleAutocompleteSyncStatus);
+        };
+    }, []);
 
     // Handle meaning search results from tRPC
     useEffect(() => {
@@ -368,13 +386,18 @@ export default function SearchContainer({
                     />
 
                     {/* Recommendations Dropdown */}
-                    {showRecommendations && (
+                    {(showRecommendations || (isAutocompleteSyncing && searchMode === "word" && debouncedInput.length >= 2)) && (
                         <div className="absolute z-[999] w-full mt-2 bg-background/95 backdrop-blur-xl border border-zinc-800 rounded-md shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-[400px] overflow-y-auto">
                             {(isLoading || (searchMode === "meaning" && isMeaningFetching)) ? (
                                 <div className="p-2">
                                     {Array.from({ length: 3 }).map((_, idx) => (
                                         <div key={idx} className="h-10 mx-2 my-1 bg-white/5 rounded-md animate-pulse" />
                                     ))}
+                                </div>
+                            ) : isAutocompleteSyncing && searchMode === "word" && recommendations.length === 0 ? (
+                                <div className="flex items-center gap-3 px-6 py-4 text-sm text-zinc-400">
+                                    <LoaderCircleIcon className="h-4 w-4 animate-spin text-primary" />
+                                    <span>{t("hero.autocompleteLoading")}</span>
                                 </div>
                             ) : searchMode === "meaning" ? (
                                 meaningResults.length > 0 && (

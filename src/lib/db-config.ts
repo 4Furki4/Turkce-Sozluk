@@ -2,7 +2,7 @@ import { DBSchema } from "idb";
 import { WordSearchResult } from "@/types";
 
 export const DB_NAME = "turkish-dictionary-offline";
-export const DB_VERSION = 6;
+export const DB_VERSION = 7;
 export const WORDS_STORE = "offlineWords";
 export const METADATA_STORE = "metadata";
 export const WORD_DATASET_LOOKUP_INDEX = "dataset_lookup_key_index";
