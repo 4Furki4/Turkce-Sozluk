@@ -23,7 +23,6 @@ import ProfileGuard from "@/src/components/customs/profile-guard";
 import { getBaseUrl, getCanonicalPathname } from "@/src/lib/seo-utils";
 import PWAServiceWorker from "@/src/components/pwa-service-worker";
 import OnlineStatusBridge from "@/src/components/online-status-bridge";
-import OnlineTelemetry from "@/src/components/online-telemetry";
 import { AutocompleteSync } from "@/src/components/customs/complete-sync";
 
 const ibmPlexSans = IBM_Plex_Sans({
@@ -234,7 +233,6 @@ export default async function RootLayout({
                   </main>
                   <Footer session={session} />
                 </div>
-                <OnlineTelemetry />
               </Providers>
             </CaptchaProvider >
             <Toaster />
