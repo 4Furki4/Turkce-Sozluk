@@ -34,6 +34,9 @@ export default function NavbarAndSidebar({
     FeedbackIntl,
     SearchIntl,
     LearnIntl,
+    MainIntl,
+    AccountIntl,
+    PreferencesIntl,
     FlashcardGameIntl,
     WordMatchingGameIntl,
     WordBuilderIntl,
@@ -65,6 +68,9 @@ export default function NavbarAndSidebar({
     FeedbackIntl: string,
     SearchIntl: string,
     LearnIntl: string,
+    MainIntl: string,
+    AccountIntl: string,
+    PreferencesIntl: string,
     FlashcardGameIntl: string,
     WordMatchingGameIntl: string,
     SpeedRoundGameIntl: string,
@@ -103,6 +109,9 @@ export default function NavbarAndSidebar({
                 FeedbackIntl={FeedbackIntl}
                 SearchIntl={SearchIntl}
                 LearnIntl={LearnIntl}
+                MainIntl={MainIntl}
+                AccountIntl={AccountIntl}
+                PreferencesIntl={PreferencesIntl}
                 FlashcardGameIntl={FlashcardGameIntl}
                 WordMatchingGameIntl={WordMatchingGameIntl}
                 SpeedRoundGameIntl={SpeedRoundGameIntl}
@@ -140,6 +149,9 @@ export default function NavbarAndSidebar({
             FeedbackIntl={FeedbackIntl}
             SearchIntl={SearchIntl}
             LearnIntl={LearnIntl}
+            MainIntl={MainIntl}
+            AccountIntl={AccountIntl}
+            PreferencesIntl={PreferencesIntl}
             FlashcardGameIntl={FlashcardGameIntl}
             WordMatchingGameIntl={WordMatchingGameIntl}
             SpeedRoundGameIntl={SpeedRoundGameIntl}
@@ -176,6 +188,9 @@ type NavbarAndSidebarShellProps = {
     FeedbackIntl: string,
     SearchIntl: string,
     LearnIntl: string,
+    MainIntl: string,
+    AccountIntl: string,
+    PreferencesIntl: string,
     FlashcardGameIntl: string,
     WordMatchingGameIntl: string,
     SpeedRoundGameIntl: string,
@@ -219,6 +234,9 @@ function NavbarAndSidebarShell({
     FeedbackIntl,
     SearchIntl,
     LearnIntl,
+    MainIntl,
+    AccountIntl,
+    PreferencesIntl,
     FlashcardGameIntl,
     WordMatchingGameIntl,
     WordBuilderIntl,
@@ -259,7 +277,17 @@ function NavbarAndSidebarShell({
                 SpeedRoundGameIntl={SpeedRoundGameIntl}
                 ForeignTermSuggestionsIntl={ForeignTermSuggestionsIntl}
             />
-            <Sidebar session={session} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
+            <Sidebar
+                session={session}
+                isSidebarOpen={isSidebarOpen}
+                setIsSidebarOpen={setIsSidebarOpen}
+                ContributeIntl={ContributeIntl}
+                LearnIntl={LearnIntl}
+                MainIntl={MainIntl}
+                AccountIntl={AccountIntl}
+                PreferencesIntl={PreferencesIntl}
+                ariaSwitchTheme={ariaSwitchTheme}
+            />
             <MobileBottomNav
                 setIsSidebarOpen={setIsSidebarOpen}
                 HomeIntl={HomeIntl}

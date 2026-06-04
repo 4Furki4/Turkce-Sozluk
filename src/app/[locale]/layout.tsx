@@ -221,6 +221,9 @@ export default async function RootLayout({
                     FeedbackIntl={t("Feedback")}
                     SearchIntl={t("Search")}
                     LearnIntl={t("Learn")}
+                    MainIntl={t("Main")}
+                    AccountIntl={t("Account")}
+                    PreferencesIntl={t("Preferences")}
                     FlashcardGameIntl={t("FlashcardGame")}
                     WordMatchingGameIntl={t("WordMatchingGame")}
                     SpeedRoundGameIntl={t("SpeedRoundGame")}
