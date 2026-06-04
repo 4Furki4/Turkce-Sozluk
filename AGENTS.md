@@ -13,7 +13,7 @@ Turkish Dictionary is a full-stack TypeScript app for a modern, community-driven
 - Offline/PWA: Serwist service worker, IndexedDB, generated offline dictionary data
 - Search: PostgreSQL queries plus Meilisearch sync/search integration
 
-This repository uses **npm** for package management and targets the versions pinned in `package.json` and `package-lock.json`.
+This repository prefers **bun** for package management and running scripts. Use **npm** only as a fallback when the equivalent `bun` command fails, and note that fallback explicitly.
 
 ## Repository map
 
@@ -37,56 +37,58 @@ This repository uses **npm** for package management and targets the versions pin
 ## First-time local setup
 
 ```bash
-npm install
+bun install
 cp .env.development.pi.example .env.local
-npm run db:push:local
-npm run dev
+bun run db:push:local
+bun run dev
 ```
 
 Adjust `.env.local` for the local database, auth providers, Upstash, reCAPTCHA, UploadThing, R2, and Meilisearch values needed by the feature you are working on.
+
+If port 3000 is already allocated when starting the app, kill the process attached to port 3000 and retry starting the app on port 3000.
 
 ## Common commands
 
 ```bash
 # app
-npm run dev
-npm run build
-npm run start
+bun run dev
+bun run build
+bun run start
 
 # quality
-npm run lint
-npm run test
-npm run test:watch
+bun run lint
+bun run test
+bun run test:watch
 
 # database
-npm run db:generate
-npm run db:migrate
-npm run db:push
-npm run db:push:local
-npm run db:migrate:local
-npm run studio
-npm run studio:local
+bun run db:generate
+bun run db:migrate
+bun run db:push
+bun run db:push:local
+bun run db:migrate:local
+bun run studio
+bun run studio:local
 
 # data/search/offline
-npm run seed:tdk
-npm run seed:daily
-npm run offline-data:generate
-npm run search:sync
+bun run seed:tdk
+bun run seed:daily
+bun run offline-data:generate
+bun run search:sync
 
 # Raspberry Pi deployment helpers
-npm run pi:sanitize:development
-npm run docker:build-pi:development
-npm run docker:build-pi:latest
+bun run pi:sanitize:development
+bun run docker:build-pi:development
+bun run docker:build-pi:latest
 ```
 
 ## Agent rules
 
 ### Package management
 
-- Use **npm** for dependency installation and normal lifecycle commands.
-- `package-lock.json` is the authoritative npm lockfile.
+- Use **bun** for dependency installation and normal lifecycle commands.
+- If a `bun` command fails, retry with the equivalent **npm** command only in that case, and mention the fallback.
+- `package-lock.json` is the authoritative npm lockfile when npm fallback is required.
 - Do not add `pnpm-lock.yaml`, `yarn.lock`, or other new package-manager lockfiles.
-- The repo contains existing npm scripts that invoke `bun` for data scripts; run those through their `npm run ...` script names unless the user asks otherwise.
 
 ### Generated files and build artifacts
 
@@ -138,8 +140,8 @@ If a schema or source change requires generated output, change the source first 
 - Migrations are written to `drizzle/migrations/`.
 - For schema changes:
   1. Edit the relevant `db/schema/*.ts` file.
-  2. Run `npm run db:generate`.
-  3. Apply locally with `npm run db:migrate` or `npm run db:migrate:local` as appropriate.
+  2. Run `bun run db:generate`.
+  3. Apply locally with `bun run db:migrate` or `bun run db:migrate:local` as appropriate.
   4. Inspect the generated SQL before finalizing.
 - Prefer Drizzle query builders and transactions over raw SQL in application code.
 
@@ -180,7 +182,7 @@ If a schema or source change requires generated output, change the source first 
 - Serwist is only enabled for production builds in `next.config.js`.
 - Service-worker behavior lives in `src/app/sw.ts`; avoid enabling it for local dev.
 - Offline dictionary client/storage logic lives in `src/lib/offline-db.ts`, `src/lib/workers/`, and `src/app/[locale]/offline-dictionary/`.
-- Generated offline data is produced by `npm run offline-data:generate` and depends on R2/S3 env vars.
+- Generated offline data is produced by `bun run offline-data:generate` and depends on R2/S3 env vars.
 
 ## Backend and domain conventions
 
@@ -207,16 +209,16 @@ If a schema or source change requires generated output, change the source first 
 Default validation for normal code changes:
 
 ```bash
-npm run build
+bun run build
 ```
 
 For logic covered by tests, also run:
 
 ```bash
-npm run test
+bun run test
 ```
 
-Use narrower checks during iteration when useful, but do not present them as full validation if `npm run build` was not run. If build cannot run because env vars or external services are missing, say that explicitly.
+Use narrower checks during iteration when useful, but do not present them as full validation if `bun run build` was not run. If build cannot run because env vars or external services are missing, say that explicitly.
 
 ## Good change hygiene
 
