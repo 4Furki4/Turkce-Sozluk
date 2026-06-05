@@ -79,10 +79,15 @@ export default function UserList(
     }, {
         initialData: users,
     })
+    const getUserDisplayName = (user: Pick<SelectUser, "name" | "username" | "email" | "id">) =>
+        user.name?.trim() || user.username?.trim() || user.email || user.id;
+
     type Row = (typeof rows)[0];
-    const rows = usersQuery.data.map((user, idx) => {
+    const rows = usersQuery.data.map((user) => {
+        const displayName = getUserDisplayName(user);
+
         return {
-            name: user.name,
+            name: displayName,
             username: user.username,
             key: user.id,
             src: user.image,
@@ -164,9 +169,11 @@ export default function UserList(
                 return (
                     <User name={
                         <NextUILink target='_blank' as={Link} href={`/profile/${item.key}`}>
-                            {item.username}
+                            {item.name}
                         </NextUILink>
+                    } description={item.username ? `@${item.username}` : undefined
                     } avatarProps={{
+                        name: item.name,
                         src: item.src ?? undefined
                     }} />
                 );
