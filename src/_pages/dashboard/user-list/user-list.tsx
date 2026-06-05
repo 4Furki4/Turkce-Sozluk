@@ -24,7 +24,6 @@ import { Pagination } from "@heroui/pagination";
 import { Select, SelectItem } from "@heroui/select";
 import { rolesEnum, SelectUser } from '@/db/schema/users';
 import { Link } from '@/src/i18n/routing';
-import { Link as NextUILink } from "@heroui/react";
 import RoleEditModal from './role-edit-modal';
 import UserDeleteModal from './user-delete-modal';
 import BadgeAssignmentModal from './badge-assignment-modal';
@@ -79,10 +78,15 @@ export default function UserList(
     }, {
         initialData: users,
     })
+    const getUserDisplayName = (user: Pick<SelectUser, "name" | "username" | "email" | "id">) =>
+        user.name?.trim() || user.username?.trim() || user.email || user.id;
+
     type Row = (typeof rows)[0];
-    const rows = usersQuery.data.map((user, idx) => {
+    const rows = usersQuery.data.map((user) => {
+        const displayName = getUserDisplayName(user);
+
         return {
-            name: user.name,
+            name: displayName,
             username: user.username,
             key: user.id,
             src: user.image,
@@ -163,10 +167,19 @@ export default function UserList(
             case "name":
                 return (
                     <User name={
-                        <NextUILink target='_blank' as={Link} href={`/profile/${item.key}`}>
-                            {item.username}
-                        </NextUILink>
+                        <Link
+                            target='_blank'
+                            href={{
+                                pathname: "/profile/[id]",
+                                params: { id: item.key },
+                            }}
+                            className="text-primary hover:underline"
+                        >
+                            {item.name}
+                        </Link>
+                    } description={item.username ? `@${item.username}` : undefined
                     } avatarProps={{
+                        name: item.name,
                         src: item.src ?? undefined
                     }} />
                 );
