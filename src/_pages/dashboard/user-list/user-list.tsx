@@ -167,17 +167,11 @@ export default function UserList(
             case "name":
                 return (
                     <User name={
-                        <Link
-                            target='_blank'
-                            href={{
-                                pathname: "/profile/[id]",
-                                params: { id: item.key },
-                            }}
-                            className="text-primary hover:underline"
-                        >
+                        <NextUILink target='_blank' as={Link} href={`/profile/${item.key}`}>
                             {item.name}
-                        </Link>
-                    } description={item.username ? `@${item.username}` : undefined
+                        </NextUILink>
+                    } 
+                        description={item.username ? `@${item.username}` : undefined
                     } avatarProps={{
                         name: item.name,
                         src: item.src ?? undefined
