@@ -21,6 +21,7 @@ import { feedbackAdminRouter } from "./admin/feedback";
 import { dailyWordsAdminRouter } from "./admin/daily-words";
 import { galatiMeshurAdminRouter } from "./admin/galatimeshur";
 import { misspellingsAdminRouter } from "./admin/misspellings";
+import { searchHistoryAdminRouter } from "./admin/search-history";
 
 export const adminRouter = createTRPCRouter({
   dynamicParameters: dynamicParametersRouter,
@@ -30,6 +31,7 @@ export const adminRouter = createTRPCRouter({
   dailyWords: dailyWordsAdminRouter,
   galatiMeshur: galatiMeshurAdminRouter,
   misspellings: misspellingsAdminRouter,
+  searchHistory: searchHistoryAdminRouter,
   deleteWord: adminProcedure
     .input(
       z.object({

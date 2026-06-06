@@ -35,6 +35,10 @@ export const pathnames = {
     en: "/dashboard/user-list",
     tr: "/panel/kullanicilar",
   },
+  "/dashboard/search-history": {
+    en: "/dashboard/search-history",
+    tr: "/panel/arama-gecmisi",
+  },
   "/dashboard/dynamic-parameters": {
     en: "/dashboard/dynamic-parameters",
     tr: "/panel/dinamik-parametreler",

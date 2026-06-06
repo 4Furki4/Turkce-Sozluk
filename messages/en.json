@@ -599,6 +599,37 @@
     "Error": "Error",
     "Append": "Append",
     "Prepend": "Prepend",
+    "searchHistory": {
+      "title": "Search History",
+      "description": "Review resolved dictionary searches and the account that triggered each search when available.",
+      "anonymous": "Anonymous",
+      "empty": "No search history entries found.",
+      "filters": {
+        "title": "Filters",
+        "clear": "Clear filters",
+        "wordPlaceholder": "Search by word",
+        "userPlaceholder": "Search by user",
+        "actor": "Who searched",
+        "dateRange": "Time range",
+        "sortOrder": "Order",
+        "itemsPerPage": "Items per page"
+      },
+      "actor": {
+        "all": "All searches",
+        "authenticated": "Authenticated users",
+        "anonymous": "Anonymous searches"
+      },
+      "sort": {
+        "newest": "Newest first",
+        "oldest": "Oldest first"
+      },
+      "table": {
+        "ariaLabel": "Dashboard search history table",
+        "user": "User",
+        "word": "Word",
+        "searchedAt": "Searched At"
+      }
+    },
     "Announcements": {
       "title": "Announcements",
       "createNew": "Create New Announcement",
