@@ -2,6 +2,7 @@
 
 import { useCallback, useState, type Key } from "react";
 import { Button, Card, CardBody, User } from "@heroui/react";
+import { Pagination } from "@heroui/pagination";
 import { format } from "date-fns";
 import { enUS, tr } from "date-fns/locale";
 import { FilterX, SearchIcon } from "lucide-react";
@@ -9,7 +10,6 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { CustomDateRangePicker } from "@/src/components/customs/heroui/custom-date-range-picker";
 import { CustomInput } from "@/src/components/customs/heroui/custom-input";
-import { CustomPagination } from "@/src/components/customs/heroui/custom-pagination";
 import { CustomSelect } from "@/src/components/customs/heroui/custom-select";
 import { CustomTable } from "@/src/components/customs/heroui/custom-table";
 import { useDebounce } from "@/src/hooks/use-debounce";
@@ -259,8 +259,13 @@ export function SearchHistoryList() {
                 aria-label={t("table.ariaLabel")}
             />
 
-            <CustomPagination
+            <Pagination
                 isDisabled={!data?.totalPages}
+                classNames={{
+                    wrapper: ["mx-auto"]
+                }}
+                isCompact
+                showControls
                 total={data?.totalPages || 1}
                 page={page}
                 onChange={setPage}
