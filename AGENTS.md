@@ -162,6 +162,7 @@ If a schema or source change requires generated output, change the source first 
 - Use localized navigation utilities from `@/src/i18n/routing` for locale-aware links, redirects, pathnames, and router usage.
 - Use `useProgressRouter` from `src/hooks/use-progress-router.ts` when imperative client navigation should trigger the progress bar.
 - Avoid hard-coded localized URL strings when a route key exists in the i18n routing config.
+- When composing navigation with third-party UI primitives such as HeroUI dropdown/menu items, render the localized `Link` from `@/src/i18n/routing` directly or verify the generated `href`; do not let wrappers coerce route keys like `/dashboard/foo` into literal localized URLs such as `/tr/dashboard/foo`.
 - When adding or renaming routes, keep both `src/i18n/routing.ts` and `src/i18n/pathnames.ts` in sync.
 
 ### i18n

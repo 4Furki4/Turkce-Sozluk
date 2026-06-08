@@ -25,8 +25,22 @@ import {
 } from "lucide-react";
 import { useLocale } from 'next-intl';
 
+type DashboardHref =
+  | "/dashboard"
+  | "/dashboard/user-list"
+  | "/dashboard/search-history"
+  | "/dashboard/badges"
+  | "/dashboard/word-relations"
+  | "/dashboard/announcements"
+  | "/dashboard/dynamic-parameters"
+  | "/dashboard/requests"
+  | "/dashboard/feedback"
+  | "/dashboard/daily-words"
+  | "/dashboard/galatimeshur"
+  | "/dashboard/misspellings";
+
 type DashboardLink = {
-  href: string;
+  href: DashboardHref;
   label: string;
   icon: React.ReactNode;
 };
@@ -162,12 +176,17 @@ export default function DashboardLinks() {
                   {group.links.map((link) => (
                     <DropdownItem
                       key={link.href}
-                      as={Link}
-                      href={link.href}
                       color={pathname === link.href ? "primary" : "default"}
-                      startContent={link.icon}
+                      textValue={link.label}
+                      className="p-0"
                     >
-                      {link.label}
+                      <Link
+                        href={link.href}
+                        className="flex w-full items-center gap-2 px-2 py-1.5 text-foreground"
+                      >
+                        {link.icon}
+                        <span>{link.label}</span>
+                      </Link>
                     </DropdownItem>
                   ))}
                 </DropdownSection>
