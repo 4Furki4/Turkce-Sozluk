@@ -48,6 +48,10 @@ export const routing = defineRouting({
       "en": "/dashboard",
       "tr": "/panel",
     },
+    "/dashboard/word-list": {
+      "en": "/dashboard/word-list",
+      "tr": "/panel/kelimeler",
+    },
     "/dashboard/create-word": {
       "en": "/dashboard/create-word",
       "tr": "/panel/kelime-ekle",

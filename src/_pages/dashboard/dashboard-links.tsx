@@ -27,6 +27,7 @@ import { useLocale } from 'next-intl';
 
 type DashboardHref =
   | "/dashboard"
+  | "/dashboard/word-list"
   | "/dashboard/user-list"
   | "/dashboard/search-history"
   | "/dashboard/badges"
@@ -62,6 +63,11 @@ const getLinkGroups: (locale: string) => DashboardLinkGroup[] = (locale) => [
     links: [
       {
         href: "/dashboard",
+        label: locale === "en" ? "Overview" : "Genel Bakış",
+        icon: <BookOpen className={iconClassName} />,
+      },
+      {
+        href: "/dashboard/word-list",
         label: locale === "en" ? "Word List" : "Kelimeler",
         icon: <ListChecks className={iconClassName} />,
       },

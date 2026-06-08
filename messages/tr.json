@@ -597,6 +597,43 @@
     "Error": "Hata",
     "Append": "Sona Ekle",
     "Prepend": "Öne Ekle",
+    "overview": {
+      "title": "Panel Genel Bakış",
+      "description": "Sözlük etkinliğini, moderasyon yükünü ve arama davranışını tek bir operasyon görünümünden takip edin.",
+      "generatedAt": "Güncellendi: {date}",
+      "metrics": {
+        "totalWords": "Toplam kelime",
+        "totalWordsDescription": "Sözlükte bulunan kelimeler",
+        "totalUsers": "Toplam kullanıcı",
+        "totalUsersDescription": "Kayıtlı hesaplar",
+        "searchesToday": "Bugünkü aramalar",
+        "searchesTodayDescription": "Gece yarısından beri çözümlenen sözlük aramaları",
+        "searchesLast7Days": "Son 7 gün aramaları",
+        "searchesLast7DaysDescription": "Mevcut 7 günlük aralıktaki çözümlenen aramalar",
+        "pendingRequests": "Bekleyen istekler",
+        "pendingRequestsDescription": "İnceleme bekleyen katkı istekleri",
+        "openFeedback": "Açık geri bildirim",
+        "openFeedbackDescription": "Şu anda açık durumdaki geri bildirimler"
+      },
+      "searchTrend": {
+        "title": "Arama eğilimi",
+        "description": "Son 14 gündeki günlük çözümlenen aramalar.",
+        "series": "Aramalar"
+      },
+      "actorSplit": {
+        "title": "Arama kaynağı",
+        "description": "Son 7 gündeki giriş yapmış ve anonim aramalar.",
+        "authenticated": "Giriş yapan",
+        "anonymous": "Anonim"
+      },
+      "topSearches": {
+        "title": "En çok aranan kelimeler",
+        "description": "Son 7 günde en çok aranan çözümlenmiş sözlük kelimeleri.",
+        "series": "Aramalar",
+        "viewHistory": "Arama geçmişini aç",
+        "empty": "Bu zaman aralığı için arama kaydı bulunmuyor."
+      }
+    },
     "searchHistory": {
       "title": "Arama Geçmişi",
       "description": "Sözlükte çözümlenen aramaları ve varsa aramayı yapan hesabı inceleyin.",
