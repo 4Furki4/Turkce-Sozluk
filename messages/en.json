@@ -599,6 +599,74 @@
     "Error": "Error",
     "Append": "Append",
     "Prepend": "Prepend",
+    "overview": {
+      "title": "Dashboard Overview",
+      "description": "Monitor dictionary activity, moderation workload, and search behavior from one operational view.",
+      "generatedAt": "Updated {date}",
+      "metrics": {
+        "totalWords": "Total words",
+        "totalWordsDescription": "Words available in the dictionary",
+        "totalUsers": "Total users",
+        "totalUsersDescription": "Registered accounts",
+        "searchesToday": "Searches today",
+        "searchesTodayDescription": "Resolved dictionary searches since midnight",
+        "searchesLast7Days": "Searches last 7 days",
+        "searchesLast7DaysDescription": "Resolved searches in the current 7-day window",
+        "pendingRequests": "Pending requests",
+        "pendingRequestsDescription": "Contribution requests waiting for review",
+        "openFeedback": "Open feedback",
+        "openFeedbackDescription": "Feedback items currently marked open"
+      },
+      "searchTrend": {
+        "title": "Search trend",
+        "description": "Daily resolved searches over the last 14 days.",
+        "series": "Searches"
+      },
+      "actorSplit": {
+        "title": "Search source",
+        "description": "Authenticated and anonymous searches from the last 7 days.",
+        "authenticated": "Authenticated",
+        "anonymous": "Anonymous"
+      },
+      "topSearches": {
+        "title": "Top searched words",
+        "description": "Most searched resolved dictionary words from the last 7 days.",
+        "series": "Searches",
+        "viewHistory": "Open search history",
+        "empty": "No search logs are available for this time window."
+      }
+    },
+    "searchHistory": {
+      "title": "Search History",
+      "description": "Review resolved dictionary searches and the account that triggered each search when available.",
+      "anonymous": "Anonymous",
+      "empty": "No search history entries found.",
+      "filters": {
+        "title": "Filters",
+        "clear": "Clear filters",
+        "wordPlaceholder": "Search by word",
+        "userPlaceholder": "Search by user",
+        "actor": "Who searched",
+        "dateRange": "Time range",
+        "sortOrder": "Order",
+        "itemsPerPage": "Items per page"
+      },
+      "actor": {
+        "all": "All searches",
+        "authenticated": "Authenticated users",
+        "anonymous": "Anonymous searches"
+      },
+      "sort": {
+        "newest": "Newest first",
+        "oldest": "Oldest first"
+      },
+      "table": {
+        "ariaLabel": "Dashboard search history table",
+        "user": "User",
+        "word": "Word",
+        "searchedAt": "Searched At"
+      }
+    },
     "Announcements": {
       "title": "Announcements",
       "createNew": "Create New Announcement",

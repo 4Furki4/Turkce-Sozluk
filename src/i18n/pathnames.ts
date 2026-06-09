@@ -27,6 +27,10 @@ export const pathnames = {
     en: "/dashboard",
     tr: "/panel",
   },
+  "/dashboard/word-list": {
+    en: "/dashboard/word-list",
+    tr: "/panel/kelimeler",
+  },
   "/dashboard/create-word": {
     en: "/dashboard/create-word",
     tr: "/panel/kelime-ekle",
@@ -34,6 +38,10 @@ export const pathnames = {
   "/dashboard/user-list": {
     en: "/dashboard/user-list",
     tr: "/panel/kullanicilar",
+  },
+  "/dashboard/search-history": {
+    en: "/dashboard/search-history",
+    tr: "/panel/arama-gecmisi",
   },
   "/dashboard/dynamic-parameters": {
     en: "/dashboard/dynamic-parameters",

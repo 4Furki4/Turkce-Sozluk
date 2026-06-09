@@ -48,6 +48,10 @@ export const routing = defineRouting({
       "en": "/dashboard",
       "tr": "/panel",
     },
+    "/dashboard/word-list": {
+      "en": "/dashboard/word-list",
+      "tr": "/panel/kelimeler",
+    },
     "/dashboard/create-word": {
       "en": "/dashboard/create-word",
       "tr": "/panel/kelime-ekle",
@@ -55,6 +59,10 @@ export const routing = defineRouting({
     "/dashboard/user-list": {
       "en": "/dashboard/user-list",
       "tr": "/panel/kullanicilar",
+    },
+    "/dashboard/search-history": {
+      "en": "/dashboard/search-history",
+      "tr": "/panel/arama-gecmisi",
     },
     "/dashboard/dynamic-parameters": {
       "en": "/dashboard/dynamic-parameters",
@@ -138,23 +146,23 @@ export const routing = defineRouting({
     },
     "/dashboard/announcements": {
       "en": "/dashboard/announcements",
-      "tr": "/dashboard/duyurular",
+      "tr": "/panel/duyurular",
     },
     "/dashboard/announcements/new": {
       "en": "/dashboard/announcements/new",
-      "tr": "/dashboard/duyurular/yeni",
+      "tr": "/panel/duyurular/yeni",
     },
     "/dashboard/announcements/[id]/edit": {
       "en": "/dashboard/announcements/[id]/edit",
-      "tr": "/dashboard/duyurular/[id]/duzenle",
+      "tr": "/panel/duyurular/[id]/duzenle",
     },
     "/dashboard/daily-words": {
       "en": "/dashboard/daily-words",
-      "tr": "/dashboard/gundelik-kelimeler",
+      "tr": "/panel/gundelik-kelimeler",
     },
     "/dashboard/daily-words/[id]/edit": {
       "en": "/dashboard/daily-words/[id]/edit",
-      "tr": "/dashboard/gundelik-kelimeler/[id]/duzenle",
+      "tr": "/panel/gundelik-kelimeler/[id]/duzenle",
     },
     "/dashboard/badges": {
       "en": "/dashboard/badges",

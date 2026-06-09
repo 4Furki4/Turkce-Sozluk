@@ -17,6 +17,7 @@ import {
     DropdownMenu,
     DropdownSection,
     DropdownItem,
+    Link as NextUILink
 } from "@heroui/react";
 import { Edit3, MoreVertical, Trash2 } from 'lucide-react';
 import { api } from '@/src/trpc/react';
@@ -24,11 +25,11 @@ import { Pagination } from "@heroui/pagination";
 import { Select, SelectItem } from "@heroui/select";
 import { rolesEnum, SelectUser } from '@/db/schema/users';
 import { Link } from '@/src/i18n/routing';
-import { Link as NextUILink } from "@heroui/react";
 import RoleEditModal from './role-edit-modal';
 import UserDeleteModal from './user-delete-modal';
 import BadgeAssignmentModal from './badge-assignment-modal';
 import { Award } from 'lucide-react';
+
 const userPerPageOptions = [
     {
         label: "5",
@@ -171,11 +172,12 @@ export default function UserList(
                         <NextUILink target='_blank' as={Link} href={`/profile/${item.key}`}>
                             {item.name}
                         </NextUILink>
-                    } description={item.username ? `@${item.username}` : undefined
-                    } avatarProps={{
-                        name: item.name,
-                        src: item.src ?? undefined
-                    }} />
+                    }
+                        description={item.username ? `@${item.username}` : undefined
+                        } avatarProps={{
+                            name: item.name,
+                            src: item.src ?? undefined
+                        }} />
                 );
             default:
                 return cellValue;

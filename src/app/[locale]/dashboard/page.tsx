@@ -1,11 +1,11 @@
-import WordList from "@/src/_pages/dashboard/word-list/word-list";
+import { DashboardOverview } from "@/src/_pages/dashboard/overview/dashboard-overview";
 import { api, HydrateClient } from "@/src/trpc/server";
 import { Metadata } from "next";
 import React from "react";
 
 export const metadata: Metadata = {
   title: "Dashboard",
-  description: "Dashboard",
+  description: "Dashboard overview",
   robots: {
     follow: false,
     index: false,
@@ -16,29 +16,12 @@ export const metadata: Metadata = {
   },
 };
 
-type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
-
-export default async function Page(
-  props: {
-    searchParams: SearchParams;
-  }
-) {
-  const searchParams = await props.searchParams;
-
-  const page = Number(searchParams.page) || 1;
-  const perPage = Number(searchParams.per_page) || 10;
-
-  void api.word.getWords.prefetch({
-    take: perPage,
-    skip: (page - 1) * perPage
-  })
-  void api.word.getWordCount.prefetch({})
-  void api.params.getLanguages.prefetch()
-  void api.params.getPartOfSpeeches.prefetch()
+export default async function DashboardPage() {
+  void api.admin.overview.getDashboardOverview.prefetch();
 
   return (
     <HydrateClient>
-      <WordList />
+      <DashboardOverview />
     </HydrateClient>
   );
 }
