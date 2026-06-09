@@ -36,6 +36,14 @@ type MetricCardProps = {
   icon: ReactNode;
 };
 
+function getNumberAxisWidth(values: number[], formatter: Intl.NumberFormat) {
+  const maxValue = Math.max(0, ...values);
+  const roundedValue = Math.ceil(maxValue * 1.1);
+  const labelLength = formatter.format(roundedValue).length;
+
+  return Math.min(96, Math.max(44, labelLength * 8 + 18));
+}
+
 function MetricCard({ label, value, description, icon }: MetricCardProps) {
   const numberFormatter = new Intl.NumberFormat();
 
@@ -71,6 +79,10 @@ export function DashboardOverview() {
     ...item,
     label: item.wordName.length > 16 ? `${item.wordName.slice(0, 15)}...` : item.wordName,
   }));
+  const searchTrendYAxisWidth = getNumberAxisWidth(
+    dailySearchData.map((item) => item.count),
+    numberFormatter,
+  );
 
   const actorSplit = data.searchAnalytics.actorSplit;
   const authenticatedPercent = actorSplit.total > 0
@@ -153,7 +165,7 @@ export function DashboardOverview() {
               config={{ count: { label: t("searchTrend.series"), color: "hsl(var(--primary))" } }}
               className="h-72 w-full"
             >
-              <AreaChart data={dailySearchData} margin={{ left: 8, right: 8, top: 10, bottom: 0 }}>
+              <AreaChart data={dailySearchData} margin={{ left: 4, right: 8, top: 10, bottom: 0 }}>
                 <defs>
                   <linearGradient id="searchTrendFill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="var(--color-count)" stopOpacity={0.45} />
@@ -162,7 +174,14 @@ export function DashboardOverview() {
                 </defs>
                 <CartesianGrid vertical={false} />
                 <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
-                <YAxis width={36} tickLine={false} axisLine={false} tickMargin={8} allowDecimals={false} />
+                <YAxis
+                  width={searchTrendYAxisWidth}
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  allowDecimals={false}
+                  tickFormatter={(value) => numberFormatter.format(Number(value))}
+                />
                 <Tooltip content={<ChartTooltipContent valueFormatter={(value) => numberFormatter.format(Number(value))} />} />
                 <Area
                   type="monotone"
@@ -232,9 +251,17 @@ export function DashboardOverview() {
               config={{ count: { label: t("topSearches.series"), color: "hsl(var(--primary))" } }}
               className="h-80 w-full"
             >
-              <BarChart data={topSearchData} layout="vertical" margin={{ left: 12, right: 16, top: 8, bottom: 8 }}>
+              <BarChart data={topSearchData} layout="vertical" margin={{ left: 12, right: 16, top: 8, bottom: 24 }}>
                 <CartesianGrid horizontal={false} />
-                <XAxis type="number" hide />
+                <XAxis
+                  type="number"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  allowDecimals={false}
+                  tickCount={5}
+                  tickFormatter={(value) => numberFormatter.format(Number(value))}
+                />
                 <YAxis
                   type="category"
                   dataKey="label"
