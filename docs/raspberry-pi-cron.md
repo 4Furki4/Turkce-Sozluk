@@ -144,9 +144,14 @@ For each cron job, create a Uptime Kuma monitor:
 - Retries: `1`
 - Resend notification every: your preference
 
-Copy the push URL from Uptime Kuma and append it as the last argument in the
-crontab entry. The final crontab should look like this after replacing each
-`<...-push-url>` placeholder with the matching Uptime Kuma push URL:
+Copy the push URL from Uptime Kuma and append it as the last quoted argument in
+the crontab entry. Prefer the bare `/api/push/<token>` URL without sample query
+parameters such as `?status=up&msg=OK&ping=`. The script strips query parameters
+before sending its own status and message, but using the bare URL keeps the
+crontab clear.
+
+The final crontab should look like this after replacing each `<...-push-url>`
+placeholder with the matching Uptime Kuma push URL:
 
 ```cron
 SHELL=/bin/bash

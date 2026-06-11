@@ -11,6 +11,7 @@ BASE_URL="${2%/}"
 JOB_NAME="$3"
 ENDPOINT="$4"
 UPTIME_KUMA_PUSH_URL="${5:-}"
+UPTIME_KUMA_PUSH_URL="${UPTIME_KUMA_PUSH_URL%%\?*}"
 
 LOG_DIR="${LOG_DIR:-/var/log/turkish-dictionary}"
 STATE_DIR="${STATE_DIR:-/var/lib/turkish-dictionary/cron}"
