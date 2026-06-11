@@ -1,2 +1,5 @@
 [mcp_servers.heroui-migration]
 url = "https://migration-mcp.heroui.com"
+
+[sandbox_workspace_write]
+network_access = true
