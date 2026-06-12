@@ -1141,6 +1141,40 @@
     "correction": "Correction",
     "obsolete": "Obsolete"
   },
+  "WordGraph": {
+    "title": "Word graph",
+    "description": "Explore nearby words and phrases from stored dictionary relations.",
+    "depth": "{depth} hop",
+    "clearFilters": "Clear filters",
+    "loading": "Loading word graph...",
+    "error": "Could not load the word graph.",
+    "empty": "No graph relations found for this word yet.",
+    "truncated": "This graph is capped to keep the page fast. Narrow the filters to inspect a smaller neighborhood.",
+    "counts": "{nodes} nodes / {edges} edges",
+    "centerWord": "Center word",
+    "openWord": "Open word",
+    "loadGraph": "Show graph",
+    "fullscreen": "Full screen",
+    "exitFullscreen": "Exit full screen",
+    "previewTitle": "Preview the relation map",
+    "previewDescription": "Load the interactive graph when you want to inspect nearby word and phrase relations.",
+    "nodeKinds": {
+      "center": "Center",
+      "word": "Word",
+      "phrase": "Phrase"
+    },
+    "relations": {
+      "relatedWord": "Related word",
+      "synonym": "Synonym",
+      "antonym": "Antonym",
+      "correction": "Correction",
+      "compound": "Compound",
+      "seeAlso": "See also",
+      "turkishEquivalent": "Turkish equivalent",
+      "obsolete": "Obsolete",
+      "phrase": "Phrase"
+    }
+  },
   "Form": {
     "noWordsFound": "No words found matching your search",
     "relatedWordLabel": "Related Word",

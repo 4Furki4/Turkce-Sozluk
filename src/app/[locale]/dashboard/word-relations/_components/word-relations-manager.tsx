@@ -9,6 +9,7 @@ import AddRelatedPhraseForm from "./add-related-phrase-form";
 import WordSearch from "./word-search";
 import AddRelatedWordForm from "./add-related-word-form";
 import RelatedWordsList from "./related-words-list";
+import WordRelationsGraph from "@/src/components/word-graph/word-relations-graph";
 
 export default function WordRelationsManager() {
   const t = useTranslations("Dashboard.WordRelations");
@@ -84,6 +85,14 @@ export default function WordRelationsManager() {
           <Divider />
 
           <CardBody>
+            <div className="mb-8">
+              <WordRelationsGraph
+                key={`${selectedWordId}-${relatedWordsQuery.data?.length ?? 0}-${relatedPhrasesQuery.data?.length ?? 0}`}
+                wordId={selectedWordId}
+                word={selectedWordName}
+              />
+            </div>
+
             {/* Word Relations Section */}
             <div className="mb-8">
               <h3 className="text-xl font-semibold mb-4">{t("relatedWords")}</h3>

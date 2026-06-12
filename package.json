@@ -57,6 +57,7 @@
     "@uploadthing/react": "^7.3.3",
     "@upstash/ratelimit": "^2.0.7",
     "@upstash/redis": "^1.35.8",
+    "@xyflow/react": "^12.11.0",
     "bcrypt": "^5.1.1",
     "better-auth": "1.4.7",
     "class-variance-authority": "^0.7.1",

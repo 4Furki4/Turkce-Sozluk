@@ -1130,6 +1130,40 @@
     "correction": "Düzeltme",
     "obsolete": "Eskimiş"
   },
+  "WordGraph": {
+    "title": "Kelime grafiği",
+    "description": "Sözlükte kayıtlı ilişkilerden yakındaki kelime ve deyimleri keşfedin.",
+    "depth": "{depth} adım",
+    "clearFilters": "Filtreleri temizle",
+    "loading": "Kelime grafiği yükleniyor...",
+    "error": "Kelime grafiği yüklenemedi.",
+    "empty": "Bu kelime için henüz grafik ilişkisi bulunamadı.",
+    "truncated": "Sayfanın hızlı kalması için grafik sınırlandırıldı. Daha küçük bir çevreyi incelemek için filtreleri daraltın.",
+    "counts": "{nodes} düğüm / {edges} bağlantı",
+    "centerWord": "Merkez kelime",
+    "openWord": "Kelimeyi aç",
+    "loadGraph": "Grafiği göster",
+    "fullscreen": "Tam ekran",
+    "exitFullscreen": "Tam ekrandan çık",
+    "previewTitle": "İlişki haritasını önizle",
+    "previewDescription": "Yakındaki kelime ve deyim ilişkilerini incelemek istediğinizde etkileşimli grafiği yükleyin.",
+    "nodeKinds": {
+      "center": "Merkez",
+      "word": "Kelime",
+      "phrase": "Deyim"
+    },
+    "relations": {
+      "relatedWord": "İlgili kelime",
+      "synonym": "Eş anlam",
+      "antonym": "Zıt anlam",
+      "correction": "Düzeltme",
+      "compound": "Bileşik",
+      "seeAlso": "Ayrıca bakınız",
+      "turkishEquivalent": "Türkçe karşılığı",
+      "obsolete": "Eskimiş",
+      "phrase": "Deyim"
+    }
+  },
   "Form": {
     "noWordsFound": "Aramanızla eşleşen kelime bulunamadı.",
     "relatedWordLabel": "İlgili Kelime",
