@@ -4,6 +4,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import WordRelationsGraph from "../word-relations-graph";
 
 const mockUseQuery = jest.fn();
+const mockRouterPush = jest.fn();
 
 jest.mock("@/src/trpc/react", () => ({
   api: {
@@ -27,8 +28,6 @@ jest.mock("next-intl", () => ({
       empty: "No graph relations found for this word yet.",
       truncated: "This graph is capped.",
       counts: "{nodes} nodes / {edges} edges",
-      centerWord: "Center word",
-      openWord: "Open word",
       loadGraph: "Show graph",
       fullscreen: "Full screen",
       exitFullscreen: "Exit full screen",
@@ -74,10 +73,12 @@ jest.mock("@xyflow/react", () => ({
     ArrowClosed: "arrowclosed",
   },
   Panel: ({ children }: any) => <div>{children}</div>,
-  ReactFlow: ({ nodes, edges, children }: any) => (
+  ReactFlow: ({ nodes, edges, children, onNodeClick }: any) => (
     <div data-testid="react-flow" data-nodes={nodes.length} data-edges={edges.length}>
       {nodes.map((node: any) => (
-        <div key={node.id}>{node.data.label}</div>
+        <button key={node.id} type="button" onClick={(event) => onNodeClick?.(event, node)}>
+          {node.data.label}
+        </button>
       ))}
       {edges.map((edge: any) => (
         <div key={edge.id}>{edge.label}</div>
@@ -88,11 +89,9 @@ jest.mock("@xyflow/react", () => ({
 }));
 
 jest.mock("@/src/i18n/routing", () => ({
-  Link: ({ children, href, ...props }: any) => (
-    <a href={typeof href === "string" ? href : `/search/${href.params.word}`} {...props}>
-      {children}
-    </a>
-  ),
+  useRouter: () => ({
+    push: mockRouterPush,
+  }),
 }));
 
 const graphData = {
@@ -117,6 +116,7 @@ const graphData = {
 describe("WordRelationsGraph", () => {
   beforeEach(() => {
     mockUseQuery.mockReset();
+    mockRouterPush.mockReset();
   });
 
   it("renders a lazy preview before fetching", () => {
@@ -188,6 +188,26 @@ describe("WordRelationsGraph", () => {
     expect(screen.getAllByText("Synonym").length).toBeGreaterThan(0);
     expect(screen.getByText("2 nodes / 1 edges")).toBeInTheDocument();
     expect(screen.getByText("This graph is capped.")).toBeInTheDocument();
+    expect(screen.queryByText("Center")).not.toBeInTheDocument();
+    expect(screen.queryByText("Center word")).not.toBeInTheDocument();
+    expect(screen.queryByText("Open word")).not.toBeInTheDocument();
+  });
+
+  it("navigates to word pages when clicking word graph nodes", () => {
+    mockUseQuery.mockReturnValue({
+      data: graphData,
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<WordRelationsGraph wordId={1} word="kitap" />);
+    fireEvent.click(screen.getAllByRole("button", { name: "Show graph" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "defter" }));
+
+    expect(mockRouterPush).toHaveBeenCalledWith({
+      pathname: "/search/[word]",
+      params: { word: "defter" },
+    });
   });
 
   it("localizes non-canonical relation type labels", () => {

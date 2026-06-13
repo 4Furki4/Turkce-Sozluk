@@ -1151,8 +1151,6 @@
     "empty": "No graph relations found for this word yet.",
     "truncated": "This graph is capped to keep the page fast. Narrow the filters to inspect a smaller neighborhood.",
     "counts": "{nodes} nodes / {edges} edges",
-    "centerWord": "Center word",
-    "openWord": "Open word",
     "loadGraph": "Show graph",
     "fullscreen": "Full screen",
     "exitFullscreen": "Exit full screen",

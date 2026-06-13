@@ -10,17 +10,22 @@ import {
   type Node,
 } from "@xyflow/react";
 import { Chip, Spinner } from "@heroui/react";
-import { ExternalLink, GitBranch, Maximize2, Minimize2, Network } from "lucide-react";
+import { GitBranch, Maximize2, Minimize2, Network } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { type CSSProperties, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type CSSProperties, type MouseEvent, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
-import { Link } from "@/src/i18n/routing";
+import { useRouter } from "@/src/i18n/routing";
 import { api, type RouterOutputs } from "@/src/trpc/react";
 
 type GraphData = RouterOutputs["wordGraph"]["getNeighborhood"];
 type GraphNode = GraphData["nodes"][number];
 type GraphEdge = GraphData["edges"][number];
+type WordGraphFlowNode = Node<{
+  label: ReactNode;
+  kind: GraphNode["kind"];
+  word: string;
+}>;
 
 type WordRelationsGraphProps = {
   wordId?: number;
@@ -98,6 +103,7 @@ export default function WordRelationsGraph({
   className,
 }: WordRelationsGraphProps) {
   const t = useTranslations("WordGraph");
+  const router = useRouter();
   const [depth, setDepth] = useState<1 | 2>(1);
   const [selectedRelationTypes, setSelectedRelationTypes] = useState<string[]>([]);
   const [hasRequestedGraph, setHasRequestedGraph] = useState(false);
@@ -119,8 +125,21 @@ export default function WordRelationsGraph({
   );
 
   const graph = graphQuery.data;
-  const selectedNode = graph?.nodes.find((node) => node.id === graph.centerNodeId) ?? graph?.nodes[0];
   const { nodes, edges } = useGraphElements(graph, t, isFullscreen);
+
+  const handleNodeClick = useCallback(
+    (_: MouseEvent, node: WordGraphFlowNode) => {
+      if (node.data.kind === "phrase") {
+        return;
+      }
+
+      router.push({
+        pathname: "/search/[word]",
+        params: { word: node.data.word },
+      });
+    },
+    [router],
+  );
 
   const toggleFullscreen = useCallback(async () => {
     if (typeof document === "undefined") {
@@ -328,6 +347,7 @@ export default function WordRelationsGraph({
             maxZoom={2}
             nodesDraggable={false}
             nodesConnectable={false}
+            onNodeClick={handleNodeClick}
             elementsSelectable
             proOptions={{ hideAttribution: true }}
           >
@@ -348,22 +368,6 @@ export default function WordRelationsGraph({
           </ReactFlow>
         ) : null}
       </div>
-
-      {selectedNode ? (
-        <div className="flex flex-col gap-2 border-t border-border/70 pt-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <p className="text-xs text-muted-foreground">{t("centerWord")}</p>
-            <p className="truncate text-sm font-medium text-foreground">{selectedNode.name}</p>
-          </div>
-          <Link
-            href={{ pathname: "/search/[word]", params: { word: selectedNode.name } }}
-            className="inline-flex min-h-8 items-center justify-center gap-2 rounded-md bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/15"
-          >
-            {t("openWord")}
-            <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-          </Link>
-        </div>
-      ) : null}
     </section>
   );
 }
@@ -437,14 +441,14 @@ function GraphState({ children }: { children: ReactNode }) {
 function useGraphElements(graph: GraphData | undefined, t: ReturnType<typeof useTranslations>, isFullscreen: boolean) {
   return useMemo(() => {
     if (!graph) {
-      return { nodes: [] as Node[], edges: [] as Edge[] };
+      return { nodes: [] as WordGraphFlowNode[], edges: [] as Edge[] };
     }
 
     const center = graph.nodes.find((node) => node.id === graph.centerNodeId);
     const otherNodes = graph.nodes.filter((node) => node.id !== graph.centerNodeId);
     const isDense = graph.nodes.length > 24;
 
-    const nodes: Node[] = graph.nodes.map((node, index) => {
+    const nodes: WordGraphFlowNode[] = graph.nodes.map((node, index) => {
       const position = getNodePosition(node, center, otherNodes, index, {
         isDense,
         isFullscreen,
@@ -456,22 +460,24 @@ function useGraphElements(graph: GraphData | undefined, t: ReturnType<typeof use
           label: (
             <div className="max-w-36 truncate">
               <span>{node.name}</span>
-              {node.kind !== "word" ? (
-                <Chip size="sm" variant="flat" color={node.kind === "center" ? "primary" : "default"} className="ml-1 scale-90">
+              {node.kind === "phrase" ? (
+                <Chip size="sm" variant="flat" color="default" className="ml-1 scale-90">
                   {t(`nodeKinds.${node.kind}`)}
                 </Chip>
               ) : null}
             </div>
           ),
+          kind: node.kind,
+          word: node.name,
         },
         position,
         className: cn(
           "!rounded-md !border !px-3 !py-2 !text-sm !shadow-sm",
           node.kind === "center"
-            ? "!border-primary/70 !bg-primary !text-primary-foreground"
+            ? "!cursor-pointer !border-primary/70 !bg-primary !text-primary-foreground"
             : node.kind === "phrase"
               ? "!border-teal-500/40 !bg-teal-500/10 !text-foreground"
-              : "!border-border/80 !bg-background !text-foreground",
+              : "!cursor-pointer !border-border/80 !bg-background !text-foreground",
         ),
       };
     });

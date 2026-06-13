@@ -1140,8 +1140,6 @@
     "empty": "Bu kelime için henüz grafik ilişkisi bulunamadı.",
     "truncated": "Sayfanın hızlı kalması için grafik sınırlandırıldı. Daha küçük bir çevreyi incelemek için filtreleri daraltın.",
     "counts": "{nodes} düğüm / {edges} bağlantı",
-    "centerWord": "Merkez kelime",
-    "openWord": "Kelimeyi aç",
     "loadGraph": "Grafiği göster",
     "fullscreen": "Tam ekran",
     "exitFullscreen": "Tam ekrandan çık",
