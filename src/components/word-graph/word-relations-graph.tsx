@@ -12,7 +12,7 @@ import {
 import { Chip, Spinner } from "@heroui/react";
 import { ExternalLink, GitBranch, Maximize2, Minimize2, Network } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type CSSProperties, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 import { Link } from "@/src/i18n/routing";
@@ -80,6 +80,15 @@ const RELATION_TRANSLATION_KEYS: Record<string, string> = {
   phrase: "phrase",
   deyim: "phrase",
 };
+
+const graphControlsStyle = {
+  "--xy-controls-button-background-color": "hsl(var(--background))",
+  "--xy-controls-button-background-color-hover": "hsl(var(--accent))",
+  "--xy-controls-button-color": "hsl(var(--foreground))",
+  "--xy-controls-button-color-hover": "hsl(var(--accent-foreground))",
+  "--xy-controls-button-border-color": "hsl(var(--border))",
+  "--xy-controls-box-shadow": "0 10px 20px rgb(0 0 0 / 0.12)",
+} as CSSProperties;
 
 export default function WordRelationsGraph({
   wordId,
@@ -311,6 +320,7 @@ export default function WordRelationsGraph({
         ) : graph ? (
           <ReactFlow
             key={isFullscreen ? "word-graph-fullscreen" : "word-graph-inline"}
+            style={graphControlsStyle}
             nodes={nodes}
             edges={edges}
             fitView
