@@ -16,6 +16,7 @@ describe("proxy SEO normalization", () => {
     const response = proxy(new NextRequest("https://turkce-sozluk.com/"));
     expect(response.status).toBe(308);
     expect(response.headers.get("location")).toBe("https://turkce-sozluk.com/tr");
+    expect(response.headers.get("Link")).toBe('</.well-known/api-catalog>; rel="api-catalog"');
   });
 
   it("permanently redirects legacy search URLs to Turkish canonicals", () => {
@@ -34,5 +35,17 @@ describe("proxy SEO normalization", () => {
     const response = proxy(new NextRequest("https://turkce-sozluk.com/en/word-list"));
     expect(response.status).toBe(200);
     expect(response.headers.get("X-Robots-Tag")).toBe("noindex, follow");
+  });
+
+  it("adds agent discovery link headers to localized homepage responses", () => {
+    const response = proxy(new NextRequest("https://turkce-sozluk.com/tr"));
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Link")).toBe('</.well-known/api-catalog>; rel="api-catalog"');
+  });
+
+  it("does not add agent discovery link headers to non-homepage responses", () => {
+    const response = proxy(new NextRequest("https://turkce-sozluk.com/tr/arama"));
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Link")).toBeNull();
   });
 });
