@@ -6,6 +6,7 @@ import { getCanonicalPathname, normalizePathname } from "./lib/seo-utils";
 const handleI18nRouting = createMiddleware(routing);
 
 const AGENT_DISCOVERY_LINK_HEADER = '</.well-known/api-catalog>; rel="api-catalog"';
+const MARKDOWN_RENDER_PATH = "/~markdown";
 
 function cloneRequestWithHeaders(request: NextRequest, headers: Headers): NextRequest {
   return new NextRequest(request.url, {
@@ -30,9 +31,46 @@ function addAgentDiscoveryHeaders(response: NextResponse, pathname: string): voi
   }
 }
 
+function acceptsMarkdown(request: NextRequest): boolean {
+  const accept = request.headers.get("accept");
+  return accept?.split(",").some((value) => {
+    const [mediaType, ...params] = value.trim().toLowerCase().split(";");
+    const q = params
+      .map((param) => param.trim())
+      .find((param) => param.startsWith("q="))
+      ?.slice(2);
+
+    return mediaType === "text/markdown" && q !== "0";
+  }) ?? false;
+}
+
+function shouldRenderMarkdown(request: NextRequest, pathname: string): boolean {
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return false;
+  }
+
+  if (normalizePathname(pathname) === MARKDOWN_RENDER_PATH) {
+    return false;
+  }
+
+  return acceptsMarkdown(request);
+}
+
+function rewriteToMarkdownRenderer(request: NextRequest, canonicalPathname: string): NextResponse {
+  const markdownUrl = request.nextUrl.clone();
+  markdownUrl.pathname = MARKDOWN_RENDER_PATH;
+  markdownUrl.search = "";
+  markdownUrl.searchParams.set("path", canonicalPathname);
+  return NextResponse.rewrite(markdownUrl);
+}
+
 export default function proxy(request: NextRequest) {
   const normalizedPathname = normalizePathname(request.nextUrl.pathname);
   const canonicalPathname = getCanonicalPathname(normalizedPathname);
+
+  if (shouldRenderMarkdown(request, normalizedPathname)) {
+    return rewriteToMarkdownRenderer(request, canonicalPathname);
+  }
 
   if (canonicalPathname !== normalizedPathname) {
     const redirectUrl = request.nextUrl.clone();
