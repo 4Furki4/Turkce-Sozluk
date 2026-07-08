@@ -48,4 +48,26 @@ describe("proxy SEO normalization", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("Link")).toBeNull();
   });
+
+  it("rewrites markdown requests to the markdown renderer", () => {
+    const response = proxy(new NextRequest("https://turkce-sozluk.com/tr", {
+      headers: {
+        accept: "text/markdown",
+      },
+    }));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-rewrite")).toBe("https://turkce-sozluk.com/~markdown?path=%2Ftr");
+  });
+
+  it("does not rewrite markdown requests when the client explicitly rejects markdown", () => {
+    const response = proxy(new NextRequest("https://turkce-sozluk.com/tr", {
+      headers: {
+        accept: "text/markdown;q=0, text/html",
+      },
+    }));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-rewrite")).toBeNull();
+  });
 });
