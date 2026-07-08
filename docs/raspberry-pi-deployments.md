@@ -74,6 +74,9 @@ ingress:
 Apply Cloudflare Access to `development.turkce-sozluk.com`,
 `netdata.turkce-sozluk.com`, and `logs.turkce-sozluk.com`.
 
+See `docs/agent-discovery-dns.md` for the public DNS-AID SVCB records used by
+agent discovery scanners.
+
 ## Monitoring
 
 Monitoring runs as a separate stack:
