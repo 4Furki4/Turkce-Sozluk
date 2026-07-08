@@ -11,6 +11,14 @@ export const pathnames = {
     en: "/word-list",
     tr: "/kelime-listesi",
   },
+  "/words": {
+    en: "/words",
+    tr: "/kelimeler",
+  },
+  "/words/[letter]": {
+    en: "/words/[letter]",
+    tr: "/kelimeler/[letter]",
+  },
   "/saved-words": {
     en: "/saved-words",
     tr: "/kaydedilen-kelimeler",

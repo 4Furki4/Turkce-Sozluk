@@ -21,9 +21,9 @@ export async function GET() {
   const baseUrl = getBaseUrl();
   const lastmod = new Date().toISOString();
 
-  // Fetch total count to calculate pages using cached function. If the database
-  // is unavailable, still return the static sitemap instead of failing builds
-  // or returning a 500 to crawlers.
+  // Fetch total count to calculate archive chunks. If the database is
+  // unavailable, still return the crawl-priority sitemaps instead of failing
+  // builds or returning a 500 to crawlers.
   const totalWords = await getWordCount().catch((error) => {
     console.error("Failed to generate word sitemap index entries", error);
     return 0;
@@ -36,7 +36,11 @@ export async function GET() {
   // 1. Point to the static sitemap
   xml += `<sitemap><loc>${baseUrl}/sitemap-static.xml</loc><lastmod>${lastmod}</lastmod></sitemap>\n`;
 
-  // 2. Point to the sitemap-words chunks directly
+  // 2. Point to crawl-priority dictionary discovery sitemaps before the full archive
+  xml += `<sitemap><loc>${baseUrl}/sitemap-word-hubs.xml</loc><lastmod>${lastmod}</lastmod></sitemap>\n`;
+  xml += `<sitemap><loc>${baseUrl}/sitemap-priority-words.xml</loc><lastmod>${lastmod}</lastmod></sitemap>\n`;
+
+  // 3. Point to the sitemap-words chunks directly
   for (let i = 1; i <= totalPages; i++) {
     // User preferred format: /sitemap-words/sitemap/1.xml
     // CRITICAL: No whitespace between tags
