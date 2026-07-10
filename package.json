@@ -32,7 +32,8 @@
     "studio:local": "drizzle-kit studio --config ./drizzle.local.config.ts",
     "studio:live": "drizzle-kit studio --config ./drizzle.production.config.ts",
     "scan": "next dev & npx react-scan@latest localhost:3000",
-    "search:sync": "bun src/scripts/sync-meilisearch.ts"
+    "search:sync": "bun src/scripts/sync-meilisearch.ts",
+    "seo:audit": "dotenv -e .env.production.local -e .env.local -- bun src/scripts/audit-seo-indexability.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.954.0",

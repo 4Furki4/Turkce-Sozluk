@@ -1,21 +1,10 @@
-import { db } from '@/db';
-import { words } from '@/db/schema/words';
 import { getBaseUrl } from '@/src/lib/seo-utils';
-import { count } from 'drizzle-orm';
-import { unstable_cache } from 'next/cache';
-
-const PAGE_SIZE = 5000;
+import {
+  getIndexableWordCount,
+  WORD_SITEMAP_PAGE_SIZE,
+} from '@/src/lib/seo-word-index';
 
 export const dynamic = 'force-dynamic';
-
-const getWordCount = unstable_cache(
-  async () => {
-    const totalResult = await db.select({ count: count() }).from(words).execute();
-    return totalResult[0].count;
-  },
-  ['sitemap-word-count'],
-  { revalidate: 86400 } // 24 hours
-);
 
 export async function GET() {
   const baseUrl = getBaseUrl();
@@ -24,11 +13,11 @@ export async function GET() {
   // Fetch total count to calculate archive chunks. If the database is
   // unavailable, still return the crawl-priority sitemaps instead of failing
   // builds or returning a 500 to crawlers.
-  const totalWords = await getWordCount().catch((error) => {
+  const totalWords = await getIndexableWordCount().catch((error) => {
     console.error("Failed to generate word sitemap index entries", error);
     return 0;
   });
-  const totalPages = Math.ceil(totalWords / PAGE_SIZE);
+  const totalPages = Math.ceil(totalWords / WORD_SITEMAP_PAGE_SIZE);
 
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
   xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';

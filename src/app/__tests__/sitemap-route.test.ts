@@ -6,23 +6,18 @@ jest.mock("next/cache", () => ({
   unstable_cache: (fn: (...args: unknown[]) => unknown) => fn,
 }));
 
-const executeWordCountMock = jest.fn(async () => [{ count: 10001 }]);
+const getIndexableWordCountMock = jest.fn(async () => 10001);
 
-jest.mock("@/db", () => ({
-  db: {
-    select: jest.fn(() => ({
-      from: jest.fn(() => ({
-        execute: executeWordCountMock,
-      })),
-    })),
-  },
+jest.mock("@/src/lib/seo-word-index", () => ({
+  getIndexableWordCount: () => getIndexableWordCountMock(),
+  WORD_SITEMAP_PAGE_SIZE: 5000,
 }));
 
 import { GET } from "@/src/app/sitemap.xml/route";
 
 describe("sitemap.xml route", () => {
   beforeEach(() => {
-    executeWordCountMock.mockResolvedValue([{ count: 10001 }]);
+    getIndexableWordCountMock.mockResolvedValue(10001);
   });
 
   it("orders static, discovery, priority, then archive sitemaps", async () => {
@@ -34,6 +29,8 @@ describe("sitemap.xml route", () => {
     expect(xml).toContain("<loc>https://turkce-sozluk.com/sitemap-priority-words.xml</loc>");
     expect(xml).toContain("<loc>https://turkce-sozluk.com/sitemap-words/sitemap/1.xml</loc>");
     expect(xml).toContain("<loc>https://turkce-sozluk.com/sitemap-words/sitemap/2.xml</loc>");
+    expect(xml).toContain("<loc>https://turkce-sozluk.com/sitemap-words/sitemap/3.xml</loc>");
+    expect(xml).not.toContain("<loc>https://turkce-sozluk.com/sitemap-words/sitemap/4.xml</loc>");
     expect(xml).not.toContain("sitemap-index.xml");
     expect(xml.indexOf("sitemap-static.xml")).toBeLessThan(xml.indexOf("sitemap-word-hubs.xml"));
     expect(xml.indexOf("sitemap-word-hubs.xml")).toBeLessThan(xml.indexOf("sitemap-priority-words.xml"));
@@ -42,7 +39,7 @@ describe("sitemap.xml route", () => {
 
   it("keeps discovery sitemaps when the archive count query fails", async () => {
     const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
-    executeWordCountMock.mockRejectedValueOnce(new Error("database unavailable"));
+    getIndexableWordCountMock.mockRejectedValueOnce(new Error("database unavailable"));
 
     const response = await GET();
     const xml = await response.text();

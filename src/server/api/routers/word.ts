@@ -18,6 +18,7 @@ import { generateAccentVariations } from "@/src/lib/search-utils";
 import { partOfSpeechs } from "@/db/schema/part_of_speechs";
 import { languages } from "@/db/schema/languages";
 import { wordAttributes } from "@/db/schema/word_attributes";
+import { NAVIGATION_MEANING_LIKE_PATTERN } from "@/src/lib/word-indexability";
 
 export const wordRouter = createTRPCRouter({
   searchWordsSimple: publicProcedure
@@ -303,7 +304,19 @@ export const wordRouter = createTRPCRouter({
             CASE
               WHEN w.name = ${purifiedName} THEN 1 -- 2. Prioritize exact case-sensitive match
               ELSE 2 -- 3. Fallback to case-insensitive match
-            END
+            END,
+            CASE
+              WHEN EXISTS (
+                SELECT 1
+                FROM meanings m_quality
+                WHERE m_quality.word_id = w.id
+                  AND LENGTH(TRIM(m_quality.meaning)) > 0
+                  AND LOWER(TRIM(m_quality.meaning)) NOT LIKE ${NAVIGATION_MEANING_LIKE_PATTERN}
+              ) THEN 1
+              ELSE 2
+            END,
+            COALESCE(w.variant, 0),
+            w.id
           LIMIT 1 -- 4. Select only the single best match
         )
         SELECT json_build_object(

@@ -1,4 +1,4 @@
-import { buildWordMetadata, buildWordNotFoundMetadata } from "../word-seo";
+import { buildWordJsonLd, buildWordMetadata, buildWordNotFoundMetadata } from "../word-seo";
 import type { WordSearchResult } from "@/types";
 
 const wordData: WordSearchResult["word_data"] = {
@@ -70,6 +70,76 @@ describe("word SEO metadata", () => {
             absolute: "kitap ne demek? | deyimleri, örnekleri ve kullanımı | Türkçe Sözlük",
         });
         expect(metadata.openGraph?.title).toBe("kitap ne demek? | deyimleri, örnekleri ve kullanımı | Türkçe Sözlük");
+    });
+
+    it("noindexes pointer-only entries while preserving their canonical and links", () => {
+        const pointerWordData: WordSearchResult["word_data"] = {
+            ...wordData,
+            word_name: "kompakt",
+            meanings: [{
+                ...wordData.meanings[0],
+                meaning_id: 11,
+                meaning: "Bakınız: yoğun",
+            }],
+            relatedWords: [{
+                related_word_id: 21,
+                related_word_name: "yoğun",
+                relation_type: "see_also",
+            }],
+            relatedPhrases: [],
+        };
+
+        const metadata = buildWordMetadata("kompakt", "tr", pointerWordData);
+
+        expect(metadata.title).toEqual({
+            absolute: "kompakt için ilgili sözlük maddeleri | Türkçe Sözlük",
+        });
+        expect(metadata.description).toContain("yoğun");
+        expect(metadata.alternates?.canonical).toBe("https://turkce-sozluk.com/tr/arama/kompakt");
+        expect(metadata.robots).toMatchObject({ index: false, follow: true });
+        expect(buildWordJsonLd(pointerWordData, "tr")).toBeNull();
+    });
+
+    it("keeps mixed entries indexable and uses the substantive definition", () => {
+        const mixedWordData: WordSearchResult["word_data"] = {
+            ...wordData,
+            meanings: [
+                {
+                    ...wordData.meanings[0],
+                    meaning_id: 11,
+                    meaning: "Bakınız: betik",
+                },
+                wordData.meanings[0],
+            ],
+        };
+
+        const metadata = buildWordMetadata("kitap", "tr", mixedWordData);
+
+        expect(metadata.robots).toMatchObject({ index: true, follow: true });
+        expect(metadata.description).toContain(wordData.meanings[0].meaning);
+        expect(buildWordJsonLd(mixedWordData, "tr")).toMatchObject({
+            "@type": "DefinedTerm",
+            description: wordData.meanings[0].meaning,
+        });
+    });
+
+    it("noindexes empty and English entries", () => {
+        const emptyWordData: WordSearchResult["word_data"] = {
+            ...wordData,
+            meanings: [],
+            relatedWords: [],
+            relatedPhrases: [],
+        };
+
+        expect(buildWordMetadata("boş", "tr", emptyWordData).robots).toEqual({
+            index: false,
+            follow: false,
+        });
+        expect(buildWordMetadata("kitap", "en", wordData).robots).toMatchObject({
+            index: false,
+            follow: true,
+        });
+        expect(buildWordJsonLd(emptyWordData, "tr")).toBeNull();
     });
 
     it("prefers meaning count when the word page has rich phrase coverage", () => {

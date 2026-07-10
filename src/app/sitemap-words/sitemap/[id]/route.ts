@@ -1,30 +1,7 @@
-import { db } from "@/db";
-import { words } from "@/db/schema/words";
 import { escapeXml, getWordCanonicalUrl } from '@/src/lib/seo-utils';
-import { unstable_cache } from "next/cache";
-
-const PAGE_SIZE = 5000;
+import { getIndexableWordsForSitemapPage } from '@/src/lib/seo-word-index';
 
 export const dynamic = 'force-dynamic';
-
-const getWordsForPage = unstable_cache(
-    async (page: number) => {
-        const offset = (page - 1) * PAGE_SIZE;
-        return await db
-            .select({
-                name: words.name,
-                updatedAt: words.updated_at,
-                createdAt: words.created_at,
-            })
-            .from(words)
-            .orderBy(words.id)
-            .offset(offset)
-            .limit(PAGE_SIZE)
-            .execute();
-    },
-    ['sitemap-words-page'],
-    { revalidate: 86400 } // 24 hours
-);
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     // Await params as per Next.js 15+ requirements
@@ -42,13 +19,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     }
 
     // Fetch this page's words from cache
-    const rows = await getWordsForPage(page);
+    const rows = await getIndexableWordsForSitemapPage(page);
 
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
-    for (const { name, updatedAt, createdAt } of rows) {
-        const rawLastModified = updatedAt ?? createdAt;
+    for (const { name, lastModified: rawLastModified } of rows) {
         const lastModified = rawLastModified
             ? new Date(rawLastModified).toISOString()
             : new Date().toISOString();
