@@ -24,6 +24,7 @@ import { getBaseUrl, getCanonicalPathname } from "@/src/lib/seo-utils";
 import PWAServiceWorker from "@/src/components/pwa-service-worker";
 import OnlineStatusBridge from "@/src/components/online-status-bridge";
 import { AutocompleteSync } from "@/src/components/customs/complete-sync";
+import WebMcpRegistrar from "@/src/components/webmcp/webmcp-registrar";
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -189,6 +190,7 @@ export default async function RootLayout({
             <CaptchaProvider>
               <Providers>
                 <OnlineStatusBridge />
+                <WebMcpRegistrar />
                 <AutocompleteSync />
                 <PWAServiceWorker />
                 <NavigationProgressBar />
