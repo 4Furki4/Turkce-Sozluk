@@ -44,3 +44,48 @@ export function createOpenIdConfiguration(issuer = getBaseUrl()) {
     ],
   } satisfies Partial<OIDCMetadata>;
 }
+
+function createProtectedResourceMetadata(
+  resource: string,
+  issuer: string,
+  resourceName: string,
+) {
+  return {
+    resource,
+    authorization_servers: [issuer],
+    scopes_supported: ["api"],
+    bearer_methods_supported: ["header"],
+    resource_name: resourceName,
+    resource_documentation: `${issuer}/auth.md`,
+  };
+}
+
+export function createOAuthProtectedResourceMetadata(issuer = getBaseUrl()) {
+  return createProtectedResourceMetadata(issuer, issuer, "Turkish Dictionary");
+}
+
+export function createTrpcOAuthProtectedResourceMetadata(issuer = getBaseUrl()) {
+  return createProtectedResourceMetadata(
+    new URL("/api/trpc", issuer).toString(),
+    issuer,
+    "Turkish Dictionary tRPC API",
+  );
+}
+
+export function createOAuthAuthorizationServerMetadata(issuer = getBaseUrl()) {
+  const openIdConfiguration = createOpenIdConfiguration(issuer);
+  const protectedResource = createTrpcOAuthProtectedResourceMetadata(issuer);
+
+  return {
+    ...openIdConfiguration,
+    protected_resources: [protectedResource.resource],
+    agent_auth: {
+      skill: `${issuer}/auth.md`,
+      register_uri: openIdConfiguration.registration_endpoint,
+      identity_types_supported: ["oauth_dynamic_client_registration"],
+      oauth_dynamic_client_registration: {
+        credential_types_supported: ["client_id", "client_secret", "pkce"],
+      },
+    },
+  };
+}
