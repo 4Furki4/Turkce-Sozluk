@@ -14,7 +14,54 @@ import { Redis } from "@upstash/redis";
 import { ZodError } from "zod";
 import { auth } from "@/src/lib/auth";
 import { db } from "@/db";
-import { headers } from "next/headers";
+import { and, eq, gt } from "drizzle-orm";
+import { oauthAccessTokens } from "@/db/schema/oauth";
+import { users } from "@/db/schema/users";
+
+type AuthSession = NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>;
+
+function hasApiScope(scopes: string): boolean {
+  return scopes.split(" ").includes("api");
+}
+
+async function getOAuthSession(requestHeaders: Headers): Promise<AuthSession | null> {
+  const authorization = requestHeaders.get("authorization");
+  const accessToken = authorization?.match(/^Bearer (.+)$/i)?.[1];
+
+  if (!accessToken) {
+    return null;
+  }
+
+  const [result] = await db
+    .select({ token: oauthAccessTokens, user: users })
+    .from(oauthAccessTokens)
+    .innerJoin(users, eq(oauthAccessTokens.userId, users.id))
+    .where(
+      and(
+        eq(oauthAccessTokens.accessToken, accessToken),
+        gt(oauthAccessTokens.accessTokenExpiresAt, new Date()),
+      ),
+    )
+    .limit(1);
+
+  if (!result || !hasApiScope(result.token.scopes)) {
+    return null;
+  }
+
+  return {
+    session: {
+      id: `oauth:${result.token.id}`,
+      token: result.token.accessToken,
+      userId: result.user.id,
+      expiresAt: result.token.accessTokenExpiresAt,
+      createdAt: result.token.createdAt,
+      updatedAt: result.token.updatedAt,
+      ipAddress: null,
+      userAgent: null,
+    },
+    user: result.user,
+  } as AuthSession;
+}
 
 
 /**
@@ -30,9 +77,10 @@ import { headers } from "next/headers";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  const session = await auth.api.getSession({
-    headers: await headers()
-  })
+  const cookieSession = await auth.api.getSession({
+    headers: opts.headers,
+  });
+  const session = cookieSession ?? (await getOAuthSession(opts.headers));
 
   return {
     db,

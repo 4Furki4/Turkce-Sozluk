@@ -34,6 +34,7 @@ import { gameScores, gameScoresRelations } from "./schema/game_scores";
 import { wordSources, wordSourcesRelations } from "./schema/word_sources";
 import { foreignTermSuggestions, foreignTermSuggestionsRelations } from "./schema/foreign_term_suggestions";
 import { foreignTermSuggestionVotes, foreignTermSuggestionVotesRelations } from "./schema/foreign_term_suggestion_votes";
+import { jwks, oauthAccessTokens, oauthApplications, oauthConsents } from "./schema/oauth";
 
 export const schema = {
   accounts,
@@ -90,7 +91,11 @@ export const schema = {
   foreignTermSuggestions,
   foreignTermSuggestionsRelations,
   foreignTermSuggestionVotes,
-  foreignTermSuggestionVotesRelations
+  foreignTermSuggestionVotesRelations,
+  jwks,
+  oauthAccessToken: oauthAccessTokens,
+  oauthApplication: oauthApplications,
+  oauthConsent: oauthConsents,
 };
 
 const globalForDb = globalThis as unknown as {
@@ -104,4 +109,3 @@ export const db = drizzle(conn, { schema });
 export const migrateToLatest = async () => {
   await migrate(db, { migrationsFolder: "drizzle/migrations" });
 };
-
