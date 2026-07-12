@@ -13,6 +13,14 @@ export const routing = {
       en: "/word-list",
       tr: "/kelime-listesi",
     },
+    "/words": {
+      en: "/words",
+      tr: "/kelimeler",
+    },
+    "/words/[letter]": {
+      en: "/words/[letter]",
+      tr: "/kelimeler/[letter]",
+    },
     "/contribute-word": {
       en: "/contribute-word",
       tr: "/kelime-katkisi",

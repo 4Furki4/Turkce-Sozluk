@@ -8,8 +8,10 @@ describe("robots.txt metadata", () => {
 
     expect(result.sitemap).toContain("https://turkce-sozluk.com/sitemap.xml");
     expect(result.sitemap).toContain("https://turkce-sozluk.com/sitemap-static.xml");
+    expect(result.sitemap).toContain("https://turkce-sozluk.com/sitemap-word-hubs.xml");
+    expect(result.sitemap).toContain("https://turkce-sozluk.com/sitemap-priority-words.xml");
     expect(result.sitemap).toContain("https://turkce-sozluk.com/sitemap-words/sitemap/1.xml");
     expect(result.sitemap).toContain("https://turkce-sozluk.com/sitemap-words/sitemap/20.xml");
-    expect(result.sitemap).toHaveLength(22);
+    expect(result.sitemap).toHaveLength(24);
   });
 });

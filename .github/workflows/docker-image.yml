@@ -69,6 +69,9 @@ jobs:
             exit 1
           fi
 
+      - name: Validate npm lockfile
+        run: npm run docker:preflight
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:

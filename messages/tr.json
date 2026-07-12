@@ -353,6 +353,7 @@
     "links": {
       "offlineDictionary": "Çevrim Dışı Sözlük",
       "wordList": "Kelime Listesi",
+      "wordIndex": "Kelime Dizini",
       "announcements": "Duyurular",
       "seeFeedback": "Geri Bildirimler",
       "privacy": "Gizlilik Politikası",
@@ -1030,7 +1031,33 @@
       "summary": "{from}-{to} / {total} kelime gösteriliyor",
       "jumpTo": "Sayfa",
       "go": "Git"
-    }
+    },
+    "seoIndexTitle": "Harf harf kelime dizini",
+    "seoIndexDescription": "Arama motorları ve JavaScript kullanmayan ziyaretçiler için hazırlanmış, sunucuda oluşturulan kelime dizinini açın.",
+    "seoIndexCta": "Kelime dizinine git"
+  },
+  "WordsHub": {
+    "metaTitle": "Türkçe Sözlük Kelime Dizini",
+    "metaDescription": "Türkçe Sözlük'teki kelimeleri harfe, popülerliğe ve güncellenme tarihine göre keşfedin.",
+    "eyebrow": "Kelime dizini",
+    "title": "Türkçe kelimeleri harfe göre keşfedin",
+    "description": "Bu dizin, sözlük maddelerini harf bağlantıları ve sade kelime listeleriyle sunucuda oluşturur.",
+    "alphabetTitle": "Harf dizini",
+    "alphabetDescription": "Bir harf seçerek o harfle başlayan sözlük maddelerine ulaşın.",
+    "popularTitle": "Popüler kelimeler",
+    "popularDescription": "En çok aranan ve görüntülenen sözlük maddeleri.",
+    "recentTitle": "Son güncellenen kelimeler",
+    "recentDescription": "Yakın zamanda güncellenen sözlük maddeleri.",
+    "backToIndex": "Kelime dizinine dön",
+    "letterMetaTitle": "{letter} harfi ile başlayan kelimeler",
+    "letterMetaDescription": "{letter} harfi ile başlayan Türkçe kelimeleri ve anlamlarını keşfedin.",
+    "letterTitle": "{letter} harfi ile başlayan kelimeler",
+    "letterDescription": "{letter} harfi için {count} sözlük maddesi listeleniyor.",
+    "letterPopularTitle": "{letter} harfinde öne çıkanlar",
+    "letterPopularDescription": "Bu harfte daha sık ziyaret edilen maddeler.",
+    "letterAllTitle": "{letter} dizini",
+    "letterAllDescription": "{count} kelime bağlantısı sunucuda oluşturuldu.",
+    "noWordsForLetter": "Bu harfle başlayan kelime bulunamadı."
   },
   "SavedWords": {
     "Toolbar": {
@@ -1129,6 +1156,38 @@
     "turkishEquivalent": "Türkçe Karşılığı",
     "correction": "Düzeltme",
     "obsolete": "Eskimiş"
+  },
+  "WordGraph": {
+    "title": "Kelime grafiği",
+    "description": "Sözlükte kayıtlı ilişkilerden yakındaki kelime ve deyimleri keşfedin.",
+    "depth": "{depth} adım",
+    "clearFilters": "Filtreleri temizle",
+    "loading": "Kelime grafiği yükleniyor...",
+    "error": "Kelime grafiği yüklenemedi.",
+    "empty": "Bu kelime için henüz grafik ilişkisi bulunamadı.",
+    "truncated": "Sayfanın hızlı kalması için grafik sınırlandırıldı. Daha küçük bir çevreyi incelemek için filtreleri daraltın.",
+    "counts": "{nodes} düğüm / {edges} bağlantı",
+    "loadGraph": "Grafiği göster",
+    "fullscreen": "Tam ekran",
+    "exitFullscreen": "Tam ekrandan çık",
+    "previewTitle": "İlişki haritasını önizle",
+    "previewDescription": "Yakındaki kelime ve deyim ilişkilerini incelemek istediğinizde etkileşimli grafiği yükleyin.",
+    "nodeKinds": {
+      "center": "Merkez",
+      "word": "Kelime",
+      "phrase": "Deyim"
+    },
+    "relations": {
+      "relatedWord": "İlgili kelime",
+      "synonym": "Eş anlam",
+      "antonym": "Zıt anlam",
+      "correction": "Düzeltme",
+      "compound": "Bileşik",
+      "seeAlso": "Ayrıca bakınız",
+      "turkishEquivalent": "Türkçe karşılığı",
+      "obsolete": "Eskimiş",
+      "phrase": "Deyim"
+    }
   },
   "Form": {
     "noWordsFound": "Aramanızla eşleşen kelime bulunamadı.",

@@ -15,6 +15,7 @@ export default async function Footer({ session }: { session: Session | null }) {
     const footerLinks = {
         dictionary: [
             { href: "/word-list" as const, label: t("links.wordList") },
+            { href: "/words" as const, label: t("links.wordIndex") },
             { href: "/announcements" as const, label: t("links.announcements") },
             { href: "/offline-dictionary" as const, label: t("links.offlineDictionary") },
         ],

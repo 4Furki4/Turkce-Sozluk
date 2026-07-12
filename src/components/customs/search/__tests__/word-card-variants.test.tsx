@@ -169,6 +169,7 @@ jest.mock("@/src/components/customs/modals/word-card-request-modal", () => ({
   ),
 }));
 jest.mock("@/src/components/customs/word-not-found-card", () => () => <div>Not Found</div>);
+jest.mock("@/src/components/word-graph/word-relations-graph", () => () => <div>Word graph</div>);
 jest.mock("@/src/utils/clipboard", () => ({
   copyPageUrl: jest.fn(),
 }));

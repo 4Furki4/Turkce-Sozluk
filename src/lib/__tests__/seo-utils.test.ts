@@ -7,6 +7,8 @@ import {
   getCanonicalPathname,
   getStaticRouteCanonicalPath,
   getWordCanonicalPath,
+  getWordsHubCanonicalPath,
+  getWordsLetterCanonicalPath,
   interpolatePathTemplate,
   matchPathTemplate,
 } from "@/src/lib/seo-utils";
@@ -18,10 +20,15 @@ describe("seo-utils", () => {
     expect(getCanonicalPathname("/arama/boncukluk")).toBe("/tr/arama/boncukluk");
     expect(getCanonicalPathname("/tr/search/boncukluk")).toBe("/tr/arama/boncukluk");
     expect(getCanonicalPathname("/word-list")).toBe("/tr/kelime-listesi");
+    expect(getCanonicalPathname("/words")).toBe("/tr/kelimeler");
+    expect(getCanonicalPathname("/words/a")).toBe("/tr/kelimeler/a");
+    expect(getCanonicalPathname("/kelimeler/ç")).toBe("/tr/kelimeler/ç");
   });
 
   it("keeps English prefixed pages on English display URLs", () => {
     expect(getCanonicalPathname("/en/word-list")).toBe("/en/word-list");
+    expect(getCanonicalPathname("/en/words")).toBe("/en/words");
+    expect(getCanonicalPathname("/en/kelimeler/boncukluk")).toBe("/en/words/boncukluk");
     expect(getCanonicalPathname("/en/arama/boncukluk")).toBe("/en/search/boncukluk");
     expect(getWordCanonicalPath("boncukluk", "en")).toBe("/en/search/boncukluk");
   });
@@ -31,6 +38,8 @@ describe("seo-utils", () => {
     expect(getStaticRouteCanonicalPath("/word-list", "tr")).toBe("/tr/kelime-listesi");
     expect(getStaticRouteCanonicalPath("/dashboard/announcements", "tr")).toBe("/tr/panel/duyurular");
     expect(getWordCanonicalPath("boncukluk", "tr")).toBe("/tr/arama/boncukluk");
+    expect(getWordsHubCanonicalPath("tr")).toBe("/tr/kelimeler");
+    expect(getWordsLetterCanonicalPath("ç", "tr")).toBe("/tr/kelimeler/%C3%A7");
   });
 
   it("redirects the mistaken Turkish dashboard aliases added by the SEO routing refactor", () => {

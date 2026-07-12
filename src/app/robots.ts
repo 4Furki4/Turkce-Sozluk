@@ -39,6 +39,8 @@ export default function robots(): MetadataRoute.Robots {
     sitemap: [
       `${baseUrl}/sitemap.xml`,
       `${baseUrl}/sitemap-static.xml`,
+      `${baseUrl}/sitemap-word-hubs.xml`,
+      `${baseUrl}/sitemap-priority-words.xml`,
       ...wordSitemaps,
     ],
   };

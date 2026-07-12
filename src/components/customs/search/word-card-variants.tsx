@@ -45,6 +45,7 @@ import WordCardRequestModal, {
 import { PronunciationCard } from "@/src/components/customs/pronunciation-card";
 import SaveWord from "@/src/components/customs/save-word";
 import WordNotFoundCard from "@/src/components/customs/word-not-found-card";
+import WordRelationsGraph from "@/src/components/word-graph/word-relations-graph";
 
 const WORD_CARD_VARIANTS: {
   value: SearchWordCardVariant;
@@ -359,6 +360,7 @@ function ReaderWordCard({
       </section>
 
       <ConnectionsSection word_data={word_data} />
+      <WordGraphSection word_data={word_data} />
       <PronunciationSection word_data={word_data} session={session} />
 
       <footer className="border-t border-border/70 px-5 py-5 sm:px-8">
@@ -492,6 +494,7 @@ function MagazineWordCard({
           highlightedMeaningId={highlightedMeaningId}
         />
         <CompactConnections word_data={word_data} />
+        <WordGraphSection word_data={word_data} compact />
       </main>
 
       <footer className="flex justify-end border-t border-border/70 px-5 py-3 sm:px-6">
@@ -1208,6 +1211,24 @@ function ConnectionGroup({ title, children }: { title: string; children: ReactNo
     <div>
       <h3 className="text-sm font-semibold text-muted-foreground">{title}</h3>
       <div className="mt-3">{children}</div>
+    </div>
+  );
+}
+
+function WordGraphSection({ word_data, compact = false }: { word_data: WordEntryData; compact?: boolean }) {
+  const { offlineLinks } = useContext(WordCardNavigationContext);
+
+  if (offlineLinks) {
+    return null;
+  }
+
+  return (
+    <div className={cn(compact ? "" : "border-t border-border/70 px-5 py-6 sm:px-8")}>
+      <WordRelationsGraph
+        wordId={word_data.word_id}
+        word={word_data.word_name}
+        compact={compact}
+      />
     </div>
   );
 }

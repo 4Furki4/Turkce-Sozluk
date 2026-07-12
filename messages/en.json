@@ -352,6 +352,7 @@
     },
     "links": {
       "wordList": "Word List",
+      "wordIndex": "Word Index",
       "offlineDictionary": "Offline Dictionary",
       "announcements": "Announcements",
       "seeFeedback": "See Feedback",
@@ -1041,7 +1042,33 @@
       "summary": "Showing {from}-{to} of {total} words",
       "jumpTo": "Page",
       "go": "Go"
-    }
+    },
+    "seoIndexTitle": "Letter-by-letter word index",
+    "seoIndexDescription": "Open the server-rendered word directory built for crawlers and visitors browsing without JavaScript.",
+    "seoIndexCta": "Go to word index"
+  },
+  "WordsHub": {
+    "metaTitle": "Turkish Dictionary Word Index",
+    "metaDescription": "Explore Turkish Dictionary entries by letter, popularity, and recent updates.",
+    "eyebrow": "Word index",
+    "title": "Explore Turkish words by letter",
+    "description": "This directory renders dictionary entries on the server with plain letter links and word lists.",
+    "alphabetTitle": "Letter index",
+    "alphabetDescription": "Choose a letter to browse dictionary entries that start with it.",
+    "popularTitle": "Popular words",
+    "popularDescription": "Dictionary entries with higher search and view activity.",
+    "recentTitle": "Recently updated words",
+    "recentDescription": "Dictionary entries updated recently.",
+    "backToIndex": "Back to word index",
+    "letterMetaTitle": "Words starting with {letter}",
+    "letterMetaDescription": "Explore Turkish words and meanings that start with {letter}.",
+    "letterTitle": "Words starting with {letter}",
+    "letterDescription": "{count} dictionary entries are listed for {letter}.",
+    "letterPopularTitle": "Popular {letter} entries",
+    "letterPopularDescription": "More frequently visited entries for this letter.",
+    "letterAllTitle": "{letter} index",
+    "letterAllDescription": "{count} word links are rendered on the server.",
+    "noWordsForLetter": "No words were found for this letter."
   },
   "SavedWords": {
     "Toolbar": {
@@ -1140,6 +1167,38 @@
     "turkishEquivalent": "Turkish Equivalent",
     "correction": "Correction",
     "obsolete": "Obsolete"
+  },
+  "WordGraph": {
+    "title": "Word graph",
+    "description": "Explore nearby words and phrases from stored dictionary relations.",
+    "depth": "{depth} hop",
+    "clearFilters": "Clear filters",
+    "loading": "Loading word graph...",
+    "error": "Could not load the word graph.",
+    "empty": "No graph relations found for this word yet.",
+    "truncated": "This graph is capped to keep the page fast. Narrow the filters to inspect a smaller neighborhood.",
+    "counts": "{nodes} nodes / {edges} edges",
+    "loadGraph": "Show graph",
+    "fullscreen": "Full screen",
+    "exitFullscreen": "Exit full screen",
+    "previewTitle": "Preview the relation map",
+    "previewDescription": "Load the interactive graph when you want to inspect nearby word and phrase relations.",
+    "nodeKinds": {
+      "center": "Center",
+      "word": "Word",
+      "phrase": "Phrase"
+    },
+    "relations": {
+      "relatedWord": "Related word",
+      "synonym": "Synonym",
+      "antonym": "Antonym",
+      "correction": "Correction",
+      "compound": "Compound",
+      "seeAlso": "See also",
+      "turkishEquivalent": "Turkish equivalent",
+      "obsolete": "Obsolete",
+      "phrase": "Phrase"
+    }
   },
   "Form": {
     "noWordsFound": "No words found matching your search",

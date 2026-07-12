@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
 
 import { getWordCanonicalUrl } from "@/src/lib/seo-utils";
+import {
+    classifyWordIndexability,
+    getPointerTargetNames,
+    getSubstantiveMeanings,
+} from "@/src/lib/word-indexability";
 
 import type { WordSearchResult } from "@/types";
 
 type WordEntryData = WordSearchResult["word_data"];
 
 function buildWordTitleSignal(wordData: WordEntryData, isEnglish: boolean) {
-    const meaningCount = wordData.meanings?.length ?? 0;
+    const meaningCount = getSubstantiveMeanings(wordData.meanings).length;
     const relatedPhraseCount = wordData.relatedPhrases?.length ?? 0;
     const hasManyMeanings = meaningCount >= 3;
     const hasRelatedPhrases = relatedPhraseCount > 0;
@@ -50,8 +55,12 @@ function buildWordTitleSignal(wordData: WordEntryData, isEnglish: boolean) {
 }
 
 export function buildWordJsonLd(wordData: WordEntryData, locale: string) {
+    if (classifyWordIndexability(wordData) !== "indexable") {
+        return null;
+    }
+
     const relatedWords = wordData.relatedWords?.map((word) => word.related_word_name) ?? [];
-    const firstMeaning = wordData.meanings?.[0]?.meaning ?? "";
+    const firstMeaning = getSubstantiveMeanings(wordData.meanings)[0]?.meaning ?? "";
     const canonicalLocale = locale === "en" ? "en" : "tr";
 
     return {
@@ -108,9 +117,57 @@ export function buildWordMetadata(
     const isEnglish = locale === "en";
     const seoLocale = isEnglish ? "en" : "tr";
     const canonicalWordName = wordData.word_name;
+    const indexability = classifyWordIndexability(wordData);
+    const canonicalUrl = getWordCanonicalUrl(canonicalWordName, seoLocale);
+
+    if (indexability === "empty") {
+        return buildWordNotFoundMetadata(canonicalWordName, locale);
+    }
+
+    if (indexability === "pointer") {
+        const pointerTargets = getPointerTargetNames(wordData).slice(0, 5);
+        const targetList = pointerTargets.join(", ");
+        const title = isEnglish
+            ? `Related entries for ${canonicalWordName} | Turkish Dictionary`
+            : `${canonicalWordName} için ilgili sözlük maddeleri | Türkçe Sözlük`;
+        const description = isEnglish
+            ? `See related Turkish dictionary entries for "${canonicalWordName}"${targetList ? `: ${targetList}` : ""}.`
+            : `"${canonicalWordName}" için ilgili sözlük maddelerine bakın${targetList ? `: ${targetList}` : ""}.`;
+
+        return {
+            title: { absolute: title },
+            description,
+            alternates: {
+                canonical: canonicalUrl,
+            },
+            openGraph: {
+                title,
+                description,
+                type: "article",
+                locale: isEnglish ? "en_US" : "tr_TR",
+            },
+            twitter: {
+                title,
+                description,
+                card: "summary_large_image",
+            },
+            robots: {
+                index: false,
+                follow: true,
+                googleBot: {
+                    index: false,
+                    follow: true,
+                    "max-video-preview": -1,
+                    "max-image-preview": "large",
+                    "max-snippet": -1,
+                },
+            },
+        };
+    }
+
     const relatedWords = wordData.relatedWords?.map((word) => word.related_word_name) ?? [];
     const relatedPhrases = wordData.relatedPhrases?.map((phrase) => phrase.related_phrase) ?? [];
-    const firstMeaning = wordData.meanings?.[0]?.meaning ?? "";
+    const firstMeaning = getSubstantiveMeanings(wordData.meanings)[0]?.meaning ?? "";
 
     const titleSignal = buildWordTitleSignal(wordData, isEnglish);
     const title = isEnglish
@@ -143,7 +200,7 @@ export function buildWordMetadata(
             card: "summary_large_image",
         },
         alternates: {
-            canonical: getWordCanonicalUrl(canonicalWordName, seoLocale),
+            canonical: canonicalUrl,
         },
         robots: {
             index: !isEnglish,
