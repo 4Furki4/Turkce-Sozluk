@@ -3,11 +3,12 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/db"; // Ensure this path is correct
 import { schema } from "@/db/index";
 import { nextCookies } from "better-auth/next-js";
-import { admin, emailOTP } from "better-auth/plugins";
+import { admin, emailOTP, jwt, oidcProvider } from "better-auth/plugins";
 import { Resend } from "resend";
 import { render } from "@react-email/render";
 import OtpEmail from "@/src/emails/otp-email";
 import { cookies } from "next/headers";
+import { createOpenIdConfiguration } from "@/src/lib/oidc-metadata";
 
 const authBaseUrl = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL;
 const trustedOrigins = [
@@ -17,6 +18,7 @@ const trustedOrigins = [
 ].filter((origin): origin is string => Boolean(origin));
 
 const resendEmailFrom = process.env.RESEND_EMAIL_FROM || "Türkçe Sözlük <no-reply@turkce-sozluk.com>";
+const openIdConfiguration = createOpenIdConfiguration();
 
 export const auth = betterAuth({
     ...(authBaseUrl ? { baseURL: authBaseUrl } : {}),
@@ -33,8 +35,13 @@ export const auth = betterAuth({
             account: schema.accounts,
             session: schema.sessions,
             verification: schema.verification,
+            jwks: schema.jwks,
+            oauthAccessToken: schema.oauthAccessToken,
+            oauthApplication: schema.oauthApplication,
+            oauthConsent: schema.oauthConsent,
         },
     }),
+    disabledPaths: ["/token"],
     emailAndPassword: {
         enabled: true,
         autoSignIn: true,
@@ -57,6 +64,28 @@ export const auth = betterAuth({
     },
     plugins: [
         nextCookies(),
+        jwt({
+            disableSettingJwtHeader: true,
+            jwt: {
+                issuer: openIdConfiguration.issuer,
+            },
+            jwks: {
+                keyPairConfig: {
+                    alg: "RS256",
+                    modulusLength: 2048,
+                },
+            },
+        }),
+        oidcProvider({
+            allowDynamicClientRegistration: true,
+            allowPlainCodeChallengeMethod: false,
+            loginPage: "/tr/signin",
+            metadata: openIdConfiguration,
+            requirePKCE: true,
+            scopes: ["api"],
+            storeClientSecret: "hashed",
+            useJWTPlugin: true,
+        }),
         emailOTP({
             async sendVerificationOTP({ email, otp, type }) {
                 if (type === "sign-in" || type === "email-verification") {
