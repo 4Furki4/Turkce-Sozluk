@@ -150,6 +150,25 @@ export function getWordCanonicalUrl(wordName: string, locale: SeoLocale): string
     return getAbsoluteUrl(getWordCanonicalPath(wordName, locale));
 }
 
+export function getWordsHubCanonicalPath(locale: SeoLocale): string {
+    return locale === "en" ? "/en/words" : "/tr/kelimeler";
+}
+
+export function getWordsHubCanonicalUrl(locale: SeoLocale): string {
+    return getAbsoluteUrl(getWordsHubCanonicalPath(locale));
+}
+
+export function getWordsLetterCanonicalPath(letter: string, locale: SeoLocale): string {
+    const encodedLetter = encodeURIComponent(letter);
+    return locale === "en"
+        ? `/en/words/${encodedLetter}`
+        : `/tr/kelimeler/${encodedLetter}`;
+}
+
+export function getWordsLetterCanonicalUrl(letter: string, locale: SeoLocale): string {
+    return getAbsoluteUrl(getWordsLetterCanonicalPath(letter, locale));
+}
+
 export function getWordRoute(wordName: string) {
     return {
         pathname: "/search/[word]" as const,

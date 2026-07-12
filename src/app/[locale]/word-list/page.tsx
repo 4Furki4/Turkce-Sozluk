@@ -57,6 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function WordListPage({ params, searchParams }: Props) {
     const { locale } = await params;
     setRequestLocale(locale);
+    const t = await getTranslations({ locale, namespace: "WordList" });
     const search_params = await searchParams;
     const page = toPositiveNumber(search_params.page, 1);
     const perPage = toPositiveNumber(search_params.per_page, 10);
@@ -98,6 +99,20 @@ export default async function WordListPage({ params, searchParams }: Props) {
 
     return (
         <main className="max-w-7xl w-full mx-auto p-4">
+            <section className="mb-6 rounded-md border border-border bg-background/40 p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 className="text-base font-semibold text-foreground">{t("seoIndexTitle")}</h2>
+                        <p className="mt-1 text-sm text-muted-foreground">{t("seoIndexDescription")}</p>
+                    </div>
+                    <Link
+                        className="inline-flex w-fit items-center justify-center rounded-md border border-primary/60 bg-background/40 px-3 py-2 text-sm font-medium text-primary hover:bg-primary hover:text-primary-foreground"
+                        href="/words"
+                    >
+                        {t("seoIndexCta")}
+                    </Link>
+                </div>
+            </section>
             <NoScriptNotice>
                 {locale === "en"
                     ? "JavaScript is disabled, so live filters are unavailable. Use the form and pagination links below for the server-rendered word list."

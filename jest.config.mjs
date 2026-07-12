@@ -13,6 +13,7 @@ const config = {
  
   testEnvironment: 'jest-environment-jsdom',
   preset: 'ts-jest',
+  modulePathIgnorePatterns: ['<rootDir>/.next/'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
   },

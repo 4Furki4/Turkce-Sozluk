@@ -1,4 +1,4 @@
-import { date, integer, pgTable, primaryKey, text, varchar } from "drizzle-orm/pg-core";
+import { date, index, integer, pgTable, primaryKey, text, varchar } from "drizzle-orm/pg-core";
 import { words } from "./words";
 import { InferInsertModel, InferSelectModel, relations } from "drizzle-orm";
 import { users } from "./users";
@@ -22,7 +22,8 @@ export const relatedWords = pgTable("related_words", {
     onDelete: "set null",
   }),
 }, (t) => [
-  primaryKey({ columns: [t.wordId, t.relatedWordId] })
+  primaryKey({ columns: [t.wordId, t.relatedWordId] }),
+  index("related_words_related_word_id_idx").on(t.relatedWordId),
 ]
 );
 export const relatedWordsToWordsRelations = relations(
