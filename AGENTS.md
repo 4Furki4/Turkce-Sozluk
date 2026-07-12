@@ -145,6 +145,14 @@ If a schema or source change requires generated output, change the source first 
   4. Inspect the generated SQL before finalizing.
 - Prefer Drizzle query builders and transactions over raw SQL in application code.
 
+### Raspberry Pi database access and migrations
+
+- Follow `docs/raspberry-pi-database-migrations.md` whenever connecting Drizzle Studio or applying migrations to the Pi development or production databases.
+- Keep Postgres and PgBouncer internal to Docker. Access the Pi databases only through an SSH tunnel bound to local loopback; never publish a database port or add it to Cloudflare Tunnel.
+- Tunnel directly to `db-development` or `db-production`, not PgBouncer, for Drizzle Studio and schema migrations.
+- Apply generated migrations with `bun run db:migrate:local` and a temporary tunneled `DATABASE_URL`. Do not use `db:push`, `db:push:prod`, or `studio:live` against a Pi database.
+- Before a production migration, create and verify a fresh PostgreSQL dump; after either environment changes, verify the corresponding local `/api/health` endpoint.
+
 ## Frontend conventions
 
 ### UI styling

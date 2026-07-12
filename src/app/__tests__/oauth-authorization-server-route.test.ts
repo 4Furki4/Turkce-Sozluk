@@ -20,12 +20,13 @@ describe("/.well-known/oauth-authorization-server route", () => {
     expect(body.agent_auth.register_uri).toBe(
       `${body.issuer}/api/auth/oauth2/register`,
     );
-    expect(body.agent_auth.identity_types_supported).toEqual([
-      "oauth_dynamic_client_registration",
+    expect(body.agent_auth.claim_uri).toBe(
+      `${body.issuer}/api/auth/oauth2/authorize`,
+    );
+    expect(body.agent_auth.identity_types_supported).toEqual(["anonymous"]);
+    expect(body.agent_auth.anonymous.credential_types_supported).toEqual([
+      "access_token",
     ]);
-    expect(
-      body.agent_auth.oauth_dynamic_client_registration.credential_types_supported,
-    ).toEqual(expect.arrayContaining(["client_id", "client_secret", "pkce"]));
   });
 
   it("returns discovery headers without a body for HEAD requests", async () => {

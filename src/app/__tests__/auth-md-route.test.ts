@@ -12,6 +12,8 @@ describe("/auth.md route", () => {
     expect(body).toContain("# Turkish Dictionary auth.md");
     expect(body).toContain("/.well-known/oauth-protected-resource");
     expect(body).toContain("/api/auth/oauth2/register");
+    expect(body).toContain("`anonymous` agent-auth method");
+    expect(body).toContain("claim URI");
     expect(body).toContain("`openid api`");
     expect(body).toContain("Authorization: Bearer ACCESS_TOKEN");
   });

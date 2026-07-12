@@ -82,9 +82,10 @@ export function createOAuthAuthorizationServerMetadata(issuer = getBaseUrl()) {
     agent_auth: {
       skill: `${issuer}/auth.md`,
       register_uri: openIdConfiguration.registration_endpoint,
-      identity_types_supported: ["oauth_dynamic_client_registration"],
-      oauth_dynamic_client_registration: {
-        credential_types_supported: ["client_id", "client_secret", "pkce"],
+      claim_uri: openIdConfiguration.authorization_endpoint,
+      identity_types_supported: ["anonymous"],
+      anonymous: {
+        credential_types_supported: ["access_token"],
       },
     },
   };
