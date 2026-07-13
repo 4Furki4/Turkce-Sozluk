@@ -1727,6 +1727,20 @@
     "signInToRequestWord": "Kelime Talep Etmek İçin Önce Giriş Yapmalısınız",
     "signIn": "Giriş Yap"
   },
+  "NotFoundPage": {
+    "eyebrow": "SÖZLÜK KAYDI / 404",
+    "marker": "KAYIP SAYFA",
+    "title": "Aradığınız sayfa sözlükte yok.",
+    "description": "Bağlantı değişmiş, silinmiş ya da hiç var olmamış olabilir. Ana sayfaya dönebilir veya kelime dizininden devam edebilirsiniz.",
+    "home": "Ana sayfaya dön",
+    "words": "Kelime dizinine git",
+    "entryLabel": "Kayıp kayıt",
+    "entryType": "isim",
+    "entryWord": "bulunamayan-sayfa",
+    "definitionLabel": "tanım",
+    "entryDefinition": "Ulaşılmak istenen ancak sözlükte karşılığı bulunmayan sayfa.",
+    "searchHint": "Yeni bir kelimeyle devam etmek için aramayı kullanın."
+  },
   "OfflineSearch": {
     "searchedWord": "Aranan kelime",
     "notDownloadedTitle": "Çevrim dışı sözlük indirilmedi",

@@ -7,6 +7,21 @@ const handleI18nRouting = createMiddleware(routing);
 
 const AGENT_DISCOVERY_LINK_HEADER = '</.well-known/api-catalog>; rel="api-catalog"';
 const MARKDOWN_RENDER_PATH = "/~markdown";
+const MALFORMED_PATH_FALLBACK = "~not-found";
+
+function hasMalformedPathEncoding(pathname: string): boolean {
+  try {
+    decodeURI(pathname);
+    return false;
+  } catch {
+    return true;
+  }
+}
+
+function getLocaleFromPath(pathname: string): "en" | "tr" {
+  const locale = pathname.split("/")[1];
+  return locale === "en" ? "en" : "tr";
+}
 
 function cloneRequestWithHeaders(request: NextRequest, headers: Headers): NextRequest {
   return new NextRequest(request.url, {
@@ -65,7 +80,16 @@ function rewriteToMarkdownRenderer(request: NextRequest, canonicalPathname: stri
 }
 
 export default function proxy(request: NextRequest) {
-  const normalizedPathname = normalizePathname(request.nextUrl.pathname);
+  const pathname = request.nextUrl.pathname;
+
+  if (hasMalformedPathEncoding(pathname)) {
+    const fallbackUrl = request.nextUrl.clone();
+    fallbackUrl.pathname = `/${getLocaleFromPath(pathname)}/${MALFORMED_PATH_FALLBACK}`;
+    fallbackUrl.search = "";
+    return NextResponse.redirect(fallbackUrl, 307);
+  }
+
+  const normalizedPathname = normalizePathname(pathname);
   const canonicalPathname = getCanonicalPathname(normalizedPathname);
 
   if (shouldRenderMarkdown(request, normalizedPathname)) {

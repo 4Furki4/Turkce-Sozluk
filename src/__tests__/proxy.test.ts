@@ -49,6 +49,13 @@ describe("proxy SEO normalization", () => {
     expect(response.headers.get("Link")).toBeNull();
   });
 
+  it("redirects malformed localized paths to the localized not-found route", () => {
+    const response = proxy(new NextRequest("https://turkce-sozluk.com/tr/kelimeler/%E0%A4%A"));
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("https://turkce-sozluk.com/tr/~not-found");
+  });
+
   it("rewrites markdown requests to the markdown renderer", () => {
     const response = proxy(new NextRequest("https://turkce-sozluk.com/tr", {
       headers: {

@@ -1762,6 +1762,20 @@
     "signInToRequestWord": "Sign in to request word",
     "signIn": "Sign in"
   },
+  "NotFoundPage": {
+    "eyebrow": "DICTIONARY ENTRY / 404",
+    "marker": "MISSING PAGE",
+    "title": "That page is not in the dictionary.",
+    "description": "The link may have changed, been removed, or never existed. Return home or browse the word index to keep exploring.",
+    "home": "Back to home",
+    "words": "Browse word index",
+    "entryLabel": "Missing entry",
+    "entryType": "noun",
+    "entryWord": "page-not-found",
+    "definitionLabel": "definition",
+    "entryDefinition": "A page with no matching entry in this dictionary.",
+    "searchHint": "Use search to continue with a new word."
+  },
   "OfflineSearch": {
     "searchedWord": "Searched word",
     "notDownloadedTitle": "Offline dictionary is not downloaded",

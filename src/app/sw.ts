@@ -19,7 +19,7 @@ declare global {
 
 // Service Worker version for debugging
 
-const SW_VERSION = "v1.6.2";
+const SW_VERSION = "v1.6.5";
 
 console.log(`[SW] Service Worker ${SW_VERSION} starting...`);
 
@@ -39,7 +39,6 @@ const OFFLINE_PAGE_PREFIXES = [
     "/tr/~%C3%A7evrim-d%C4%B1%C5%9F%C4%B1",
 ];
 const DOCUMENT_CACHE_NAME = "document-pages";
-const NAVIGATION_NETWORK_TIMEOUT_MS = 4000;
 const RUNTIME_CACHING = [...defaultCache] satisfies RuntimeCaching[];
 const NAVIGATION_DENYLIST = [
     /^\/api(?:\/|$)/,
@@ -188,17 +187,11 @@ const getCachedNavigationResponse = async (
     return caches.match(fallbackUrl, { ignoreSearch: true });
 };
 
-const timeout = (ms: number) =>
-    new Promise<undefined>((resolve) => {
-        setTimeout(resolve, ms);
-    });
-
 const handleNavigationRequest = async ({
     event,
     request,
     url,
 }: RouteHandlerCallbackOptions) => {
-    const fetchEvent = event as FetchEvent;
     const searchQueryRedirectUrl = getSearchQueryRedirectUrl(url);
 
     if (searchQueryRedirectUrl) {
@@ -223,10 +216,7 @@ const handleNavigationRequest = async ({
                 event.waitUntil(
                     cacheNavigationResponse(
                         request,
-                        (async () => {
-                            const preloadResponse = await fetchEvent.preloadResponse;
-                            return preloadResponse ?? fetch(request);
-                        })(),
+                        fetch(request),
                     ),
                 );
             }
@@ -235,18 +225,12 @@ const handleNavigationRequest = async ({
         }
     }
 
-    const networkResponsePromise = (async () => {
-        const preloadResponse = await fetchEvent.preloadResponse;
-        return preloadResponse ?? fetch(request);
-    })();
+    const networkResponsePromise = fetch(request);
 
     let networkResponse: Response | undefined;
 
     try {
-        networkResponse = await Promise.race([
-            networkResponsePromise,
-            timeout(NAVIGATION_NETWORK_TIMEOUT_MS),
-        ]);
+        networkResponse = await networkResponsePromise;
     } catch (error) {
         console.warn(
             `[SW] Navigation request failed; serving cached fallback for ${url.pathname}`,
@@ -254,23 +238,14 @@ const handleNavigationRequest = async ({
         );
     }
 
-    if (networkResponse && isUsableNavigationResponse(networkResponse)) {
-        event.waitUntil(
-            cacheNavigationResponse(request, Promise.resolve(networkResponse.clone())),
-        );
-        return networkResponse;
-    }
-
-    event.waitUntil(cacheNavigationResponse(request, networkResponsePromise));
-
     if (networkResponse) {
-        console.warn(
-            `[SW] Navigation returned ${networkResponse.status}; serving cached fallback for ${url.pathname}`,
-        );
-    } else {
-        console.warn(
-            `[SW] Navigation timed out; serving cached fallback for ${url.pathname}`,
-        );
+        if (isUsableNavigationResponse(networkResponse)) {
+            event.waitUntil(
+                cacheNavigationResponse(request, Promise.resolve(networkResponse.clone())),
+            );
+        }
+
+        return networkResponse;
     }
 
     const cachedResponse = await getCachedNavigationResponse(
@@ -283,23 +258,13 @@ const handleNavigationRequest = async ({
         return cachedResponse;
     }
 
-    if (networkResponse) {
-        return networkResponse;
-    }
-
-    try {
-        const lateNetworkResponse = await networkResponsePromise;
-        return lateNetworkResponse ?? Response.error();
-    } catch {
-        return Response.error();
-    }
+    return Response.error();
 };
 
 const serwist = new Serwist({
     precacheEntries: self.__SW_MANIFEST,
     skipWaiting: true,
     clientsClaim: true,
-    navigationPreload: true,
     // precacheOptions: {
     //     navigateFallback: "/",
     //     navigateFallbackDenylist: [/^\/api/],

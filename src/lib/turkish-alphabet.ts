@@ -33,7 +33,14 @@ export const TURKISH_ALPHABET = [
 export type TurkishAlphabetLetter = (typeof TURKISH_ALPHABET)[number];
 
 export function normalizeTurkishLetter(value: string): TurkishAlphabetLetter | null {
-  const normalized = decodeURIComponent(value).trim().toLocaleLowerCase("tr-TR");
+  let normalized: string;
+
+  try {
+    normalized = decodeURIComponent(value).trim().toLocaleLowerCase("tr-TR");
+  } catch {
+    return null;
+  }
+
   return TURKISH_ALPHABET.includes(normalized as TurkishAlphabetLetter)
     ? (normalized as TurkishAlphabetLetter)
     : null;

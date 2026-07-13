@@ -1,0 +1,99 @@
+.page {
+    min-height: calc(100dvh - var(--navbar-height));
+    padding-block: 3.5rem;
+}
+
+.layout {
+    width: 100%;
+    max-width: 80rem;
+    padding-inline: 1.25rem;
+    gap: 2.5rem;
+}
+
+.hero {
+    display: flex;
+    min-height: calc(100svh - 12.5rem - env(safe-area-inset-bottom));
+    width: 100%;
+    flex-direction: column;
+    justify-self: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.errorRow {
+    justify-content: center;
+}
+
+.centeredCopy {
+    margin-inline: auto;
+}
+
+.actions {
+    width: 100%;
+    max-width: 32rem;
+    margin-inline: auto;
+}
+
+.errorCode {
+    font-size: clamp(6rem, 18vw, 12rem);
+    line-height: 0.74;
+    letter-spacing: -0.08em;
+}
+
+.eyebrow {
+    letter-spacing: 0.24em;
+}
+
+.marker,
+.metaLabel {
+    letter-spacing: 0.18em;
+}
+
+.entryCard {
+    box-shadow: 0 24px 60px -42px rgb(0 0 0 / 55%);
+}
+
+@media (min-width: 640px) {
+    .layout {
+        padding-inline: 1.5rem;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 899px) {
+    .hero {
+        min-height: calc(100svh - var(--navbar-height) - 7rem);
+    }
+}
+
+@media (min-width: 900px) {
+    .layout {
+        grid-template-columns: minmax(0, 1fr) minmax(20rem, 0.68fr);
+        gap: 3rem;
+    }
+
+    .hero {
+        display: block;
+        min-height: 0;
+        justify-self: start;
+        text-align: left;
+    }
+
+    .errorRow {
+        justify-content: flex-start;
+    }
+
+    .centeredCopy,
+    .actions {
+        margin-inline: 0;
+    }
+
+    .actions {
+        max-width: none;
+    }
+}
+
+@media (min-width: 1200px) {
+    .layout {
+        gap: 4rem;
+    }
+}
