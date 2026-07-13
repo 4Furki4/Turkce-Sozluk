@@ -46,6 +46,34 @@ ssh furkipie 'sudo -n docker inspect -f "{{.Name}} {{.State.Status}}" \
 If `sudo -n` fails, authenticate on the Pi or fix the Pi user's Docker access;
 do not work around it by publishing a database port.
 
+## Migration ledger gate
+
+Before running `db:migrate:local`, confirm that the database's Drizzle ledger
+matches the schema's history. Run this read-only query inside the relevant
+`db-development` or `db-production` container:
+
+```sql
+SELECT count(*) AS applied_migrations, max(created_at) AS latest_created_at
+FROM drizzle.__drizzle_migrations;
+```
+
+Interpret the result before taking any write action:
+
+- A non-empty ledger can proceed through the normal migration process after
+  its entries are checked against `drizzle/migrations/meta/_journal.json`.
+- An empty ledger and an empty application schema means this is a new database;
+  only then can the full migration history be applied after development
+  validation.
+- An empty ledger while application tables exist means the schema was created
+  through `db:push`, a restore, or another untracked workflow. **Stop. Do not
+  run `db:migrate:local`**: it would replay the historical SQL into existing
+  objects. First reconcile the schema with the intended branch and create a
+  reviewed one-off baseline for the migration ledger.
+
+Do not insert migration metadata based on table counts alone. Confirm the
+schema, columns, constraints, and indexes required by the intended branch
+before recording a baseline.
+
 ## Open the SSH tunnel
 
 Run the following on the Mac. Docker container IPs may change after a recreate,
@@ -120,7 +148,8 @@ tool: inspect by default and make only deliberate, reviewed data changes.
 
 Use the same temporary `DATABASE_URL` for this command. `db:migrate:local` is
 the URL-based Drizzle configuration, so it is the correct command for either
-Pi target once its SSH tunnel is open.
+Pi target only after the migration ledger gate above has passed or the database
+has been reviewed and baselined.
 
 ### Development rollout
 
