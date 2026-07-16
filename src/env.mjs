@@ -27,6 +27,7 @@ export const env = createEnv({
     RECAPTCHA_SECRET_KEY: z.string().min(1),
     UPSTASH_REDIS_REST_URL: z.string().url(),
     UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
+    BETTER_AUTH_COOKIE_DOMAIN: z.string().min(1).optional(),
   },
 
   /**
@@ -38,6 +39,7 @@ export const env = createEnv({
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
     NEXT_PUBLIC_RECAPTCHA_SITE_KEY: z.string().min(1),
     NEXT_PUBLIC_APP_URL: z.string().url().optional(),
+    NEXT_PUBLIC_PLAY_ORIGIN: z.string().url().optional(),
     NEXT_PUBLIC_PATREON_URL: z.string().url().optional(),
   },
 
@@ -61,9 +63,11 @@ export const env = createEnv({
     RECAPTCHA_SECRET_KEY: process.env.RECAPTCHA_SECRET_KEY,
     NEXT_PUBLIC_RECAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_PLAY_ORIGIN: process.env.NEXT_PUBLIC_PLAY_ORIGIN,
     NEXT_PUBLIC_PATREON_URL: process.env.NEXT_PUBLIC_PATREON_URL,
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+    BETTER_AUTH_COOKIE_DOMAIN: process.env.BETTER_AUTH_COOKIE_DOMAIN,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

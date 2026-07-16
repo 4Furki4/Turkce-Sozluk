@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { Avatar } from '@heroui/react';
 import { Button } from '@heroui/react';
 import { useLocaleSwitchHref } from '@/src/hooks/useLocaleSwitchHref';
+import { getPlayUrl } from '@/src/lib/play-url';
 
 type SidebarProps = {
     session: Session | null,
@@ -32,6 +33,7 @@ type SidebarProps = {
 
 type SidebarLink = {
     href: React.ComponentProps<typeof NextIntlLink>["href"],
+    externalHref?: string,
     label: string,
     icon: React.ReactNode,
     isActive?: boolean,
@@ -57,26 +59,29 @@ function SidebarLinkRow({
     item: SidebarLink,
     onSelect: () => void,
 }) {
+    const linkClassName = cn(
+        "group flex min-h-11 w-full items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium text-foreground/68 transition-colors hover:bg-primary/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45",
+        item.isActive && "bg-primary/12 text-primary"
+    );
+    const content = <>
+        <span className={cn(
+            "grid h-8 w-8 shrink-0 place-items-center rounded-md text-foreground/50 transition-colors group-hover:text-primary",
+            item.isActive && "bg-primary/10 text-primary"
+        )}>
+            {item.icon}
+        </span>
+        <span className="min-w-0 flex-1 truncate">
+            {item.label}
+        </span>
+    </>;
+
     return (
         <li>
-            <NextIntlLink
-                className={cn(
-                    "group flex min-h-11 w-full items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium text-foreground/68 transition-colors hover:bg-primary/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45",
-                    item.isActive && "bg-primary/12 text-primary"
-                )}
-                href={item.href}
-                onClick={onSelect}
-            >
-                <span className={cn(
-                    "grid h-8 w-8 shrink-0 place-items-center rounded-md text-foreground/50 transition-colors group-hover:text-primary",
-                    item.isActive && "bg-primary/10 text-primary"
-                )}>
-                    {item.icon}
-                </span>
-                <span className="min-w-0 flex-1 truncate">
-                    {item.label}
-                </span>
-            </NextIntlLink>
+            {item.externalHref ? (
+                <a className={linkClassName} href={item.externalHref} onClick={onSelect}>{content}</a>
+            ) : (
+                <NextIntlLink className={linkClassName} href={item.href} onClick={onSelect}>{content}</NextIntlLink>
+            )}
         </li>
     )
 }
@@ -100,6 +105,11 @@ export default function Sidebar(
     const pathname = usePathname();
     const router = useRouter();
     const languageSwitchHref = useLocaleSwitchHref();
+    const [playHref, setPlayHref] = React.useState<string | null>(null);
+
+    React.useEffect(() => {
+        setPlayHref(getPlayUrl(window.location.origin, locale));
+    }, [locale]);
 
     const handleSignOut = async () => {
         await authClient.signOut();
@@ -115,6 +125,7 @@ export default function Sidebar(
         { href: '/offline-dictionary', label: t("Navbar.OfflineDictionary"), icon: <WifiOff className="h-5 w-5" />, isActive: isActive("/offline-dictionary") },
     ];
     const learnLinks: SidebarLink[] = [
+        ...(playHref ? [{ href: '/games' as const, externalHref: playHref, label: t("Navbar.Play"), icon: <Gamepad2 className="h-5 w-5" /> }] : []),
         { href: '/games', label: t("Navbar.Games"), icon: <Gamepad2 className="h-5 w-5" />, isActive: isActive("/games") },
         { href: '/word-list', label: t("Navbar.Word List"), icon: <ListTree className="h-5 w-5" />, isActive: isActive("/word-list") },
         { href: '/word-builder', label: t("Navbar.WordBuilder"), icon: <Blocks className="h-5 w-5" />, isActive: isActive("/word-builder") },

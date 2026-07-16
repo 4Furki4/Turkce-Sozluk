@@ -16,7 +16,7 @@ import { Input } from "@heroui/input";
 // import { signIn, signOut } from "next-auth/react"; // Removed
 import { authClient, type User } from "@/src/lib/auth-client"; // Added
 import { useTheme } from "next-themes";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/src/i18n/routing";
 import { usePathname, Link as NextIntlLink } from "@/src/i18n/routing";
 // import { Session } from "@/src/lib/auth"; // Removed
@@ -28,9 +28,10 @@ import { cn } from "@/lib/utils";
 import CustomDropdown from "./heroui/custom-dropdown";
 import { Session } from "@/src/lib/auth-client";
 import { useLocaleSwitchHref } from "@/src/hooks/useLocaleSwitchHref";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { startNavigationProgress } from "@/src/lib/navigation-progress";
 import { getPlainSearchAction, getSearchQueryHref, getWordSearchHref } from "@/src/lib/search-route";
+import { getPlayUrl } from "@/src/lib/play-url";
 
 type NavbarProps = {
   session: Session | null;
@@ -72,8 +73,10 @@ export default function Navbar({
   const { theme, setTheme } = useTheme();
   const pathName = usePathname();
   const locale = useLocale();
+  const navT = useTranslations("Navbar");
   const router = useRouter();
   const [navbarSearchQuery, setNavbarSearchQuery] = useState("");
+  const [playHref, setPlayHref] = useState<string | null>(null);
   const languageSwitchHref = useLocaleSwitchHref();
   const isAuthPage = ["/signup", "/signin", "/forgot-password"].includes(
     pathName
@@ -88,6 +91,10 @@ export default function Navbar({
     pathName.startsWith("/search/");
   const shouldShowNavbarSearch = !isHomeRoute && !isSearchRoute;
   const homeHref = locale === "en" ? "/en" : "/tr";
+
+  useEffect(() => {
+    setPlayHref(getPlayUrl(window.location.origin, locale));
+  }, [locale]);
 
   const handleSignOut = async () => {
     await authClient.signOut();
@@ -221,6 +228,11 @@ export default function Navbar({
                 "dark:data-[hover=true]:bg-primary/30",
               ]
             }}>
+            {playHref ? (
+              <DropdownItem key="play" as="a" href={playHref} startContent={<Gamepad2 aria-label={navT("Play")} className="w-4 h-4" />}>
+                {navT("Play")}
+              </DropdownItem>
+            ) : null}
             <DropdownItem key="games" as={NextIntlLink} href="/games" startContent={<Gamepad2 aria-label={GamesIntl} className="w-4 h-4" />}>
               {GamesIntl}
             </DropdownItem>

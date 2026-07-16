@@ -67,6 +67,35 @@ describe("proxy SEO normalization", () => {
     expect(response.headers.get("x-middleware-rewrite")).toBe("https://turkce-sozluk.com/~markdown?path=%2Ftr");
   });
 
+  it("rewrites the Play subdomain's Turkish flashcards route to its dedicated shell", () => {
+    const response = proxy(new NextRequest("http://oyna.localhost:3000/tr/kelime-kartlari"));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-rewrite")).toBe(
+      "http://oyna.localhost:3000/play/tr/kelime-kartlari",
+    );
+  });
+
+  it("uses the Host header when a local server normalizes the request URL hostname", () => {
+    const response = proxy(new NextRequest("http://localhost:3000/tr/kelime-kartlari", {
+      headers: {
+        host: "oyna.localhost:3000",
+      },
+    }));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-rewrite")).toBe(
+      "http://localhost:3000/play/tr/kelime-kartlari",
+    );
+  });
+
+  it("keeps the dictionary host on its normal flashcards route", () => {
+    const response = proxy(new NextRequest("http://localhost:3000/tr/kelime-kartlari"));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-rewrite")).toBeNull();
+  });
+
   it("does not rewrite markdown requests when the client explicitly rejects markdown", () => {
     const response = proxy(new NextRequest("https://turkce-sozluk.com/tr", {
       headers: {

@@ -11,11 +11,17 @@ import { cookies } from "next/headers";
 import { createOpenIdConfiguration } from "@/src/lib/oidc-metadata";
 
 const authBaseUrl = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL;
-const trustedOrigins = [
+const localPlayOrigins = process.env.NODE_ENV === "development"
+    ? ["http://localhost:3000", "http://oyna.localhost:3000"]
+    : [];
+const trustedOrigins = [...new Set([
     authBaseUrl,
     process.env.NEXT_PUBLIC_APP_URL,
     process.env.NEXT_PUBLIC_URL,
-].filter((origin): origin is string => Boolean(origin));
+    process.env.NEXT_PUBLIC_PLAY_ORIGIN,
+    ...localPlayOrigins,
+].filter((origin): origin is string => Boolean(origin)))];
+const crossSubDomainCookieDomain = process.env.BETTER_AUTH_COOKIE_DOMAIN;
 
 const resendEmailFrom = process.env.RESEND_EMAIL_FROM || "Türkçe Sözlük <no-reply@turkce-sozluk.com>";
 const openIdConfiguration = createOpenIdConfiguration();
@@ -64,6 +70,14 @@ export const auth = betterAuth({
             maxAge: 5 * 60, // Cache duration in seconds
         }
     },
+    advanced: crossSubDomainCookieDomain
+        ? {
+            crossSubDomainCookies: {
+                enabled: true,
+                domain: crossSubDomainCookieDomain,
+            },
+        }
+        : undefined,
     plugins: [
         nextCookies(),
         jwt({

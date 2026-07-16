@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
 import React, { useEffect, useState } from "react";
 import { authClient } from "@/src/lib/auth-client";
+import { getSafeAuthReturnUrl } from "@/src/lib/play-url";
 import { toast } from "sonner";
 
 export default function VerifyOtpPage() {
@@ -65,7 +66,8 @@ export default function VerifyOtpPage() {
 
             toast.success(t("successMessage"))
             localStorage.removeItem("otp_email");
-            router.push(backTo || "/");
+            const returnUrl = getSafeAuthReturnUrl(backTo, window.location.origin);
+            window.location.assign(returnUrl || "/");
         }
     });
 

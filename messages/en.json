@@ -30,6 +30,7 @@
     "ForeignTermSuggestions": "Foreign Term Suggestions",
     "FlashcardGame": "Flashcard Game",
     "Games": "Games",
+    "Play": "Play",
     "Learn": "Learn",
     "WordMatchingGame": "Word Matching",
     "SpeedRoundGame": "Speed Round"
@@ -2155,6 +2156,40 @@
     "comingTitle": "Daily 5 is warming up.",
     "comingDescription": "A five-question daily Turkish challenge will give every return visit a fresh reason to play.",
     "comingBadge": "In the works"
+  },
+  "Play": {
+    "metaTitle": "oyna — Turkish Word Games",
+    "metaDescription": "A focused arcade for Turkish vocabulary practice.",
+    "navigationLabel": "oyna navigation",
+    "homeAriaLabel": "oyna home",
+    "gameRoom": "Game room",
+    "flashcardsNav": "Flashcards",
+    "backToDictionary": "Dictionary",
+    "signIn": "Sign in",
+    "footerLine": "Play your way into Turkish words.",
+    "feedback": "Feedback",
+    "privacy": "Privacy",
+    "homeEyebrow": "Turkish word arcade",
+    "homeTitleFirst": "A little play.",
+    "homeTitleAccent": "A lot more words.",
+    "homeDescription": "Choose a focused round, reveal what you know, and let the next word pull you in.",
+    "startFlashcards": "Start flashcards",
+    "deckWord": "söz",
+    "deckMeaning": "Every word earns another turn.",
+    "flashcards": {
+      "roundKicker": "Focus round",
+      "setupDescription": "Build a deck that fits the moment. One clear turn at a time.",
+      "cards": "{count} cards",
+      "howToPlay": "How it works",
+      "stepOne": "Meet the word before you reveal its meaning.",
+      "stepTwo": "Flip the card when you are ready to check yourself.",
+      "stepThree": "Move on, shuffle, or start a fresh round whenever you need.",
+      "roundCompleteKicker": "Round complete",
+      "roundCompleteTitle": "That deck is yours now.",
+      "roundCompleteDescription": "You reviewed all {count} cards. Give the words another turn or build a new deck.",
+      "playAgain": "Play again",
+      "navigate": "Navigate"
+    }
   },
   "WordMatchingGame": {
     "title": "Word Matching",
