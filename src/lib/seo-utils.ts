@@ -172,7 +172,10 @@ export function getWordsLetterCanonicalUrl(letter: string, locale: SeoLocale): s
 export function getWordRoute(wordName: string) {
     return {
         pathname: "/search/[word]" as const,
-        params: { word: encodeURIComponent(wordName) },
+        // `Link` from the localized navigation layer serializes route params.
+        // Supplying an encoded value here causes the percent signs themselves to
+        // be encoded and bypasses the locale-aware pathname mapping.
+        params: { word: wordName },
     };
 }
 

@@ -3,6 +3,7 @@
 import { api } from "@/src/trpc/react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/src/i18n/routing";
+import NextLink from "next/link";
 import { Button, Card, CardBody, CardFooter, CardHeader, Skeleton } from "@heroui/react";
 import { ArrowLeft, BookOpen, CheckCircle2, ChevronRight, Share2 } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -115,7 +116,7 @@ export default function GalatiMeshurDetailPage({ params }: { params: Promise<{ i
                         {t("seeDetailedMeaning")}
                     </span>
                     <Button
-                        as={Link}
+                        as={NextLink}
                         href={getWordCanonicalPath(item.word, locale === "en" ? "en" : "tr")}
                         color="primary"
                         variant="flat"

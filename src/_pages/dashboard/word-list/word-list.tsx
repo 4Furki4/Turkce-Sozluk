@@ -15,6 +15,7 @@ import { Edit3, MoreVertical, Plus, Trash2 } from "lucide-react";
 import { api } from "@/src/trpc/react";
 import { Link as NextUILink } from "@heroui/react";
 import { usePathname, useSearchParams } from "next/navigation";
+import NextLink from "next/link";
 import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
 import { Link } from "@/src/i18n/routing";
 import WordListDeleteModal from "./word-list-delete-modal";
@@ -207,13 +208,13 @@ export default function WordList() {
           return <span>{item.meaning}</span>;
         }
         return (
-          <NextUILink target='_blank' as={Link} href={getWordCanonicalPath(item.name, "tr")}>
+          <NextUILink target='_blank' as={NextLink} href={getWordCanonicalPath(item.name, "tr")}>
             {t("Dashboard.NavigationWordLink")}
           </NextUILink>
         );
       case "name":
         return (
-          <NextUILink target='_blank' as={Link} href={getWordCanonicalPath(item.name, "tr")}>
+          <NextUILink target='_blank' as={NextLink} href={getWordCanonicalPath(item.name, "tr")}>
             {cellValue}
           </NextUILink>
         );

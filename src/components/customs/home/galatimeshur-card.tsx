@@ -3,14 +3,15 @@
 import { api } from "@/src/trpc/react";
 import CustomCard from "@/src/components/customs/heroui/custom-card";
 import { CardHeader, CardBody, CardFooter, Button, Skeleton } from "@heroui/react";
-import { Link } from "@/src/i18n/routing";
-import { useTranslations } from "next-intl";
+import NextLink from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { BookOpen } from "lucide-react";
 import { useOnlineStatus } from "@/src/hooks/use-online-status";
 import { getWordCanonicalPath } from "@/src/lib/seo-utils";
 
 export function GalatiMeshurCard() {
     const t = useTranslations("Home.HomeExtras");
+    const locale = useLocale();
     const isOnline = useOnlineStatus();
     const { data, isLoading } = api.extras.getGalatiMeshur.useQuery(
         { limit: 1 },
@@ -79,8 +80,8 @@ export function GalatiMeshurCard() {
 
             <CardFooter className="pt-0 pb-4 px-4">
                 <Button
-                    as={Link}
-                    href={getWordCanonicalPath(item.word, "tr")}
+                    as={NextLink}
+                    href={getWordCanonicalPath(item.word, locale === "en" ? "en" : "tr")}
                     variant="light"
                     color="warning"
                     size="sm"

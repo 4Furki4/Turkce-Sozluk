@@ -6,6 +6,7 @@ import {
   escapeXml,
   getCanonicalPathname,
   getStaticRouteCanonicalPath,
+  getWordRoute,
   getWordCanonicalPath,
   getWordsHubCanonicalPath,
   getWordsLetterCanonicalPath,
@@ -40,6 +41,13 @@ describe("seo-utils", () => {
     expect(getWordCanonicalPath("boncukluk", "tr")).toBe("/tr/arama/boncukluk");
     expect(getWordsHubCanonicalPath("tr")).toBe("/tr/kelimeler");
     expect(getWordsLetterCanonicalPath("ç", "tr")).toBe("/tr/kelimeler/%C3%A7");
+  });
+
+  it("builds locale-neutral internal word routes for localized links", () => {
+    expect(getWordRoute("güzel sanatlar")).toEqual({
+      pathname: "/search/[word]",
+      params: { word: "güzel sanatlar" },
+    });
   });
 
   it("redirects the mistaken Turkish dashboard aliases added by the SEO routing refactor", () => {

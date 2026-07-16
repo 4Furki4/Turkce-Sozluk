@@ -5,6 +5,7 @@ import { api } from "@/src/trpc/react";
 import CustomCard from "@/src/components/customs/heroui/custom-card";
 import { CardHeader, CardBody, CardFooter, Button, Skeleton, Tooltip } from "@heroui/react";
 import { Link } from "@/src/i18n/routing";
+import NextLink from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { formatDate } from "@/src/utils/date";
 import { getWordCanonicalPath, getWordRoute } from "@/src/lib/seo-utils";
@@ -105,8 +106,8 @@ export function WordOfTheDayCard() {
 
             <CardFooter className="flex justify-center gap-3 pt-0 pb-6">
                 <Button
-                    as={Link}
-                    href={getWordCanonicalPath(word.name, "tr")}
+                    as={NextLink}
+                    href={getWordCanonicalPath(word.name, locale === "en" ? "en" : "tr")}
                     variant="bordered"
                     color="primary"
                     size="sm"
