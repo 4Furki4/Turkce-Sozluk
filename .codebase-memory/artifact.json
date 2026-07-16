@@ -1,11 +1,11 @@
 {
     "schema_version": 2,
-    "commit": "9ae28441e347f315e996816dd6784eeb998f99b6",
-    "indexed_at": "2026-07-16T18:51:59Z",
+    "commit": "47b2a1b3aa39b54a16d6ee9061c9b4675679a2fc",
+    "indexed_at": "2026-07-16T21:33:01Z",
     "project": "Users-muhammedfurkancengiz-Development-Turkish-Dictionary",
-    "nodes": 0,
-    "edges": 0,
-    "original_size": 102400,
-    "compressed_size": 1468,
+    "nodes": 4137,
+    "edges": 5154,
+    "original_size": 9109504,
+    "compressed_size": 1044126,
     "compression_level": 3
 }
