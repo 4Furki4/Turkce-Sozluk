@@ -1,0 +1,139 @@
+.root {
+  --ink: #1d2340;
+  --muted: #56607a;
+  --paper: #fff9eb;
+  --paper-dark: #f6eddb;
+  --red: #d84b47;
+  --red-deep: #a72e35;
+  --mint: #5ac8ae;
+  --blue: #5b8def;
+  --yellow: #ffd76a;
+  width: 100%;
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-bottom: 4px solid var(--ink);
+  background: var(--red);
+  color: var(--paper);
+}
+
+.heroPattern {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: linear-gradient(25deg, transparent 48%, rgb(255 255 255 / 13%) 48% 50%, transparent 50%), linear-gradient(-25deg, transparent 48%, rgb(255 255 255 / 9%) 48% 50%, transparent 50%);
+  background-size: 58px 58px;
+}
+
+.heroInner {
+  display: grid;
+  min-height: calc(100svh - var(--navbar-height));
+  max-width: 80rem;
+  margin: 0 auto;
+  align-items: center;
+  gap: 3rem;
+  padding: 4rem 1.25rem;
+}
+
+.heroCopy { max-width: 42rem; }
+.heroEyebrow, .sectionEyebrow, .comingEyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  margin: 0;
+  font-size: .75rem;
+  font-weight: 900;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.heroEyebrow { color: var(--yellow); }
+.heroEyebrow::before, .sectionEyebrow::before { width: .5rem; height: .5rem; border: 2px solid currentColor; border-radius: 999px; content: ""; }
+
+.heroTitle {
+  max-width: 48rem;
+  margin: 1.25rem 0 0;
+  color: var(--paper);
+  font-size: clamp(3.65rem, 9vw, 7rem);
+  font-weight: 900;
+  line-height: .82;
+  letter-spacing: -.09em;
+}
+.heroTitle em { color: var(--yellow); }
+.heroDescription { max-width: 36rem; margin: 1.75rem 0 0; color: #fff6e4; font-size: clamp(1rem, 1.5vw, 1.125rem); font-weight: 700; line-height: 1.75; }
+.heroActions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2rem; }
+.heroAction { display: inline-flex; min-height: 2.75rem; align-items: center; gap: .5rem; border: 2px solid; border-radius: .65rem; padding: .625rem 1rem; font-size: .875rem; font-weight: 900; text-decoration: none; transition: transform 150ms, box-shadow 150ms; }
+.heroAction:hover { transform: translate(2px, 2px); }
+.heroAction:focus-visible, .gameTile:focus-visible { outline: 4px solid var(--paper); outline-offset: 4px; }
+.heroPrimary { border-color: var(--ink); background: var(--yellow); box-shadow: 3px 3px 0 var(--ink); color: var(--ink); }
+.heroPrimary:hover { box-shadow: 1px 1px 0 var(--ink); }
+.heroSecondary { border-color: var(--paper); box-shadow: 3px 3px 0 var(--paper); color: var(--paper); }
+.heroSecondary:hover { box-shadow: 1px 1px 0 var(--paper); }
+.cabinetMotion { justify-self: center; width: min(100%, 29rem); }
+
+.main {
+  padding: 6rem 1.25rem;
+  background-color: var(--paper);
+  background-image: radial-gradient(circle at 6% 9%, rgb(255 215 106 / 62%) 0 2px, transparent 3px), radial-gradient(circle at 88% 25%, rgb(216 75 71 / 45%) 0 2px, transparent 3px), radial-gradient(circle at 13% 78%, rgb(90 200 174 / 35%) 0 3px, transparent 4px), linear-gradient(130deg, #fff9eb 0 52%, #f9efd9 52% 100%);
+  background-size: 39px 39px, 63px 63px, 79px 79px, auto;
+}
+.content { max-width: 80rem; margin: 0 auto; }
+.gamesSection { scroll-margin-top: 2rem; }
+.gamesIntro { display: grid; gap: 2rem; padding-bottom: 2rem; border-bottom: 2px solid var(--ink); }
+.sectionEyebrow { color: var(--red-deep); }
+.sectionTitle { margin: 1rem 0 0; font-size: clamp(2.8rem, 6vw, 5.2rem); font-weight: 900; line-height: .86; letter-spacing: -.08em; }
+.sectionDescription { max-width: 34rem; margin: 0; color: var(--muted); font-size: 1rem; font-weight: 700; line-height: 1.75; }
+.gameGrid { display: grid; gap: 1.25rem; margin-top: 2.5rem; }
+.tileMotion { height: 100%; }
+.gameTile { position: relative; display: flex; min-height: 20rem; height: 100%; flex-direction: column; overflow: hidden; border: 3px solid var(--ink); border-radius: 1.15rem; padding: 1.5rem; box-shadow: 5px 5px 0 var(--ink); color: var(--ink); text-decoration: none; transition: transform 150ms, box-shadow 150ms; }
+.gameTile:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--ink); }
+.gameTile:focus-visible { outline-color: var(--red); }
+.flashcards { background: var(--paper); }
+.matching { background: #e6f9f3; }
+.speedRound { background: #fff0dc; }
+.gameTag { align-self: flex-start; border: 2px solid var(--ink); border-radius: 999px; padding: .25rem .625rem; background: var(--yellow); font-size: .66rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.matching .gameTag, .matching .gameIcon { background: var(--mint); }
+.speedRound .gameTag, .speedRound .gameIcon { background: var(--red); color: var(--paper); }
+.gameIcon { display: grid; width: 3.5rem; height: 3.5rem; place-items: center; margin-top: 1.75rem; border: 3px solid var(--ink); border-radius: 1rem; background: var(--yellow); box-shadow: 3px 3px 0 var(--ink); }
+.gameIcon svg { width: 1.75rem; height: 1.75rem; }
+.gameTitle { margin: 1.75rem 0 0; font-size: 2.25rem; font-weight: 900; line-height: .9; letter-spacing: -.07em; }
+.gameDescription { max-width: 22rem; margin: 1rem 0 0; color: var(--muted); font-size: .875rem; font-weight: 700; line-height: 1.7; }
+.gameCta { display: flex; align-items: center; margin-top: auto; padding-top: 2.25rem; color: var(--red-deep); font-size: .75rem; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }
+.gameCtaIcon { width: .9rem; height: .9rem; margin-left: .25rem; transition: transform 150ms; }
+.gameTile:hover .gameCtaIcon { transform: translateX(.25rem); }
+.gameIndex { pointer-events: none; position: absolute; right: -.25rem; bottom: -3.5rem; color: rgb(29 35 64 / 7%); font-size: 9rem; font-weight: 900; line-height: 1; }
+
+.loopSection { margin-top: 7rem; }
+.loopPanel { border: 4px solid var(--ink); border-radius: 1.5rem; padding: 1.75rem; background: var(--ink); box-shadow: 5px 5px 0 var(--ink); color: var(--paper); }
+.loopEyebrow { color: var(--mint); }
+.loopTitle { max-width: 64rem; margin: 1.25rem 0 0; font-size: clamp(2.3rem, 5vw, 4.5rem); font-weight: 900; line-height: .93; letter-spacing: -.07em; }
+.loopGrid { display: grid; gap: 2rem; margin-top: 2.5rem; padding-top: 2rem; border-top: 2px dashed rgb(255 249 235 / 50%); }
+.loopIcon { display: grid; width: 3rem; height: 3rem; place-items: center; border: 3px solid var(--ink); border-radius: 999px; box-shadow: 3px 3px 0 var(--paper); color: var(--ink); }
+.loopIcon svg { width: 1.25rem; height: 1.25rem; }
+.loopIconYellow { background: var(--yellow); }.loopIconMint { background: var(--mint); }.loopIconBlue { background: var(--blue); }
+.loopItemTitle { margin: 1.25rem 0 0; font-size: 1.5rem; font-weight: 900; letter-spacing: -.05em; }
+.loopItemDescription { max-width: 22rem; margin: .5rem 0 0; color: rgb(255 249 235 / 80%); font-size: .875rem; font-weight: 700; line-height: 1.7; }
+
+.comingSection { display: grid; gap: 2rem; margin-top: 7rem; border-top: 3px solid var(--ink); border-bottom: 3px solid var(--ink); padding: 2rem 1.5rem; background: var(--yellow); }
+.comingIcon { display: grid; width: 4rem; height: 4rem; place-items: center; border: 3px solid var(--ink); border-radius: 999px; background: var(--paper); box-shadow: 4px 4px 0 var(--ink); }
+.comingIcon svg { width: 1.75rem; height: 1.75rem; }
+.comingEyebrow { color: var(--red-deep); }
+.comingTitle { margin: .5rem 0 0; font-size: clamp(1.875rem, 4vw, 2.25rem); font-weight: 900; line-height: 1; letter-spacing: -.06em; }
+.comingDescription { max-width: 42rem; margin: .75rem 0 0; color: rgb(29 35 64 / 80%); font-size: .875rem; font-weight: 700; line-height: 1.7; }
+.comingBadge { display: inline-flex; width: fit-content; align-items: center; gap: .5rem; align-self: start; border: 2px solid var(--ink); border-radius: 999px; padding: .5rem .75rem; background: var(--paper); font-size: .75rem; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }
+
+@media (min-width: 40rem) { .heroInner, .main { padding-right: 2rem; padding-left: 2rem; } .loopPanel { padding: 2.5rem; } .comingSection { padding-right: 2.5rem; padding-left: 2.5rem; } }
+@media (min-width: 64rem) {
+  .heroInner { grid-template-columns: 1.04fr .96fr; padding: 5rem 2.5rem; }
+  .cabinetMotion { justify-self: end; }
+  .gamesIntro { grid-template-columns: 1fr .63fr; align-items: end; }
+  .gameGrid, .loopGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .comingSection { grid-template-columns: auto 1fr auto; align-items: center; }
+  .comingBadge { align-self: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .heroAction, .gameTile, .gameCtaIcon { transition: none; } }

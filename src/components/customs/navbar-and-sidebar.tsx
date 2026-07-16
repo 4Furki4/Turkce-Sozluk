@@ -34,6 +34,7 @@ export default function NavbarAndSidebar({
     FeedbackIntl,
     SearchIntl,
     LearnIntl,
+    GamesIntl,
     MainIntl,
     AccountIntl,
     PreferencesIntl,
@@ -68,6 +69,7 @@ export default function NavbarAndSidebar({
     FeedbackIntl: string,
     SearchIntl: string,
     LearnIntl: string,
+    GamesIntl: string,
     MainIntl: string,
     AccountIntl: string,
     PreferencesIntl: string,
@@ -109,6 +111,7 @@ export default function NavbarAndSidebar({
                 FeedbackIntl={FeedbackIntl}
                 SearchIntl={SearchIntl}
                 LearnIntl={LearnIntl}
+                GamesIntl={GamesIntl}
                 MainIntl={MainIntl}
                 AccountIntl={AccountIntl}
                 PreferencesIntl={PreferencesIntl}
@@ -149,6 +152,7 @@ export default function NavbarAndSidebar({
             FeedbackIntl={FeedbackIntl}
             SearchIntl={SearchIntl}
             LearnIntl={LearnIntl}
+            GamesIntl={GamesIntl}
             MainIntl={MainIntl}
             AccountIntl={AccountIntl}
             PreferencesIntl={PreferencesIntl}
@@ -188,6 +192,7 @@ type NavbarAndSidebarShellProps = {
     FeedbackIntl: string,
     SearchIntl: string,
     LearnIntl: string,
+    GamesIntl: string,
     MainIntl: string,
     AccountIntl: string,
     PreferencesIntl: string,
@@ -234,6 +239,7 @@ function NavbarAndSidebarShell({
     FeedbackIntl,
     SearchIntl,
     LearnIntl,
+    GamesIntl,
     MainIntl,
     AccountIntl,
     PreferencesIntl,
@@ -272,6 +278,7 @@ function NavbarAndSidebarShell({
                 FeedbackIntl={FeedbackIntl}
                 SearchIntl={SearchIntl}
                 LearnIntl={LearnIntl}
+                GamesIntl={GamesIntl}
                 FlashcardGameIntl={FlashcardGameIntl}
                 WordMatchingGameIntl={WordMatchingGameIntl}
                 SpeedRoundGameIntl={SpeedRoundGameIntl}

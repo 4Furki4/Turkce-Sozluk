@@ -1,0 +1,23 @@
+.cabinet {
+  position: relative;
+  width: 100%;
+  max-width: 29rem;
+  border: 4px solid #1d2340;
+  border-radius: 42% 42% 1.5rem 1.5rem / 13% 13% 1.5rem 1.5rem;
+  padding: 1.25rem;
+  background: #fff9eb;
+  box-shadow: 11px 11px 0 #1d2340;
+  color: #1d2340;
+}
+.cabinet::before, .cabinet::after { position: absolute; z-index: -1; bottom: -1.25rem; width: 4.65rem; height: 1rem; border: 4px solid #1d2340; border-bottom: 0; border-radius: 15px 15px 0 0; background: #5b8def; content: ""; }
+.cabinet::before { left: 1.75rem; }.cabinet::after { right: 1.75rem; }
+.orbitLarge, .orbitSmall { position: absolute; z-index: -1; border: 2px dashed rgb(255 249 235 / 70%); border-radius: 999px; }
+.orbitLarge { top: 1.25rem; right: -4rem; width: 6rem; height: 6rem; }.orbitSmall { bottom: -.75rem; left: -2.5rem; width: 2.75rem; height: 2.75rem; }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.brand { margin: 0; font-size: .75rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.lights, .buttons { display: flex; gap: .375rem; }.light { width: .625rem; height: .625rem; border: 2px solid #1d2340; border-radius: 999px; }.mint { background: #5ac8ae; }.yellow { background: #ffd76a; }.red { background: #d84b47; }
+.screen { position: relative; min-height: 14rem; overflow: hidden; border: 4px solid #1d2340; border-radius: 1rem; padding: 1.25rem; background: #1d2340; color: #fff9eb; }
+.scanlines { pointer-events: none; position: absolute; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0 4px, rgb(255 255 255 / 5%) 4px 5px); }
+.kicker, .word, .meaning { position: relative; }.kicker { margin: 0; color: #5ac8ae; font-size: .68rem; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }.word { margin: 1.5rem 0 0; overflow-wrap: anywhere; color: #ffd76a; font-size: clamp(3.4rem, 8vw, 5rem); font-weight: 900; line-height: .8; letter-spacing: -.09em; }.meaning { max-width: 13rem; margin: 1.25rem 0 0; font-size: .875rem; font-weight: 700; line-height: 1.45; }.points { position: absolute; right: 1.25rem; bottom: 1.25rem; color: #5ac8ae; font-size: .75rem; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }
+.controls { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem .25rem .25rem; }.dpad { position: relative; width: 3rem; height: 3rem; }.dpad::before, .dpad::after { position: absolute; border: 2px solid #1d2340; background: #5b8def; content: ""; }.dpad::before { top: 0; left: .9375rem; width: 1.0625rem; height: 3rem; }.dpad::after { top: .9375rem; left: 0; width: 3rem; height: 1.0625rem; }.button { display: block; width: 1.75rem; height: 1.75rem; border: 3px solid #1d2340; border-radius: 999px; }
+@media (min-width: 40rem) { .cabinet { padding: 1.5rem; }.screen { padding: 1.5rem; } }

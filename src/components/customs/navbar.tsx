@@ -11,7 +11,7 @@ import {
   NavbarBrand,
   DropdownSection
 } from "@heroui/react";
-import { Blocks, BookOpen, ChevronDown, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, Link2, LogOut, Mic, Monitor, Moon, Search, StarIcon, Sun, UserIcon, WalletCards, Zap } from "lucide-react";
+import { Blocks, BookOpen, ChevronDown, Gamepad2, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, Link2, LogOut, Mic, Monitor, Moon, Search, StarIcon, Sun, UserIcon, WalletCards, Zap } from "lucide-react";
 import { Input } from "@heroui/input";
 // import { signIn, signOut } from "next-auth/react"; // Removed
 import { authClient, type User } from "@/src/lib/auth-client"; // Added
@@ -34,7 +34,7 @@ import { getPlainSearchAction, getSearchQueryHref, getWordSearchHref } from "@/s
 
 type NavbarProps = {
   session: Session | null;
-} & Record<"TitleIntl" | "WordListIntl" | "WordBuilderIntl" | "SignInIntl" | "HomeIntl" | "ProfileIntl" | "SavedWordsIntl" | "MyRequestsIntl" | "SearchHistoryIntl" | "LogoutIntl" | "AnnouncementsIntl" | "ContributeWordIntl" | "DonateIntl" | "PronunciationsIntl" | "ariaAvatar" | "ariaMenu" | "ariaLanguages" | "ariaSwitchTheme" | "ariaBlur" | "ContributeIntl" | "FeedbackIntl" | "LearnIntl" | "FlashcardGameIntl" | "WordMatchingGameIntl" | "SpeedRoundGameIntl" | "ForeignTermSuggestionsIntl" | "SearchIntl" | "DashboardIntl", string>;
+} & Record<"TitleIntl" | "WordListIntl" | "WordBuilderIntl" | "SignInIntl" | "HomeIntl" | "ProfileIntl" | "SavedWordsIntl" | "MyRequestsIntl" | "SearchHistoryIntl" | "LogoutIntl" | "AnnouncementsIntl" | "ContributeWordIntl" | "DonateIntl" | "PronunciationsIntl" | "ariaAvatar" | "ariaMenu" | "ariaLanguages" | "ariaSwitchTheme" | "ariaBlur" | "ContributeIntl" | "FeedbackIntl" | "LearnIntl" | "GamesIntl" | "FlashcardGameIntl" | "WordMatchingGameIntl" | "SpeedRoundGameIntl" | "ForeignTermSuggestionsIntl" | "SearchIntl" | "DashboardIntl", string>;
 
 export default function Navbar({
   session,
@@ -60,6 +60,7 @@ export default function Navbar({
   ContributeIntl,
   FeedbackIntl,
   LearnIntl,
+  GamesIntl,
   FlashcardGameIntl,
   WordMatchingGameIntl,
   WordBuilderIntl,
@@ -79,7 +80,7 @@ export default function Navbar({
   );
   const snap = useSnapshot(preferencesState);
   const isContributeActive = ["/contribute-word", "/donate", "/pronunciation-voting", "/feedback", "/foreign-term-suggestions"].some((route) => pathName.startsWith(route));
-  const isLearnActive = ["/word-list", "/word-builder", "/flashcard-game", "/word-matching", "/speed-round"].some((route) => pathName.startsWith(route));
+  const isLearnActive = ["/word-list", "/word-builder", "/games", "/flashcard-game", "/word-matching", "/speed-round"].some((route) => pathName.startsWith(route));
   const isHomeRoute = pathName === "/";
   const isSearchRoute =
     pathName === "/search" ||
@@ -220,6 +221,9 @@ export default function Navbar({
                 "dark:data-[hover=true]:bg-primary/30",
               ]
             }}>
+            <DropdownItem key="games" as={NextIntlLink} href="/games" startContent={<Gamepad2 aria-label={GamesIntl} className="w-4 h-4" />}>
+              {GamesIntl}
+            </DropdownItem>
             <DropdownItem key="word-list" as={NextIntlLink} href="/word-list" startContent={<BookOpen aria-label={WordListIntl} className="w-4 h-4" />}>
               {WordListIntl}
             </DropdownItem>

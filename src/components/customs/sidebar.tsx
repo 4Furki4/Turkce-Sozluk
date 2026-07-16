@@ -1,4 +1,4 @@
-import { BellIcon, Blocks, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, HomeIcon, LayoutDashboard, Layers, Link2, ListTree, LogIn, MicIcon, Monitor, StarIcon, WifiOff, Sun, Moon, Languages, LogOut, WalletCards, Zap } from 'lucide-react'
+import { BellIcon, Blocks, Gamepad2, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, HomeIcon, LayoutDashboard, Layers, Link2, ListTree, LogIn, MicIcon, Monitor, StarIcon, WifiOff, Sun, Moon, Languages, LogOut, WalletCards, Zap } from 'lucide-react'
 import React from 'react'
 import { Link as NextIntlLink, usePathname } from "@/src/i18n/routing";
 import { useRouter } from "@/src/i18n/routing";
@@ -115,6 +115,7 @@ export default function Sidebar(
         { href: '/offline-dictionary', label: t("Navbar.OfflineDictionary"), icon: <WifiOff className="h-5 w-5" />, isActive: isActive("/offline-dictionary") },
     ];
     const learnLinks: SidebarLink[] = [
+        { href: '/games', label: t("Navbar.Games"), icon: <Gamepad2 className="h-5 w-5" />, isActive: isActive("/games") },
         { href: '/word-list', label: t("Navbar.Word List"), icon: <ListTree className="h-5 w-5" />, isActive: isActive("/word-list") },
         { href: '/word-builder', label: t("Navbar.WordBuilder"), icon: <Blocks className="h-5 w-5" />, isActive: isActive("/word-builder") },
         { href: '/flashcard-game', label: t("Navbar.FlashcardGame"), icon: <Layers className="h-5 w-5" />, isActive: isActive("/flashcard-game") },

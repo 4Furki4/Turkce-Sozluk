@@ -199,6 +199,10 @@ export const pathnames = {
     en: "/flashcard-game",
     tr: "/kelime-kartlari",
   },
+  "/games": {
+    en: "/games",
+    tr: "/oyunlar",
+  },
   "/word-matching": {
     en: "/word-matching",
     tr: "/kelime-eslestirme",

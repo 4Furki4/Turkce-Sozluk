@@ -173,37 +173,18 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
         },
     });
 
-
-    // Timer effect
-    useEffect(() => {
-        if (gameState !== "playing" || showFeedback !== null) return;
-
-        const timer = setInterval(() => {
-            setTimeLeft((prev) => {
-                if (prev <= 1) {
-                    // Time's up for this question
-                    handleAnswer(null);
-                    return timePerQuestionNum;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [gameState, showFeedback, timePerQuestionNum]);
-
     // Handle answer selection
-    const handleAnswer = useCallback((answer: string | null) => {
+    const handleAnswer = useCallback((answer: string | null, resolvedTimeLeft = timeLeft) => {
         if (showFeedback !== null) return;
 
         const currentQuestion = questions[currentIndex];
         const isCorrect = answer === currentQuestion.correctMeaning;
-        const timeSpent = timePerQuestionNum - timeLeft;
+        const timeSpent = timePerQuestionNum - resolvedTimeLeft;
 
         // Calculate points: base 100 + speed bonus (faster = more points)
         let pointsEarned = 0;
         if (isCorrect) {
-            const speedBonus = Math.round((timeLeft / timePerQuestionNum) * 50);
+            const speedBonus = Math.round((resolvedTimeLeft / timePerQuestionNum) * 50);
             const streakMultiplier = Math.min(streak + 1, 5); // Max 5x multiplier
             pointsEarned = (100 + speedBonus) * streakMultiplier;
         }
@@ -244,6 +225,24 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
             }
         }, 1000);
     }, [currentIndex, questions, streak, timeLeft, timePerQuestionNum, showFeedback]);
+
+    // Timer effect: the timeout is handled in a separate effect so the result
+    // uses the actual remaining time rather than a stale interval closure.
+    useEffect(() => {
+        if (gameState !== "playing" || showFeedback !== null) return;
+
+        const timer = setInterval(() => {
+            setTimeLeft((prev) => Math.max(prev - 1, 0));
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [gameState, showFeedback]);
+
+    useEffect(() => {
+        if (gameState === "playing" && showFeedback === null && timeLeft === 0) {
+            handleAnswer(null, 0);
+        }
+    }, [gameState, handleAnswer, showFeedback, timeLeft]);
 
     // Start game
     const startGame = useCallback(async () => {

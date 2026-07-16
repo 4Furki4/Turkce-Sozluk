@@ -17,6 +17,7 @@ export const INDEXABLE_STATIC_ROUTE_KEYS = [
     "/pronunciation-voting",
     "/sik-yapilan-yanlislar",
     "/galati-meshur",
+    "/games",
     "/flashcard-game",
     "/word-matching",
     "/word-builder",

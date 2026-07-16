@@ -28,6 +28,7 @@
     "Preferences": "Tercihler",
     "OfflineDictionary": "Çevrim Dışı Sözlük",
     "FlashcardGame": "Kelime Kartları",
+    "Games": "Oyunlar",
     "Learn": "Öğren",
     "WordMatchingGame": "Kelime Eşleştirme",
     "SpeedRoundGame": "Hızlı Tur",
@@ -359,6 +360,7 @@
       "privacy": "Gizlilik Politikası",
       "terms": "Kullanım Şartları",
       "status": "Durum",
+      "games": "Oyunlar",
       "contributeWord": "Kelime Katkısı",
       "donate": "Destek Ol",
       "pronunciations": "Telaffuzlar",
@@ -2062,6 +2064,63 @@
     "defaultSide": "Önce Göster",
     "showWordFirst": "Kelime Yüzü",
     "showMeaningFirst": "Anlam Yüzü"
+  },
+  "GamesHub": {
+    "metaTitle": "Türkçe Kelime Oyunları",
+    "metaDescription": "Kelime kartları, kelime eşleştirme ve hızlı turlarla Türkçe kelime dağarcığınızı geliştirin.",
+    "eyebrow": "Türkçe Sözlük Öğrenme Salonu",
+    "heroTitleFirst": "Her kelime",
+    "heroTitleSecond": "bir rövanş",
+    "heroTitleAccent": "istesin.",
+    "heroDescription": "Bir kelimeyi keşfedin, pratik yapın, hatanızı güvenle görün ve yeniden oynamaya hazır dönün.",
+    "heroPrimaryAction": "Oyun seç",
+    "heroSecondaryAction": "Sıralamaları gör",
+    "cabinetKicker": "Yeni tur hazır",
+    "cabinetWord": "söz",
+    "cabinetMeaning": "Her kelimenin yeni bir turu vardır: öğren, eşleştir, hızlan.",
+    "cabinetPoints": "Sıradaki: oyna",
+    "gamesEyebrow": "Oyun rafı",
+    "gamesTitleFirst": "Bir kelimeyi",
+    "gamesTitleSecond": "kalıcı kılmanın üç yolu.",
+    "gamesDescription": "O ana uyan pratiği seçin: sakin tekrar, odaklı eşleştirme veya hızlı bir meydan okuma.",
+    "playGame": "Şimdi oyna",
+    "games": {
+      "flashcards": {
+        "tag": "Çalış",
+        "title": "Kelime Kartları",
+        "description": "Kısa bir anı odaklı Türkçe kelime tekrarına dönüştürün."
+      },
+      "matching": {
+        "tag": "Eşleştir",
+        "title": "Kelime Eşleştirme",
+        "description": "Bağlantılar otomatikleşene kadar Türkçe kelimeleri anlamlarıyla eşleştirin."
+      },
+      "speedRound": {
+        "tag": "Yarış",
+        "title": "Hızlı Tur",
+        "description": "Hızla cevaplayın, seri yapın ve baskı altında neleri bildiğinizi görün."
+      }
+    },
+    "loopEyebrow": "Tek öğrenme döngüsü",
+    "loopTitle": "Çalış. Eşleştir. Benimse.",
+    "loop": {
+      "study": {
+        "title": "Çalış",
+        "description": "Bir kelimeyle tanışın, anlamını görün ve kendi hızınızda tanımayı güçlendirin."
+      },
+      "match": {
+        "title": "Eşleştir",
+        "description": "Kelimeleri ve anlamları bilinçli, uygulamalı pratikle birbirine bağlayın."
+      },
+      "perform": {
+        "title": "Yarış",
+        "description": "Süre, odak ve seriler önem kazandığında kelime bilginizi sınayın."
+      }
+    },
+    "comingEyebrow": "Sırada",
+    "comingTitle": "Günlük 5 hazırlanıyor.",
+    "comingDescription": "Beş soruluk günlük Türkçe meydan okuması, her dönüşe yeni bir oynama nedeni katacak.",
+    "comingBadge": "Hazırlanıyor"
   },
   "WordMatchingGame": {
     "title": "Kelime Eşleştirme",

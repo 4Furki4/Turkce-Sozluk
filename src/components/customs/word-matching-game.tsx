@@ -17,6 +17,7 @@ import {
     Zap,
 } from "lucide-react";
 import { Session } from "@/src/lib/auth-client";
+import { shuffleArray } from "@/src/lib/game";
 import CustomCard from "./heroui/custom-card";
 
 interface WordMatchingGameProps {
@@ -97,8 +98,7 @@ export default function WordMatchingGame({ session, locale }: WordMatchingGamePr
             }));
 
             // Create meaning items (shuffled)
-            const meanings: ShuffledItem[] = [...pairs]
-                .sort(() => Math.random() - 0.5)
+            const meanings: ShuffledItem[] = shuffleArray(pairs)
                 .map((p) => ({
                     id: p.id,
                     text: p.meaning,
@@ -512,10 +512,10 @@ export default function WordMatchingGame({ session, locale }: WordMatchingGamePr
                                         transition-all duration-200
                                         ${matchedPairs.has(item.id)
                                             ? "bg-success/20 border-success cursor-default"
-                                            : item.isSelected
-                                                ? "bg-primary/30 border-primary ring-2 ring-primary"
-                                                : showError && item.isSelected
-                                                    ? "bg-danger/30 border-danger"
+                                            : showError && item.isSelected
+                                                ? "bg-danger/30 border-danger"
+                                                : item.isSelected
+                                                    ? "bg-primary/30 border-primary ring-2 ring-primary"
                                                     : "hover:bg-primary/10"
                                         }
                                     `}
@@ -554,10 +554,10 @@ export default function WordMatchingGame({ session, locale }: WordMatchingGamePr
                                         transition-all duration-200
                                         ${matchedPairs.has(item.id)
                                             ? "bg-success/20 border-success cursor-default"
-                                            : item.isSelected
-                                                ? "bg-primary/30 border-primary ring-2 ring-primary"
-                                                : showError && item.isSelected
-                                                    ? "bg-danger/30 border-danger"
+                                            : showError && item.isSelected
+                                                ? "bg-danger/30 border-danger"
+                                                : item.isSelected
+                                                    ? "bg-primary/30 border-primary ring-2 ring-primary"
                                                     : "hover:bg-primary/10"
                                         }
                                     `}

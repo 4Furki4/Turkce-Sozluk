@@ -29,6 +29,7 @@
     "OfflineDictionary": "Offline Dictionary",
     "ForeignTermSuggestions": "Foreign Term Suggestions",
     "FlashcardGame": "Flashcard Game",
+    "Games": "Games",
     "Learn": "Learn",
     "WordMatchingGame": "Word Matching",
     "SpeedRoundGame": "Speed Round"
@@ -362,6 +363,7 @@
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
       "status": "Status",
+      "games": "Games",
       "flashcardGame": "Flashcard Game",
       "wordMatchingGame": "Word Matching",
       "speedRoundGame": "Speed Round",
@@ -2096,6 +2098,63 @@
     "defaultSide": "Show First",
     "showWordFirst": "Word Side",
     "showMeaningFirst": "Meaning Side"
+  },
+  "GamesHub": {
+    "metaTitle": "Turkish Word Games",
+    "metaDescription": "Practice Turkish vocabulary through flashcards, word matching, and fast-paced challenges.",
+    "eyebrow": "Turkish Dictionary Learning Arcade",
+    "heroTitleFirst": "Make every",
+    "heroTitleSecond": "word want a",
+    "heroTitleAccent": "rematch.",
+    "heroDescription": "Discover a word, practise it, make a mistake safely, and come back ready to play again.",
+    "heroPrimaryAction": "Choose a game",
+    "heroSecondaryAction": "See the rankings",
+    "cabinetKicker": "Ready for replay",
+    "cabinetWord": "söz",
+    "cabinetMeaning": "Every word has another turn: learn it, match it, race it.",
+    "cabinetPoints": "Next: play",
+    "gamesEyebrow": "The game shelf",
+    "gamesTitleFirst": "Three ways",
+    "gamesTitleSecond": "to make a word stick.",
+    "gamesDescription": "Choose the kind of practice that fits the moment: calm recall, purposeful matching, or a rapid-fire challenge.",
+    "playGame": "Play now",
+    "games": {
+      "flashcards": {
+        "tag": "Study",
+        "title": "Flashcards",
+        "description": "Turn a quiet minute into a focused Turkish vocabulary review."
+      },
+      "matching": {
+        "tag": "Match",
+        "title": "Word Matching",
+        "description": "Pair Turkish words and meanings until the connections feel automatic."
+      },
+      "speedRound": {
+        "tag": "Perform",
+        "title": "Speed Round",
+        "description": "Answer quickly, build a streak, and see what you know under pressure."
+      }
+    },
+    "loopEyebrow": "One learning loop",
+    "loopTitle": "Study it. Match it. Make it yours.",
+    "loop": {
+      "study": {
+        "title": "Study",
+        "description": "Meet a word, reveal its meaning, and build recognition at your own pace."
+      },
+      "match": {
+        "title": "Match",
+        "description": "Connect words and meanings with deliberate, hands-on practice."
+      },
+      "perform": {
+        "title": "Perform",
+        "description": "Put vocabulary to the test when time, focus, and streaks matter."
+      }
+    },
+    "comingEyebrow": "Coming next",
+    "comingTitle": "Daily 5 is warming up.",
+    "comingDescription": "A five-question daily Turkish challenge will give every return visit a fresh reason to play.",
+    "comingBadge": "In the works"
   },
   "WordMatchingGame": {
     "title": "Word Matching",
