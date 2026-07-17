@@ -6,6 +6,10 @@ export function getPlayFlashcardPath(locale: string): string {
     return locale === "tr" ? "/tr/oyna/kelime-kartlari" : "/en/play/flashcards";
 }
 
+export function getPlayWordMatchingPath(locale: string): string {
+    return locale === "tr" ? "/tr/oyna/kelime-eslestirme" : "/en/play/word-matching";
+}
+
 export function getSafeAuthReturnUrl(backTo: string | null, currentOrigin: string): string | null {
     if (!backTo) {
         return null;

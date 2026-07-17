@@ -94,6 +94,15 @@ describe("proxy SEO normalization", () => {
     );
   });
 
+  it("rewrites the Turkish Play word matching route to its dedicated shell", () => {
+    const response = proxy(new NextRequest("http://localhost:3000/tr/oyna/kelime-eslestirme"));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-rewrite")).toBe(
+      "http://localhost:3000/play/tr/word-matching",
+    );
+  });
+
   it("does not rewrite markdown requests when the client explicitly rejects markdown", () => {
     const response = proxy(new NextRequest("https://turkce-sozluk.com/tr", {
       headers: {

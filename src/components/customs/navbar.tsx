@@ -233,10 +233,10 @@ export default function Navbar({
             <DropdownItem key="word-builder" as={NextIntlLink} href="/word-builder" startContent={<Blocks aria-label={WordBuilderIntl} className="w-4 h-4" />}>
               {WordBuilderIntl}
             </DropdownItem>
-            <DropdownItem key="flashcard-game" as={NextIntlLink} href="/flashcard-game" startContent={<Layers aria-label={FlashcardGameIntl} className="w-4 h-4" />}>
+            <DropdownItem key="flashcard-game" as={NextIntlLink} href="/play/flashcards" startContent={<Layers aria-label={FlashcardGameIntl} className="w-4 h-4" />}>
               {FlashcardGameIntl}
             </DropdownItem>
-            <DropdownItem key="word-matching" as={NextIntlLink} href="/word-matching" startContent={<Link2 aria-label={WordMatchingGameIntl} className="w-4 h-4" />}>
+            <DropdownItem key="word-matching" as={NextIntlLink} href="/play/word-matching" startContent={<Link2 aria-label={WordMatchingGameIntl} className="w-4 h-4" />}>
               {WordMatchingGameIntl}
             </DropdownItem>
             <DropdownItem key="speed-round" as={NextIntlLink} href="/speed-round" startContent={<Zap aria-label={SpeedRoundGameIntl} className="w-4 h-4" />}>

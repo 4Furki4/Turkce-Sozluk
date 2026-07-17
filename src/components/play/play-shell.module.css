@@ -1,4 +1,5 @@
 .shell {
+  --navbar-height: 4.5rem;
   --play-ink: #1d2340;
   --play-muted: #536078;
   --play-paper: #fff9eb;

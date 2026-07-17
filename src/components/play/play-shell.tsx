@@ -1,6 +1,7 @@
 import type { Session } from "@/src/lib/auth";
-import { getPlayFlashcardPath, getPlayHomePath } from "@/src/lib/play-url";
+import { getPlayFlashcardPath, getPlayHomePath, getPlayWordMatchingPath } from "@/src/lib/play-url";
 import { BookOpen, Gamepad2, UserRound } from "lucide-react";
+import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import styles from "./play-shell.module.css";
 
@@ -24,7 +25,13 @@ export async function PlayShell({ children, locale, session }: PlayShellProps) {
     const t = await getTranslations("Play");
     const playHomeHref = getPlayHomePath(locale);
     const flashcardHref = getPlayFlashcardPath(locale);
-    const signInUrl = new URLSearchParams({ backTo: flashcardHref });
+    const wordMatchingHref = getPlayWordMatchingPath(locale);
+    const requestedPlayPath = (await headers()).get("x-play-path");
+    const knownPlayPaths = new Set([playHomeHref, flashcardHref, wordMatchingHref]);
+    const activePlayPath = requestedPlayPath && knownPlayPaths.has(requestedPlayPath)
+        ? requestedPlayPath
+        : playHomeHref;
+    const signInUrl = new URLSearchParams({ backTo: activePlayPath });
     const playerName = session?.user?.name || session?.user?.username;
 
     return (
@@ -37,8 +44,9 @@ export async function PlayShell({ children, locale, session }: PlayShellProps) {
                     </a>
 
                     <div className={styles.links}>
-                        <a href={playHomeHref}>{t("gameRoom")}</a>
-                        <a className={styles.activeLink} href={flashcardHref}>{t("flashcardsNav")}</a>
+                        <a className={activePlayPath === playHomeHref ? styles.activeLink : undefined} href={playHomeHref}>{t("gameRoom")}</a>
+                        <a className={activePlayPath === flashcardHref ? styles.activeLink : undefined} href={flashcardHref}>{t("flashcardsNav")}</a>
+                        <a className={activePlayPath === wordMatchingHref ? styles.activeLink : undefined} href={wordMatchingHref}>{t("wordMatchingNav")}</a>
                     </div>
 
                     <div className={styles.actions}>

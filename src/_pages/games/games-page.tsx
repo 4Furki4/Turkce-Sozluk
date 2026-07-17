@@ -16,7 +16,7 @@ const gameDefinitions = [
     },
     {
         key: "matching",
-        href: "/word-matching" as const,
+        href: "/play/word-matching" as const,
         icon: Link2,
     },
     {

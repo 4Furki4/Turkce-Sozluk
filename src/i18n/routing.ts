@@ -228,6 +228,10 @@ export const routing = defineRouting({
       "en": "/play/flashcards",
       "tr": "/oyna/kelime-kartlari",
     },
+    "/play/word-matching": {
+      "en": "/play/word-matching",
+      "tr": "/oyna/kelime-eslestirme",
+    },
     "/games": {
       "en": "/games",
       "tr": "/oyunlar",

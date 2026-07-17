@@ -2164,6 +2164,7 @@
     "homeAriaLabel": "oyna home",
     "gameRoom": "Game room",
     "flashcardsNav": "Flashcards",
+    "wordMatchingNav": "Matching",
     "backToDictionary": "Dictionary",
     "signIn": "Sign in",
     "footerLine": "Play your way into Turkish words.",
@@ -2189,6 +2190,20 @@
       "roundCompleteDescription": "You reviewed all {count} cards. Give the words another turn or build a new deck.",
       "playAgain": "Play again",
       "navigate": "Navigate"
+    },
+    "wordMatching": {
+      "roundKicker": "Match round",
+      "setupDescription": "Choose a set, connect every word to its meaning, and make the link stick.",
+      "howToPlay": "How it works",
+      "stepOne": "Choose a word from the left column.",
+      "stepTwo": "Choose the meaning that belongs to it.",
+      "stepThree": "Clear the board, then start another round when you are ready.",
+      "noSavedWords": "You do not have enough saved words for a round yet.",
+      "noWords": "We could not build a matching round right now. Try again.",
+      "roundCompleteKicker": "Round complete",
+      "roundCompleteDescription": "The connections are made. Give them another quick pass or set up a fresh round.",
+      "timeUpDescription": "Time ran out this round. Pick up the matches in a fresh run.",
+      "scoreboard": "Round progress"
     }
   },
   "WordMatchingGame": {

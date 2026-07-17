@@ -33,7 +33,7 @@
 
 .heroInner {
   display: grid;
-  min-height: calc(100svh - var(--navbar-height));
+  min-height: calc(100svh - var(--navbar-height, 0px));
   max-width: 80rem;
   margin: 0 auto;
   align-items: center;

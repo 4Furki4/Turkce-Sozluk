@@ -14,6 +14,8 @@ const PLAY_ROUTE_REWRITES = new Map([
   ["/en/play", `${PLAY_PATH_PREFIX}/en`],
   ["/tr/oyna/kelime-kartlari", `${PLAY_PATH_PREFIX}/tr/kelime-kartlari`],
   ["/en/play/flashcards", `${PLAY_PATH_PREFIX}/en/flashcard-game`],
+  ["/tr/oyna/kelime-eslestirme", `${PLAY_PATH_PREFIX}/tr/word-matching`],
+  ["/en/play/word-matching", `${PLAY_PATH_PREFIX}/en/word-matching`],
 ]);
 
 function hasMalformedPathEncoding(pathname: string): boolean {
@@ -116,8 +118,10 @@ export default function proxy(request: NextRequest) {
   if (playPath) {
     const playUrl = request.nextUrl.clone();
     playUrl.pathname = playPath;
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-play-path", canonicalPathname);
 
-    return NextResponse.rewrite(playUrl);
+    return NextResponse.rewrite(playUrl, { request: { headers: requestHeaders } });
   }
 
   const requestHeaders = new Headers(request.headers);

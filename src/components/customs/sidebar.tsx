@@ -117,8 +117,8 @@ export default function Sidebar(
         { href: '/games', label: t("Navbar.Games"), icon: <Gamepad2 className="h-5 w-5" />, isActive: isActive("/games") },
         { href: '/word-list', label: t("Navbar.Word List"), icon: <ListTree className="h-5 w-5" />, isActive: isActive("/word-list") },
         { href: '/word-builder', label: t("Navbar.WordBuilder"), icon: <Blocks className="h-5 w-5" />, isActive: isActive("/word-builder") },
-        { href: '/flashcard-game', label: t("Navbar.FlashcardGame"), icon: <Layers className="h-5 w-5" />, isActive: isActive("/flashcard-game") },
-        { href: '/word-matching', label: t("Navbar.WordMatchingGame"), icon: <Link2 className="h-5 w-5" />, isActive: isActive("/word-matching") },
+        { href: '/play/flashcards', label: t("Navbar.FlashcardGame"), icon: <Layers className="h-5 w-5" />, isActive: isActive("/play/flashcards") },
+        { href: '/play/word-matching', label: t("Navbar.WordMatchingGame"), icon: <Link2 className="h-5 w-5" />, isActive: isActive("/play/word-matching") },
         { href: '/speed-round', label: t("Navbar.SpeedRoundGame"), icon: <Zap className="h-5 w-5" />, isActive: isActive("/speed-round") },
     ];
     const contributeLinks: SidebarLink[] = [

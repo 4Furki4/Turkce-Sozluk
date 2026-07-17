@@ -2130,6 +2130,7 @@
     "homeAriaLabel": "oyna ana sayfası",
     "gameRoom": "Oyun odası",
     "flashcardsNav": "Kelime Kartları",
+    "wordMatchingNav": "Eşleştirme",
     "backToDictionary": "Sözlük",
     "signIn": "Giriş yap",
     "footerLine": "Oynayarak Türkçe kelimelere yaklaşın.",
@@ -2155,6 +2156,20 @@
       "roundCompleteDescription": "{count} kartın tamamını incelediniz. Kelimelere yeni bir tur verin ya da yeni deste oluşturun.",
       "playAgain": "Tekrar oyna",
       "navigate": "Gezinme"
+    },
+    "wordMatching": {
+      "roundKicker": "Eşleştirme turu",
+      "setupDescription": "Bir set seçin, her kelimeyi anlamıyla bağlayın ve ilişkiyi kalıcı hâle getirin.",
+      "howToPlay": "Nasıl oynanır",
+      "stepOne": "Sol sütundan bir kelime seçin.",
+      "stepTwo": "O kelimeye ait anlamı seçin.",
+      "stepThree": "Tahtayı tamamlayın, sonra hazır olduğunuzda yeni bir tur başlatın.",
+      "noSavedWords": "Henüz bir tur için yeterli kaydedilmiş kelimeniz yok.",
+      "noWords": "Şu anda bir eşleştirme turu oluşturamadık. Tekrar deneyin.",
+      "roundCompleteKicker": "Tur tamamlandı",
+      "roundCompleteDescription": "Bağlantılar kuruldu. Hızlıca tekrar edin ya da yeni bir tur oluşturun.",
+      "timeUpDescription": "Bu turda süre doldu. Yeni bir turda eşleştirmelere devam edin.",
+      "scoreboard": "Tur ilerlemesi"
     }
   },
   "WordMatchingGame": {
