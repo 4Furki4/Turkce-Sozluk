@@ -67,21 +67,17 @@ describe("proxy SEO normalization", () => {
     expect(response.headers.get("x-middleware-rewrite")).toBe("https://turkce-sozluk.com/~markdown?path=%2Ftr");
   });
 
-  it("rewrites the Play subdomain's Turkish flashcards route to its dedicated shell", () => {
-    const response = proxy(new NextRequest("http://oyna.localhost:3000/tr/kelime-kartlari"));
+  it("rewrites the Turkish Play home route to its dedicated shell", () => {
+    const response = proxy(new NextRequest("http://localhost:3000/tr/oyna"));
 
     expect(response.status).toBe(200);
     expect(response.headers.get("x-middleware-rewrite")).toBe(
-      "http://oyna.localhost:3000/play/tr/kelime-kartlari",
+      "http://localhost:3000/play/tr",
     );
   });
 
-  it("uses the Host header when a local server normalizes the request URL hostname", () => {
-    const response = proxy(new NextRequest("http://localhost:3000/tr/kelime-kartlari", {
-      headers: {
-        host: "oyna.localhost:3000",
-      },
-    }));
+  it("rewrites the Turkish Play flashcards route to its dedicated shell", () => {
+    const response = proxy(new NextRequest("http://localhost:3000/tr/oyna/kelime-kartlari"));
 
     expect(response.status).toBe(200);
     expect(response.headers.get("x-middleware-rewrite")).toBe(
@@ -89,11 +85,13 @@ describe("proxy SEO normalization", () => {
     );
   });
 
-  it("keeps the dictionary host on its normal flashcards route", () => {
-    const response = proxy(new NextRequest("http://localhost:3000/tr/kelime-kartlari"));
+  it("rewrites the English Play flashcards route to its dedicated shell", () => {
+    const response = proxy(new NextRequest("http://localhost:3000/en/play/flashcards"));
 
     expect(response.status).toBe(200);
-    expect(response.headers.get("x-middleware-rewrite")).toBeNull();
+    expect(response.headers.get("x-middleware-rewrite")).toBe(
+      "http://localhost:3000/play/en/flashcard-game",
+    );
   });
 
   it("does not rewrite markdown requests when the client explicitly rejects markdown", () => {

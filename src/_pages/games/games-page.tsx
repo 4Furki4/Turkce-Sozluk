@@ -2,18 +2,16 @@
 
 import { ArcadeCabinet } from "@/src/components/games/arcade-cabinet";
 import { Link } from "@/src/i18n/routing";
-import { getPlayUrl } from "@/src/lib/play-url";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowDown, ArrowRight, Clock3, Layers, Link2, Sparkles, Trophy, Zap } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import type { LucideIcon } from "lucide-react";
 import styles from "./games-page.module.css";
 
 const gameDefinitions = [
     {
         key: "flashcards",
-        href: "/flashcard-game" as const,
+        href: "/play/flashcards" as const,
         icon: Layers,
     },
     {
@@ -30,7 +28,7 @@ const gameDefinitions = [
 
 type GameDefinition = (typeof gameDefinitions)[number];
 
-function GameTile({ game, index, playHref }: { game: GameDefinition; index: number; playHref: string | null }) {
+function GameTile({ game, index }: { game: GameDefinition; index: number }) {
     const t = useTranslations("GamesHub");
     const Icon = game.icon as LucideIcon;
     const shouldReduceMotion = useReducedMotion();
@@ -64,24 +62,14 @@ function GameTile({ game, index, playHref }: { game: GameDefinition; index: numb
             transition={{ duration: 0.35, delay: index * 0.08 }}
             className={styles.tileMotion}
         >
-            {game.key === "flashcards" && playHref ? (
-                <a href={playHref} className={`${styles.gameTile} ${styles[game.key]}`}>{tileContent}</a>
-            ) : (
-                <Link href={game.href} className={`${styles.gameTile} ${styles[game.key]}`}>{tileContent}</Link>
-            )}
+            <Link href={game.href} className={`${styles.gameTile} ${styles[game.key]}`}>{tileContent}</Link>
         </motion.div>
     );
 }
 
 export default function GamesPage() {
     const t = useTranslations("GamesHub");
-    const locale = useLocale();
     const shouldReduceMotion = useReducedMotion();
-    const [playHref, setPlayHref] = useState<string | null>(null);
-
-    useEffect(() => {
-        setPlayHref(getPlayUrl(window.location.origin, locale));
-    }, [locale]);
 
     return (
         <div className={styles.root}>
@@ -156,7 +144,7 @@ export default function GamesPage() {
 
                         <div className={styles.gameGrid}>
                             {gameDefinitions.map((game, index) => (
-                                <GameTile game={game} index={index} key={game.key} playHref={playHref} />
+                                <GameTile game={game} index={index} key={game.key} />
                             ))}
                         </div>
                     </section>

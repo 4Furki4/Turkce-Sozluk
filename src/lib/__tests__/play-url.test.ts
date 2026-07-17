@@ -1,32 +1,31 @@
 import {
-    getDictionaryOrigin,
-    getPlayOrigin,
-    getPlayUrl,
+    getPlayFlashcardPath,
+    getPlayHomePath,
     getSafeAuthReturnUrl,
 } from "../play-url";
 
 describe("Play URL helpers", () => {
-    it("keeps local Play navigation on the matching localhost port", () => {
-        expect(getPlayOrigin("http://localhost:3000")).toBe("http://oyna.localhost:3000");
-        expect(getPlayUrl("http://localhost:3000", "tr")).toBe(
-            "http://oyna.localhost:3000/tr/kelime-kartlari",
-        );
-        expect(getDictionaryOrigin("http://oyna.localhost:3000")).toBe("http://localhost:3000");
+    it("returns localized same-origin Play paths", () => {
+        expect(getPlayHomePath("tr")).toBe("/tr/oyna");
+        expect(getPlayHomePath("en")).toBe("/en/play");
+        expect(getPlayFlashcardPath("tr")).toBe("/tr/oyna/kelime-kartlari");
+        expect(getPlayFlashcardPath("en")).toBe("/en/play/flashcards");
     });
 
-    it("derives the production dictionary host from the Play host", () => {
-        expect(getDictionaryOrigin("https://oyna.turkce-sozluk.com")).toBe(
-            "https://turkce-sozluk.com",
-        );
-    });
-
-    it("allows auth returns only to the dictionary or its Play host", () => {
+    it("allows auth returns only to the current origin", () => {
         expect(
             getSafeAuthReturnUrl(
-                "http://oyna.localhost:3000/tr/kelime-kartlari",
+                "/tr/oyna/kelime-kartlari?source=signin#review",
                 "http://localhost:3000",
             ),
-        ).toBe("http://oyna.localhost:3000/tr/kelime-kartlari");
+        ).toBe("/tr/oyna/kelime-kartlari?source=signin#review");
+        expect(
+            getSafeAuthReturnUrl(
+                "https://development.turkce-sozluk.com/tr/oyna",
+                "https://development.turkce-sozluk.com",
+            ),
+        ).toBe("/tr/oyna");
+        expect(getSafeAuthReturnUrl("http://oyna.localhost:3000/tr/oyna", "http://localhost:3000")).toBeNull();
         expect(getSafeAuthReturnUrl("https://example.com", "http://localhost:3000")).toBeNull();
     });
 });

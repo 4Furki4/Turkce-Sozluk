@@ -17,7 +17,6 @@ import { cn } from '@/lib/utils';
 import { Avatar } from '@heroui/react';
 import { Button } from '@heroui/react';
 import { useLocaleSwitchHref } from '@/src/hooks/useLocaleSwitchHref';
-import { getPlayUrl } from '@/src/lib/play-url';
 
 type SidebarProps = {
     session: Session | null,
@@ -33,7 +32,6 @@ type SidebarProps = {
 
 type SidebarLink = {
     href: React.ComponentProps<typeof NextIntlLink>["href"],
-    externalHref?: string,
     label: string,
     icon: React.ReactNode,
     isActive?: boolean,
@@ -77,11 +75,7 @@ function SidebarLinkRow({
 
     return (
         <li>
-            {item.externalHref ? (
-                <a className={linkClassName} href={item.externalHref} onClick={onSelect}>{content}</a>
-            ) : (
-                <NextIntlLink className={linkClassName} href={item.href} onClick={onSelect}>{content}</NextIntlLink>
-            )}
+            <NextIntlLink className={linkClassName} href={item.href} onClick={onSelect}>{content}</NextIntlLink>
         </li>
     )
 }
@@ -105,12 +99,6 @@ export default function Sidebar(
     const pathname = usePathname();
     const router = useRouter();
     const languageSwitchHref = useLocaleSwitchHref();
-    const [playHref, setPlayHref] = React.useState<string | null>(null);
-
-    React.useEffect(() => {
-        setPlayHref(getPlayUrl(window.location.origin, locale));
-    }, [locale]);
-
     const handleSignOut = async () => {
         await authClient.signOut();
         router.refresh();
@@ -125,7 +113,7 @@ export default function Sidebar(
         { href: '/offline-dictionary', label: t("Navbar.OfflineDictionary"), icon: <WifiOff className="h-5 w-5" />, isActive: isActive("/offline-dictionary") },
     ];
     const learnLinks: SidebarLink[] = [
-        ...(playHref ? [{ href: '/games' as const, externalHref: playHref, label: t("Navbar.Play"), icon: <Gamepad2 className="h-5 w-5" /> }] : []),
+        { href: '/play', label: t("Navbar.Play"), icon: <Gamepad2 className="h-5 w-5" />, isActive: isActive("/play") },
         { href: '/games', label: t("Navbar.Games"), icon: <Gamepad2 className="h-5 w-5" />, isActive: isActive("/games") },
         { href: '/word-list', label: t("Navbar.Word List"), icon: <ListTree className="h-5 w-5" />, isActive: isActive("/word-list") },
         { href: '/word-builder', label: t("Navbar.WordBuilder"), icon: <Blocks className="h-5 w-5" />, isActive: isActive("/word-builder") },

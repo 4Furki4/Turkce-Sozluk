@@ -1,4 +1,5 @@
 import { Sparkles, ArrowRight, Layers3 } from "lucide-react";
+import { getPlayFlashcardPath } from "@/src/lib/play-url";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import styles from "./play-home.module.css";
@@ -18,7 +19,7 @@ export default async function PlayHomePage({ params }: { params: Promise<{ local
     const { locale } = await params;
     setRequestLocale(locale);
     const t = await getTranslations("Play");
-    const flashcardHref = locale === "tr" ? "/tr/kelime-kartlari" : "/en/flashcard-game";
+    const flashcardHref = getPlayFlashcardPath(locale);
 
     return (
         <section className={styles.page}>

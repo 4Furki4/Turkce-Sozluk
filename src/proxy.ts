@@ -9,55 +9,12 @@ const AGENT_DISCOVERY_LINK_HEADER = '</.well-known/api-catalog>; rel="api-catalo
 const MARKDOWN_RENDER_PATH = "/~markdown";
 const MALFORMED_PATH_FALLBACK = "~not-found";
 const PLAY_PATH_PREFIX = "/play";
-const DEFAULT_PLAY_HOSTS = new Set([
-  "oyna.localhost",
-  "oyna.turkce-sozluk.com",
+const PLAY_ROUTE_REWRITES = new Map([
+  ["/tr/oyna", `${PLAY_PATH_PREFIX}/tr`],
+  ["/en/play", `${PLAY_PATH_PREFIX}/en`],
+  ["/tr/oyna/kelime-kartlari", `${PLAY_PATH_PREFIX}/tr/kelime-kartlari`],
+  ["/en/play/flashcards", `${PLAY_PATH_PREFIX}/en/flashcard-game`],
 ]);
-const PLAY_CANONICAL_PATHS = new Set([
-  "/tr",
-  "/en",
-  "/tr/kelime-kartlari",
-  "/en/flashcard-game",
-]);
-
-function getConfiguredPlayHost(): string | null {
-  const playOrigin = process.env.NEXT_PUBLIC_PLAY_ORIGIN;
-
-  if (!playOrigin) {
-    return null;
-  }
-
-  try {
-    return new URL(playOrigin).hostname.toLowerCase();
-  } catch {
-    return null;
-  }
-}
-
-function getRequestHostname(request: NextRequest): string {
-  const host = request.headers.get("host");
-
-  if (host) {
-    try {
-      return new URL(`http://${host}`).hostname.toLowerCase();
-    } catch {
-      // Fall back to Next's parsed URL for malformed Host headers.
-    }
-  }
-
-  return request.nextUrl.hostname.toLowerCase();
-}
-
-function isPlayHost(request: NextRequest): boolean {
-  const hostname = getRequestHostname(request);
-  const configuredPlayHost = getConfiguredPlayHost();
-
-  return DEFAULT_PLAY_HOSTS.has(hostname) || hostname === configuredPlayHost;
-}
-
-function isPlayPath(pathname: string): boolean {
-  return PLAY_CANONICAL_PATHS.has(pathname);
-}
 
 function hasMalformedPathEncoding(pathname: string): boolean {
   try {
@@ -154,10 +111,11 @@ export default function proxy(request: NextRequest) {
     return response;
   }
 
-  if (isPlayHost(request) && isPlayPath(canonicalPathname)) {
+  const playPath = PLAY_ROUTE_REWRITES.get(canonicalPathname);
+
+  if (playPath) {
     const playUrl = request.nextUrl.clone();
-    playUrl.pathname = `${PLAY_PATH_PREFIX}${canonicalPathname}`;
-    playUrl.search = "";
+    playUrl.pathname = playPath;
 
     return NextResponse.rewrite(playUrl);
   }

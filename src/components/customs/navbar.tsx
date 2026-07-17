@@ -4,7 +4,6 @@ import {
   NavbarItem,
   Button,
   Avatar,
-  Link,
   DropdownItem,
   DropdownTrigger,
   DropdownMenu,
@@ -28,10 +27,9 @@ import { cn } from "@/lib/utils";
 import CustomDropdown from "./heroui/custom-dropdown";
 import { Session } from "@/src/lib/auth-client";
 import { useLocaleSwitchHref } from "@/src/hooks/useLocaleSwitchHref";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { startNavigationProgress } from "@/src/lib/navigation-progress";
 import { getPlainSearchAction, getSearchQueryHref, getWordSearchHref } from "@/src/lib/search-route";
-import { getPlayUrl } from "@/src/lib/play-url";
 
 type NavbarProps = {
   session: Session | null;
@@ -76,14 +74,13 @@ export default function Navbar({
   const navT = useTranslations("Navbar");
   const router = useRouter();
   const [navbarSearchQuery, setNavbarSearchQuery] = useState("");
-  const [playHref, setPlayHref] = useState<string | null>(null);
   const languageSwitchHref = useLocaleSwitchHref();
   const isAuthPage = ["/signup", "/signin", "/forgot-password"].includes(
     pathName
   );
   const snap = useSnapshot(preferencesState);
   const isContributeActive = ["/contribute-word", "/donate", "/pronunciation-voting", "/feedback", "/foreign-term-suggestions"].some((route) => pathName.startsWith(route));
-  const isLearnActive = ["/word-list", "/word-builder", "/games", "/flashcard-game", "/word-matching", "/speed-round"].some((route) => pathName.startsWith(route));
+  const isLearnActive = ["/word-list", "/word-builder", "/games", "/play", "/flashcard-game", "/word-matching", "/speed-round"].some((route) => pathName.startsWith(route));
   const isHomeRoute = pathName === "/";
   const isSearchRoute =
     pathName === "/search" ||
@@ -91,10 +88,6 @@ export default function Navbar({
     pathName.startsWith("/search/");
   const shouldShowNavbarSearch = !isHomeRoute && !isSearchRoute;
   const homeHref = locale === "en" ? "/en" : "/tr";
-
-  useEffect(() => {
-    setPlayHref(getPlayUrl(window.location.origin, locale));
-  }, [locale]);
 
   const handleSignOut = async () => {
     await authClient.signOut();
@@ -228,11 +221,9 @@ export default function Navbar({
                 "dark:data-[hover=true]:bg-primary/30",
               ]
             }}>
-            {playHref ? (
-              <DropdownItem key="play" as="a" href={playHref} startContent={<Gamepad2 aria-label={navT("Play")} className="w-4 h-4" />}>
-                {navT("Play")}
-              </DropdownItem>
-            ) : null}
+            <DropdownItem key="play" as={NextIntlLink} href="/play" startContent={<Gamepad2 aria-label={navT("Play")} className="w-4 h-4" />}>
+              {navT("Play")}
+            </DropdownItem>
             <DropdownItem key="games" as={NextIntlLink} href="/games" startContent={<Gamepad2 aria-label={GamesIntl} className="w-4 h-4" />}>
               {GamesIntl}
             </DropdownItem>
