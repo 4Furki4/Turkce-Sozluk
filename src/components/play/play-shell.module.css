@@ -19,7 +19,7 @@
 }
 
 .header { border-bottom: 3px solid var(--play-ink); background: var(--play-paper); }
-.nav { display: flex; min-height: 4.5rem; max-width: 82rem; align-items: center; gap: 1.25rem; margin: 0 auto; padding: .75rem 1.25rem; }
+.nav { display: flex; width: 100%; min-height: 4.5rem; max-width: 80rem; align-items: center; gap: 1.25rem; margin: 0 auto; padding: .75rem 1.25rem; }
 .brand, .links, .actions, .dictionaryLink, .signIn, .player { display: flex; align-items: center; }
 .brand { gap: .35rem; color: var(--play-ink); font-size: 1.55rem; font-weight: 900; letter-spacing: -.08em; text-decoration: none; }
 .brand svg { width: 1.15rem; height: 1.15rem; color: var(--play-red); }
@@ -41,4 +41,6 @@
 @media (max-width: 48rem) {
   .nav { flex-wrap: wrap; gap: .5rem 1rem; padding: .75rem 1rem; }.links { flex-wrap: wrap; order: 3; width: 100%; margin-left: 0; }.actions { gap: .4rem; }.dictionaryLink span { display: none; }.player { max-width: 7.5rem; }.footer { align-items: flex-start; flex-direction: column; padding: 1.25rem 1rem; }
 }
+@media (min-width: 40rem) { .nav { padding-right: 2rem; padding-left: 2rem; } }
+@media (min-width: 64rem) { .nav { padding-right: 2.5rem; padding-left: 2.5rem; } }
 @media (max-width: 27rem) { .links { display: none; }.brand { margin-right: auto; }.actions { margin-left: 0; } }
