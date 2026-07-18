@@ -223,13 +223,9 @@ export default async function RootLayout({
                     FeedbackIntl={t("Feedback")}
                     SearchIntl={t("Search")}
                     LearnIntl={t("Learn")}
-                    GamesIntl={t("Games")}
                     MainIntl={t("Main")}
                     AccountIntl={t("Account")}
                     PreferencesIntl={t("Preferences")}
-                    FlashcardGameIntl={t("FlashcardGame")}
-                    WordMatchingGameIntl={t("WordMatchingGame")}
-                    SpeedRoundGameIntl={t("SpeedRoundGame")}
                     ForeignTermSuggestionsIntl={t("ForeignTermSuggestions")}
                   />
                   <main className="relative w-full flex-grow flex min-h-[calc(100vh-var(--navbar-height))] pt-[env(safe-area-inset-top)] md:pt-0 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-0">

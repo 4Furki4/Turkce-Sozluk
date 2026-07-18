@@ -1,4 +1,4 @@
-import { BellIcon, Blocks, Gamepad2, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, HomeIcon, LayoutDashboard, Layers, Link2, ListTree, LogIn, MicIcon, Monitor, StarIcon, WifiOff, Sun, Moon, Languages, LogOut, WalletCards, Zap } from 'lucide-react'
+import { BellIcon, Blocks, Gamepad2, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, HomeIcon, LayoutDashboard, ListTree, LogIn, MicIcon, Monitor, StarIcon, WifiOff, Sun, Moon, Languages, LogOut, WalletCards } from 'lucide-react'
 import React from 'react'
 import { Link as NextIntlLink, usePathname } from "@/src/i18n/routing";
 import { useRouter } from "@/src/i18n/routing";
@@ -114,12 +114,8 @@ export default function Sidebar(
     ];
     const learnLinks: SidebarLink[] = [
         { href: '/play', label: t("Navbar.Play"), icon: <Gamepad2 className="h-5 w-5" />, isActive: isActive("/play") },
-        { href: '/games', label: t("Navbar.Games"), icon: <Gamepad2 className="h-5 w-5" />, isActive: isActive("/games") },
         { href: '/word-list', label: t("Navbar.Word List"), icon: <ListTree className="h-5 w-5" />, isActive: isActive("/word-list") },
         { href: '/word-builder', label: t("Navbar.WordBuilder"), icon: <Blocks className="h-5 w-5" />, isActive: isActive("/word-builder") },
-        { href: '/play/flashcards', label: t("Navbar.FlashcardGame"), icon: <Layers className="h-5 w-5" />, isActive: isActive("/play/flashcards") },
-        { href: '/play/word-matching', label: t("Navbar.WordMatchingGame"), icon: <Link2 className="h-5 w-5" />, isActive: isActive("/play/word-matching") },
-        { href: '/play/speed-round', label: t("Navbar.SpeedRoundGame"), icon: <Zap className="h-5 w-5" />, isActive: isActive("/play/speed-round") },
     ];
     const contributeLinks: SidebarLink[] = [
         { href: '/contribute-word', label: t("Navbar.ContributeWord"), icon: <HeartHandshake className="h-5 w-5" />, isActive: isActive("/contribute-word") },

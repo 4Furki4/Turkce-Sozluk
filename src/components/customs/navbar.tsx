@@ -10,7 +10,7 @@ import {
   NavbarBrand,
   DropdownSection
 } from "@heroui/react";
-import { Blocks, BookOpen, ChevronDown, Gamepad2, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, Link2, LogOut, Mic, Monitor, Moon, Search, StarIcon, Sun, UserIcon, WalletCards, Zap } from "lucide-react";
+import { Blocks, BookOpen, ChevronDown, Gamepad2, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, Languages, Layers, LogOut, Mic, Monitor, Moon, Search, StarIcon, Sun, UserIcon, WalletCards } from "lucide-react";
 import { Input } from "@heroui/input";
 // import { signIn, signOut } from "next-auth/react"; // Removed
 import { authClient, type User } from "@/src/lib/auth-client"; // Added
@@ -33,7 +33,7 @@ import { getPlainSearchAction, getSearchQueryHref, getWordSearchHref } from "@/s
 
 type NavbarProps = {
   session: Session | null;
-} & Record<"TitleIntl" | "WordListIntl" | "WordBuilderIntl" | "SignInIntl" | "HomeIntl" | "ProfileIntl" | "SavedWordsIntl" | "MyRequestsIntl" | "SearchHistoryIntl" | "LogoutIntl" | "AnnouncementsIntl" | "ContributeWordIntl" | "DonateIntl" | "PronunciationsIntl" | "ariaAvatar" | "ariaMenu" | "ariaLanguages" | "ariaSwitchTheme" | "ariaBlur" | "ContributeIntl" | "FeedbackIntl" | "LearnIntl" | "GamesIntl" | "FlashcardGameIntl" | "WordMatchingGameIntl" | "SpeedRoundGameIntl" | "ForeignTermSuggestionsIntl" | "SearchIntl" | "DashboardIntl", string>;
+} & Record<"TitleIntl" | "WordListIntl" | "WordBuilderIntl" | "SignInIntl" | "HomeIntl" | "ProfileIntl" | "SavedWordsIntl" | "MyRequestsIntl" | "SearchHistoryIntl" | "LogoutIntl" | "AnnouncementsIntl" | "ContributeWordIntl" | "DonateIntl" | "PronunciationsIntl" | "ariaAvatar" | "ariaMenu" | "ariaLanguages" | "ariaSwitchTheme" | "ariaBlur" | "ContributeIntl" | "FeedbackIntl" | "LearnIntl" | "ForeignTermSuggestionsIntl" | "SearchIntl" | "DashboardIntl", string>;
 
 export default function Navbar({
   session,
@@ -59,11 +59,7 @@ export default function Navbar({
   ContributeIntl,
   FeedbackIntl,
   LearnIntl,
-  GamesIntl,
-  FlashcardGameIntl,
-  WordMatchingGameIntl,
   WordBuilderIntl,
-  SpeedRoundGameIntl,
   ForeignTermSuggestionsIntl,
   SearchIntl,
   DashboardIntl
@@ -80,7 +76,7 @@ export default function Navbar({
   );
   const snap = useSnapshot(preferencesState);
   const isContributeActive = ["/contribute-word", "/donate", "/pronunciation-voting", "/feedback", "/foreign-term-suggestions"].some((route) => pathName.startsWith(route));
-  const isLearnActive = ["/word-list", "/word-builder", "/games", "/play", "/flashcard-game", "/word-matching", "/speed-round"].some((route) => pathName.startsWith(route));
+  const isLearnActive = ["/word-list", "/word-builder", "/play"].some((route) => pathName.startsWith(route));
   const isHomeRoute = pathName === "/";
   const isSearchRoute =
     pathName === "/search" ||
@@ -224,23 +220,11 @@ export default function Navbar({
             <DropdownItem key="play" as={NextIntlLink} href="/play" startContent={<Gamepad2 aria-label={navT("Play")} className="w-4 h-4" />}>
               {navT("Play")}
             </DropdownItem>
-            <DropdownItem key="games" as={NextIntlLink} href="/games" startContent={<Gamepad2 aria-label={GamesIntl} className="w-4 h-4" />}>
-              {GamesIntl}
-            </DropdownItem>
             <DropdownItem key="word-list" as={NextIntlLink} href="/word-list" startContent={<BookOpen aria-label={WordListIntl} className="w-4 h-4" />}>
               {WordListIntl}
             </DropdownItem>
             <DropdownItem key="word-builder" as={NextIntlLink} href="/word-builder" startContent={<Blocks aria-label={WordBuilderIntl} className="w-4 h-4" />}>
               {WordBuilderIntl}
-            </DropdownItem>
-            <DropdownItem key="flashcard-game" as={NextIntlLink} href="/play/flashcards" startContent={<Layers aria-label={FlashcardGameIntl} className="w-4 h-4" />}>
-              {FlashcardGameIntl}
-            </DropdownItem>
-            <DropdownItem key="word-matching" as={NextIntlLink} href="/play/word-matching" startContent={<Link2 aria-label={WordMatchingGameIntl} className="w-4 h-4" />}>
-              {WordMatchingGameIntl}
-            </DropdownItem>
-            <DropdownItem key="speed-round" as={NextIntlLink} href="/play/speed-round" startContent={<Zap aria-label={SpeedRoundGameIntl} className="w-4 h-4" />}>
-              {SpeedRoundGameIntl}
             </DropdownItem>
           </DropdownMenu>
         </CustomDropdown>

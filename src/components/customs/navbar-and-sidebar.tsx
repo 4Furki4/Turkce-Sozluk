@@ -34,14 +34,10 @@ export default function NavbarAndSidebar({
     FeedbackIntl,
     SearchIntl,
     LearnIntl,
-    GamesIntl,
     MainIntl,
     AccountIntl,
     PreferencesIntl,
-    FlashcardGameIntl,
-    WordMatchingGameIntl,
     WordBuilderIntl,
-    SpeedRoundGameIntl,
     ForeignTermSuggestionsIntl
 }: {
     session: Session | null
@@ -69,13 +65,9 @@ export default function NavbarAndSidebar({
     FeedbackIntl: string,
     SearchIntl: string,
     LearnIntl: string,
-    GamesIntl: string,
     MainIntl: string,
     AccountIntl: string,
     PreferencesIntl: string,
-    FlashcardGameIntl: string,
-    WordMatchingGameIntl: string,
-    SpeedRoundGameIntl: string,
     ForeignTermSuggestionsIntl: string
 }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -111,13 +103,9 @@ export default function NavbarAndSidebar({
                 FeedbackIntl={FeedbackIntl}
                 SearchIntl={SearchIntl}
                 LearnIntl={LearnIntl}
-                GamesIntl={GamesIntl}
                 MainIntl={MainIntl}
                 AccountIntl={AccountIntl}
                 PreferencesIntl={PreferencesIntl}
-                FlashcardGameIntl={FlashcardGameIntl}
-                WordMatchingGameIntl={WordMatchingGameIntl}
-                SpeedRoundGameIntl={SpeedRoundGameIntl}
                 ForeignTermSuggestionsIntl={ForeignTermSuggestionsIntl}
             />
         )
@@ -152,13 +140,9 @@ export default function NavbarAndSidebar({
             FeedbackIntl={FeedbackIntl}
             SearchIntl={SearchIntl}
             LearnIntl={LearnIntl}
-            GamesIntl={GamesIntl}
             MainIntl={MainIntl}
             AccountIntl={AccountIntl}
             PreferencesIntl={PreferencesIntl}
-            FlashcardGameIntl={FlashcardGameIntl}
-            WordMatchingGameIntl={WordMatchingGameIntl}
-            SpeedRoundGameIntl={SpeedRoundGameIntl}
             ForeignTermSuggestionsIntl={ForeignTermSuggestionsIntl}
         />
     )
@@ -192,13 +176,9 @@ type NavbarAndSidebarShellProps = {
     FeedbackIntl: string,
     SearchIntl: string,
     LearnIntl: string,
-    GamesIntl: string,
     MainIntl: string,
     AccountIntl: string,
     PreferencesIntl: string,
-    FlashcardGameIntl: string,
-    WordMatchingGameIntl: string,
-    SpeedRoundGameIntl: string,
     ForeignTermSuggestionsIntl: string
 }
 
@@ -239,14 +219,10 @@ function NavbarAndSidebarShell({
     FeedbackIntl,
     SearchIntl,
     LearnIntl,
-    GamesIntl,
     MainIntl,
     AccountIntl,
     PreferencesIntl,
-    FlashcardGameIntl,
-    WordMatchingGameIntl,
     WordBuilderIntl,
-    SpeedRoundGameIntl,
     ForeignTermSuggestionsIntl
 }: NavbarAndSidebarShellProps) {
     return (
@@ -278,10 +254,6 @@ function NavbarAndSidebarShell({
                 FeedbackIntl={FeedbackIntl}
                 SearchIntl={SearchIntl}
                 LearnIntl={LearnIntl}
-                GamesIntl={GamesIntl}
-                FlashcardGameIntl={FlashcardGameIntl}
-                WordMatchingGameIntl={WordMatchingGameIntl}
-                SpeedRoundGameIntl={SpeedRoundGameIntl}
                 ForeignTermSuggestionsIntl={ForeignTermSuggestionsIntl}
             />
             <Sidebar

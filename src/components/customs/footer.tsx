@@ -20,10 +20,7 @@ export default async function Footer({ session }: { session: Session | null }) {
             { href: "/offline-dictionary" as const, label: t("links.offlineDictionary") },
         ],
         games: [
-            { href: "/games" as const, label: t("links.games") },
-            { href: "/play/flashcards" as const, label: t("links.flashcardGame") },
-            { href: "/play/word-matching" as const, label: t("links.wordMatchingGame") },
-            { href: "/play/speed-round" as const, label: t("links.speedRoundGame") },
+            { href: "/play" as const, label: t("links.play") },
             { href: "/leaderboards" as const, label: t("links.leaderboards") },
         ],
         community: [
