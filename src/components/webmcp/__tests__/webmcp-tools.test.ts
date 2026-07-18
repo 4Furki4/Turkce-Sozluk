@@ -29,6 +29,8 @@ describe("WebMCP tools", () => {
   it("builds localized page paths", () => {
     expect(createPagePath("word-list", "tr")).toBe("/tr/kelime-listesi");
     expect(createPagePath("word-list", "en")).toBe("/en/word-list");
+    expect(createPagePath("speed-round", "tr")).toBe("/tr/oyna/hizli-tur");
+    expect(createPagePath("speed-round", "en")).toBe("/en/play/speed-round");
     expect(createPagePath("unknown", "tr")).toBeNull();
   });
 

@@ -2165,6 +2165,7 @@
     "gameRoom": "Game room",
     "flashcardsNav": "Flashcards",
     "wordMatchingNav": "Matching",
+    "speedRoundNav": "Speed round",
     "backToDictionary": "Dictionary",
     "signIn": "Sign in",
     "footerLine": "Play your way into Turkish words.",
@@ -2204,6 +2205,23 @@
       "roundCompleteDescription": "The connections are made. Give them another quick pass or set up a fresh round.",
       "timeUpDescription": "Time ran out this round. Pick up the matches in a fresh run.",
       "scoreboard": "Round progress"
+    },
+    "speedRound": {
+      "roundKicker": "Sprint round",
+      "setupDescription": "Choose your pace, trust your first instinct, and build a score before the clock runs out.",
+      "howToPlay": "How it works",
+      "stepOne": "Read the word and pick the meaning that fits.",
+      "stepTwo": "Answer quickly to earn a speed bonus and grow your streak.",
+      "stepThree": "Finish the round, submit your score, and come back for another sprint.",
+      "noSavedWords": "You do not have enough saved words for a speed round yet.",
+      "noWords": "We could not build a speed round right now. Try again.",
+      "roundCompleteKicker": "Sprint complete",
+      "roundCompleteDescription": "Your result is in. Put those words through another fast pass or tune a new round.",
+      "scoreboard": "Sprint status",
+      "review": "Round review",
+      "save": "Save word",
+      "saved": "Saved",
+      "signInToSave": "Sign in to save"
     }
   },
   "WordMatchingGame": {

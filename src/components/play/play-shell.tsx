@@ -1,5 +1,5 @@
 import type { Session } from "@/src/lib/auth";
-import { getPlayFlashcardPath, getPlayHomePath, getPlayWordMatchingPath } from "@/src/lib/play-url";
+import { getPlayFlashcardPath, getPlayHomePath, getPlaySpeedRoundPath, getPlayWordMatchingPath } from "@/src/lib/play-url";
 import { BookOpen, Gamepad2, UserRound } from "lucide-react";
 import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
@@ -26,8 +26,9 @@ export async function PlayShell({ children, locale, session }: PlayShellProps) {
     const playHomeHref = getPlayHomePath(locale);
     const flashcardHref = getPlayFlashcardPath(locale);
     const wordMatchingHref = getPlayWordMatchingPath(locale);
+    const speedRoundHref = getPlaySpeedRoundPath(locale);
     const requestedPlayPath = (await headers()).get("x-play-path");
-    const knownPlayPaths = new Set([playHomeHref, flashcardHref, wordMatchingHref]);
+    const knownPlayPaths = new Set([playHomeHref, flashcardHref, wordMatchingHref, speedRoundHref]);
     const activePlayPath = requestedPlayPath && knownPlayPaths.has(requestedPlayPath)
         ? requestedPlayPath
         : playHomeHref;
@@ -47,6 +48,7 @@ export async function PlayShell({ children, locale, session }: PlayShellProps) {
                         <a className={activePlayPath === playHomeHref ? styles.activeLink : undefined} href={playHomeHref}>{t("gameRoom")}</a>
                         <a className={activePlayPath === flashcardHref ? styles.activeLink : undefined} href={flashcardHref}>{t("flashcardsNav")}</a>
                         <a className={activePlayPath === wordMatchingHref ? styles.activeLink : undefined} href={wordMatchingHref}>{t("wordMatchingNav")}</a>
+                        <a className={activePlayPath === speedRoundHref ? styles.activeLink : undefined} href={speedRoundHref}>{t("speedRoundNav")}</a>
                     </div>
 
                     <div className={styles.actions}>

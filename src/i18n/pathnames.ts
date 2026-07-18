@@ -211,6 +211,10 @@ export const pathnames = {
     en: "/play/word-matching",
     tr: "/oyna/kelime-eslestirme",
   },
+  "/play/speed-round": {
+    en: "/play/speed-round",
+    tr: "/oyna/hizli-tur",
+  },
   "/games": {
     en: "/games",
     tr: "/oyunlar",

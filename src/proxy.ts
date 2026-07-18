@@ -16,6 +16,8 @@ const PLAY_ROUTE_REWRITES = new Map([
   ["/en/play/flashcards", `${PLAY_PATH_PREFIX}/en/flashcard-game`],
   ["/tr/oyna/kelime-eslestirme", `${PLAY_PATH_PREFIX}/tr/word-matching`],
   ["/en/play/word-matching", `${PLAY_PATH_PREFIX}/en/word-matching`],
+  ["/tr/oyna/hizli-tur", `${PLAY_PATH_PREFIX}/tr/speed-round`],
+  ["/en/play/speed-round", `${PLAY_PATH_PREFIX}/en/speed-round`],
 ]);
 
 function hasMalformedPathEncoding(pathname: string): boolean {

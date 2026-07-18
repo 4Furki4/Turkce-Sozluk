@@ -39,6 +39,6 @@
 .nav a:focus-visible, .footer a:focus-visible { outline: 3px solid var(--play-red); outline-offset: 3px; }
 
 @media (max-width: 48rem) {
-  .nav { flex-wrap: wrap; gap: .5rem 1rem; padding: .75rem 1rem; }.links { order: 3; width: 100%; margin-left: 0; }.actions { gap: .4rem; }.dictionaryLink span { display: none; }.player { max-width: 7.5rem; }.footer { align-items: flex-start; flex-direction: column; padding: 1.25rem 1rem; }
+  .nav { flex-wrap: wrap; gap: .5rem 1rem; padding: .75rem 1rem; }.links { flex-wrap: wrap; order: 3; width: 100%; margin-left: 0; }.actions { gap: .4rem; }.dictionaryLink span { display: none; }.player { max-width: 7.5rem; }.footer { align-items: flex-start; flex-direction: column; padding: 1.25rem 1rem; }
 }
 @media (max-width: 27rem) { .links { display: none; }.brand { margin-right: auto; }.actions { margin-left: 0; } }

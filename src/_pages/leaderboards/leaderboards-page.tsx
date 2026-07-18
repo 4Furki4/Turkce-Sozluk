@@ -21,7 +21,7 @@ const gameConfig = {
     speed_round: {
         icon: Zap,
         color: "warning" as const,
-        href: "/speed-round",
+        href: "/play/speed-round",
     },
 };
 

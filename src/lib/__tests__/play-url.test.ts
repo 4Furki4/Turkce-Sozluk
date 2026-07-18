@@ -1,6 +1,7 @@
 import {
     getPlayFlashcardPath,
     getPlayHomePath,
+    getPlaySpeedRoundPath,
     getPlayWordMatchingPath,
     getSafeAuthReturnUrl,
 } from "../play-url";
@@ -13,6 +14,8 @@ describe("Play URL helpers", () => {
         expect(getPlayFlashcardPath("en")).toBe("/en/play/flashcards");
         expect(getPlayWordMatchingPath("tr")).toBe("/tr/oyna/kelime-eslestirme");
         expect(getPlayWordMatchingPath("en")).toBe("/en/play/word-matching");
+        expect(getPlaySpeedRoundPath("tr")).toBe("/tr/oyna/hizli-tur");
+        expect(getPlaySpeedRoundPath("en")).toBe("/en/play/speed-round");
     });
 
     it("allows auth returns only to the current origin", () => {

@@ -119,7 +119,7 @@ export default function Sidebar(
         { href: '/word-builder', label: t("Navbar.WordBuilder"), icon: <Blocks className="h-5 w-5" />, isActive: isActive("/word-builder") },
         { href: '/play/flashcards', label: t("Navbar.FlashcardGame"), icon: <Layers className="h-5 w-5" />, isActive: isActive("/play/flashcards") },
         { href: '/play/word-matching', label: t("Navbar.WordMatchingGame"), icon: <Link2 className="h-5 w-5" />, isActive: isActive("/play/word-matching") },
-        { href: '/speed-round', label: t("Navbar.SpeedRoundGame"), icon: <Zap className="h-5 w-5" />, isActive: isActive("/speed-round") },
+        { href: '/play/speed-round', label: t("Navbar.SpeedRoundGame"), icon: <Zap className="h-5 w-5" />, isActive: isActive("/play/speed-round") },
     ];
     const contributeLinks: SidebarLink[] = [
         { href: '/contribute-word', label: t("Navbar.ContributeWord"), icon: <HeartHandshake className="h-5 w-5" />, isActive: isActive("/contribute-word") },

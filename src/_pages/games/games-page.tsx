@@ -21,7 +21,7 @@ const gameDefinitions = [
     },
     {
         key: "speedRound",
-        href: "/speed-round" as const,
+        href: "/play/speed-round" as const,
         icon: Zap,
     },
 ] as const;

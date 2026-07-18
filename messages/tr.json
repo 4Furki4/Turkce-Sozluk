@@ -2131,6 +2131,7 @@
     "gameRoom": "Oyun odası",
     "flashcardsNav": "Kelime Kartları",
     "wordMatchingNav": "Eşleştirme",
+    "speedRoundNav": "Hızlı Tur",
     "backToDictionary": "Sözlük",
     "signIn": "Giriş yap",
     "footerLine": "Oynayarak Türkçe kelimelere yaklaşın.",
@@ -2170,6 +2171,23 @@
       "roundCompleteDescription": "Bağlantılar kuruldu. Hızlıca tekrar edin ya da yeni bir tur oluşturun.",
       "timeUpDescription": "Bu turda süre doldu. Yeni bir turda eşleştirmelere devam edin.",
       "scoreboard": "Tur ilerlemesi"
+    },
+    "speedRound": {
+      "roundKicker": "Sprint turu",
+      "setupDescription": "Ritminizi seçin, ilk sezginize güvenin ve süre dolmadan puanınızı büyütün.",
+      "howToPlay": "Nasıl oynanır",
+      "stepOne": "Kelimeyi okuyun ve uygun anlamı seçin.",
+      "stepTwo": "Hız bonusu kazanmak ve serinizi büyütmek için hızlı cevaplayın.",
+      "stepThree": "Turu tamamlayın, skorunuzu gönderin ve yeni bir sprint için geri dönün.",
+      "noSavedWords": "Henüz hızlı tur için yeterli kaydedilmiş kelimeniz yok.",
+      "noWords": "Şu anda hızlı bir tur oluşturamadık. Tekrar deneyin.",
+      "roundCompleteKicker": "Sprint tamamlandı",
+      "roundCompleteDescription": "Sonuç hazır. Kelimelere bir hızlı tur daha verin ya da yeni bir tur ayarlayın.",
+      "scoreboard": "Sprint durumu",
+      "review": "Tur incelemesi",
+      "save": "Kelimeyi kaydet",
+      "saved": "Kaydedildi",
+      "signInToSave": "Kaydetmek için giriş yapın"
     }
   },
   "WordMatchingGame": {

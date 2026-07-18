@@ -10,6 +10,10 @@ export function getPlayWordMatchingPath(locale: string): string {
     return locale === "tr" ? "/tr/oyna/kelime-eslestirme" : "/en/play/word-matching";
 }
 
+export function getPlaySpeedRoundPath(locale: string): string {
+    return locale === "tr" ? "/tr/oyna/hizli-tur" : "/en/play/speed-round";
+}
+
 export function getSafeAuthReturnUrl(backTo: string | null, currentOrigin: string): string | null {
     if (!backTo) {
         return null;

@@ -103,6 +103,24 @@ describe("proxy SEO normalization", () => {
     );
   });
 
+  it("rewrites the Turkish Play speed round route to its dedicated shell", () => {
+    const response = proxy(new NextRequest("http://localhost:3000/tr/oyna/hizli-tur"));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-rewrite")).toBe(
+      "http://localhost:3000/play/tr/speed-round",
+    );
+  });
+
+  it("rewrites the English Play speed round route to its dedicated shell", () => {
+    const response = proxy(new NextRequest("http://localhost:3000/en/play/speed-round"));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-rewrite")).toBe(
+      "http://localhost:3000/play/en/speed-round",
+    );
+  });
+
   it("does not rewrite markdown requests when the client explicitly rejects markdown", () => {
     const response = proxy(new NextRequest("https://turkce-sozluk.com/tr", {
       headers: {

@@ -239,7 +239,7 @@ export default function Navbar({
             <DropdownItem key="word-matching" as={NextIntlLink} href="/play/word-matching" startContent={<Link2 aria-label={WordMatchingGameIntl} className="w-4 h-4" />}>
               {WordMatchingGameIntl}
             </DropdownItem>
-            <DropdownItem key="speed-round" as={NextIntlLink} href="/speed-round" startContent={<Zap aria-label={SpeedRoundGameIntl} className="w-4 h-4" />}>
+            <DropdownItem key="speed-round" as={NextIntlLink} href="/play/speed-round" startContent={<Zap aria-label={SpeedRoundGameIntl} className="w-4 h-4" />}>
               {SpeedRoundGameIntl}
             </DropdownItem>
           </DropdownMenu>

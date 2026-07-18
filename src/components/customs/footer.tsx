@@ -21,9 +21,9 @@ export default async function Footer({ session }: { session: Session | null }) {
         ],
         games: [
             { href: "/games" as const, label: t("links.games") },
-            { href: "/flashcard-game" as const, label: t("links.flashcardGame") },
-            { href: "/word-matching" as const, label: t("links.wordMatchingGame") },
-            { href: "/speed-round" as const, label: t("links.speedRoundGame") },
+            { href: "/play/flashcards" as const, label: t("links.flashcardGame") },
+            { href: "/play/word-matching" as const, label: t("links.wordMatchingGame") },
+            { href: "/play/speed-round" as const, label: t("links.speedRoundGame") },
             { href: "/leaderboards" as const, label: t("links.leaderboards") },
         ],
         community: [
