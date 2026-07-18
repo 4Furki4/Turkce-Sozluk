@@ -199,6 +199,26 @@ export const pathnames = {
     en: "/flashcard-game",
     tr: "/kelime-kartlari",
   },
+  "/play": {
+    en: "/play",
+    tr: "/oyna",
+  },
+  "/play/flashcards": {
+    en: "/play/flashcards",
+    tr: "/oyna/kelime-kartlari",
+  },
+  "/play/word-matching": {
+    en: "/play/word-matching",
+    tr: "/oyna/kelime-eslestirme",
+  },
+  "/play/speed-round": {
+    en: "/play/speed-round",
+    tr: "/oyna/hizli-tur",
+  },
+  "/games": {
+    en: "/games",
+    tr: "/oyunlar",
+  },
   "/word-matching": {
     en: "/word-matching",
     tr: "/kelime-eslestirme",

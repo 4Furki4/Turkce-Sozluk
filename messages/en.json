@@ -29,6 +29,8 @@
     "OfflineDictionary": "Offline Dictionary",
     "ForeignTermSuggestions": "Foreign Term Suggestions",
     "FlashcardGame": "Flashcard Game",
+    "Games": "Games",
+    "Play": "Play",
     "Learn": "Learn",
     "WordMatchingGame": "Word Matching",
     "SpeedRoundGame": "Speed Round"
@@ -362,6 +364,8 @@
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
       "status": "Status",
+      "play": "Play",
+      "games": "Games",
       "flashcardGame": "Flashcard Game",
       "wordMatchingGame": "Word Matching",
       "speedRoundGame": "Speed Round",
@@ -2096,6 +2100,130 @@
     "defaultSide": "Show First",
     "showWordFirst": "Word Side",
     "showMeaningFirst": "Meaning Side"
+  },
+  "GamesHub": {
+    "metaTitle": "Turkish Word Games",
+    "metaDescription": "Practice Turkish vocabulary through flashcards, word matching, and fast-paced challenges.",
+    "eyebrow": "Turkish Dictionary Learning Arcade",
+    "heroTitleFirst": "Make every",
+    "heroTitleSecond": "word want a",
+    "heroTitleAccent": "rematch.",
+    "heroDescription": "Discover a word, practise it, make a mistake safely, and come back ready to play again.",
+    "heroPrimaryAction": "Choose a game",
+    "heroSecondaryAction": "See the rankings",
+    "cabinetKicker": "Ready for replay",
+    "cabinetWord": "söz",
+    "cabinetMeaning": "Every word has another turn: learn it, match it, race it.",
+    "cabinetPoints": "Next: play",
+    "gamesEyebrow": "The game shelf",
+    "gamesTitleFirst": "Three ways",
+    "gamesTitleSecond": "to make a word stick.",
+    "gamesDescription": "Choose the kind of practice that fits the moment: calm recall, purposeful matching, or a rapid-fire challenge.",
+    "playGame": "Play now",
+    "games": {
+      "flashcards": {
+        "tag": "Study",
+        "title": "Flashcards",
+        "description": "Turn a quiet minute into a focused Turkish vocabulary review."
+      },
+      "matching": {
+        "tag": "Match",
+        "title": "Word Matching",
+        "description": "Pair Turkish words and meanings until the connections feel automatic."
+      },
+      "speedRound": {
+        "tag": "Perform",
+        "title": "Speed Round",
+        "description": "Answer quickly, build a streak, and see what you know under pressure."
+      }
+    },
+    "loopEyebrow": "One learning loop",
+    "loopTitle": "Study it. Match it. Make it yours.",
+    "loop": {
+      "study": {
+        "title": "Study",
+        "description": "Meet a word, reveal its meaning, and build recognition at your own pace."
+      },
+      "match": {
+        "title": "Match",
+        "description": "Connect words and meanings with deliberate, hands-on practice."
+      },
+      "perform": {
+        "title": "Perform",
+        "description": "Put vocabulary to the test when time, focus, and streaks matter."
+      }
+    },
+    "comingEyebrow": "Coming next",
+    "comingTitle": "Daily 5 is warming up.",
+    "comingDescription": "A five-question daily Turkish challenge will give every return visit a fresh reason to play.",
+    "comingBadge": "In the works"
+  },
+  "Play": {
+    "metaTitle": "oyna — Turkish Word Games",
+    "metaDescription": "A focused arcade for Turkish vocabulary practice.",
+    "navigationLabel": "oyna navigation",
+    "homeAriaLabel": "oyna home",
+    "gameRoom": "Game room",
+    "flashcardsNav": "Flashcards",
+    "wordMatchingNav": "Matching",
+    "speedRoundNav": "Speed round",
+    "backToDictionary": "Dictionary",
+    "signIn": "Sign in",
+    "footerLine": "Play your way into Turkish words.",
+    "feedback": "Feedback",
+    "privacy": "Privacy",
+    "homeEyebrow": "Turkish word arcade",
+    "homeTitleFirst": "A little play.",
+    "homeTitleAccent": "A lot more words.",
+    "homeDescription": "Choose a focused round, reveal what you know, and let the next word pull you in.",
+    "startFlashcards": "Start flashcards",
+    "deckWord": "söz",
+    "deckMeaning": "Every word earns another turn.",
+    "flashcards": {
+      "roundKicker": "Focus round",
+      "setupDescription": "Build a deck that fits the moment. One clear turn at a time.",
+      "cards": "{count} cards",
+      "howToPlay": "How it works",
+      "stepOne": "Meet the word before you reveal its meaning.",
+      "stepTwo": "Flip the card when you are ready to check yourself.",
+      "stepThree": "Move on, shuffle, or start a fresh round whenever you need.",
+      "roundCompleteKicker": "Round complete",
+      "roundCompleteTitle": "That deck is yours now.",
+      "roundCompleteDescription": "You reviewed all {count} cards. Give the words another turn or build a new deck.",
+      "playAgain": "Play again",
+      "navigate": "Navigate"
+    },
+    "wordMatching": {
+      "roundKicker": "Match round",
+      "setupDescription": "Choose a set, connect every word to its meaning, and make the link stick.",
+      "howToPlay": "How it works",
+      "stepOne": "Choose a word from the left column.",
+      "stepTwo": "Choose the meaning that belongs to it.",
+      "stepThree": "Clear the board, then start another round when you are ready.",
+      "noSavedWords": "You do not have enough saved words for a round yet.",
+      "noWords": "We could not build a matching round right now. Try again.",
+      "roundCompleteKicker": "Round complete",
+      "roundCompleteDescription": "The connections are made. Give them another quick pass or set up a fresh round.",
+      "timeUpDescription": "Time ran out this round. Pick up the matches in a fresh run.",
+      "scoreboard": "Round progress"
+    },
+    "speedRound": {
+      "roundKicker": "Sprint round",
+      "setupDescription": "Choose your pace, trust your first instinct, and build a score before the clock runs out.",
+      "howToPlay": "How it works",
+      "stepOne": "Read the word and pick the meaning that fits.",
+      "stepTwo": "Answer quickly to earn a speed bonus and grow your streak.",
+      "stepThree": "Finish the round, submit your score, and come back for another sprint.",
+      "noSavedWords": "You do not have enough saved words for a speed round yet.",
+      "noWords": "We could not build a speed round right now. Try again.",
+      "roundCompleteKicker": "Sprint complete",
+      "roundCompleteDescription": "Your result is in. Put those words through another fast pass or tune a new round.",
+      "scoreboard": "Sprint status",
+      "review": "Round review",
+      "save": "Save word",
+      "saved": "Saved",
+      "signInToSave": "Sign in to save"
+    }
   },
   "WordMatchingGame": {
     "title": "Word Matching",

@@ -53,8 +53,8 @@ export function createPagePath(page: string, locale: Locale): string | null {
     words: { en: "/en/words", tr: "/tr/kelimeler" },
     "contribute-word": { en: "/en/contribute-word", tr: "/tr/kelime-katkisi" },
     "word-builder": { en: "/en/word-builder", tr: "/tr/kelime-insa" },
-    "word-matching": { en: "/en/word-matching", tr: "/tr/kelime-eslestirme" },
-    "speed-round": { en: "/en/speed-round", tr: "/tr/hizli-tur" },
+    "word-matching": { en: "/en/play/word-matching", tr: "/tr/oyna/kelime-eslestirme" },
+    "speed-round": { en: "/en/play/speed-round", tr: "/tr/oyna/hizli-tur" },
   };
 
   return page in pagePaths ? pagePaths[page as keyof typeof pagePaths][locale] : null;

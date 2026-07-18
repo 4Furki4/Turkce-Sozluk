@@ -14,6 +14,7 @@ import {
     Settings,
 } from "lucide-react";
 import { Session } from "@/src/lib/auth-client";
+import { shuffleArray } from "@/src/lib/game";
 import CustomCard from "./heroui/custom-card";
 
 
@@ -95,8 +96,7 @@ export default function FlashcardGame({ session, locale }: FlashcardGameProps) {
     }, []);
 
     const shuffleCards = useCallback(() => {
-        const shuffled = [...words].sort(() => Math.random() - 0.5);
-        setWords(shuffled);
+        setWords(shuffleArray(words));
         setCurrentIndex(0);
         setIsFlipped(defaultSide === "meaning");
     }, [words, defaultSide]);

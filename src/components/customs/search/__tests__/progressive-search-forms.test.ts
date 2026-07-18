@@ -25,4 +25,13 @@ describe("progressive search forms", () => {
         expect(source).toContain("getWordSearchHref(locale, input)");
         expect(source).not.toContain('name="offlineWord"');
     });
+
+    it("uses client-side links for trending words", () => {
+        const source = readFileSync(join(root, "src/components/customs/search/search-container.tsx"), "utf8");
+
+        expect(source).toMatch(
+            /trendingWords\?\.map\(\(tag: any\) => \(\s*<Link[\s\S]*?pathname: "\/search\/\[word\]",[\s\S]*?params: \{ word: tag\.name \}/,
+        );
+        expect(source).not.toContain("onClick={() => handleRecommendationClick(tag.name)}");
+    });
 });

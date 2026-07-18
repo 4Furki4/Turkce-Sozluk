@@ -1,0 +1,46 @@
+.shell {
+  --navbar-height: 4.5rem;
+  --play-ink: #1d2340;
+  --play-muted: #536078;
+  --play-paper: #fff9eb;
+  --play-paper-dark: #f6eddb;
+  --play-red: #d84b47;
+  --play-red-deep: #a72e35;
+  --play-mint: #5ac8ae;
+  --play-yellow: #ffd76a;
+  --play-blue: #5b8def;
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  background-color: var(--play-paper);
+  background-image: radial-gradient(circle at 8% 14%, rgb(255 215 106 / 65%) 0 2px, transparent 3px), radial-gradient(circle at 89% 34%, rgb(90 200 174 / 38%) 0 2px, transparent 3px), linear-gradient(125deg, #fff9eb 0 58%, #f6eddb 58% 100%);
+  background-size: 43px 43px, 67px 67px, auto;
+  color: var(--play-ink);
+}
+
+.header { border-bottom: 3px solid var(--play-ink); background: var(--play-paper); }
+.nav { display: flex; width: 100%; min-height: 4.5rem; max-width: 80rem; align-items: center; gap: 1.25rem; margin: 0 auto; padding: .75rem 1.25rem; }
+.brand, .links, .actions, .dictionaryLink, .signIn, .player { display: flex; align-items: center; }
+.brand { gap: .35rem; color: var(--play-ink); font-size: 1.55rem; font-weight: 900; letter-spacing: -.08em; text-decoration: none; }
+.brand svg { width: 1.15rem; height: 1.15rem; color: var(--play-red); }
+.brand b { color: var(--play-red); }
+.links { gap: .25rem; margin-left: .75rem; }
+.links a { border-radius: .5rem; padding: .55rem .7rem; color: var(--play-muted); font-size: .78rem; font-weight: 900; letter-spacing: .06em; text-decoration: none; text-transform: uppercase; }
+.links a:hover, .links .activeLink { background: var(--play-yellow); color: var(--play-ink); }
+.actions { gap: .6rem; margin-left: auto; }
+.dictionaryLink, .signIn, .player { gap: .4rem; border: 2px solid var(--play-ink); border-radius: .55rem; padding: .48rem .65rem; color: var(--play-ink); font-size: .75rem; font-weight: 900; text-decoration: none; }
+.dictionaryLink { background: transparent; }.dictionaryLink:hover { background: var(--play-ink); color: var(--play-paper); }
+.signIn { border-color: var(--play-red-deep); background: var(--play-red); color: var(--play-paper); box-shadow: 2px 2px 0 var(--play-ink); }.signIn:hover { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--play-ink); }
+.player { max-width: 10rem; border-color: var(--play-mint); background: #e4f8f1; }.player span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dictionaryLink svg, .signIn svg, .player svg { width: .9rem; height: .9rem; flex: none; }
+.main { display: flex; width: 100%; flex: 1; }
+.footer { display: flex; max-width: 82rem; width: 100%; align-items: center; justify-content: space-between; gap: 1rem; margin: auto auto 0; padding: 1.5rem 1.25rem; color: var(--play-muted); font-size: .75rem; font-weight: 700; }
+.footer p { margin: 0; }.footer div { display: flex; gap: 1rem; }.footer a { color: inherit; text-decoration: none; }.footer a:hover { color: var(--play-red-deep); text-decoration: underline; }
+.nav a:focus-visible, .footer a:focus-visible { outline: 3px solid var(--play-red); outline-offset: 3px; }
+
+@media (max-width: 48rem) {
+  .nav { flex-wrap: wrap; gap: .5rem 1rem; padding: .75rem 1rem; }.links { flex-wrap: wrap; order: 3; width: 100%; margin-left: 0; }.actions { gap: .4rem; }.dictionaryLink span { display: none; }.player { max-width: 7.5rem; }.footer { align-items: flex-start; flex-direction: column; padding: 1.25rem 1rem; }
+}
+@media (min-width: 40rem) { .nav { padding-right: 2rem; padding-left: 2rem; } }
+@media (min-width: 64rem) { .nav { padding-right: 2.5rem; padding-left: 2.5rem; } }
+@media (max-width: 27rem) { .links { display: none; }.brand { margin-right: auto; }.actions { margin-left: 0; } }

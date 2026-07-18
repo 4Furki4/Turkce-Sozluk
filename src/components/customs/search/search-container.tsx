@@ -14,6 +14,7 @@ import { useTypewriter } from "@/src/hooks/use-typewriter";
 import { useOnlineStatus } from "@/src/hooks/use-online-status";
 import { api } from "@/src/trpc/react";
 import { startNavigationProgress } from "@/src/lib/navigation-progress";
+import { Link } from "@/src/i18n/routing";
 import { getOfflineWordSearchQueryKey, toOfflineWordSearchResult } from "@/src/hooks/useWordSearch";
 import { getPlainSearchAction, getSearchQueryHref, getWordSearchHref } from "@/src/lib/search-route";
 import type { RouterOutputs } from "@/src/trpc/shared";
@@ -514,13 +515,17 @@ export default function SearchContainer({
                         </>
                     ) : (
                         trendingWords?.map((tag: any) => (
-                            <button
+                            <Link
                                 key={tag.id}
-                                onClick={() => handleRecommendationClick(tag.name)}
+                                href={{
+                                    pathname: "/search/[word]",
+                                    params: { word: tag.name },
+                                }}
+                                onClick={onSearchComplete}
                                 className="px-4 py-1.5 rounded-md bg-background shadow-sm border border-border  text-sm cursor-pointer hover:text-primary transition-all duration-200"
                             >
                                 {tag.name}
-                            </button>
+                            </Link>
                         ))
                     )}
                 </div>

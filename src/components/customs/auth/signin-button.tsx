@@ -9,7 +9,7 @@ export default function SigninButton({ provider, IntlMessage, startContent, redi
                 // better-auth requires absolute URLs (with full origin) for callback URLs
                 // Construct the absolute URL from the path
                 const absoluteUrl = redirectPath
-                    ? `${window.location.origin}${redirectPath.startsWith('/') ? '' : '/'}${redirectPath}`
+                    ? new URL(redirectPath, window.location.origin).toString()
                     : undefined;
                 await authClient.signIn.social({
                     provider: provider,

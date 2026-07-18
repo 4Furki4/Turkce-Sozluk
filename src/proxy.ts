@@ -8,6 +8,17 @@ const handleI18nRouting = createMiddleware(routing);
 const AGENT_DISCOVERY_LINK_HEADER = '</.well-known/api-catalog>; rel="api-catalog"';
 const MARKDOWN_RENDER_PATH = "/~markdown";
 const MALFORMED_PATH_FALLBACK = "~not-found";
+const PLAY_PATH_PREFIX = "/play";
+const PLAY_ROUTE_REWRITES = new Map([
+  ["/tr/oyna", `${PLAY_PATH_PREFIX}/tr`],
+  ["/en/play", `${PLAY_PATH_PREFIX}/en`],
+  ["/tr/oyna/kelime-kartlari", `${PLAY_PATH_PREFIX}/tr/kelime-kartlari`],
+  ["/en/play/flashcards", `${PLAY_PATH_PREFIX}/en/flashcard-game`],
+  ["/tr/oyna/kelime-eslestirme", `${PLAY_PATH_PREFIX}/tr/word-matching`],
+  ["/en/play/word-matching", `${PLAY_PATH_PREFIX}/en/word-matching`],
+  ["/tr/oyna/hizli-tur", `${PLAY_PATH_PREFIX}/tr/speed-round`],
+  ["/en/play/speed-round", `${PLAY_PATH_PREFIX}/en/speed-round`],
+]);
 
 function hasMalformedPathEncoding(pathname: string): boolean {
   try {
@@ -102,6 +113,17 @@ export default function proxy(request: NextRequest) {
     const response = NextResponse.redirect(redirectUrl, 308);
     addAgentDiscoveryHeaders(response, canonicalPathname);
     return response;
+  }
+
+  const playPath = PLAY_ROUTE_REWRITES.get(canonicalPathname);
+
+  if (playPath) {
+    const playUrl = request.nextUrl.clone();
+    playUrl.pathname = playPath;
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-play-path", canonicalPathname);
+
+    return NextResponse.rewrite(playUrl, { request: { headers: requestHeaders } });
   }
 
   const requestHeaders = new Headers(request.headers);

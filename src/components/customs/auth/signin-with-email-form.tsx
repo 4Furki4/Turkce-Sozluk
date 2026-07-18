@@ -8,16 +8,13 @@ import { useSearchParams } from 'next/navigation'
 import { Controller, FieldValues, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { authClient } from "@/src/lib/auth-client"
+import { getSafeAuthReturnUrl } from "@/src/lib/play-url"
 
 export default function SigninWithEmailForm({ SigninWithEmailIntl, EnterYourEmailIntl, EmailSigninLabelIntl, MagicLinkIntl, InvalidEmailIntl }: { SigninWithEmailIntl: string, EnterYourEmailIntl: string, EmailSigninLabelIntl: string, MagicLinkIntl: string, InvalidEmailIntl: string }) {
     const [step, setStep] = useState<"email" | "otp">("email")
     const [email, setEmail] = useState("")
     const searchParams = useSearchParams()
-    // The backTo param may be double-encoded - decode fully then re-encode properly
-    const rawBackTo = searchParams.get("backTo") ?? "/"
-    const decodedUrl = decodeURIComponent(rawBackTo)
-    // Re-encode for URL safety (spaces -> %20)
-    const backTo = encodeURI(decodedUrl)
+    const backTo = getSafeAuthReturnUrl(searchParams.get("backTo"), window.location.origin)
 
     const { control, handleSubmit, reset } = useForm({
         resolver: zodResolver(z.object({
@@ -35,7 +32,7 @@ export default function SigninWithEmailForm({ SigninWithEmailIntl, EnterYourEmai
             if (!res?.error) {
                 localStorage.setItem("otp_email", data.email)
                 const url = new URL("/verify-otp", window.location.origin)
-                if (backTo !== "/") {
+                if (backTo) {
                     url.searchParams.set("backTo", backTo)
                 }
                 window.location.href = url.toString()

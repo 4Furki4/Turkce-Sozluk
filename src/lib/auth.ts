@@ -11,11 +11,11 @@ import { cookies } from "next/headers";
 import { createOpenIdConfiguration } from "@/src/lib/oidc-metadata";
 
 const authBaseUrl = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL;
-const trustedOrigins = [
+const trustedOrigins = [...new Set([
     authBaseUrl,
     process.env.NEXT_PUBLIC_APP_URL,
     process.env.NEXT_PUBLIC_URL,
-].filter((origin): origin is string => Boolean(origin));
+].filter((origin): origin is string => Boolean(origin)))];
 
 const resendEmailFrom = process.env.RESEND_EMAIL_FROM || "Türkçe Sözlük <no-reply@turkce-sozluk.com>";
 const openIdConfiguration = createOpenIdConfiguration();

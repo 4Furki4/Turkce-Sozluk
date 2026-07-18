@@ -1,4 +1,4 @@
-import { BellIcon, Blocks, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, HomeIcon, LayoutDashboard, Layers, Link2, ListTree, LogIn, MicIcon, Monitor, StarIcon, WifiOff, Sun, Moon, Languages, LogOut, WalletCards, Zap } from 'lucide-react'
+import { BellIcon, Blocks, Gamepad2, GitPullRequestArrow, Globe, HandHeart, HeartHandshake, HistoryIcon, HomeIcon, LayoutDashboard, ListTree, LogIn, MicIcon, Monitor, StarIcon, WifiOff, Sun, Moon, Languages, LogOut, WalletCards } from 'lucide-react'
 import React from 'react'
 import { Link as NextIntlLink, usePathname } from "@/src/i18n/routing";
 import { useRouter } from "@/src/i18n/routing";
@@ -57,26 +57,25 @@ function SidebarLinkRow({
     item: SidebarLink,
     onSelect: () => void,
 }) {
+    const linkClassName = cn(
+        "group flex min-h-11 w-full items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium text-foreground/68 transition-colors hover:bg-primary/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45",
+        item.isActive && "bg-primary/12 text-primary"
+    );
+    const content = <>
+        <span className={cn(
+            "grid h-8 w-8 shrink-0 place-items-center rounded-md text-foreground/50 transition-colors group-hover:text-primary",
+            item.isActive && "bg-primary/10 text-primary"
+        )}>
+            {item.icon}
+        </span>
+        <span className="min-w-0 flex-1 truncate">
+            {item.label}
+        </span>
+    </>;
+
     return (
         <li>
-            <NextIntlLink
-                className={cn(
-                    "group flex min-h-11 w-full items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium text-foreground/68 transition-colors hover:bg-primary/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45",
-                    item.isActive && "bg-primary/12 text-primary"
-                )}
-                href={item.href}
-                onClick={onSelect}
-            >
-                <span className={cn(
-                    "grid h-8 w-8 shrink-0 place-items-center rounded-md text-foreground/50 transition-colors group-hover:text-primary",
-                    item.isActive && "bg-primary/10 text-primary"
-                )}>
-                    {item.icon}
-                </span>
-                <span className="min-w-0 flex-1 truncate">
-                    {item.label}
-                </span>
-            </NextIntlLink>
+            <NextIntlLink className={linkClassName} href={item.href} onClick={onSelect}>{content}</NextIntlLink>
         </li>
     )
 }
@@ -100,7 +99,6 @@ export default function Sidebar(
     const pathname = usePathname();
     const router = useRouter();
     const languageSwitchHref = useLocaleSwitchHref();
-
     const handleSignOut = async () => {
         await authClient.signOut();
         router.refresh();
@@ -115,11 +113,9 @@ export default function Sidebar(
         { href: '/offline-dictionary', label: t("Navbar.OfflineDictionary"), icon: <WifiOff className="h-5 w-5" />, isActive: isActive("/offline-dictionary") },
     ];
     const learnLinks: SidebarLink[] = [
+        { href: '/play', label: t("Navbar.Play"), icon: <Gamepad2 className="h-5 w-5" />, isActive: isActive("/play") },
         { href: '/word-list', label: t("Navbar.Word List"), icon: <ListTree className="h-5 w-5" />, isActive: isActive("/word-list") },
         { href: '/word-builder', label: t("Navbar.WordBuilder"), icon: <Blocks className="h-5 w-5" />, isActive: isActive("/word-builder") },
-        { href: '/flashcard-game', label: t("Navbar.FlashcardGame"), icon: <Layers className="h-5 w-5" />, isActive: isActive("/flashcard-game") },
-        { href: '/word-matching', label: t("Navbar.WordMatchingGame"), icon: <Link2 className="h-5 w-5" />, isActive: isActive("/word-matching") },
-        { href: '/speed-round', label: t("Navbar.SpeedRoundGame"), icon: <Zap className="h-5 w-5" />, isActive: isActive("/speed-round") },
     ];
     const contributeLinks: SidebarLink[] = [
         { href: '/contribute-word', label: t("Navbar.ContributeWord"), icon: <HeartHandshake className="h-5 w-5" />, isActive: isActive("/contribute-word") },
