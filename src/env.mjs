@@ -25,8 +25,10 @@ export const env = createEnv({
     DATABASE_DATABASE: z.string(),
     // DATABASE_SSL_CA: z.string(),
     RECAPTCHA_SECRET_KEY: z.string().min(1),
-    UPSTASH_REDIS_REST_URL: z.string().url(),
-    UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
+    VALKEY_URL:
+      process.env.NODE_ENV === "production"
+        ? z.string().url()
+        : z.string().url().default("redis://127.0.0.1:6379"),
   },
 
   /**
@@ -62,8 +64,7 @@ export const env = createEnv({
     NEXT_PUBLIC_RECAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_PATREON_URL: process.env.NEXT_PUBLIC_PATREON_URL,
-    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
-    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+    VALKEY_URL: process.env.VALKEY_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
