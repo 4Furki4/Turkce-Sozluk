@@ -1,7 +1,6 @@
 import PlaySpeedRoundGame from "@/src/components/play/play-speed-round-game";
 import { NoScriptNotice } from "@/src/components/progressive-enhancement/no-script-notice";
 import { auth } from "@/src/lib/auth";
-import { api, HydrateClient } from "@/src/trpc/server";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 
@@ -22,16 +21,14 @@ export default async function PlaySpeedRoundRoute({ params }: { params: Promise<
     const { locale } = await params;
     const session = await auth.api.getSession({ headers: await headers() }).catch(() => null);
 
-    void api.game.getWordsForSpeedRound.prefetch({ questionCount: 10, source: "all" });
-
     return (
-        <HydrateClient>
+        <>
             <NoScriptNotice>
                 {locale === "en"
                     ? "JavaScript is required to play Speed Round."
                     : "Hızlı Tur'u oynamak için JavaScript gerekir."}
             </NoScriptNotice>
             <PlaySpeedRoundGame session={session} locale={locale as "en" | "tr"} />
-        </HydrateClient>
+        </>
     );
 }

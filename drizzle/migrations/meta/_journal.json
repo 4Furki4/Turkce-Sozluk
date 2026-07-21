@@ -309,6 +309,20 @@
       "when": 1783890624743,
       "tag": "0043_married_mordo",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1784586819690,
+      "tag": "0044_pink_lord_hawal",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1784587841594,
+      "tag": "0045_odd_victor_mancha",
+      "breakpoints": true
     }
   ]
 }

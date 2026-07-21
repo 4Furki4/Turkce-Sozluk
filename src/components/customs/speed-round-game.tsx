@@ -146,10 +146,6 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
     const [showFeedback, setShowFeedback] = useState<"correct" | "incorrect" | null>(null);
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
-    // Leaderboard state
-    const [userRank, setUserRank] = useState<number | null>(null);
-    const [scoreSubmitted, setScoreSubmitted] = useState(false);
-
     // Data fetching
     const { refetch } = api.game.getWordsForSpeedRound.useQuery(
         { questionCount: questionCountNum, source },
@@ -157,21 +153,10 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
     );
 
     // Leaderboard query
-    const { data: leaderboardData, refetch: refetchLeaderboard } = api.game.getLeaderboard.useQuery(
+    const { data: leaderboardData } = api.game.getLeaderboard.useQuery(
         { gameType: "speed_round", limit: 10 },
         { enabled: gameState === "finished" }
     );
-
-    // Submit score mutation
-    const submitScoreMutation = api.game.submitScore.useMutation({
-        onSuccess: (data) => {
-            if (data.success && data.rank) {
-                setUserRank(data.rank);
-            }
-            setScoreSubmitted(true);
-            refetchLeaderboard();
-        },
-    });
 
     // Handle answer selection
     const handleAnswer = useCallback((answer: string | null, resolvedTimeLeft = timeLeft) => {
@@ -254,8 +239,6 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
         setTimeLeft(timePerQuestionNum);
         setShowFeedback(null);
         setSelectedAnswer(null);
-        setUserRank(null);
-        setScoreSubmitted(false);
 
         setGameState("loading");
 
@@ -276,8 +259,6 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
         setResults([]);
         setStreak(0);
         setMaxStreak(0);
-        setUserRank(null);
-        setScoreSubmitted(false);
     }, []);
 
     // Calculate final stats
@@ -439,44 +420,6 @@ export default function SpeedRoundGame({ session, locale }: SpeedRoundGameProps)
                                     <p className="text-2xl font-bold">{stats.avgTime}s</p>
                                 </div>
                             </div>
-
-                            {/* Submit Score Section */}
-                            {session && !scoreSubmitted && (
-                                <div className="mt-6">
-                                    <Button
-                                        color="success"
-                                        size="lg"
-                                        className="w-full"
-                                        onPress={() => {
-                                            const totalTime = results.reduce((sum, r) => sum + r.timeSpent, 0);
-                                            submitScoreMutation.mutate({
-                                                gameType: "speed_round",
-                                                score: stats.totalScore,
-                                                accuracy: stats.accuracy,
-                                                maxStreak: maxStreak,
-                                                questionCount: results.length,
-                                                timeTaken: totalTime,
-                                            });
-                                        }}
-                                        isLoading={submitScoreMutation.isPending}
-                                        startContent={<Trophy className="w-5 h-5" />}
-                                    >
-                                        {t("submitScore")}
-                                    </Button>
-                                </div>
-                            )}
-
-                            {/* Submitted Rank Display */}
-                            {scoreSubmitted && userRank && (
-                                <motion.div
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    className="mt-6 p-4 bg-primary/10 rounded-md"
-                                >
-                                    <p className="text-sm text-default-500">{t("yourRank")}</p>
-                                    <p className="text-3xl font-bold text-primary">#{userRank}</p>
-                                </motion.div>
-                            )}
 
                             {/* Leaderboard Section */}
                             {leaderboardData && leaderboardData.leaderboard.length > 0 && (
