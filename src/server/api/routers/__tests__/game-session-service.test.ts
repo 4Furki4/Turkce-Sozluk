@@ -35,6 +35,78 @@ describe("rated game session public projections", () => {
         expect(new Set(labels).size).toBe(labels.length);
     });
 
+    it("prefers curated semantic relations and comparable parts of speech over random decoys", () => {
+        const snapshot = createSpeedRoundSnapshot(
+            [{
+                wordId: 1,
+                word: "kitap",
+                meaningId: 11,
+                meaning: "Yazılı yapraklardan oluşan eser",
+                partOfSpeechId: 1,
+            }],
+            [
+                {
+                    meaningId: 12,
+                    wordId: 2,
+                    word: "dergi",
+                    meaning: "Belirli aralıklarla yayımlanan basılı yayın",
+                    partOfSpeechId: 3,
+                    relatedToWordIds: [1],
+                },
+                {
+                    meaningId: 13,
+                    wordId: 3,
+                    word: "roman",
+                    meaning: "Uzun yazılı eser",
+                    partOfSpeechId: 1,
+                },
+                {
+                    meaningId: 14,
+                    wordId: 4,
+                    word: "defter",
+                    meaning: "Yazılı yaprakların bir araya getirilmesiyle oluşan nesne",
+                    partOfSpeechId: 1,
+                },
+                {
+                    meaningId: 15,
+                    wordId: 5,
+                    word: "yağış",
+                    meaning: "Atmosferdeki su buharının yoğunlaşması olayı",
+                    partOfSpeechId: 4,
+                },
+            ],
+            1,
+        );
+
+        expect(snapshot).not.toBeNull();
+        const labels = snapshot!.questions[0]!.options.map((option) => option.meaning);
+        expect(labels).toEqual(expect.arrayContaining([
+            "Belirli aralıklarla yayımlanan basılı yayın",
+            "Uzun yazılı eser",
+            "Yazılı yaprakların bir araya getirilmesiyle oluşan nesne",
+        ]));
+        expect(labels).not.toContain("Atmosferdeki su buharının yoğunlaşması olayı");
+    });
+
+    it("falls back to distinct labels when metadata is unavailable", () => {
+        const snapshot = createSpeedRoundSnapshot(
+            [{ wordId: 1, word: "başlangıç", meaningId: 11, meaning: "Tanım" }],
+            [
+                { meaningId: 12, meaning: "tanım" },
+                { meaningId: 13, meaning: "başka" },
+                { meaningId: 14, meaning: "BAŞKA" },
+                { meaningId: 15, meaning: "üçüncü" },
+                { meaningId: 16, meaning: "dördüncü" },
+            ],
+            1,
+        );
+
+        expect(snapshot).not.toBeNull();
+        const labels = snapshot!.questions[0]!.options.map((option) => option.meaning.trim().toLocaleLowerCase("tr-TR"));
+        expect(labels).toHaveLength(4);
+        expect(new Set(labels).size).toBe(labels.length);
+    });
+
     it("never gives Word Matching duplicate visible words or meanings", () => {
         const snapshot = createWordMatchingSnapshot(
             [

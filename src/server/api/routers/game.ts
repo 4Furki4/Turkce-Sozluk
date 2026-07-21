@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { words } from "@/db/schema/words";
 import { meanings } from "@/db/schema/meanings";
+import { relatedWords } from "@/db/schema/related_words";
 import { savedWords } from "@/db/schema/saved_words";
 import { partOfSpeechs } from "@/db/schema/part_of_speechs";
 import { users } from "@/db/schema/users";
@@ -28,6 +29,7 @@ import {
     createSpeedRoundSnapshot,
     createWordMatchingSnapshot,
     redactWordMatchingBoard,
+    type MeaningCandidate,
     type RoundCandidate,
     type SpeedRoundSnapshot,
     type WordMatchingSnapshot,
@@ -129,6 +131,7 @@ async function getRoundCandidates(
         word: words.name,
         meaningId: meanings.id,
         meaning: meanings.meaning,
+        partOfSpeechId: meanings.partOfSpeechId,
     };
 
     // Snapshot builders discard visually duplicated labels, so sample beyond
@@ -166,13 +169,91 @@ async function getRoundCandidates(
     return distinctCandidates(candidates);
 }
 
-async function getMeaningDecoys(db: GameDatabase, count: number) {
-    return db
-        .select({ meaningId: meanings.id, meaning: meanings.meaning })
+async function getMeaningDecoys(
+    db: GameDatabase,
+    count: number,
+    targetWordIds: readonly number[],
+): Promise<MeaningCandidate[]> {
+    const decoySampleSize = Math.max(160, count * 24);
+    const randomDecoys = await db
+        .select({
+            meaningId: meanings.id,
+            meaning: meanings.meaning,
+            wordId: words.id,
+            word: words.name,
+            partOfSpeechId: meanings.partOfSpeechId,
+        })
         .from(meanings)
+        .innerJoin(words, eq(meanings.wordId, words.id))
         .where(isNotNull(meanings.meaning))
         .orderBy(sql`RANDOM()`)
-        .limit(Math.max(100, count * 16));
+        .limit(decoySampleSize);
+
+    // The relation graph gives us a real semantic signal when it is available.
+    // Obsolete entries are deliberately excluded: they are useful dictionary
+    // metadata, but misleading as a live answer alternative.
+    const relationDecoys = targetWordIds.length === 0
+        ? []
+        : (await Promise.all([
+            db
+                .select({
+                    targetWordId: relatedWords.wordId,
+                    meaningId: meanings.id,
+                    meaning: meanings.meaning,
+                    wordId: words.id,
+                    word: words.name,
+                    partOfSpeechId: meanings.partOfSpeechId,
+                })
+                .from(relatedWords)
+                .innerJoin(words, eq(relatedWords.relatedWordId, words.id))
+                .innerJoin(meanings, eq(meanings.wordId, words.id))
+                .where(and(
+                    inArray(relatedWords.wordId, [...targetWordIds]),
+                    inArray(relatedWords.relationType, ["relatedWord", "see_also", "turkish_equivalent"]),
+                    isNotNull(meanings.meaning),
+                ))
+                .orderBy(sql`RANDOM()`)
+                .limit(decoySampleSize),
+            db
+                .select({
+                    targetWordId: relatedWords.relatedWordId,
+                    meaningId: meanings.id,
+                    meaning: meanings.meaning,
+                    wordId: words.id,
+                    word: words.name,
+                    partOfSpeechId: meanings.partOfSpeechId,
+                })
+                .from(relatedWords)
+                .innerJoin(words, eq(relatedWords.wordId, words.id))
+                .innerJoin(meanings, eq(meanings.wordId, words.id))
+                .where(and(
+                    inArray(relatedWords.relatedWordId, [...targetWordIds]),
+                    inArray(relatedWords.relationType, ["relatedWord", "see_also", "turkish_equivalent"]),
+                    isNotNull(meanings.meaning),
+                ))
+                .orderBy(sql`RANDOM()`)
+                .limit(decoySampleSize),
+        ])).flat();
+
+    const decoysByMeaningId = new Map<number, MeaningCandidate>();
+    for (const decoy of randomDecoys) {
+        decoysByMeaningId.set(decoy.meaningId, { ...decoy, relatedToWordIds: [] });
+    }
+    for (const decoy of relationDecoys) {
+        const existing = decoysByMeaningId.get(decoy.meaningId);
+        const relatedToWordIds = new Set(existing?.relatedToWordIds ?? []);
+        relatedToWordIds.add(decoy.targetWordId);
+        decoysByMeaningId.set(decoy.meaningId, {
+            meaningId: decoy.meaningId,
+            meaning: decoy.meaning,
+            wordId: decoy.wordId,
+            word: decoy.word,
+            partOfSpeechId: decoy.partOfSpeechId,
+            relatedToWordIds: [...relatedToWordIds],
+        });
+    }
+
+    return [...decoysByMeaningId.values()];
 }
 
 function sessionExpiry(now: Date, minimumMinutes = 10) {
@@ -645,121 +726,39 @@ export const gameRouter = createTRPCRouter({
         )
         .query(async ({ input, ctx: { db, session } }) => {
             const { questionCount, source } = input;
-
-            // Get all meanings for decoys (we need a pool of random meanings)
-            const allMeanings = await db
-                .select({ meaning: meanings.meaning })
-                .from(meanings)
-                .where(isNotNull(meanings.meaning))
-                .orderBy(sql`RANDOM()`)
-                .limit(200);
-
-            const meaningPool = allMeanings.map((m) => m.meaning).filter(Boolean) as string[];
-
-            // If source is "saved", user must be authenticated
-            if (source === "saved") {
-                if (!session?.user?.id) {
-                    return { questions: [], error: "authRequired" };
-                }
-
-                const savedWordIds = await db
-                    .select({ wordId: savedWords.wordId })
-                    .from(savedWords)
-                    .where(eq(savedWords.userId, session.user.id));
-
-                if (savedWordIds.length === 0) {
-                    return { questions: [], error: "noSavedWords" };
-                }
-
-                const wordIds = savedWordIds.map((sw) => sw.wordId);
-
-                const result = await db
-                    .select({
-                        id: words.id,
-                        name: words.name,
-                        meaning: meanings.meaning,
-                    })
-                    .from(words)
-                    .innerJoin(meanings, eq(meanings.wordId, words.id))
-                    .where(inArray(words.id, wordIds))
-                    .orderBy(asc(meanings.order))
-                    .limit(questionCount * 2);
-
-                // Deduplicate by word id
-                const seenIds = new Set<number>();
-                const uniqueWords = result.filter((row) => {
-                    if (seenIds.has(row.id)) return false;
-                    seenIds.add(row.id);
-                    return true;
-                });
-
-                const shuffled = [...uniqueWords].sort(() => Math.random() - 0.5).slice(0, questionCount);
-
-                return {
-                    questions: shuffled.map((row) => {
-                        const correctMeaning = row.meaning;
-                        // Get 3 random decoy meanings (not the correct one)
-                        const decoys = meaningPool
-                            .filter((m) => m !== correctMeaning)
-                            .sort(() => Math.random() - 0.5)
-                            .slice(0, 3);
-
-                        // Shuffle all 4 options
-                        const options = [correctMeaning, ...decoys].sort(() => Math.random() - 0.5);
-
-                        return {
-                            id: row.id,
-                            word: row.name,
-                            correctMeaning,
-                            options,
-                        };
-                    }),
-                    error: null,
-                };
+            if (source === "saved" && !session?.user?.id) {
+                return { questions: [], error: "authRequired" };
             }
 
-            // Get random words from all words
-            const result = await db
-                .select({
-                    id: words.id,
-                    name: words.name,
-                    meaning: meanings.meaning,
-                })
-                .from(words)
-                .innerJoin(meanings, eq(meanings.wordId, words.id))
-                .where(isNotNull(meanings.meaning))
-                .orderBy(sql`RANDOM()`)
-                .limit(questionCount * 3);
+            const candidates = await getRoundCandidates(
+                db,
+                session?.user?.id ?? "",
+                source,
+                questionCount,
+            );
+            if (candidates.length < questionCount) {
+                return { questions: [], error: source === "saved" ? "noSavedWords" : "noWords" };
+            }
 
-            // Deduplicate by word id
-            const seenIds = new Set<number>();
-            const uniqueWords = result.filter((row) => {
-                if (seenIds.has(row.id)) return false;
-                seenIds.add(row.id);
-                return true;
-            });
-
-            const finalQuestions = uniqueWords.slice(0, questionCount);
+            const snapshot = createSpeedRoundSnapshot(
+                candidates,
+                await getMeaningDecoys(db, questionCount, candidates.map((candidate) => candidate.wordId)),
+                questionCount,
+            );
+            if (!snapshot) {
+                return { questions: [], error: source === "saved" ? "noSavedWords" : "noWords" };
+            }
 
             return {
-                questions: finalQuestions.map((row) => {
-                    const correctMeaning = row.meaning;
-                    // Get 3 random decoy meanings (not the correct one)
-                    const decoys = meaningPool
-                        .filter((m) => m !== correctMeaning)
-                        .sort(() => Math.random() - 0.5)
-                        .slice(0, 3);
-
-                    // Shuffle all 4 options
-                    const options = [correctMeaning, ...decoys].sort(() => Math.random() - 0.5);
-
-                    return {
-                        id: row.id,
-                        word: row.name,
-                        correctMeaning,
-                        options,
-                    };
-                }),
+                // Guest rounds are explicitly unranked practice, so they can
+                // receive the correct label for client-side feedback. Rated
+                // sessions below retain only opaque option tokens.
+                questions: snapshot.questions.map((question) => ({
+                    id: question.wordId,
+                    word: question.word,
+                    correctMeaning: question.options.find((option) => option.token === question.correctOptionToken)?.meaning ?? "",
+                    options: question.options.map((option) => option.meaning),
+                })),
                 error: null,
             };
         }),
@@ -779,7 +778,7 @@ export const gameRouter = createTRPCRouter({
 
             const snapshot = createSpeedRoundSnapshot(
                 candidates,
-                await getMeaningDecoys(db, input.questionCount),
+                await getMeaningDecoys(db, input.questionCount, candidates.map((candidate) => candidate.wordId)),
                 input.questionCount,
             );
             if (!snapshot) {

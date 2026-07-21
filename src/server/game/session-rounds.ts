@@ -1,8 +1,17 @@
 import "server-only";
 
-type MeaningCandidate = {
+export type MeaningCandidate = {
     meaningId: number;
     meaning: string;
+    /**
+     * These are server-only ranking signals. They never leave the persisted
+     * snapshot, so a rated player still cannot infer the correct option.
+     */
+    wordId?: number;
+    word?: string;
+    partOfSpeechId?: number | null;
+    /** Source words that have an explicit non-obsolete relation to this one. */
+    relatedToWordIds?: readonly number[];
 };
 
 export type RoundCandidate = MeaningCandidate & {
@@ -74,6 +83,78 @@ function normalizeVisibleText(value: string): string {
     return value.trim().replace(/\s+/g, " ").toLocaleLowerCase("tr-TR");
 }
 
+const DEFINITION_STOP_WORDS = new Set([
+    "ama", "ancak", "bir", "bu", "da", "de", "gibi", "için", "ile", "ki", "olan", "olarak", "ve", "veya", "ya",
+]);
+
+function definitionTokens(value: string): Set<string> {
+    return new Set(
+        normalizeVisibleText(value)
+            .replace(/[^\p{L}\p{N}]+/gu, " ")
+            .split(" ")
+            .filter((token) => token.length > 2 && !DEFINITION_STOP_WORDS.has(token)),
+    );
+}
+
+function sharedDefinitionTokenCount(first: string, second: string): number {
+    const firstTokens = definitionTokens(first);
+    const secondTokens = definitionTokens(second);
+    let shared = 0;
+
+    for (const token of firstTokens) {
+        if (secondTokens.has(token)) shared += 1;
+    }
+
+    return shared;
+}
+
+function difficultyDistance(first: MeaningCandidate, second: MeaningCandidate): number {
+    const firstPromptLength = [...(first.word ?? "")].length;
+    const secondPromptLength = [...(second.word ?? "")].length;
+    const firstMeaningLength = [...normalizeVisibleText(first.meaning)].length;
+    const secondMeaningLength = [...normalizeVisibleText(second.meaning)].length;
+    const firstTokenCount = definitionTokens(first.meaning).size;
+    const secondTokenCount = definitionTokens(second.meaning).size;
+
+    return Math.abs(firstPromptLength - secondPromptLength) * 3
+        + Math.abs(firstMeaningLength - secondMeaningLength)
+        + Math.abs(firstTokenCount - secondTokenCount) * 8;
+}
+
+function decoyRank(target: RoundCandidate, decoy: MeaningCandidate): number {
+    const isCuratedRelation = decoy.relatedToWordIds?.includes(target.wordId) ?? false;
+    const samePartOfSpeech = target.partOfSpeechId !== null
+        && target.partOfSpeechId !== undefined
+        && target.partOfSpeechId === decoy.partOfSpeechId;
+    const semanticOverlap = sharedDefinitionTokenCount(target.meaning, decoy.meaning);
+    const complexityDistance = difficultyDistance(target, decoy);
+
+    // Relations are the strongest available semantic signal. The remaining
+    // signals make uncurated distractors feel comparable instead of random.
+    return (isCuratedRelation ? 10_000 : 0)
+        + (samePartOfSpeech ? 1_000 : 0)
+        + semanticOverlap * 120
+        + Math.max(0, 180 - complexityDistance);
+}
+
+function chooseDecoys(target: RoundCandidate, decoyPool: readonly MeaningCandidate[]): MeaningCandidate[] {
+    const targetMeaning = normalizeVisibleText(target.meaning);
+    const eligible = distinctBy(
+        decoyPool.filter((decoy) => (
+            decoy.meaningId !== target.meaningId
+            && decoy.wordId !== target.wordId
+            && normalizeVisibleText(decoy.meaning) !== targetMeaning
+        )),
+        (decoy) => normalizeVisibleText(decoy.meaning),
+    );
+
+    // Shuffle before the stable sort so options with equal evidence remain
+    // varied between rounds without diluting stronger evidence.
+    return shuffle(eligible)
+        .sort((first, second) => decoyRank(target, second) - decoyRank(target, first))
+        .slice(0, 3);
+}
+
 export function createSpeedRoundSnapshot(
     candidates: readonly RoundCandidate[],
     decoyPool: readonly MeaningCandidate[],
@@ -88,16 +169,7 @@ export function createSpeedRoundSnapshot(
     for (const candidate of shuffle(uniqueCandidates)) {
         if (questions.length === questionCount) break;
 
-        const candidateMeaning = normalizeVisibleText(candidate.meaning);
-        const decoys = shuffle(
-            distinctBy(
-                decoyPool.filter((decoy) => (
-                    decoy.meaningId !== candidate.meaningId
-                    && normalizeVisibleText(decoy.meaning) !== candidateMeaning
-                )),
-                (decoy) => normalizeVisibleText(decoy.meaning),
-            ),
-        ).slice(0, 3);
+        const decoys = chooseDecoys(candidate, decoyPool);
 
         if (decoys.length < 3) continue;
 

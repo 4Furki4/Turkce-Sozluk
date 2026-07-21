@@ -139,6 +139,81 @@ describe("server-owned Speed Round scoring", () => {
         expect(result.state.deadlineAt).toBe(21_720);
     });
 
+    it("accepts a correct answer one millisecond before the server deadline", () => {
+        const progress = createSpeedRoundProgress(speedSnapshot, 1_000);
+        const result = resolveSpeedRoundAnswer(
+            speedSnapshot,
+            progress,
+            { questionIndex: 0, optionToken: "option-a" },
+            10_999,
+        );
+
+        expect(result).toMatchObject({
+            ok: true,
+            isCorrect: true,
+            timedOut: false,
+            timeSpentMs: 9_999,
+        });
+        if (!result.ok) return;
+        expect(result.state.score).toBeGreaterThan(0);
+        expect(result.state.deadlineAt).toBe(21_719);
+    });
+
+    it("classifies the exact server deadline as a timeout even with a correct option token", () => {
+        const progress = createSpeedRoundProgress(speedSnapshot, 1_000);
+        const result = resolveSpeedRoundAnswer(
+            speedSnapshot,
+            progress,
+            { questionIndex: 0, optionToken: "option-a" },
+            11_000,
+        );
+
+        expect(result).toMatchObject({
+            ok: true,
+            isCorrect: false,
+            timedOut: true,
+            pointsEarned: 0,
+            timeSpentMs: 10_000,
+        });
+    });
+
+    it("starts a repeated round with independent zeroed statistics", () => {
+        const firstRound = createSpeedRoundProgress(speedSnapshot, 0);
+        const resolvedFirstRound = resolveSpeedRoundAnswer(
+            speedSnapshot,
+            firstRound,
+            { questionIndex: 0, optionToken: "option-a" },
+            1_000,
+        );
+        if (!resolvedFirstRound.ok) throw new Error("Expected first round answer to resolve");
+        expect(resolvedFirstRound.state.score).toBeGreaterThan(0);
+        expect(resolvedFirstRound.state.correctCount).toBe(1);
+
+        const secondRound = createSpeedRoundProgress(speedSnapshot, 30_000);
+        expect(secondRound).toMatchObject({
+            currentStep: 0,
+            score: 0,
+            streak: 0,
+            maxStreak: 0,
+            correctCount: 0,
+            timeTakenMs: 0,
+        });
+
+        const resolvedSecondRound = resolveSpeedRoundAnswer(
+            speedSnapshot,
+            secondRound,
+            { questionIndex: 0, optionToken: "option-b" },
+            31_000,
+        );
+        expect(resolvedSecondRound).toMatchObject({
+            ok: true,
+            isCorrect: false,
+            pointsEarned: 0,
+            streak: 0,
+            timeSpentMs: 1_000,
+        });
+    });
+
     it("does not accept the next answer until its feedback pause is over", () => {
         const initial = createSpeedRoundProgress(speedSnapshot, 0);
         const first = resolveSpeedRoundAnswer(
