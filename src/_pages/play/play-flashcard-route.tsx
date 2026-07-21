@@ -23,6 +23,13 @@ export default async function PlayFlashcardRoute({ params }: { params: Promise<{
     const session = await auth.api.getSession({ headers: await headers() }).catch(() => null);
 
     void api.game.getRandomWordsForFlashcards.prefetch({ count: 10, source: "all" });
+    if (session?.user?.id) {
+        // This optional query must settle before HydrateClient serializes the
+        // cache. A pending query that rejects (for example during a migration
+        // rollout) otherwise becomes an RSC hydration error instead of the
+        // Flashcards UI's normal recoverable review-queue error state.
+        await api.game.getFlashcardReviewSummary.prefetch();
+    }
 
     return (
         <HydrateClient>

@@ -37,6 +37,12 @@ import {
   gameSessions,
   gameSessionsRelations,
 } from "./schema/game_sessions";
+import {
+  flashcardReviewEvents,
+  flashcardReviewEventsRelations,
+  flashcardReviewStates,
+  flashcardReviewStatesRelations,
+} from "./schema/flashcard_reviews";
 import { wordSources, wordSourcesRelations } from "./schema/word_sources";
 import { foreignTermSuggestions, foreignTermSuggestionsRelations } from "./schema/foreign_term_suggestions";
 import { foreignTermSuggestionVotes, foreignTermSuggestionVotesRelations } from "./schema/foreign_term_suggestion_votes";
@@ -96,6 +102,10 @@ export const schema = {
   gameSessionsRelations,
   gameSessionEvents,
   gameSessionEventsRelations,
+  flashcardReviewStates,
+  flashcardReviewStatesRelations,
+  flashcardReviewEvents,
+  flashcardReviewEventsRelations,
   wordSources,
   wordSourcesRelations,
   foreignTermSuggestions,

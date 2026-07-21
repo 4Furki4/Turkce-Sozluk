@@ -5,8 +5,14 @@ import { words } from "@/db/schema/words";
 import { meanings } from "@/db/schema/meanings";
 import { savedWords } from "@/db/schema/saved_words";
 import { partOfSpeechs } from "@/db/schema/part_of_speechs";
+import { users } from "@/db/schema/users";
 import { gameScores } from "@/db/schema/game_scores";
 import { gameSessionEvents, gameSessions, type GameSessionSettings } from "@/db/schema/game_sessions";
+import {
+    flashcardReviewEvents,
+    flashcardReviewStates,
+    type FlashcardReviewEventOutcome,
+} from "@/db/schema/flashcard_reviews";
 import {
     createVerifiedGameScore,
     getPlayableSpeedRoundQuestion,
@@ -14,6 +20,8 @@ import {
     isCompetitiveWordMatchingRuleset,
     resolveSpeedRoundAnswer,
     resolveWordMatchingAttempt,
+    scheduleFlashcardReview,
+    type FlashcardRating,
     type VerifiedGameScore,
 } from "@/src/lib/game";
 import {
@@ -30,9 +38,12 @@ import {
     toWordMatchingProgress,
     toWordMatchingSessionSnapshot,
 } from "@/src/server/game/rated-session-state";
-import { and, asc, eq, inArray, isNotNull, sql } from "drizzle-orm";
+import { isSameFlashcardReviewAction } from "@/src/server/game/flashcard-review-actions";
+import { and, asc, eq, gt, inArray, isNotNull, lte, sql } from "drizzle-orm";
 
 const gameSourceSchema = z.enum(["all", "saved"]);
+const flashcardDirectionSchema = z.enum(["word", "meaning"]);
+const flashcardRatingSchema = z.enum(["again", "hard", "good", "easy"]);
 
 const speedRoundSessionInput = z.object({
     questionCount: z.number().int().min(5).max(30).default(10),
@@ -240,6 +251,7 @@ export const gameRouter = createTRPCRouter({
                 const result = await db
                     .select({
                         id: words.id,
+                        meaningId: meanings.id,
                         name: words.name,
                         phonetic: words.phonetic,
                         meaning: meanings.meaning,
@@ -266,6 +278,7 @@ export const gameRouter = createTRPCRouter({
                 return {
                     words: shuffled.map((row) => ({
                         id: row.id,
+                        meaningId: row.meaningId,
                         name: row.name,
                         phonetic: row.phonetic,
                         meaning: row.meaning,
@@ -279,6 +292,7 @@ export const gameRouter = createTRPCRouter({
             const result = await db
                 .select({
                     id: words.id,
+                    meaningId: meanings.id,
                     name: words.name,
                     phonetic: words.phonetic,
                     meaning: meanings.meaning,
@@ -305,6 +319,7 @@ export const gameRouter = createTRPCRouter({
             return {
                 words: finalWords.map((row) => ({
                     id: row.id,
+                    meaningId: row.meaningId,
                     name: row.name,
                     phonetic: row.phonetic,
                     meaning: row.meaning,
@@ -313,6 +328,211 @@ export const gameRouter = createTRPCRouter({
                 error: null,
             };
         }),
+
+    /** Summary deliberately distinguishes a new learner from a caught-up one. */
+    getFlashcardReviewSummary: protectedProcedure
+        .query(async ({ ctx: { db, session } }) => {
+            const now = new Date();
+            const [counts] = await db
+                .select({
+                    totalCount: sql<number>`count(*)`.mapWith(Number),
+                    dueCount: sql<number>`count(*) filter (where ${flashcardReviewStates.dueAt} <= ${now})`.mapWith(Number),
+                })
+                .from(flashcardReviewStates)
+                .where(eq(flashcardReviewStates.userId, session.user.id));
+            const [nextReview] = await db
+                .select({ dueAt: flashcardReviewStates.dueAt })
+                .from(flashcardReviewStates)
+                .where(and(
+                    eq(flashcardReviewStates.userId, session.user.id),
+                    gt(flashcardReviewStates.dueAt, now),
+                ))
+                .orderBy(asc(flashcardReviewStates.dueAt))
+                .limit(1);
+
+            return {
+                totalCount: counts?.totalCount ?? 0,
+                dueCount: counts?.dueCount ?? 0,
+                nextDueAt: nextReview?.dueAt ?? null,
+            };
+        }),
+
+    /**
+     * A due queue preserves the exact meaning and prompt direction that were
+     * previously rated. It is not based on saved words, so unsaving a word
+     * never erases or hides learning history.
+     */
+    getDueFlashcardReviews: protectedProcedure
+        .input(z.object({ limit: z.number().int().min(1).max(100).default(10) }))
+        .query(async ({ input, ctx: { db, session } }) => {
+            const now = new Date();
+            const dueWhere = and(
+                eq(flashcardReviewStates.userId, session.user.id),
+                lte(flashcardReviewStates.dueAt, now),
+            );
+            const [countResult] = await db
+                .select({ count: sql<number>`count(*)`.mapWith(Number) })
+                .from(flashcardReviewStates)
+                .where(dueWhere);
+            const cards = await db
+                .select({
+                    id: words.id,
+                    meaningId: meanings.id,
+                    name: words.name,
+                    phonetic: words.phonetic,
+                    meaning: meanings.meaning,
+                    partOfSpeech: partOfSpeechs.partOfSpeech,
+                    direction: flashcardReviewStates.direction,
+                    dueAt: flashcardReviewStates.dueAt,
+                })
+                .from(flashcardReviewStates)
+                .innerJoin(meanings, eq(flashcardReviewStates.meaningId, meanings.id))
+                .innerJoin(words, eq(meanings.wordId, words.id))
+                .leftJoin(partOfSpeechs, eq(meanings.partOfSpeechId, partOfSpeechs.id))
+                .where(dueWhere)
+                .orderBy(
+                    asc(flashcardReviewStates.dueAt),
+                    asc(flashcardReviewStates.meaningId),
+                    asc(flashcardReviewStates.direction),
+                )
+                .limit(input.limit);
+
+            return {
+                cards,
+                totalDueCount: countResult?.count ?? 0,
+            };
+        }),
+
+    /**
+     * Atomically rate one revealed card. State is locked per user so two tabs
+     * cannot derive transitions from the same prior interval; the immutable
+     * action event makes a lost client response safe to replay.
+     */
+    rateFlashcardReview: protectedProcedure
+        .input(z.object({
+            meaningId: z.number().int().positive(),
+            direction: flashcardDirectionSchema,
+            rating: flashcardRatingSchema,
+            actionId: z.string().uuid(),
+        }))
+        .mutation(async ({ input, ctx: { db, session } }) => db.transaction(async (tx) => {
+            // Serialize a learner's ratings. This handles both duplicate action
+            // IDs and different concurrent ratings for the same card without a
+            // client-provided version or timestamp.
+            const [lockedUser] = await tx
+                .select({ id: users.id })
+                .from(users)
+                .where(eq(users.id, session.user.id))
+                .for("update")
+                .limit(1);
+            if (!lockedUser) {
+                throw new TRPCError({ code: "UNAUTHORIZED", message: "Flashcard learner not found" });
+            }
+
+            const [previousEvent] = await tx
+                .select({
+                    meaningId: flashcardReviewEvents.meaningId,
+                    direction: flashcardReviewEvents.direction,
+                    rating: flashcardReviewEvents.rating,
+                    outcome: flashcardReviewEvents.outcome,
+                })
+                .from(flashcardReviewEvents)
+                .where(and(
+                    eq(flashcardReviewEvents.userId, session.user.id),
+                    eq(flashcardReviewEvents.actionId, input.actionId),
+                ))
+                .limit(1);
+            if (previousEvent) {
+                if (!isSameFlashcardReviewAction(previousEvent, input)) {
+                    throw new TRPCError({
+                        code: "CONFLICT",
+                        message: "Flashcard review action ID was already used for another rating",
+                    });
+                }
+
+                return previousEvent.outcome as FlashcardReviewEventOutcome;
+            }
+
+            const [card] = await tx
+                .select({ meaningId: meanings.id })
+                .from(meanings)
+                .innerJoin(words, eq(meanings.wordId, words.id))
+                .where(eq(meanings.id, input.meaningId))
+                .limit(1);
+            if (!card) {
+                throw new TRPCError({ code: "NOT_FOUND", message: "Flashcard meaning not found" });
+            }
+
+            const [previousState] = await tx
+                .select()
+                .from(flashcardReviewStates)
+                .where(and(
+                    eq(flashcardReviewStates.userId, session.user.id),
+                    eq(flashcardReviewStates.meaningId, input.meaningId),
+                    eq(flashcardReviewStates.direction, input.direction),
+                ))
+                .for("update")
+                .limit(1);
+
+            const now = new Date();
+            const nextState = scheduleFlashcardReview(
+                previousState ? {
+                    repetitions: previousState.repetitions,
+                    lapses: previousState.lapses,
+                    easeFactor: previousState.easeFactor,
+                    intervalDays: previousState.intervalDays,
+                } : null,
+                input.rating as FlashcardRating,
+                now,
+            );
+            const outcome: FlashcardReviewEventOutcome = {
+                meaningId: card.meaningId,
+                direction: input.direction,
+                rating: input.rating,
+                dueAt: nextState.dueAt.toISOString(),
+                repetitions: nextState.repetitions,
+                lapses: nextState.lapses,
+                easeFactor: nextState.easeFactor,
+                intervalDays: nextState.intervalDays,
+            };
+
+            if (previousState) {
+                await tx
+                    .update(flashcardReviewStates)
+                    .set({
+                        ...nextState,
+                        lastReviewedAt: now,
+                        updatedAt: now,
+                    })
+                    .where(and(
+                        eq(flashcardReviewStates.userId, session.user.id),
+                        eq(flashcardReviewStates.meaningId, input.meaningId),
+                        eq(flashcardReviewStates.direction, input.direction),
+                    ));
+            } else {
+                await tx.insert(flashcardReviewStates).values({
+                    userId: session.user.id,
+                    meaningId: input.meaningId,
+                    direction: input.direction,
+                    ...nextState,
+                    lastReviewedAt: now,
+                    createdAt: now,
+                    updatedAt: now,
+                });
+            }
+
+            await tx.insert(flashcardReviewEvents).values({
+                userId: session.user.id,
+                meaningId: input.meaningId,
+                direction: input.direction,
+                rating: input.rating,
+                actionId: input.actionId,
+                outcome,
+                createdAt: now,
+            });
+
+            return outcome;
+        })),
 
     /**
      * Get words for matching game (pairs of word-meaning)
