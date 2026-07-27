@@ -2194,7 +2194,14 @@
       "roundCompleteKicker": "Tur tamamlandı",
       "roundCompleteDescription": "Bağlantılar kuruldu. Hızlıca tekrar edin ya da yeni bir tur oluşturun.",
       "timeUpDescription": "Bu turda süre doldu. Yeni bir turda eşleştirmelere devam edin.",
-      "scoreboard": "Tur ilerlemesi"
+      "scoreboard": "Tur ilerlemesi",
+      "review": "Eşleşme incelemesi",
+      "correctPair": "Hatasız eşleştirildi",
+      "mistakeCount": "{count} hatalı bağlantı",
+      "unmatchedPair": "Tur bitmeden eşleştirilmedi",
+      "save": "Kelimeyi kaydet",
+      "saved": "Kaydedildi",
+      "signInToSave": "Kaydetmek için giriş yapın"
     },
     "speedRound": {
       "roundKicker": "Sprint turu",

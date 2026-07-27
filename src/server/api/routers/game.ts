@@ -27,12 +27,15 @@ import {
 } from "@/src/lib/game";
 import {
     createSpeedRoundSnapshot,
+    createWordMatchingReview,
     createWordMatchingSnapshot,
     redactWordMatchingBoard,
     type MeaningCandidate,
     type RoundCandidate,
     type SpeedRoundSnapshot,
+    type WordMatchingReviewPair,
     type WordMatchingSnapshot,
+    type WordMatchingWrongAttempt,
 } from "@/src/server/game/session-rounds";
 import {
     toSpeedRoundProgress,
@@ -109,6 +112,8 @@ type WordMatchingActionOutcome = {
     timeTakenSeconds?: number | null;
     finalResult?: VerifiedGameScore | null;
     rank?: number | null;
+    /** The authoritative answer map is attached only to terminal outcomes. */
+    review?: readonly WordMatchingReviewPair[];
 };
 
 function distinctCandidates(rows: RoundCandidate[]) {
@@ -1056,6 +1061,29 @@ export const gameRouter = createTRPCRouter({
                 .limit(1);
             if (previousEvent) return previousEvent.outcome as WordMatchingActionOutcome;
 
+            const snapshot = ownedSession.snapshot as unknown as WordMatchingSnapshot;
+            const buildTerminalReview = async (matchedWordTokens: readonly string[]) => {
+                const wrongEvents = await tx
+                    .select({ payload: gameSessionEvents.payload })
+                    .from(gameSessionEvents)
+                    .where(and(
+                        eq(gameSessionEvents.sessionId, ownedSession.id),
+                        eq(gameSessionEvents.isCorrect, false),
+                    ));
+                const wrongAttempts = wrongEvents.flatMap(({ payload }) => {
+                    const wordToken = payload.wordTileToken;
+                    const meaningToken = payload.meaningTileToken;
+                    return typeof wordToken === "string" && typeof meaningToken === "string"
+                        ? [{ wordToken, meaningToken } satisfies WordMatchingWrongAttempt]
+                        : [];
+                });
+
+                return createWordMatchingReview(snapshot, matchedWordTokens, wrongAttempts);
+            };
+            const matchedMeaningTokens = (matchedWordTokens: readonly string[]) => snapshot.pairs
+                .filter((pair) => matchedWordTokens.includes(pair.wordToken))
+                .map((pair) => pair.meaningToken);
+
             const now = new Date();
             if (ownedSession.status !== "active") sessionError("session_not_active");
             if (now >= ownedSession.expiresAt) {
@@ -1066,6 +1094,11 @@ export const gameRouter = createTRPCRouter({
                         ownedSession.questionStartedAt,
                         ownedSession.deadlineAt ?? now,
                     ),
+                    score: ownedSession.score,
+                    mistakes: ownedSession.mistakeCount,
+                    matchedWordTokens: ownedSession.matchedTokens,
+                    matchedMeaningTokens: matchedMeaningTokens(ownedSession.matchedTokens),
+                    review: await buildTerminalReview(ownedSession.matchedTokens),
                 };
                 await tx.update(gameSessions).set({ status: "expired", completedAt: now, updatedAt: now }).where(eq(gameSessions.id, ownedSession.id));
                 await tx.insert(gameSessionEvents).values({
@@ -1090,6 +1123,11 @@ export const gameRouter = createTRPCRouter({
                     expired: true,
                     completed: false,
                     timeTakenSeconds: elapsedSeconds(ownedSession.questionStartedAt, ownedSession.deadlineAt),
+                    score: ownedSession.score,
+                    mistakes: ownedSession.mistakeCount,
+                    matchedWordTokens: ownedSession.matchedTokens,
+                    matchedMeaningTokens: matchedMeaningTokens(ownedSession.matchedTokens),
+                    review: await buildTerminalReview(ownedSession.matchedTokens),
                 };
                 await tx.update(gameSessions).set({
                     status: "expired",
@@ -1111,7 +1149,6 @@ export const gameRouter = createTRPCRouter({
                 sessionError("invalid_tile");
             }
 
-            const snapshot = ownedSession.snapshot as unknown as WordMatchingSnapshot;
             const timeLimitSeconds = ownedSession.settings.mode === "timed" ? 60 : null;
             const scoringSnapshot = toWordMatchingSessionSnapshot(snapshot, timeLimitSeconds);
             const resolution = resolveWordMatchingAttempt(
@@ -1130,6 +1167,11 @@ export const gameRouter = createTRPCRouter({
                             ownedSession.questionStartedAt,
                             ownedSession.deadlineAt ?? now,
                         ),
+                        score: ownedSession.score,
+                        mistakes: ownedSession.mistakeCount,
+                        matchedWordTokens: ownedSession.matchedTokens,
+                        matchedMeaningTokens: matchedMeaningTokens(ownedSession.matchedTokens),
+                        review: await buildTerminalReview(ownedSession.matchedTokens),
                     };
                     await tx.update(gameSessions).set({ status: "expired", completedAt: now, updatedAt: now }).where(eq(gameSessions.id, ownedSession.id));
                     await tx.insert(gameSessionEvents).values({
@@ -1162,15 +1204,16 @@ export const gameRouter = createTRPCRouter({
                 score: resolution.state.score,
                 mistakes: resolution.state.mistakes,
                 matchedWordTokens: resolution.state.matchedWordTokens,
-                matchedMeaningTokens: snapshot.pairs
-                    .filter((pair) => resolution.state.matchedWordTokens.includes(pair.wordToken))
-                    .map((pair) => pair.meaningToken),
+                matchedMeaningTokens: matchedMeaningTokens(resolution.state.matchedWordTokens),
                 timeTakenSeconds: resolution.completed
                     ? Math.max(0, Math.ceil((resolution.occurredAt - ownedSession.questionStartedAt.getTime()) / 1000))
                     : null,
                 finalResult: verifiedScore,
                 rank: null as number | null,
             };
+            if (resolution.completed) {
+                outcome.review = await buildTerminalReview(resolution.state.matchedWordTokens);
+            }
 
             await tx.update(gameSessions).set({
                 status: resolution.state.status,

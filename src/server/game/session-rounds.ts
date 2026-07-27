@@ -52,6 +52,19 @@ export type WordMatchingSnapshot = {
     meaningOrder: string[];
 };
 
+export type WordMatchingWrongAttempt = {
+    wordToken: string;
+    meaningToken: string;
+};
+
+export type WordMatchingReviewPair = {
+    wordId: number;
+    word: string;
+    meaning: string;
+    matched: boolean;
+    mistakeCount: number;
+};
+
 export type RatedGameSnapshot = SpeedRoundSnapshot | WordMatchingSnapshot;
 
 function shuffle<T>(values: readonly T[]): T[] {
@@ -260,6 +273,45 @@ export function redactWordMatchingBoard(snapshot: WordMatchingSnapshot) {
     }).filter((item): item is { token: string; meaning: string } => item !== null);
 
     return { words, meanings };
+}
+
+/**
+ * Reveal the authoritative answer map only after a matching session has ended.
+ * A wrong connection makes both correct pairs worth revisiting: the selected
+ * word's pair and the selected meaning's pair.
+ */
+export function createWordMatchingReview(
+    snapshot: WordMatchingSnapshot,
+    matchedWordTokens: readonly string[],
+    wrongAttempts: readonly WordMatchingWrongAttempt[],
+): WordMatchingReviewPair[] {
+    const matchedTokens = new Set(matchedWordTokens);
+    const mistakeCounts = new Map<string, number>();
+
+    for (const attempt of wrongAttempts) {
+        const wordPair = snapshot.pairs.find((pair) => pair.wordToken === attempt.wordToken);
+        const meaningPair = snapshot.pairs.find((pair) => pair.meaningToken === attempt.meaningToken);
+
+        if (wordPair) {
+            mistakeCounts.set(wordPair.wordToken, (mistakeCounts.get(wordPair.wordToken) ?? 0) + 1);
+        }
+        if (meaningPair && meaningPair.wordToken !== wordPair?.wordToken) {
+            mistakeCounts.set(meaningPair.wordToken, (mistakeCounts.get(meaningPair.wordToken) ?? 0) + 1);
+        }
+    }
+
+    return snapshot.wordOrder.flatMap((wordToken) => {
+        const pair = snapshot.pairs.find((item) => item.wordToken === wordToken);
+        if (!pair) return [];
+
+        return [{
+            wordId: pair.wordId,
+            word: pair.word,
+            meaning: pair.meaning,
+            matched: matchedTokens.has(pair.wordToken),
+            mistakeCount: mistakeCounts.get(pair.wordToken) ?? 0,
+        }];
+    });
 }
 
 export function findSpeedRoundQuestion(snapshot: SpeedRoundSnapshot, token: string) {

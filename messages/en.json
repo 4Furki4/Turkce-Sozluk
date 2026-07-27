@@ -2228,7 +2228,14 @@
       "roundCompleteKicker": "Round complete",
       "roundCompleteDescription": "The connections are made. Give them another quick pass or set up a fresh round.",
       "timeUpDescription": "Time ran out this round. Pick up the matches in a fresh run.",
-      "scoreboard": "Round progress"
+      "scoreboard": "Round progress",
+      "review": "Connection review",
+      "correctPair": "Matched without mistakes",
+      "mistakeCount": "{count, plural, one {# wrong connection} other {# wrong connections}}",
+      "unmatchedPair": "Not matched before the round ended",
+      "save": "Save word",
+      "saved": "Saved",
+      "signInToSave": "Sign in to save"
     },
     "speedRound": {
       "roundKicker": "Sprint round",

@@ -2,9 +2,10 @@
 
 import type { Session } from "@/src/lib/auth-client";
 import { shuffleArray } from "@/src/lib/game";
+import { Link } from "@/src/i18n/routing";
 import { api } from "@/src/trpc/react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Check, Clock3, Link2, RotateCcw, Sparkles, Timer, Trophy, X } from "lucide-react";
+import { Check, CircleHelp, Clock3, Heart, Link2, RotateCcw, Sparkles, Timer, Trophy, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./play-word-matching-game.module.css";
@@ -32,6 +33,14 @@ interface GuestMatchPair {
     id: number;
     word: string;
     meaning: string;
+}
+
+interface ReviewPair {
+    wordId: number;
+    word: string;
+    meaning: string;
+    matched: boolean;
+    mistakeCount: number;
 }
 
 type GameMode = "relaxed" | "timed";
@@ -93,6 +102,92 @@ function ChoiceButton({
     return <button type="button" className={`${styles.controlButton} ${className || ""}`} {...props}>{children}</button>;
 }
 
+function ReviewPairItem({ pair, session }: { pair: ReviewPair; session: Session | null }) {
+    const play = useTranslations("Play.wordMatching");
+    const [isSaveRequested, setIsSaveRequested] = useState(false);
+    const utils = api.useUtils();
+    const savedWordsQuery = api.user.getWordSaveStatus.useQuery(pair.wordId, {
+        enabled: Boolean(session),
+    });
+    const saveWordMutation = api.user.saveWord.useMutation({
+        onMutate: async ({ wordId }) => {
+            await utils.user.getWordSaveStatus.cancel(wordId);
+            const previousValue = utils.user.getWordSaveStatus.getData(wordId);
+            utils.user.getWordSaveStatus.setData(wordId, !previousValue);
+            return { previousValue };
+        },
+        onError: (_error, { wordId }, context) => {
+            utils.user.getWordSaveStatus.setData(wordId, context?.previousValue);
+        },
+        onSuccess: (saved, { wordId }) => {
+            utils.user.getWordSaveStatus.setData(wordId, saved);
+        },
+        onSettled: (_saved, _error, { wordId }) => {
+            setIsSaveRequested(false);
+            void utils.user.getWordSaveStatus.invalidate(wordId);
+        },
+    });
+    const isSaved = savedWordsQuery.data === true;
+    const status = pair.mistakeCount > 0 ? "mistake" : pair.matched ? "correct" : "unmatched";
+    const statusClass = status === "mistake"
+        ? styles.reviewMistake
+        : status === "correct"
+            ? styles.reviewCorrect
+            : styles.reviewUnmatched;
+
+    const saveWord = () => {
+        if (
+            !session
+            || savedWordsQuery.isLoading
+            || savedWordsQuery.isError
+            || isSaveRequested
+            || saveWordMutation.isPending
+        ) return;
+        setIsSaveRequested(true);
+        saveWordMutation.mutate({ wordId: pair.wordId });
+    };
+
+    return (
+        <article className={`${styles.reviewItem} ${statusClass}`}>
+            <span className={styles.reviewStatus}>
+                {status === "correct" ? <Check aria-hidden="true" /> : status === "mistake" ? <X aria-hidden="true" /> : <Clock3 aria-hidden="true" />}
+            </span>
+            <div>
+                <Link
+                    href={{ pathname: "/search/[word]", params: { word: pair.word } }}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    {pair.word}
+                </Link>
+                <p>{pair.meaning}</p>
+                <small>
+                    {status === "mistake"
+                        ? play("mistakeCount", { count: pair.mistakeCount })
+                        : status === "correct"
+                            ? play("correctPair")
+                            : play("unmatchedPair")}
+                </small>
+            </div>
+            <button
+                type="button"
+                className={styles.saveButton}
+                onClick={saveWord}
+                disabled={
+                    !session
+                    || savedWordsQuery.isLoading
+                    || savedWordsQuery.isError
+                    || isSaveRequested
+                    || saveWordMutation.isPending
+                }
+            >
+                <Heart aria-hidden="true" className={isSaved ? styles.savedHeart : undefined} />
+                {isSaved ? play("saved") : session ? play("save") : play("signInToSave")}
+            </button>
+        </article>
+    );
+}
+
 export default function PlayWordMatchingGame({ session }: PlayWordMatchingGameProps) {
     const t = useTranslations("WordMatchingGame");
     const play = useTranslations("Play.wordMatching");
@@ -103,6 +198,9 @@ export default function PlayWordMatchingGame({ session }: PlayWordMatchingGamePr
     const [gameState, setGameState] = useState<GameState>("setup");
     const [wordItems, setWordItems] = useState<WordTile[]>([]);
     const [meaningItems, setMeaningItems] = useState<MeaningTile[]>([]);
+    const [guestPairs, setGuestPairs] = useState<GuestMatchPair[]>([]);
+    const [guestMistakeCounts, setGuestMistakeCounts] = useState<Map<string, number>>(new Map());
+    const [ratedReviewPairs, setRatedReviewPairs] = useState<ReviewPair[]>([]);
     const [selectedWord, setSelectedWord] = useState<string | null>(null);
     const [selectedMeaning, setSelectedMeaning] = useState<string | null>(null);
     const [matchedWordTokens, setMatchedWordTokens] = useState<Set<string>>(new Set());
@@ -139,6 +237,9 @@ export default function PlayWordMatchingGame({ session }: PlayWordMatchingGamePr
         replayInFlightRef.current = false;
         setWordItems([]);
         setMeaningItems([]);
+        setGuestPairs([]);
+        setGuestMistakeCounts(new Map());
+        setRatedReviewPairs([]);
         setSelectedWord(null);
         setSelectedMeaning(null);
         setMatchedWordTokens(new Set());
@@ -169,6 +270,7 @@ export default function PlayWordMatchingGame({ session }: PlayWordMatchingGamePr
 
         setWordItems(words);
         setMeaningItems(meanings);
+        setGuestPairs(pairs);
         setGameState("playing");
     }, []);
 
@@ -253,6 +355,7 @@ export default function PlayWordMatchingGame({ session }: PlayWordMatchingGamePr
             setOfficialScore(outcome.score ?? 0);
             setMatchedWordTokens(new Set(outcome.matchedWordTokens ?? []));
             setMatchedMeaningTokens(new Set(outcome.matchedMeaningTokens ?? []));
+            setRatedReviewPairs((outcome.review ?? []).map((pair) => ({ ...pair })));
             finishRatedRound(outcome.timeTakenSeconds ?? outcome.finalResult?.timeTakenSeconds);
         } catch {
             if (roundGeneration !== roundGenerationRef.current) return;
@@ -308,6 +411,11 @@ export default function PlayWordMatchingGame({ session }: PlayWordMatchingGamePr
 
                 if (outcome.expired) {
                     setServerDeadlineAt(null);
+                    setMistakes(outcome.mistakes ?? 0);
+                    setOfficialScore(outcome.score ?? 0);
+                    setMatchedWordTokens(new Set(outcome.matchedWordTokens ?? []));
+                    setMatchedMeaningTokens(new Set(outcome.matchedMeaningTokens ?? []));
+                    setRatedReviewPairs((outcome.review ?? []).map((pair) => ({ ...pair })));
                     finishRatedRound(outcome.timeTakenSeconds ?? undefined);
                     return;
                 }
@@ -326,6 +434,7 @@ export default function PlayWordMatchingGame({ session }: PlayWordMatchingGamePr
 
                 setIsAttemptPending(false);
                 if (outcome.completed) {
+                    setRatedReviewPairs((outcome.review ?? []).map((pair) => ({ ...pair })));
                     finishRatedRound(outcome.timeTakenSeconds ?? outcome.finalResult?.timeTakenSeconds);
                 }
             } catch {
@@ -345,6 +454,14 @@ export default function PlayWordMatchingGame({ session }: PlayWordMatchingGamePr
             setMatchedMeaningTokens((current) => new Set(current).add(meaningToken));
         } else {
             setMistakes((current) => current + 1);
+            setGuestMistakeCounts((current) => {
+                const next = new Map(current);
+                for (const pairId of new Set([selectedWordItem.pairId, selectedMeaningItem.pairId])) {
+                    if (!pairId) continue;
+                    next.set(pairId, (next.get(pairId) ?? 0) + 1);
+                }
+                return next;
+            });
             setMismatch({ wordToken, meaningToken });
             window.setTimeout(() => {
                 if (roundGeneration === roundGenerationRef.current) setMismatch(null);
@@ -436,6 +553,21 @@ export default function PlayWordMatchingGame({ session }: PlayWordMatchingGamePr
     );
     const boardSize = wordItems.length || pairCount;
     const displayTime = officialTime ?? (gameMode === "timed" ? 60 - timeLeft : elapsedTime);
+    const reviewPairs = useMemo(() => {
+        if (ratedSessionId) return ratedReviewPairs;
+
+        return guestPairs.map((pair) => {
+            const pairId = String(pair.id);
+            const wordTile = wordItems.find((item) => item.pairId === pairId);
+            return {
+                wordId: pair.id,
+                word: pair.word,
+                meaning: pair.meaning,
+                matched: wordTile ? matchedWordTokens.has(wordTile.token) : false,
+                mistakeCount: guestMistakeCounts.get(pairId) ?? 0,
+            };
+        });
+    }, [guestMistakeCounts, guestPairs, matchedWordTokens, ratedReviewPairs, ratedSessionId, wordItems]);
 
     if (gameState === "setup") {
         return (
@@ -524,6 +656,7 @@ export default function PlayWordMatchingGame({ session }: PlayWordMatchingGamePr
                 <p className={styles.kicker}><Trophy aria-hidden="true" /> {play("roundCompleteKicker")}</p>
                 <h1 id="finished-title">{isWin ? t("congratulations") : t("timeUp")}</h1>
                 <p>{isWin ? play("roundCompleteDescription") : play("timeUpDescription")}</p>
+                {!session ? <p className={styles.unrankedResult}>{play("unrankedPractice")}</p> : null}
                 <div className={styles.results}>
                     <span><b>{matchedWordTokens.size}/{boardSize}</b>{t("matchedPairs")}</span>
                     <span><b>{score}</b>{t("score")}</span>
@@ -534,6 +667,14 @@ export default function PlayWordMatchingGame({ session }: PlayWordMatchingGamePr
                     <button type="button" className={styles.primaryAction} onClick={() => void startGame()}>{t("playAgain")} <RotateCcw aria-hidden="true" /></button>
                     <button type="button" className={styles.secondaryAction} onClick={restartSetup}>{t("settings")}</button>
                 </div>
+                {reviewPairs.length > 0 ? (
+                    <section className={styles.review} aria-labelledby="word-matching-review-title">
+                        <h2 id="word-matching-review-title"><CircleHelp aria-hidden="true" /> {play("review")}</h2>
+                        <div>
+                            {reviewPairs.map((pair) => <ReviewPairItem key={pair.wordId} pair={pair} session={session} />)}
+                        </div>
+                    </section>
+                ) : null}
             </section>
         );
     }

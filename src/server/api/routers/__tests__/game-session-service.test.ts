@@ -8,6 +8,7 @@ Object.defineProperty(globalThis, "crypto", {
 
 import {
     createSpeedRoundSnapshot,
+    createWordMatchingReview,
     createWordMatchingSnapshot,
     redactSpeedRoundQuestion,
     redactWordMatchingBoard,
@@ -196,5 +197,85 @@ describe("rated game session public projections", () => {
         expect(JSON.stringify(board)).not.toContain("wordId");
         expect(JSON.stringify(board)).not.toContain("meaningId");
         expect(JSON.stringify(board)).not.toContain("pairId");
+    });
+
+    it("reveals the correct terminal pairs and marks both sides of a wrong connection", () => {
+        const snapshot: WordMatchingSnapshot = {
+            kind: "word_matching",
+            pairs: [
+                {
+                    wordToken: "word-a",
+                    wordId: 1,
+                    word: "kitap",
+                    meaningToken: "meaning-a",
+                    meaningId: 11,
+                    meaning: "book",
+                },
+                {
+                    wordToken: "word-b",
+                    wordId: 2,
+                    word: "kalem",
+                    meaningToken: "meaning-b",
+                    meaningId: 12,
+                    meaning: "pen",
+                },
+            ],
+            wordOrder: ["word-b", "word-a"],
+            meaningOrder: ["meaning-a", "meaning-b"],
+        };
+
+        const review = createWordMatchingReview(
+            snapshot,
+            ["word-a"],
+            [{ wordToken: "word-a", meaningToken: "meaning-b" }],
+        );
+
+        expect(review).toEqual([
+            {
+                wordId: 2,
+                word: "kalem",
+                meaning: "pen",
+                matched: false,
+                mistakeCount: 1,
+            },
+            {
+                wordId: 1,
+                word: "kitap",
+                meaning: "book",
+                matched: true,
+                mistakeCount: 1,
+            },
+        ]);
+    });
+
+    it("keeps untouched pairs visible as unmatched in a timeout review", () => {
+        const snapshot: WordMatchingSnapshot = {
+            kind: "word_matching",
+            pairs: [
+                {
+                    wordToken: "word-a",
+                    wordId: 1,
+                    word: "kitap",
+                    meaningToken: "meaning-a",
+                    meaningId: 11,
+                    meaning: "book",
+                },
+                {
+                    wordToken: "word-b",
+                    wordId: 2,
+                    word: "kalem",
+                    meaningToken: "meaning-b",
+                    meaningId: 12,
+                    meaning: "pen",
+                },
+            ],
+            wordOrder: ["word-a", "word-b"],
+            meaningOrder: ["meaning-b", "meaning-a"],
+        };
+
+        expect(createWordMatchingReview(snapshot, ["word-a"], [])).toEqual([
+            expect.objectContaining({ wordId: 1, matched: true, mistakeCount: 0 }),
+            expect.objectContaining({ wordId: 2, matched: false, mistakeCount: 0 }),
+        ]);
     });
 });
