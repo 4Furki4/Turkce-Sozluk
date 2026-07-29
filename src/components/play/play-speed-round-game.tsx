@@ -44,7 +44,7 @@ interface GuestQuestionPayload {
     options: string[];
 }
 
-type GameState = "setup" | "loading" | "playing" | "finished";
+type GameState = "setup" | "loading" | "ready" | "playing" | "finished";
 
 type PendingSpeedRoundAction = {
     actionId: string;
@@ -79,6 +79,21 @@ function toClientDeadline(
     const requestDuration = Math.max(0, responseReceivedAt - requestStartedAt);
     const remaining = Math.max(0, deadline.getTime() - serverTime.getTime() - requestDuration);
     return new Date(responseReceivedAt + remaining);
+}
+
+/**
+ * Activation starts on the server after the outbound request arrives. Only
+ * use the authoritative duration returned by that response; subtracting the
+ * full round trip would incorrectly charge pre-activation outbound latency.
+ */
+function toActivationClientDeadline(
+    deadlineAt: Date | string | null | undefined,
+    serverNow: Date | string | null | undefined,
+): Date | null {
+    const deadline = toDeadlineDate(deadlineAt);
+    const serverTime = toDeadlineDate(serverNow);
+    if (!deadline || !serverTime) return deadline;
+    return new Date(Date.now() + Math.max(0, deadline.getTime() - serverTime.getTime()));
 }
 
 /** A duplicate action ID makes this one immediate retry safe to replay. */
@@ -195,6 +210,7 @@ export default function PlaySpeedRoundGame({ session }: PlaySpeedRoundGameProps)
     const answerLockRef = useRef(false);
     const advanceTimerRef = useRef<number | null>(null);
     const roundGenerationRef = useRef(0);
+    const activationSessionRef = useRef<string | null>(null);
     const pendingActionRef = useRef<PendingSpeedRoundAction | null>(null);
     const replayInFlightRef = useRef(false);
 
@@ -203,6 +219,7 @@ export default function PlaySpeedRoundGame({ session }: PlaySpeedRoundGameProps)
         { enabled: false },
     );
     const startRatedRound = api.game.startSpeedRoundSession.useMutation();
+    const activateRatedRound = api.game.activateGameSession.useMutation();
     const answerRatedRound = api.game.answerSpeedRoundSession.useMutation();
     const { data: leaderboardData, refetch: refetchLeaderboard } = api.game.getLeaderboard.useQuery(
         { gameType: "speed_round", limit: 10 },
@@ -222,6 +239,7 @@ export default function PlaySpeedRoundGame({ session }: PlaySpeedRoundGameProps)
         roundGenerationRef.current += 1;
         clearAdvanceTimer();
         answerLockRef.current = false;
+        activationSessionRef.current = null;
         pendingActionRef.current = null;
         replayInFlightRef.current = false;
         setQuestions([]);
@@ -253,17 +271,14 @@ export default function PlaySpeedRoundGame({ session }: PlaySpeedRoundGameProps)
 
         try {
             if (session?.user?.id) {
-                const requestStartedAt = Date.now();
                 const result = await startRatedRound.mutateAsync({ questionCount, timePerQuestion, source });
                 if (roundGeneration !== roundGenerationRef.current) return;
                 if (result.sessionId && result.question) {
                     setRatedSessionId(result.sessionId);
                     setRatedQuestionCount(result.questionCount);
                     setQuestions([toRatedQuestion(result.question)]);
-                    const deadlineAt = toClientDeadline(result.deadlineAt, result.serverNow, requestStartedAt);
-                    setServerDeadlineAt(deadlineAt);
-                    setTimeLeft(getRemainingSeconds(deadlineAt));
-                    setGameState("playing");
+                    setTimeLeft(timePerQuestion);
+                    setGameState("ready");
                     return;
                 }
 
@@ -289,6 +304,35 @@ export default function PlaySpeedRoundGame({ session }: PlaySpeedRoundGameProps)
         if (roundGeneration !== roundGenerationRef.current) return;
         setGameState("setup");
     }, [loadGuestRound, play, questionCount, resetRound, session?.user?.id, source, startRatedRound, timePerQuestion]);
+
+    useEffect(() => {
+        if (gameState !== "ready" || !ratedSessionId) return;
+        if (activationSessionRef.current === ratedSessionId) return;
+        activationSessionRef.current = ratedSessionId;
+
+        const roundGeneration = roundGenerationRef.current;
+        const activate = async () => {
+            try {
+                const result = await retryIdempotentAction(
+                    () => activateRatedRound.mutateAsync({ sessionId: ratedSessionId }),
+                );
+                if (roundGeneration !== roundGenerationRef.current) return;
+
+                const deadlineAt = toActivationClientDeadline(result.deadlineAt, result.serverNow);
+                if (!deadlineAt) throw new Error("Speed Round activation returned no deadline");
+                setServerDeadlineAt(deadlineAt);
+                setTimeLeft(getRemainingSeconds(deadlineAt));
+                setGameState("playing");
+            } catch {
+                if (roundGeneration !== roundGenerationRef.current) return;
+                resetRound();
+                setLoadError(play("activationError"));
+                setGameState("setup");
+            }
+        };
+
+        void activate();
+    }, [activateRatedRound, gameState, play, ratedSessionId, resetRound]);
 
     const finishRatedRound = useCallback((rank: number | null | undefined) => {
         answerLockRef.current = false;
@@ -664,8 +708,10 @@ export default function PlaySpeedRoundGame({ session }: PlaySpeedRoundGameProps)
         );
     }
 
+    const isReady = gameState === "ready";
+
     return (
-        <section className={styles.page} aria-labelledby="speed-round-title">
+        <section className={styles.page} aria-labelledby="speed-round-title" aria-busy={isReady || undefined}>
             <header className={styles.playHeader}>
                 <div>
                     <p className={styles.kicker}><Zap aria-hidden="true" /> {play("roundKicker")}</p>
@@ -708,7 +754,7 @@ export default function PlaySpeedRoundGame({ session }: PlaySpeedRoundGameProps)
                                     key={option.token}
                                     className={`${styles.answerButton} ${feedbackClass}`}
                                     onClick={() => void answerQuestion(option.token)}
-                                    disabled={feedback !== null || isAnswerPending}
+                                    disabled={isReady || feedback !== null || isAnswerPending}
                                     initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.045, duration: 0.18 }}
@@ -722,6 +768,7 @@ export default function PlaySpeedRoundGame({ session }: PlaySpeedRoundGameProps)
                         })}
                     </div>
                     <p className={styles.bonusLine}><Zap aria-hidden="true" /> {t("fasterBonus")}</p>
+                    {isReady ? <p className={styles.loadingLabel} role="status">{play("roundReady")}</p> : null}
                     {isReplayingAction ? <p className={styles.loadingLabel} role="status">{play("syncingAction")}</p> : null}
                 </motion.div>
             )}

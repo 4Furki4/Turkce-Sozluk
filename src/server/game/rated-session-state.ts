@@ -9,6 +9,29 @@ import type {
 import type { SelectGameSession } from "@/db/schema/game_sessions";
 import type { SpeedRoundSnapshot, WordMatchingSnapshot } from "./session-rounds";
 
+function getSessionStartedAt(session: SelectGameSession): Date {
+    if (session.settings.activationState === "pending") {
+        throw new Error("Prepared game session is not activated");
+    }
+    // Rows created before two-phase activation have no state marker. They
+    // remain playable from their original persisted start timestamp.
+    if (session.settings.activationState === undefined) {
+        return session.questionStartedAt;
+    }
+
+    const activatedAt = session.settings.activatedAt;
+    if (!activatedAt) {
+        throw new Error("Activated game session has no activation timestamp");
+    }
+
+    const parsed = new Date(activatedAt);
+    if (Number.isNaN(parsed.getTime())) {
+        throw new Error("Game session activation timestamp is invalid");
+    }
+
+    return parsed;
+}
+
 export function toSpeedRoundSessionSnapshot(
     snapshot: SpeedRoundSnapshot,
     timePerQuestionSeconds: number,
@@ -45,10 +68,15 @@ export function toWordMatchingSessionSnapshot(
 }
 
 export function toSpeedRoundProgress(session: SelectGameSession): SpeedRoundSessionProgress {
+    getSessionStartedAt(session);
+    if (!session.deadlineAt) {
+        throw new Error("Activated Speed Round session has no deadline");
+    }
+
     return {
         status: session.status,
         currentStep: session.currentStep,
-        deadlineAt: session.deadlineAt ?? session.questionStartedAt,
+        deadlineAt: session.deadlineAt,
         score: session.score,
         streak: session.streak,
         maxStreak: session.maxStreak,
@@ -59,14 +87,13 @@ export function toSpeedRoundProgress(session: SelectGameSession): SpeedRoundSess
 }
 
 export function toWordMatchingProgress(session: SelectGameSession): WordMatchingSessionProgress {
+    const startedAt = getSessionStartedAt(session);
+
     return {
         status: session.status,
         currentStep: session.currentStep,
         deadlineAt: session.deadlineAt,
-        // The router captures the game start with its application clock when
-        // it also derives `deadlineAt`; use the same persisted timestamp for
-        // elapsed-time scoring instead of a potentially skewed DB default.
-        startedAt: session.questionStartedAt,
+        startedAt,
         score: session.score,
         mistakes: session.mistakeCount,
         matchedWordTokens: session.matchedTokens,

@@ -7,6 +7,7 @@ jest.mock("@/src/trpc/react", () => ({
         game: {
             getWordsForMatching: { useQuery: jest.fn() },
             startWordMatchingSession: { useMutation: jest.fn() },
+            activateGameSession: { useMutation: jest.fn() },
             attemptWordMatchingSession: { useMutation: jest.fn() },
         },
         user: {
@@ -45,6 +46,7 @@ import PlayWordMatchingGame from "../play-word-matching-game";
 
 const mockGuestRefetch = jest.fn();
 const mockStartMutateAsync = jest.fn();
+const mockActivateMutateAsync = jest.fn();
 const mockAttemptMutateAsync = jest.fn();
 const mockSaveMutate = jest.fn();
 const mockSaveStatusCancel = jest.fn();
@@ -62,8 +64,6 @@ function ratedRound(word = "kitap", meaning = "book") {
             words: [{ token: "10000000-0000-4000-8000-000000000001", word }],
             meanings: [{ token: "20000000-0000-4000-8000-000000000001", meaning }],
         },
-        deadlineAt: null,
-        serverNow: "2026-07-27T12:00:00.000Z",
         score: 0,
         mistakes: 0,
     };
@@ -98,6 +98,15 @@ describe("PlayWordMatchingGame result review", () => {
             mutateAsync: mockStartMutateAsync,
             isPending: false,
         });
+        mockActivateMutateAsync.mockResolvedValue({
+            gameType: "word_matching",
+            activatedAt: "2026-07-27T12:00:00.000Z",
+            deadlineAt: null,
+            serverNow: "2026-07-27T12:00:00.000Z",
+        });
+        (mockApi.game.activateGameSession.useMutation as jest.Mock).mockReturnValue({
+            mutateAsync: mockActivateMutateAsync,
+        });
         (mockApi.game.attemptWordMatchingSession.useMutation as jest.Mock).mockReturnValue({
             mutateAsync: mockAttemptMutateAsync,
         });
@@ -130,8 +139,10 @@ describe("PlayWordMatchingGame result review", () => {
 
         render(<PlayWordMatchingGame session={signedInSession} locale="en" />);
         fireEvent.click(screen.getByText("WordMatchingGame.startGame"));
-        fireEvent.click(await screen.findByText("kitap"));
-        fireEvent.click(screen.getByText("book"));
+        const wordButton = await screen.findByRole("button", { name: /kitap/ });
+        await waitFor(() => expect(wordButton).toBeEnabled());
+        fireEvent.click(wordButton);
+        fireEvent.click(screen.getByRole("button", { name: /book/ }));
 
         expect(await screen.findByText("Play.wordMatching.review")).toBeInTheDocument();
         expect(screen.getByText("Play.wordMatching.correctPair")).toBeInTheDocument();
@@ -146,8 +157,10 @@ describe("PlayWordMatchingGame result review", () => {
 
         render(<PlayWordMatchingGame session={signedInSession} locale="en" />);
         fireEvent.click(screen.getByText("WordMatchingGame.startGame"));
-        fireEvent.click(await screen.findByText("kitap"));
-        fireEvent.click(screen.getByText("book"));
+        const wordButton = await screen.findByRole("button", { name: /kitap/ });
+        await waitFor(() => expect(wordButton).toBeEnabled());
+        fireEvent.click(wordButton);
+        fireEvent.click(screen.getByRole("button", { name: /book/ }));
 
         const saveButton = await screen.findByRole("button", { name: "Play.wordMatching.save" });
         fireEvent.click(saveButton);
@@ -169,8 +182,10 @@ describe("PlayWordMatchingGame result review", () => {
 
         render(<PlayWordMatchingGame session={signedInSession} locale="en" />);
         fireEvent.click(screen.getByText("WordMatchingGame.startGame"));
-        fireEvent.click(await screen.findByText("kitap"));
-        fireEvent.click(screen.getByText("book"));
+        const wordButton = await screen.findByRole("button", { name: /kitap/ });
+        await waitFor(() => expect(wordButton).toBeEnabled());
+        fireEvent.click(wordButton);
+        fireEvent.click(screen.getByRole("button", { name: /book/ }));
 
         expect(await screen.findByRole("button", { name: "Play.wordMatching.saved" })).toBeInTheDocument();
         expect(mockApi.user.getWordSaveStatus.useQuery).toHaveBeenCalledWith(1, { enabled: true });
@@ -246,8 +261,10 @@ describe("PlayWordMatchingGame result review", () => {
 
         render(<PlayWordMatchingGame session={signedInSession} locale="en" />);
         fireEvent.click(screen.getByText("WordMatchingGame.startGame"));
-        fireEvent.click(await screen.findByText("kitap"));
-        fireEvent.click(screen.getByText("book"));
+        const wordButton = await screen.findByRole("button", { name: /kitap/ });
+        await waitFor(() => expect(wordButton).toBeEnabled());
+        fireEvent.click(wordButton);
+        fireEvent.click(screen.getByRole("button", { name: /book/ }));
         await screen.findByText("Play.wordMatching.review");
 
         fireEvent.click(screen.getByText("WordMatchingGame.playAgain"));
@@ -255,5 +272,109 @@ describe("PlayWordMatchingGame result review", () => {
         expect(await screen.findByText("kalem")).toBeInTheDocument();
         await waitFor(() => expect(screen.queryByText("Play.wordMatching.review")).not.toBeInTheDocument());
         expect(screen.queryByText("book")).not.toBeInTheDocument();
+    });
+
+    it("keeps a loaded relaxed board disabled and elapsed time stopped until activation", async () => {
+        jest.useFakeTimers();
+        let resolveActivation!: (value: unknown) => void;
+        mockStartMutateAsync.mockResolvedValue(ratedRound());
+        mockActivateMutateAsync.mockReturnValue(new Promise((resolve) => {
+            resolveActivation = resolve;
+        }));
+
+        try {
+            render(<PlayWordMatchingGame session={signedInSession} locale="en" />);
+            fireEvent.click(screen.getByText("WordMatchingGame.startGame"));
+            await act(async () => {
+                await Promise.resolve();
+            });
+            const word = screen.getByRole("button", { name: /kitap/ });
+
+            expect(word).toBeDisabled();
+            expect(screen.getByText("Play.wordMatching.roundReady")).toBeInTheDocument();
+            act(() => jest.advanceTimersByTime(5_000));
+            expect(screen.getByText("0:00")).toBeInTheDocument();
+
+            await act(async () => {
+                resolveActivation({
+                    gameType: "word_matching",
+                    activatedAt: "2026-07-27T12:00:00.000Z",
+                    deadlineAt: null,
+                    serverNow: "2026-07-27T12:00:00.000Z",
+                });
+                await Promise.resolve();
+            });
+            expect(word).toBeEnabled();
+
+            act(() => jest.advanceTimersByTime(1_000));
+            expect(screen.getByText("0:01")).toBeInTheDocument();
+        } finally {
+            jest.useRealTimers();
+        }
+    });
+
+    it("starts a timed rated board from a full minute only after activation", async () => {
+        jest.useFakeTimers();
+        let resolveActivation!: (value: unknown) => void;
+        mockStartMutateAsync.mockResolvedValue(ratedRound());
+        mockActivateMutateAsync.mockReturnValue(new Promise((resolve) => {
+            resolveActivation = resolve;
+        }));
+
+        try {
+            render(<PlayWordMatchingGame session={signedInSession} locale="en" />);
+            fireEvent.click(screen.getByText("WordMatchingGame.timedMode"));
+            fireEvent.click(screen.getByText("WordMatchingGame.startGame"));
+            await act(async () => {
+                await Promise.resolve();
+            });
+            const word = screen.getByRole("button", { name: /kitap/ });
+
+            expect(word).toBeDisabled();
+            expect(screen.getByText("1:00")).toBeInTheDocument();
+
+            await act(async () => {
+                resolveActivation({
+                    gameType: "word_matching",
+                    activatedAt: "2026-07-29T12:00:00.000Z",
+                    deadlineAt: "2026-07-29T12:01:00.000Z",
+                    serverNow: "2026-07-29T12:00:00.000Z",
+                });
+                await Promise.resolve();
+            });
+            expect(word).toBeEnabled();
+            expect(screen.getByText("1:00")).toBeInTheDocument();
+
+            act(() => jest.advanceTimersByTime(1_000));
+            expect(screen.getByText("0:59")).toBeInTheDocument();
+        } finally {
+            jest.useRealTimers();
+        }
+    });
+
+    it("ignores a late activation response after returning to setup", async () => {
+        let resolveActivation!: (value: unknown) => void;
+        mockStartMutateAsync.mockResolvedValue(ratedRound());
+        mockActivateMutateAsync.mockReturnValue(new Promise((resolve) => {
+            resolveActivation = resolve;
+        }));
+
+        render(<PlayWordMatchingGame session={signedInSession} locale="en" />);
+        fireEvent.click(screen.getByText("WordMatchingGame.startGame"));
+        await screen.findByText("kitap");
+        fireEvent.click(screen.getByRole("button", { name: "WordMatchingGame.restart" }));
+
+        await act(async () => {
+            resolveActivation({
+                gameType: "word_matching",
+                activatedAt: "2026-07-27T12:00:00.000Z",
+                deadlineAt: null,
+                serverNow: "2026-07-27T12:00:00.000Z",
+            });
+            await Promise.resolve();
+        });
+
+        expect(screen.getByText("WordMatchingGame.startGame")).toBeInTheDocument();
+        expect(screen.queryByText("kitap")).not.toBeInTheDocument();
     });
 });

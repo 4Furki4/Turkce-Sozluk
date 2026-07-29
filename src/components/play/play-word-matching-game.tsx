@@ -44,7 +44,7 @@ interface ReviewPair {
 }
 
 type GameMode = "relaxed" | "timed";
-type GameState = "setup" | "loading" | "playing" | "finished";
+type GameState = "setup" | "loading" | "ready" | "playing" | "finished";
 
 type PendingWordMatchingAction = {
     actionId: string;
@@ -72,6 +72,17 @@ function toClientDeadline(
     const requestDuration = Math.max(0, responseReceivedAt - requestStartedAt);
     const remaining = Math.max(0, deadline.getTime() - serverTime.getTime() - requestDuration);
     return new Date(responseReceivedAt + remaining);
+}
+
+/** Do not charge outbound request time that occurred before server activation. */
+function toActivationClientDeadline(
+    deadlineAt: Date | string | null | undefined,
+    serverNow: Date | string | null | undefined,
+): Date | null {
+    const deadline = toDeadlineDate(deadlineAt);
+    const serverTime = toDeadlineDate(serverNow);
+    if (!deadline || !serverTime) return deadline;
+    return new Date(Date.now() + Math.max(0, deadline.getTime() - serverTime.getTime()));
 }
 
 /** The server records an action by ID, so one transport retry cannot double-score. */
@@ -217,6 +228,7 @@ export default function PlayWordMatchingGame({ session }: PlayWordMatchingGamePr
     const [elapsedTime, setElapsedTime] = useState(0);
     const [loadError, setLoadError] = useState<string | null>(null);
     const roundGenerationRef = useRef(0);
+    const activationSessionRef = useRef<string | null>(null);
     const timeoutActionIdRef = useRef<string | null>(null);
     const timeoutSettlingRef = useRef(false);
     const pendingActionRef = useRef<PendingWordMatchingAction | null>(null);
@@ -227,10 +239,12 @@ export default function PlayWordMatchingGame({ session }: PlayWordMatchingGamePr
         { enabled: false },
     );
     const startRatedRound = api.game.startWordMatchingSession.useMutation();
+    const activateRatedRound = api.game.activateGameSession.useMutation();
     const attemptRatedMatch = api.game.attemptWordMatchingSession.useMutation();
 
     const resetRound = useCallback(() => {
         roundGenerationRef.current += 1;
+        activationSessionRef.current = null;
         timeoutActionIdRef.current = null;
         timeoutSettlingRef.current = false;
         pendingActionRef.current = null;
@@ -282,17 +296,13 @@ export default function PlayWordMatchingGame({ session }: PlayWordMatchingGamePr
 
         try {
             if (session?.user?.id) {
-                const requestStartedAt = Date.now();
                 const result = await startRatedRound.mutateAsync({ pairCount, source, mode: gameMode });
                 if (roundGeneration !== roundGenerationRef.current) return;
                 if (result.sessionId && result.board) {
                     setRatedSessionId(result.sessionId);
-                    const deadlineAt = toClientDeadline(result.deadlineAt, result.serverNow, requestStartedAt);
-                    setServerDeadlineAt(deadlineAt);
-                    if (deadlineAt) setTimeLeft(getRemainingSeconds(deadlineAt));
                     setWordItems(result.board.words.map((tile) => ({ token: tile.token, word: tile.word })));
                     setMeaningItems(result.board.meanings.map((tile) => ({ token: tile.token, meaning: tile.meaning })));
-                    setGameState("playing");
+                    setGameState("ready");
                     return;
                 }
 
@@ -316,6 +326,38 @@ export default function PlayWordMatchingGame({ session }: PlayWordMatchingGamePr
         if (roundGeneration !== roundGenerationRef.current) return;
         setGameState("setup");
     }, [gameMode, loadGuestRound, pairCount, play, prepareGuestRound, resetRound, session?.user?.id, source, startRatedRound]);
+
+    useEffect(() => {
+        if (gameState !== "ready" || !ratedSessionId) return;
+        if (activationSessionRef.current === ratedSessionId) return;
+        activationSessionRef.current = ratedSessionId;
+
+        const roundGeneration = roundGenerationRef.current;
+        const activate = async () => {
+            try {
+                const result = await retryIdempotentAction(
+                    () => activateRatedRound.mutateAsync({ sessionId: ratedSessionId }),
+                );
+                if (roundGeneration !== roundGenerationRef.current) return;
+
+                const deadlineAt = toActivationClientDeadline(result.deadlineAt, result.serverNow);
+                if (gameMode === "timed" && !deadlineAt) {
+                    throw new Error("Timed Word Matching activation returned no deadline");
+                }
+                setServerDeadlineAt(deadlineAt);
+                setTimeLeft(deadlineAt ? getRemainingSeconds(deadlineAt) : 60);
+                setElapsedTime(0);
+                setGameState("playing");
+            } catch {
+                if (roundGeneration !== roundGenerationRef.current) return;
+                resetRound();
+                setLoadError(play("activationError"));
+                setGameState("setup");
+            }
+        };
+
+        void activate();
+    }, [activateRatedRound, gameMode, gameState, play, ratedSessionId, resetRound]);
 
     const restartSetup = useCallback(() => {
         resetRound();
@@ -679,8 +721,10 @@ export default function PlayWordMatchingGame({ session }: PlayWordMatchingGamePr
         );
     }
 
+    const isReady = gameState === "ready";
+
     return (
-        <section className={styles.page} aria-labelledby="word-matching-title">
+        <section className={styles.page} aria-labelledby="word-matching-title" aria-busy={isReady || undefined}>
             <header className={styles.playHeader}>
                 <div>
                     <p className={styles.kicker}><Link2 aria-hidden="true" /> {play("roundKicker")}</p>
@@ -710,7 +754,7 @@ export default function PlayWordMatchingGame({ session }: PlayWordMatchingGamePr
                                 key={item.token}
                                 className={`${styles.matchChoice} ${matched ? styles.matched : ""} ${selected ? styles.selectedChoice : ""} ${incorrect ? styles.incorrect : ""}`}
                                 onClick={() => chooseWord(item.token)}
-                                disabled={matched || isAttemptPending}
+                                disabled={isReady || matched || isAttemptPending}
                                 aria-pressed={selected}
                                 initial={shouldReduceMotion ? false : { opacity: 0, x: -14 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -736,7 +780,7 @@ export default function PlayWordMatchingGame({ session }: PlayWordMatchingGamePr
                                 key={item.token}
                                 className={`${styles.matchChoice} ${styles.meaningChoice} ${matched ? styles.matched : ""} ${selected ? styles.selectedChoice : ""} ${incorrect ? styles.incorrect : ""}`}
                                 onClick={() => chooseMeaning(item.token)}
-                                disabled={matched || isAttemptPending}
+                                disabled={isReady || matched || isAttemptPending}
                                 aria-pressed={selected}
                                 initial={shouldReduceMotion ? false : { opacity: 0, x: 14 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -751,6 +795,7 @@ export default function PlayWordMatchingGame({ session }: PlayWordMatchingGamePr
             </div>
 
             <p className={styles.keyboardHint}><Clock3 aria-hidden="true" /> {t("instructions")}</p>
+            {isReady ? <p className={styles.keyboardHint} role="status">{play("roundReady")}</p> : null}
             {isReplayingAction ? <p className={styles.keyboardHint} role="status">{play("syncingAction")}</p> : null}
         </section>
     );

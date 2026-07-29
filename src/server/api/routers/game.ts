@@ -116,6 +116,17 @@ type WordMatchingActionOutcome = {
     review?: readonly WordMatchingReviewPair[];
 };
 
+type GameSessionActivationOutcome = {
+    gameType: "speed_round" | "word_matching";
+    activatedAt: string;
+    deadlineAt: string | null;
+    serverNow: string;
+};
+
+type GameSessionActivationResult =
+    | GameSessionActivationOutcome
+    | { error: "session_expired" };
+
 function distinctCandidates(rows: RoundCandidate[]) {
     const seen = new Set<number>();
     return rows.filter((row) => {
@@ -791,11 +802,11 @@ export const gameRouter = createTRPCRouter({
             }
 
             const now = new Date();
-            const deadlineAt = new Date(now.getTime() + input.timePerQuestion * 1000);
             const settings: GameSessionSettings = {
                 source: input.source,
                 questionCount: input.questionCount,
                 timePerQuestion: input.timePerQuestion,
+                activationState: "pending",
             };
             const [created] = await db.insert(gameSessions).values({
                 userId: session.user.id,
@@ -803,7 +814,7 @@ export const gameRouter = createTRPCRouter({
                 settings,
                 snapshot,
                 questionStartedAt: now,
-                deadlineAt,
+                deadlineAt: null,
                 expiresAt: sessionExpiry(now),
             }).returning();
 
@@ -813,11 +824,101 @@ export const gameRouter = createTRPCRouter({
                 error: null,
                 question: getPlayableSpeedRoundQuestion(scoringSnapshot, 0),
                 questionCount: input.questionCount,
-                deadlineAt: deadlineAt.toISOString(),
-                serverNow: now.toISOString(),
                 score: 0,
                 streak: 0,
             };
+        }),
+
+    /**
+     * Starts the authoritative clock only after a prepared board/question has
+     * committed in the browser. The persisted marker makes response-loss
+     * retries return the original timing rather than granting more time.
+     */
+    activateGameSession: protectedProcedure
+        .input(z.object({ sessionId: z.string().uuid() }))
+        .mutation(async ({ input, ctx: { db, session } }) => {
+            const result: GameSessionActivationResult = await db.transaction(async (tx) => {
+                const [ownedSession] = await tx
+                    .select()
+                    .from(gameSessions)
+                    .where(and(eq(gameSessions.id, input.sessionId), eq(gameSessions.userId, session.user.id)))
+                    .for("update")
+                    .limit(1);
+
+                if (!ownedSession
+                    || (ownedSession.gameType !== "speed_round" && ownedSession.gameType !== "word_matching")) {
+                    sessionError("session_not_found");
+                }
+                if (ownedSession.status !== "active") sessionError("session_not_active");
+
+                const serverNow = new Date();
+                if (ownedSession.settings.activationState === "active") {
+                    const storedActivatedAt = ownedSession.settings.activatedAt;
+                    if (!storedActivatedAt) sessionError("invalid_session_state");
+                    return {
+                        gameType: ownedSession.gameType,
+                        activatedAt: storedActivatedAt,
+                        deadlineAt: ownedSession.deadlineAt?.toISOString() ?? null,
+                        serverNow: serverNow.toISOString(),
+                    };
+                }
+                // Legacy rows had no activation marker and were timed at
+                // creation. Never let a new client reset their clocks.
+                if (ownedSession.settings.activationState !== "pending") {
+                    sessionError("session_already_active");
+                }
+                if (serverNow >= ownedSession.expiresAt) {
+                    await tx.update(gameSessions).set({
+                        status: "expired",
+                        completedAt: serverNow,
+                        updatedAt: serverNow,
+                    }).where(eq(gameSessions.id, ownedSession.id));
+                    return { error: "session_expired" };
+                }
+
+                let deadlineAt: Date | null;
+                let expiryMinutes = 15;
+                if (ownedSession.gameType === "speed_round") {
+                    const timePerQuestion = ownedSession.settings.timePerQuestion;
+                    if (!timePerQuestion) sessionError("invalid_session_state");
+                    deadlineAt = new Date(serverNow.getTime() + timePerQuestion * 1000);
+                } else {
+                    const mode = ownedSession.settings.mode;
+                    if (mode !== "timed" && mode !== "relaxed") {
+                        sessionError("invalid_session_state");
+                    }
+                    deadlineAt = mode === "timed"
+                        ? new Date(serverNow.getTime() + 60_000)
+                        : null;
+                    if (mode === "relaxed") expiryMinutes = 60 * 24;
+                }
+
+                const activatedAt = serverNow.toISOString();
+                const settings: GameSessionSettings = {
+                    ...ownedSession.settings,
+                    activationState: "active",
+                    activatedAt,
+                };
+                const expiresAt = sessionExpiry(serverNow, expiryMinutes);
+
+                await tx.update(gameSessions).set({
+                    settings,
+                    questionStartedAt: serverNow,
+                    deadlineAt,
+                    expiresAt,
+                    updatedAt: serverNow,
+                }).where(eq(gameSessions.id, ownedSession.id));
+
+                return {
+                    gameType: ownedSession.gameType,
+                    activatedAt,
+                    deadlineAt: deadlineAt?.toISOString() ?? null,
+                    serverNow: serverNow.toISOString(),
+                };
+            });
+
+            if ("error" in result) sessionError(result.error);
+            return result;
         }),
 
     /** Resolve exactly one server-timed Speed Round action. */
@@ -843,6 +944,7 @@ export const gameRouter = createTRPCRouter({
                 .limit(1);
 
             if (!ownedSession || ownedSession.gameType !== "speed_round") sessionError("session_not_found");
+            if (ownedSession.settings.activationState === "pending") sessionError("session_not_ready");
 
             const [previousEvent] = await tx
                 .select()
@@ -1003,12 +1105,11 @@ export const gameRouter = createTRPCRouter({
             }
 
             const now = new Date();
-            const timeLimitSeconds = input.mode === "timed" ? 60 : null;
-            const deadlineAt = timeLimitSeconds === null ? null : new Date(now.getTime() + timeLimitSeconds * 1000);
             const settings: GameSessionSettings = {
                 source: input.source,
                 pairCount: input.pairCount,
                 mode: input.mode,
+                activationState: "pending",
             };
             const [created] = await db.insert(gameSessions).values({
                 userId: session.user.id,
@@ -1016,7 +1117,7 @@ export const gameRouter = createTRPCRouter({
                 settings,
                 snapshot,
                 questionStartedAt: now,
-                deadlineAt,
+                deadlineAt: null,
                 expiresAt: sessionExpiry(now, input.mode === "relaxed" ? 60 * 24 : 15),
             }).returning();
 
@@ -1024,8 +1125,6 @@ export const gameRouter = createTRPCRouter({
                 sessionId: created.id,
                 error: null,
                 board: redactWordMatchingBoard(snapshot),
-                deadlineAt: deadlineAt?.toISOString() ?? null,
-                serverNow: now.toISOString(),
                 score: 0,
                 mistakes: 0,
             };
@@ -1053,6 +1152,7 @@ export const gameRouter = createTRPCRouter({
                 .limit(1);
 
             if (!ownedSession || ownedSession.gameType !== "word_matching") sessionError("session_not_found");
+            if (ownedSession.settings.activationState === "pending") sessionError("session_not_ready");
 
             const [previousEvent] = await tx
                 .select()

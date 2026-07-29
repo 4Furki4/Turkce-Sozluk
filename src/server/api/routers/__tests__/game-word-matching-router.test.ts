@@ -88,6 +88,8 @@ function makeSession(
         userId: "learner-1",
         gameType: "word_matching",
         status: "active",
+        // No activation marker models rows created before the two-phase flow.
+        // They must remain playable without being eligible for reactivation.
         settings: { source: "all", pairCount: 6, mode: "timed" },
         snapshot,
         currentStep: 0,

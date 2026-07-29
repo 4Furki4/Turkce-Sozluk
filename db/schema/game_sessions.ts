@@ -45,6 +45,10 @@ export type GameSessionSettings = {
     pairCount?: number;
     timePerQuestion?: number;
     mode?: "relaxed" | "timed";
+    /** Missing on legacy rows, which were already active when created. */
+    activationState?: "pending" | "active";
+    /** ISO timestamp written by the server when a prepared round becomes playable. */
+    activatedAt?: string;
 };
 
 export const gameSessions = pgTable(
