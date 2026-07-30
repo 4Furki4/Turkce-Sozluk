@@ -123,7 +123,7 @@ export default async function Footer({ session }: { session: Session | null }) {
                                 ))}
                                 <li>
                                     <FeedbackModal session={session} variant="link">
-                                        <span className="text-sm text-foreground/70 hover:text-primary cursor-pointer transition-colors">
+                                        <span className="text-sm text-foreground/80 hover:text-primary cursor-pointer transition-colors">
                                             {tFeedback("submitFeedback")}
                                         </span>
                                     </FeedbackModal>
