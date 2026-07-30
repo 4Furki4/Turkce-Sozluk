@@ -237,7 +237,7 @@ function BentoWordOfTheDay({
         </div>
         <Link
           href={{ pathname: "/search/[word]", params: { word: wordData.word } }}
-          className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+          className="text-sm font-medium text-foreground/70 hover:text-foreground flex items-center gap-1 transition-colors"
         >
           {labels.details} <ArrowRight className="w-4 h-4" />
         </Link>
@@ -257,7 +257,7 @@ function BentoWordOfTheDay({
           </div>
         </div>
 
-        <p className="text-xl sm:text-2xl text-zinc-300 font-light italic leading-relaxed line-clamp-3">
+        <p className="text-xl sm:text-2xl text-zinc-700 dark:text-zinc-300 font-light italic leading-relaxed line-clamp-3">
           &ldquo;{wordData.meaning}&rdquo;
         </p>
       </CardBody>

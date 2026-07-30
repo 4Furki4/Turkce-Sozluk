@@ -306,7 +306,13 @@ export default function SearchContainer({
                             <div className="flex items-center gap-1">
                                 <Popover placement="bottom" classNames={{ content: "bg-background" }}>
                                     <PopoverTrigger>
-                                        <Button className="bg-transparent" isIconOnly variant="flat" radius="none">
+                                        <Button
+                                            aria-label={t("hero.patternSearchTooltip")}
+                                            className="bg-transparent"
+                                            isIconOnly
+                                            variant="flat"
+                                            radius="none"
+                                        >
                                             <PuzzleIcon className="w-5 h-5 text-default-400 cursor-pointer hover:text-primary transition-colors" />
                                         </Button>
                                     </PopoverTrigger>
