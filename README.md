@@ -1,302 +1,123 @@
-# Çağdaş Türkçe Sözlük - Modern Turkish Dictionary
+# Çağdaş Türkçe Sözlük
 
-## Turkish Dictionary (EN)
+[turkce-sozluk.com](https://turkce-sozluk.com) üzerinde yayımlanan, toplulukla gelişen ve açık kaynaklı bir Türkçe sözlük uygulaması.
 
-### Project Aim
+Kelimeleri; anlamları, örnek cümleleri, telaffuzları ve ilişkili maddeleriyle keşfedin. Sözlüğe katkıda bulunun, kelimeleri kaydedin, çevrim dışı kullanın ve Türkçe öğrenme araçlarıyla pratik yapın.
 
-- The world and languages we use to understand the world are always changing, especially in the modern world. My goal is to create an engaging, non-native speaker-friendly, and up-to-date Turkish dictionary, by also consulting with experts in fields such as science.
-- I'll follow the dictionary book that's been used in the [Official Turkish Dictionary](https://sozluk.gov.tr)
+## Öne çıkan özellikler
 
-### Feature Roadmap
+- Türkçe kelime, anlam, örnek cümle, sözcük türü ve ilişkili madde araması
+- Paylaşılabilir ve arama motorlarına uygun kelime sayfaları
+- Günün kelimesi, kelime listeleri ve kaydedilen kelimeler
+- Uygulama olarak yüklenebilen PWA ve isteğe bağlı çevrim dışı sözlük verisi
+- Topluluk katkıları: yeni kelime, anlam, ilişki, örnek, görsel ve telaffuz önerileri
+- Telaffuz yükleme ve oylama akışı ile geri bildirim sistemi
+- Kelime türetme ve fiil çekim araçları
+- Kelime kartları, eşleştirme ve hızlı tur oyunları; skor tabloları
+- Türkçe ve İngilizce arayüzler
 
-#### Current features
+## Teknoloji
 
-- Offline word search
-- PWA support to install the app on your devices and use it offline
-- Community contributions
-  - Word pronunciations
-  - Missing word requests (Detailed and simple word request forms)
-  - Word details change suggestions
-- User feedback system
-  - Easy feature requests
-  - Intuitive feedback submission
-- Save words for later
-- Creating Screenshots of words
-- Sharing word URLs
+- **Uygulama:** Next.js 16 (App Router), React 19 ve TypeScript
+- **Arayüz:** Tailwind CSS v4, HeroUI, Radix UI ve lucide-react
+- **API ve veri:** tRPC, TanStack Query, PostgreSQL ve Drizzle ORM
+- **Kimlik doğrulama:** Better Auth; e-posta OTP ve sosyal sağlayıcılar
+- **Çok dillilik:** next-intl
+- **Çevrim dışı/PWA:** Serwist, IndexedDB ve oluşturulmuş çevrim dışı sözlük verisi
+- **Arama:** PostgreSQL araması ve Meilisearch eşitlemesi
 
-#### Future features
+## Yerelde çalıştırma
 
-- Minigames to learn or practice Turkish words and grammar
-  - Randomized letter puzzles to find words
-  - More games coming soon!
-- Community contributions
-  - Visual aids and images for words and meanings
-- Personal learning tools
-  - Flashcard creation system
-  - Quick integration of saved words into learning cards
-- Visual learning support
-  - Images for words to enhance understanding
-  - Visual context for different word meanings
-  - User-contributed image suggestions
+### Gereksinimler
 
-### Tech Stack
+- [Bun](https://bun.sh/)
+- Yerel PostgreSQL kurulumu veya örnek ortam dosyasındaki Docker/Pi geliştirme veritabanına erişim
 
-#### Core Technologies
-
-- **Frontend & Backend**
-  - Next.js (App Router) with React 19
-  - create-t3-app stack
-  - tRPC for type-safe API
-  - HeroUI for modern UI components
-  - next-intl for internationalization
-  - PWA support with serwist
-  - Uploadthing for file uploads
-
-#### Database & Authentication
-
-- PostgreSQL database (using DrizzleORM) hosted on DigitalOcean
-- NextAuth for authentication
-  - Multiple OAuth providers (Google, GitHub, Discord)
-
-### Getting Started
-
-#### Prerequisites
-
-- Node.js
-- Docker and Docker Compose (for local development)
-- PostgreSQL (automatically handled by Docker)
-
-#### Development Setup
-
-1. Clone the repository
-2. Copy the `.env.example` file to `.env` and fill in the required variables
-3. Start the development environment:
-
-   ```bash
-   docker-compose up -d    # Starts PostgreSQL database
-   npm install            # Install dependencies
-   npm run dev           # Start development server
-   ```
-
-#### Environment Variables
-
-```env
-# Database
-DATABASE_URL=              # PostgreSQL connection URL
-DATABASE_SSL_CA=
-
-# Authentication
-NEXTAUTH_SECRET=          # See https://next-auth.js.org/configuration/options#secret
-NEXTAUTH_URL=             # http://localhost:3000 for local development
-
-# OAuth Providers
-AUTH_DISCORD_ID=
-AUTH_DISCORD_SECRET=
-AUTH_GITHUB_ID=
-AUTH_GITHUB_SECRET=
-AUTH_GOOGLE_ID=
-AUTH_GOOGLE_SECRET=
-AUTH_TRUST_HOST=true
-
-# Login via Email (OTP)
-RESEND_API_KEY=           # Replace re_xxxxxxxxx with your real Resend API key
-RESEND_EMAIL_FROM=        # e.g. "Türkçe Sözlük <no-reply@turkce-sozluk.com>"
-
-# File Upload
-UPLOADTHING_SECRET=       # From uploadthing.com
-UPLOADTHING_TOKEN=
-
-# Cron secret for scheduled tasks
-CRON_SECRET=
-
-# Email
-NODEMAIL_PASSWORD=
-NODEMAIL_EMAIL=
-
-# Drizzle Studio DB URL
-DATABASE_USERNAME=
-DATABASE_PASSWORD=
-DATABASE_HOST=
-DATABASE_PORT=
-DATABASE_DATABASE=
-DATABASE_SSLMODE=
-
-# Recaptcha
-NEXT_PUBLIC_RECAPTCHA_SITE_KEY=
-RECAPTCHA_SECRET_KEY=
-
-# Push Notifications
-NEXT_PUBLIC_VAPID_PUBLIC_KEY=
-VAPID_PRIVATE_KEY=
-
-# Cloudflare R2 for offline db
-
-S3_API_URL=
-R2_ACCOUNT_ID=
-R2_ACCESS_KEY_ID=
-R2_SECRET_ACCESS_KEY=
-R2_BUCKET_NAME=
-NEXT_PUBLIC_R2_CUSTOM_URL=
-```
-
-### Local Postgres Backups (Aiven / Weekly + Boot Catch-Up)
-
-If you're on a free Aiven tier without managed backups, this project includes a local backup automation for macOS:
-
-- Backs up every Sunday (LaunchAgent calendar trigger)
-- Also runs at every boot/login (`RunAtLoad`)
-- Before dumping, checks whether the most recent Sunday is already backed up and skips if yes
-
-#### 1. Ensure `pg_dump` is available
+### Kurulum
 
 ```bash
-pg_dump --version
+git clone https://github.com/4Furki4/Turkish-Dictionary.git
+cd Turkish-Dictionary
+
+bun install
+cp .env.development.pi.example .env.local
 ```
 
-If needed on macOS:
+`.env.local` içindeki veritabanı ve kullanacağınız servis ayarlarını kendi geliştirme ortamınıza göre güncelleyin. Gizli anahtarları sürüm kontrolüne eklemeyin.
+
+Ardından yerel şemayı uygulayıp geliştirme sunucusunu başlatın:
 
 ```bash
-brew install libpq
-brew link --force libpq
+bun run db:push:local
+bun run dev
 ```
 
-#### 2. Ensure database URL is configured
+Uygulama varsayılan olarak [http://localhost:3000](http://localhost:3000) adresinde açılır.
 
-The backup script reads `DATABASE_URL` (or `AIVEN_DATABASE_URL`) from:
-
-- current shell environment, or
-- `.env.production.local` by default
-
-You can override the env file:
+## Sık kullanılan komutlar
 
 ```bash
-ENV_FILE=/absolute/path/to/.env.production.local npm run db:backup
+# Uygulama
+bun run dev
+bun run build
+bun run start
+
+# Testler
+bun run test
+bun run test:watch
+
+# Veritabanı
+bun run db:generate
+bun run db:migrate:local
+bun run studio:local
+
+# Sözlük verisi ve arama
+bun run seed:tdk
+bun run seed:daily
+bun run offline-data:generate
+bun run search:sync
 ```
 
-#### 3. Run a manual backup test
+`bun run build`, üretim derlemesi için temel doğrulama komutudur. Bu proje Bun ile yönetilir; npm yalnızca gerekli bir geri dönüş seçeneği olduğunda kullanılmalıdır.
 
-```bash
-npm run db:backup
-```
+## Ortam değişkenleri
 
-Output dumps are written under `backups/postgres/`.
+Uygulamanın doğrulanan ortam değişkenleri [`src/env.mjs`](src/env.mjs) içinde; yerel geliştirme için örnek ayarlar [`.env.development.pi.example`](.env.development.pi.example) içinde bulunur.
 
-#### 4. Install weekly + boot automation (macOS)
+Kullandığınız özelliğe göre PostgreSQL, Better Auth, e-posta, OAuth, Meilisearch, UploadThing, R2/S3, reCAPTCHA ve web push ayarlarını yapılandırmanız gerekebilir. Yeni bir uygulama değişkeni eklerken önce `src/env.mjs` dosyasını güncelleyin.
 
-By default this schedules Sundays at `09:00` and runs on every boot/login:
+## Proje yapısı
 
-```bash
-npm run db:backup:install
-```
+- `src/app/`: App Router sayfaları, API uçları, sitemap/robots ve servis çalışanı
+- `src/_pages/` ve `src/components/`: sayfa seviyesindeki arayüzler ve yeniden kullanılabilir bileşenler
+- `src/server/api/`: tRPC yönlendiricileri, şemalar ve istek işleyicileri
+- `src/lib/`: arama, SEO, kimlik doğrulama, çevrim dışı veri, biçimbilim ve oyun yardımcıları
+- `db/schema/`: Drizzle tablo ve ilişki tanımları
+- `messages/`: Türkçe ve İngilizce metinler
+- `docs/`: Raspberry Pi dağıtımı, veritabanı ve operasyon belgeleri
 
-Optional custom time:
+Pi veritabanı ve dağıtım işlemleri için sırasıyla [veritabanı geçişleri](docs/raspberry-pi-database-migrations.md) ve [dağıtım kılavuzu](docs/raspberry-pi-deployments.md) belgelerini izleyin.
 
-```bash
-BACKUP_HOUR=3 BACKUP_MINUTE=30 npm run db:backup:install
-```
+## Katkıda bulunma
 
-#### 5. Verify the LaunchAgent
+Hata bildirimi, özellik önerisi ve pull request'ler memnuniyetle karşılanır. Kapsamı netleştirmek için büyük değişikliklerden önce bir issue açın. Uygulama içinden yapılan sözlük katkıları da mevcut moderasyon akışından geçer.
 
-```bash
-launchctl print gui/$(id -u)/com.turkishdictionary.postgres.backup
-```
+## Lisans
 
-#### 6. Disable automation later
+Bu proje [GNU Affero General Public License v3.0](LICENSE) ile lisanslanmıştır. Uygulamayı değiştirip ağ üzerinden hizmete sunarsanız, değiştirilmiş kaynak kodunu kullanıcılara aynı lisansla sunmanız gerekir.
 
-```bash
-npm run db:backup:uninstall
-```
+## İletişim
 
-### Contributing
+Muhammed Furkan Cengiz — [GitHub](https://github.com/4Furki4) · [muhammedfurkancengiz@gmail.com](mailto:muhammedfurkancengiz@gmail.com)
 
-I welcome contributions! Please check my issues page for current tasks or bug reports. A detailed contribution guide will be added soon.
+---
 
-### License
+## English
 
-This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0). This means:
+**Çağdaş Türkçe Sözlük** is an open-source, community-driven Turkish dictionary available at [turkce-sozluk.com](https://turkce-sozluk.com).
 
-- You can use, modify, and distribute this software.
-- If you modify and use this software in a network service (like a web application), you must make the complete source code available to users.
-- Any modifications must also be licensed under AGPL-3.0.
-- Full license terms can be found in the LICENSE file.
+It offers searchable dictionary entries with meanings, examples, related terms, pronunciations, contribution and feedback workflows, offline/PWA support, word-building tools, verb conjugation, and flashcard, matching, and speed-round games. The project uses Next.js 16, React 19, TypeScript, tRPC, PostgreSQL/Drizzle, Better Auth, next-intl, Tailwind CSS v4, HeroUI, Serwist, and Meilisearch.
 
-## Contact
+For local development, install dependencies with `bun install`, copy `.env.development.pi.example` to `.env.local`, configure the required services, run `bun run db:push:local`, then start the app with `bun run dev`.
 
-You can contact me at muhammedfurkancengiz@gmail.com
-
-## Türkçe Sözlük (TR)
-
-### Projenin Amacı
-
-- Dünya ve onu anlamlandırmak için kullandığımız diller sürekli değişiyor — özellikle de modern dünyada. Amacım, alanında uzman kişilerle (örneğin bilim insanlarıyla) da görüşerek, güncel, ilgi çekici ve ana dili Türkçe olmayan kullanıcılar için de erişilebilir bir Türkçe sözlük oluşturmaktır.
-- [Resmî Türkçe Sözlük](https://sozluk.gov.tr)'teki sözlük yapısı esas alınacaktır.
-
-### Özellik Yol Haritası
-
-#### Mevcut Özellikler
-
-- Çevrimdışı kelime arama  
-- Uygulama olarak indirip çevrimdışı kullanılabilen PWA desteği  
-- Topluluk katkıları  
-  - Kelime telaffuzları  
-  - Eksik kelime bildirme (Detaylı ve basit formlar)  
-  - Kelime detaylarında öneri/değişiklik sistemi  
-- Kullanıcı geri bildirim sistemi  
-  - Kolay özellik önerileri  
-  - Anlaşılır geri bildirim gönderimi  
-- Kelimeleri kaydetme  
-- Kelime ekran görüntüsü oluşturma  
-- Kelime bağlantılarını paylaşma  
-
-#### Gelecek Özellikler
-
-- Türkçe kelimeleri ve dil bilgisini öğrenmeye yönelik mini oyunlar  
-  - Harf karıştırmaca türü kelime bulmaca oyunları  
-  - Yeni oyunlar yolda!  
-- Topluluk katkıları  
-  - Kelimeler için görsel destek / çizimler  
-- Kişisel öğrenme araçları  
-  - Flashcard (kart destesi) oluşturma sistemi  
-  - Kaydedilen kelimeleri hızlıca karta dönüştürme  
-- Görsel öğrenme desteği  
-  - Anlamı pekiştiren kelime görselleri  
-  - Kelimelerin farklı anlamlarına görsel bağlam ekleme  
-  - Kullanıcı katkılı görsel öneri sistemi  
-
-### Teknoloji Yığını
-
-#### Temel Teknolojiler
-
-- **Frontend & Backend**  
-  - Next.js (App Router) ve React 19  
-  - create-t3-app altyapısı  
-  - tRPC ile tür güvenli API  
-  - HeroUI ile modern arayüz bileşenleri  
-  - next-intl ile çok dilli destek  
-  - serwist ile PWA desteği  
-  - Uploadthing ile dosya yükleme sistemi  
-
-#### Veritabanı & Kimlik Doğrulama
-
-- PostgreSQL veritabanı (DrizzleORM kullanılarak) DigitalOcean üzerinde barındırılıyor  
-- NextAuth ile kimlik doğrulama  
-  - Birden fazla OAuth sağlayıcı (Google, GitHub, Discord)  
-
-### Başlarken
-
-#### Gereklilikler
-
-- Node.js  
-- Docker ve Docker Compose (yerel geliştirme için)  
-- PostgreSQL (Docker tarafından otomatik kurulur)  
-
-#### Geliştirme Ortamı Kurulumu
-
-1. Depoyu klonlayın  
-2. `.env.example` dosyasını `.env` olarak kopyalayın ve gerekli alanları doldurun  
-3. Geliştirme ortamını başlatın:
-
-   ```bash
-   docker-compose up -d    # PostgreSQL veritabanını başlatır
-   npm install             # Bağımlılıkları kurar
-   npm run dev             # Geliştirme sunucusunu çalıştırır
+Contributions and issue reports are welcome. The project is licensed under [AGPL-3.0](LICENSE).
