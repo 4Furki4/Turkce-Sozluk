@@ -1,11 +1,21 @@
 {
     "schema_version": 2,
-    "commit": "39659e875ad84a36d5a8c2183e6938e97a79fede",
-    "indexed_at": "2026-07-18T23:36:41Z",
+<<<<<<< Updated upstream
+    "commit": "d94911f10b16035c9f01dfbc059069d570de3ba5",
+    "indexed_at": "2026-07-18T23:21:36Z",
     "project": "Users-muhammedfurkancengiz-Development-Turkish-Dictionary",
-    "nodes": 0,
-    "edges": 0,
-    "original_size": 102400,
-    "compressed_size": 1468,
+    "nodes": 15460,
+    "edges": 24052,
+    "original_size": 25952256,
+    "compressed_size": 3003545,
+=======
+    "commit": "908b25eb5d395efecabf9e509acf15e50fb73f4b",
+    "indexed_at": "2026-07-30T04:57:55Z",
+    "project": "Users-muhammedfurkancengiz-Development-Turkish-Dictionary",
+    "nodes": 15445,
+    "edges": 23990,
+    "original_size": 30670848,
+    "compressed_size": 3461412,
+>>>>>>> Stashed changes
     "compression_level": 3
 }

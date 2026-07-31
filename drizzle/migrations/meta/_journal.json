@@ -309,6 +309,27 @@
       "when": 1783890624743,
       "tag": "0043_married_mordo",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1784586819690,
+      "tag": "0044_pink_lord_hawal",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1784587841594,
+      "tag": "0045_odd_victor_mancha",
+      "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1784635975316,
+      "tag": "0046_conscious_jack_murdock",
+      "breakpoints": true
     }
   ]
 }

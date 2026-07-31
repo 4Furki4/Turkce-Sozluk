@@ -66,6 +66,7 @@ export function BentoCommonMistake({
           isIconOnly
           size="sm"
           variant="light"
+          aria-label={t("HomeExtras.previous")}
           className="text-muted-foreground hover:text-foreground"
           onPress={handlePrev}
           isDisabled={offset === 0}
@@ -76,6 +77,7 @@ export function BentoCommonMistake({
           isIconOnly
           size="sm"
           variant="light"
+          aria-label={t("HomeExtras.next")}
           className="text-muted-foreground hover:text-foreground"
           onPress={handleNext}
           isDisabled={!data?.total || offset >= data.total - 1}
@@ -168,7 +170,7 @@ export function BentoGalatiMeshur({
       <CardHeader className="pt-4 px-6 z-10 flex flex-row justify-between items-center">
         <Link
           href="/galati-meshur"
-          className="text-xs font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest flex items-center gap-2 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+          className="text-xs font-bold text-amber-700 dark:text-amber-500 uppercase tracking-widest flex items-center gap-2 hover:text-amber-800 dark:hover:text-amber-400 transition-colors"
         >
           <BookOpen className="w-3 h-3" />
           {t("HomeExtras.galatiMeshurTitle")}
@@ -192,7 +194,7 @@ export function BentoGalatiMeshur({
             <p className="text-lg font-serif font-semibold text-foreground line-clamp-1 mb-2">
               {item.word}
             </p>
-            <p className="text-[11px] font-mono uppercase tracking-wide text-amber-600 dark:text-amber-500 mb-1">
+            <p className="text-[11px] font-mono uppercase tracking-wide text-amber-700 dark:text-amber-500 mb-1">
               {t("HomeExtras.explanation")}
             </p>
             <p className="text-[15px] leading-relaxed text-foreground/85 line-clamp-2">
@@ -212,7 +214,8 @@ export function BentoGalatiMeshur({
             isIconOnly
             size="sm"
             variant="light"
-            className="text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400"
+            aria-label={t("HomeExtras.previous")}
+            className="text-amber-700 dark:text-amber-500 hover:text-amber-800 dark:hover:text-amber-400"
             onPress={handlePrev}
             isDisabled={offset === 0}
           >
@@ -222,7 +225,8 @@ export function BentoGalatiMeshur({
             isIconOnly
             size="sm"
             variant="light"
-            className="text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400"
+            aria-label={t("HomeExtras.next")}
+            className="text-amber-700 dark:text-amber-500 hover:text-amber-800 dark:hover:text-amber-400"
             onPress={handleNext}
             isDisabled={!data?.total || offset >= data.total - 1}
           >
@@ -242,7 +246,7 @@ export function BentoGalatiMeshur({
                 id: item.id.toString(),
               },
             }}
-            className="text-sm font-medium text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+            className="text-sm font-medium text-amber-700 dark:text-amber-500 hover:text-amber-800 dark:hover:text-amber-400 transition-colors"
           >
             {t("HomeExtras.readMore")}
           </Link>

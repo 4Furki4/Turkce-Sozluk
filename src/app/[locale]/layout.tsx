@@ -15,7 +15,6 @@ import { auth } from "@/src/lib/auth";
 import { Params } from "next/dist/server/request/params";
 import NavbarAndSidebar from "@/src/components/customs/navbar-and-sidebar";
 import { BackgroundGradient } from "@/src/components/customs/background-gradient";
-import { CaptchaProvider } from "@/src/components/customs/captcha-provider";
 import { PreferencesInitializer } from "@/src/components/customs/preferences-initializer";
 import NavigationProgressBar from "@/src/components/customs/navigation-progress-bar";
 // import { SessionProvider } from "next-auth/react"; // Removed
@@ -187,8 +186,7 @@ export default async function RootLayout({
       <body className={`${ibmPlexSans.variable} ${ibmPlexMono.variable} font-sans antialiased relative`}>
         <TRPCReactProvider>
           <NextIntlClientProvider messages={messages}>
-            <CaptchaProvider>
-              <Providers>
+            <Providers>
                 <OnlineStatusBridge />
                 <WebMcpRegistrar />
                 <AutocompleteSync />
@@ -235,8 +233,7 @@ export default async function RootLayout({
                   </main>
                   <Footer session={session} />
                 </div>
-              </Providers>
-            </CaptchaProvider >
+            </Providers>
             <Toaster />
           </NextIntlClientProvider >
         </TRPCReactProvider >

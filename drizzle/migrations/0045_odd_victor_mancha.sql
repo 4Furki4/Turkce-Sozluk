@@ -1,0 +1,1 @@
+ALTER TABLE "game_sessions" ADD COLUMN "matched_tokens" jsonb DEFAULT '[]'::jsonb NOT NULL;

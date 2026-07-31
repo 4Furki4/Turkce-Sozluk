@@ -140,15 +140,13 @@ export default function Navbar({
         // wrapper: ["sm:px-0"]
       }}
     >
-      <NavbarItem>
-        <NavbarBrand>
-          <a href={homeHref} className="hidden md:flex items-center gap-2">
-            <Image src={logo} alt="Turkish Dictionary Logo" className="h-8 w-8" />
-            <span className="text-fs-1 font-bold text-primary">{TitleIntl}</span>
-          </a>
-          {/* Mobile menu button moved to bottom nav */}
-        </NavbarBrand>
-      </NavbarItem>
+      <NavbarBrand>
+        <a href={homeHref} className="hidden md:flex items-center gap-2">
+          <Image src={logo} alt="Turkish Dictionary Logo" className="h-8 w-8" />
+          <span className="text-fs-1 font-bold text-primary">{TitleIntl}</span>
+        </a>
+        {/* Mobile menu button moved to bottom nav */}
+      </NavbarBrand>
       <NavbarContent justify="end" className="gap-2 md:gap-3 lg:gap-4">
         <CustomDropdown>
           <NavbarItem className="hidden md:flex" isActive={isContributeActive}>

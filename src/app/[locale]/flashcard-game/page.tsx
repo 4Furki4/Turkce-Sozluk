@@ -1,48 +1,25 @@
-import { auth } from "@/src/lib/auth";
-import { api, HydrateClient } from "@/src/trpc/server";
-import { Metadata } from "next";
-import { Params } from "next/dist/server/request/params";
-import React from "react";
+import { redirect } from "@/src/i18n/routing";
+import type { Metadata } from "next";
 
-import { headers } from "next/headers";
-import FlashcardGame from "@/src/components/customs/flashcard-game";
-import { NoScriptNotice } from "@/src/components/progressive-enhancement/no-script-notice";
-
-export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const { locale } = await params;
     return {
-        title: locale === "en" ? "Flashcard Game | Turkish Dictionary" : "Kelime Kartları Oyunu | Türkçe Sözlük",
+        title: locale === "en" ? "Flashcards | Turkish Dictionary" : "Kelime Kartları | Türkçe Sözlük",
         description: locale === "en"
-            ? "Test your Turkish vocabulary with interactive flashcards"
-            : "Etkileşimli kelime kartlarıyla Türkçe kelime bilginizi test edin"
+            ? "Practice Turkish vocabulary with focused flashcards."
+            : "Odaklı kelime kartlarıyla Türkçe kelime pratiği yapın.",
     };
 }
 
 export default async function FlashcardGamePage(
     props: {
         params: Promise<{ locale: string }>;
-    }
+    },
 ) {
-    const params = await props.params;
-    const { locale } = params;
+    const { locale } = await props.params;
 
-    const session = await auth.api.getSession({
-        headers: await headers()
+    redirect({
+        href: "/play/flashcards",
+        locale,
     });
-
-    void api.game.getRandomWordsForFlashcards.prefetch({ count: 10, source: "all" });
-
-    return (
-        <HydrateClient>
-            <NoScriptNotice>
-                {locale === "en"
-                    ? "JavaScript is required to play the flashcard game."
-                    : "Kelime kartları oyununu oynamak için JavaScript gerekir."}
-            </NoScriptNotice>
-            <FlashcardGame
-                session={session}
-                locale={locale as "en" | "tr"}
-            />
-        </HydrateClient>
-    );
 }

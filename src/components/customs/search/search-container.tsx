@@ -14,7 +14,7 @@ import { useTypewriter } from "@/src/hooks/use-typewriter";
 import { useOnlineStatus } from "@/src/hooks/use-online-status";
 import { api } from "@/src/trpc/react";
 import { startNavigationProgress } from "@/src/lib/navigation-progress";
-import { Link } from "@/src/i18n/routing";
+import { Link, useRouter } from "@/src/i18n/routing";
 import { getOfflineWordSearchQueryKey, toOfflineWordSearchResult } from "@/src/hooks/useWordSearch";
 import { getPlainSearchAction, getSearchQueryHref, getWordSearchHref } from "@/src/lib/search-route";
 import type { RouterOutputs } from "@/src/trpc/shared";
@@ -51,6 +51,7 @@ export default function SearchContainer({
 }: SearchContainerProps) {
     const t = useTranslations("Home");
     const locale = useLocale();
+    const router = useRouter();
     const queryClient = useQueryClient();
     const [wordInput, setWordInput] = useState<string>("");
     const [inputError, setInputError] = useState<string>("");
@@ -278,8 +279,11 @@ export default function SearchContainer({
             return;
         }
 
-        window.location.assign(dynamicWordHref);
-    }, [isOnline, locale, onSearchComplete, primeOfflineWordCache, t]);
+        router.push({
+            pathname: "/search/[word]",
+            params: { word: input },
+        });
+    }, [isOnline, locale, onSearchComplete, primeOfflineWordCache, router, t]);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -306,7 +310,13 @@ export default function SearchContainer({
                             <div className="flex items-center gap-1">
                                 <Popover placement="bottom" classNames={{ content: "bg-background" }}>
                                     <PopoverTrigger>
-                                        <Button className="bg-transparent" isIconOnly variant="flat" radius="none">
+                                        <Button
+                                            aria-label={t("hero.patternSearchTooltip")}
+                                            className="bg-transparent"
+                                            isIconOnly
+                                            variant="flat"
+                                            radius="none"
+                                        >
                                             <PuzzleIcon className="w-5 h-5 text-default-400 cursor-pointer hover:text-primary transition-colors" />
                                         </Button>
                                     </PopoverTrigger>

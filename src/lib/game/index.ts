@@ -3,3 +3,5 @@
  */
 export * from './types';
 export * from './utils';
+export * from './session-scoring';
+export * from './flashcard-scheduling';

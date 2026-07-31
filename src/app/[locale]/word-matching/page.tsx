@@ -1,14 +1,8 @@
-import { auth } from "@/src/lib/auth";
-import { api, HydrateClient } from "@/src/trpc/server";
-import { Metadata } from "next";
-import { Params } from "next/dist/server/request/params";
-import React from "react";
-import { headers } from "next/headers";
-import WordMatchingGame from "@/src/components/customs/word-matching-game";
-import { NoScriptNotice } from "@/src/components/progressive-enhancement/no-script-notice";
+import { redirect } from "@/src/i18n/routing";
+import type { Metadata } from "next";
 
 
-export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const { locale } = await params;
     return {
         title: locale === "en" ? "Word Matching Game | Turkish Dictionary" : "Kelime Eşleştirme Oyunu | Türkçe Sözlük",
@@ -26,23 +20,8 @@ export default async function WordMatchingGamePage(
     const params = await props.params;
     const { locale } = params;
 
-    const session = await auth.api.getSession({
-        headers: await headers()
+    redirect({
+        href: "/play/word-matching",
+        locale,
     });
-
-    void api.game.getWordsForMatching.prefetch({ pairCount: 6, source: "all" });
-
-    return (
-        <HydrateClient>
-            <NoScriptNotice>
-                {locale === "en"
-                    ? "JavaScript is required to play the word matching game."
-                    : "Kelime eşleştirme oyununu oynamak için JavaScript gerekir."}
-            </NoScriptNotice>
-            <WordMatchingGame
-                session={session}
-                locale={locale as "en" | "tr"}
-            />
-        </HydrateClient>
-    );
 }
