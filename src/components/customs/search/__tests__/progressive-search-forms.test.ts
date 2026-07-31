@@ -34,4 +34,14 @@ describe("progressive search forms", () => {
         );
         expect(source).not.toContain("onClick={() => handleRecommendationClick(tag.name)}");
     });
+
+    it("uses locale-aware client navigation for online word searches", () => {
+        const source = readFileSync(join(root, "src/components/customs/search/search-container.tsx"), "utf8");
+
+        expect(source).toContain('import { Link, useRouter } from "@/src/i18n/routing";');
+        expect(source).toContain("const router = useRouter();");
+        expect(source).toMatch(
+            /if \(!isOnline\) \{\s*window\.location\.assign\(dynamicWordHref\);\s*return;\s*\}\s*router\.push\(\{\s*pathname: "\/search\/\[word\]",\s*params: \{ word: input \},\s*\}\);/,
+        );
+    });
 });
