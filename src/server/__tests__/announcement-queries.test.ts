@@ -7,7 +7,6 @@ jest.mock("next/cache", () => ({
 
 import {
   findPublishedAnnouncementBySlug,
-  listEligiblePublishedAnnouncementSlugs,
 } from "@/src/server/announcement-queries";
 import fs from "node:fs";
 import path from "node:path";
@@ -74,16 +73,6 @@ describe("announcement queries", () => {
         database as never,
       ),
     ).resolves.toBeNull();
-  });
-
-  it("applies the eligibility query when listing static slugs", async () => {
-    const rows = [{ slug: "sozluk-hakkinda" }];
-    const { database, where } = createSelectDatabase(rows);
-
-    await expect(
-      listEligiblePublishedAnnouncementSlugs(database as never),
-    ).resolves.toBe(rows);
-    expect(where).toHaveBeenCalledTimes(1);
   });
 
   it("does not convert database failures into missing rows", async () => {

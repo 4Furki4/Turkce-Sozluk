@@ -10,7 +10,6 @@ import { getAnnouncementCanonicalPath } from "@/src/lib/seo-utils";
 import {
   type AnnouncementLocale,
   getCachedPublishedAnnouncementBySlug,
-  listEligiblePublishedAnnouncementSlugs,
 } from "@/src/server/announcement-queries";
 
 interface AnnouncementDetailPageProps {
@@ -21,12 +20,6 @@ interface AnnouncementDetailPageProps {
 }
 
 export const instant = false;
-
-export async function generateStaticParams() {
-  const announcements = await listEligiblePublishedAnnouncementSlugs();
-
-  return announcements.map(({ slug }) => ({ slug }));
-}
 
 export async function generateMetadata({
   params

@@ -64,18 +64,3 @@ export async function getCachedPublishedAnnouncementBySlug(
 
   return findPublishedAnnouncementBySlug({ slug, locale });
 }
-
-export async function listEligiblePublishedAnnouncementSlugs(
-  database: AnnouncementDatabase = db,
-) {
-  return database
-    .select({ slug: announcements.slug })
-    .from(announcements)
-    .where(
-      and(
-        eq(announcements.status, "published"),
-        lte(announcements.publishedAt, new Date()),
-      ),
-    )
-    .limit(100);
-}

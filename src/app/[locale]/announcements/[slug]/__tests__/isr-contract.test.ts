@@ -5,11 +5,12 @@ const routePath = path.join(__dirname, "..", "page.tsx");
 const routeSource = fs.readFileSync(routePath, "utf8");
 
 describe("announcement detail ISR contract", () => {
-  it("uses the incremental blocking guard without legacy route caching exports", () => {
+  it("uses the incremental blocking guard without build-time database enumeration", () => {
     expect(routeSource).toMatch(/export const instant = false/);
     expect(routeSource).not.toMatch(/export const prefetch/);
     expect(routeSource).not.toMatch(/export const dynamicParams/);
     expect(routeSource).not.toMatch(/export const revalidate/);
+    expect(routeSource).not.toMatch(/generateStaticParams/);
   });
 
   it("does not use request-bound or competing cache APIs", () => {
@@ -22,10 +23,8 @@ describe("announcement detail ISR contract", () => {
     expect(routeSource).not.toMatch(/createServerSideHelpers/);
   });
 
-  it("uses one cached shared query for prerendering, metadata, and content", () => {
+  it("uses one cached shared query for metadata and content", () => {
     expect(routeSource).toMatch(/getCachedPublishedAnnouncementBySlug/);
-    expect(routeSource).toMatch(/listEligiblePublishedAnnouncementSlugs/);
-    expect(routeSource).toMatch(/export async function generateStaticParams/);
     expect(routeSource).toMatch(/generateMetadata/);
     expect(routeSource).toMatch(/getAnnouncementCanonicalPath/);
   });
