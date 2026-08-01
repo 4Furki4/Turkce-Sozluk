@@ -28,10 +28,51 @@ services:
       - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
       - DATABASE_DATABASE=${POSTGRES_DB:-turkish_dictionary}
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@pgbouncer-production:5432/${POSTGRES_DB:-turkish_dictionary}?sslmode=disable
+      - VALKEY_URL=redis://valkey-production:6379
     ports:
       - "127.0.0.1:3000:3000"
     depends_on:
-      - pgbouncer-production
+      pgbouncer-production:
+        condition: service_started
+      valkey-production:
+        condition: service_healthy
+
+  valkey-production:
+    image: valkey/valkey:8.1-alpine
+    container_name: turkish-dictionary-valkey-production
+    restart: unless-stopped
+    init: true
+    user: "999:1000"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp
+    command:
+      - valkey-server
+      - --save
+      - ""
+      - --appendonly
+      - "no"
+      - --dir
+      - /tmp
+      - --maxmemory
+      - 128mb
+      - --maxmemory-policy
+      - volatile-ttl
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   pgbouncer-production:
     image: edoburu/pgbouncer:latest

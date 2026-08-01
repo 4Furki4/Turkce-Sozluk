@@ -9,14 +9,17 @@
 
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
 import { ZodError } from "zod";
 import { auth } from "@/src/lib/auth";
 import { db } from "@/db";
 import { and, eq, gt } from "drizzle-orm";
 import { oauthAccessTokens } from "@/db/schema/oauth";
 import { users } from "@/db/schema/users";
+import {
+  enforceTrpcRateLimit,
+  RateLimitExceededError,
+  RateLimitUnavailableError,
+} from "./rate-limit";
 
 type AuthSession = NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>;
 
@@ -110,104 +113,26 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
   },
 });
 
-// Known search engine bot user-agent patterns
-const BOT_USER_AGENTS = [
-  'googlebot',
-  'bingbot',
-  'yandexbot',
-  'duckduckbot',
-  'slurp',        // Yahoo
-  'baiduspider',
-  'facebookexternalhit',
-  'twitterbot',
-  'linkedinbot',
-  'applebot',
-  'petalbot',     // Huawei/Petal Search
-];
-
-/**
- * Check if the user-agent belongs to a known search engine bot
- */
-function isSearchBot(userAgent: string | null): boolean {
-  if (!userAgent) return false;
-  const lowerUA = userAgent.toLowerCase();
-  return BOT_USER_AGENTS.some(bot => lowerUA.includes(bot));
-}
-
-// Create a new ratelimiter that allows 60 requests per 10 seconds
-const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(60, "10 s"),
-  analytics: false,
-  prefix: "@upstash/ratelimit",
-});
-
-let isRateLimitBackendDisabled = false;
-let hasLoggedRateLimitBackendDisabled = false;
-
-function isUpstashQuotaExceededError(error: unknown): boolean {
-  if (!(error instanceof Error)) {
-    return false;
-  }
-
-  return error.message.toLowerCase().includes("max requests limit exceeded");
-}
-
 const rateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
-  if (process.env.NODE_ENV === "development") {
-    return next();
-  }
-
-  // Allow search engine bots to bypass rate limiting for SEO
-  const userAgent = ctx.headers.get("user-agent");
-  if (isSearchBot(userAgent)) {
-    return next();
-  }
-
-  let identifier = "anonymous";
-
-  // Use User ID if logged in
-  if (ctx.session?.user?.id) {
-    identifier = ctx.session.user.id;
-  } else {
-    // Use IP for anonymous users
-    identifier = ctx.headers.get("x-forwarded-for") ?? "127.0.0.1";
-  }
-
-  if (isRateLimitBackendDisabled) {
-    return next();
-  }
-
   try {
-    const { success } = await ratelimit.limit(identifier);
-
-    if (!success) {
+    await enforceTrpcRateLimit(ctx.headers, ctx.session?.user?.id);
+  } catch (error) {
+    if (error instanceof RateLimitExceededError) {
       throw new TRPCError({
         code: "TOO_MANY_REQUESTS",
-        message: "Rate limit exceeded. Please try again later.",
+        message: `Rate limit exceeded. Try again in ${error.retryAfterSeconds} seconds.`,
       });
     }
-  } catch (error) {
-    if (error instanceof TRPCError) {
-      throw error;
+
+    if (error instanceof RateLimitUnavailableError) {
+      console.error("Valkey rate limiter unavailable; rejecting request");
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Service temporarily unavailable. Please try again shortly.",
+      });
     }
 
-    if (isUpstashQuotaExceededError(error)) {
-      isRateLimitBackendDisabled = true;
-
-      if (!hasLoggedRateLimitBackendDisabled) {
-        hasLoggedRateLimitBackendDisabled = true;
-        console.warn(
-          "Rate limiter disabled (fail open): Upstash request quota exceeded. Requests will bypass rate limiting until the process restarts.",
-        );
-      }
-
-      return next();
-    }
-
-    // Fail open: Log unexpected errors and allow request to proceed
-    console.error("Rate Limiter Error (Fail Open):", error);
-    return next();
+    throw error;
   }
 
   return next();
