@@ -1,8 +1,6 @@
 import { escapeXml, getWordCanonicalUrl } from '@/src/lib/seo-utils';
 import { getIndexableWordsForSitemapPage } from '@/src/lib/seo-word-index';
 
-export const dynamic = 'force-dynamic';
-
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     // Await params as per Next.js 15+ requirements
     const { id } = await params;

@@ -8,6 +8,7 @@ const withNextIntl = createNextIntlPlugin();
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     output: "standalone",
+    cacheComponents: true,
     htmlLimitedBots: /.*/,
     images: {
         remotePatterns: [

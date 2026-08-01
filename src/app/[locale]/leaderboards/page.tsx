@@ -1,5 +1,6 @@
 import { auth } from "@/src/lib/auth";
 import { headers } from "next/headers";
+import { getStaticRouteCanonicalPath } from "@/src/lib/seo-utils";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Metadata } from "next";
 import { api, HydrateClient } from "@/src/trpc/server";
@@ -10,6 +11,8 @@ type Props = {
     params: Promise<{ locale: "en" | "tr" }>;
 };
 
+export const instant = false;
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { locale } = await params;
     const t = await getTranslations({ locale, namespace: "Leaderboards" });
@@ -17,6 +20,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
         title: t("title"),
         description: t("description"),
+        alternates: {
+            canonical: getStaticRouteCanonicalPath(
+                "/leaderboards",
+                locale === "en" ? "en" : "tr",
+            ),
+        },
     };
 }
 

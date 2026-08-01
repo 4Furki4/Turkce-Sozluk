@@ -6,6 +6,8 @@ import { auth } from "@/src/lib/auth";
 import { api, HydrateClient } from "@/src/trpc/server";
 import { headers } from "next/headers";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getStaticRouteCanonicalPath } from "@/src/lib/seo-utils";
+import type { Metadata } from "next";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -14,6 +16,21 @@ interface FeedbackPageProps {
         locale: string;
     }>;
     searchParams: Promise<SearchParams>;
+}
+
+export const instant = false;
+
+export async function generateMetadata({
+    params,
+}: Pick<FeedbackPageProps, "params">): Promise<Metadata> {
+    const { locale } = await params;
+    const resolvedLocale = locale === "en" ? "en" : "tr";
+
+    return {
+        alternates: {
+            canonical: getStaticRouteCanonicalPath("/feedback", resolvedLocale),
+        },
+    };
 }
 
 const toStringParam = (value: string | string[] | undefined, fallback = "") =>

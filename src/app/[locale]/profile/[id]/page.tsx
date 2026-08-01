@@ -6,6 +6,8 @@ import ProfilePageWrapper from '@/src/_pages/profile/profile-page-wrapper';
 import { notFound } from 'next/navigation';
 import { TRPCError } from '@trpc/server';
 import { ErrorBoundary } from 'react-error-boundary';
+
+export const instant = false;
 import { headers } from "next/headers";
 interface ProfilePageProps {
     params: Promise<{

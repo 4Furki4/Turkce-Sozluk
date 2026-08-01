@@ -3,10 +3,10 @@ import {
   getIndexableWordCount,
   WORD_SITEMAP_PAGE_SIZE,
 } from '@/src/lib/seo-word-index';
-
-export const dynamic = 'force-dynamic';
+import { io } from "next/cache";
 
 export async function GET() {
+  await io();
   const baseUrl = getBaseUrl();
   const lastmod = new Date().toISOString();
 

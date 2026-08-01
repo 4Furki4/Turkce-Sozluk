@@ -1,6 +1,8 @@
 import { redirect } from "@/src/i18n/routing";
 import type { Metadata } from "next";
 
+export const instant = false;
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const { locale } = await params;
     return {

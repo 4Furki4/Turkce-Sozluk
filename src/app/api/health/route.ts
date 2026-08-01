@@ -1,10 +1,10 @@
 import { db } from "@/db";
 import { sql } from "drizzle-orm";
+import { io } from "next/cache";
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
-
 export async function GET() {
+  await io();
   const startedAt = Date.now();
 
   try {

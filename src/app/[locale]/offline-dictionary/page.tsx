@@ -2,8 +2,29 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import OfflineDictionaryClient from "./offline-dictionary-client";
 import CustomCard from "@/src/components/customs/heroui/custom-card";
 import { NoScriptNotice } from "@/src/components/progressive-enhancement/no-script-notice";
+import { getStaticRouteCanonicalPath } from "@/src/lib/seo-utils";
+import type { Metadata } from "next";
 
-export default async function OfflineDictionaryPage({ params }: { params: Promise<{ locale: string }> }) {
+export const instant = false;
+
+type Props = {
+    params: Promise<{ locale: string }>;
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { locale } = await params;
+
+    return {
+        alternates: {
+            canonical: getStaticRouteCanonicalPath(
+                "/offline-dictionary",
+                locale === "en" ? "en" : "tr",
+            ),
+        },
+    };
+}
+
+export default async function OfflineDictionaryPage({ params }: Props) {
     const { locale } = await params;
     setRequestLocale(locale);
     const t = await getTranslations("OfflineDictionary");

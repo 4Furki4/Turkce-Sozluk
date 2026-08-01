@@ -6,10 +6,27 @@ import { auth } from "@/src/lib/auth";
 import { setRequestLocale } from 'next-intl/server';
 import { redirect } from '@/src/i18n/routing';
 import { headers } from 'next/headers';
+import { getStaticRouteCanonicalPath } from '@/src/lib/seo-utils';
+import type { Metadata } from 'next';
 
 interface ContributeWordPageProps {
     params: Promise<{ locale: string }>;
     searchParams: Promise<{ word?: string }>;
+}
+
+export const instant = false;
+
+export async function generateMetadata({
+    params,
+}: Pick<ContributeWordPageProps, "params">): Promise<Metadata> {
+    const { locale } = await params;
+    const resolvedLocale = locale === "en" ? "en" : "tr";
+
+    return {
+        alternates: {
+            canonical: getStaticRouteCanonicalPath("/contribute-word", resolvedLocale),
+        },
+    };
 }
 
 export default async function ContributeWord({

@@ -6,6 +6,9 @@ import { auth } from "@/src/lib/auth";
 import { api, HydrateClient } from "@/src/trpc/server";
 import { Metadata } from "next";
 import { headers } from "next/headers";
+import { getStaticRouteCanonicalPath } from "@/src/lib/seo-utils";
+
+export const instant = false;
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
@@ -52,6 +55,12 @@ export async function generateMetadata({
     return {
         title: t("title"),
         description: t("subtitle"),
+        alternates: {
+            canonical: getStaticRouteCanonicalPath(
+                "/foreign-term-suggestions",
+                locale === "en" ? "en" : "tr",
+            ),
+        },
     };
 }
 

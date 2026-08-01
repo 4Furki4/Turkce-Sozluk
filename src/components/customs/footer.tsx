@@ -1,16 +1,61 @@
-import React from 'react'
+import { Suspense } from 'react'
 import { getTranslations } from 'next-intl/server'
-import { FeedbackModal } from "@/src/components/customs/modals/add-feedback";
 import { Link as NextIntlLink } from "@/src/i18n/routing";
 import { Github } from 'lucide-react';
-import { Session } from '@/src/lib/auth';
 import Image from "next/image";
 import logo from "@/public/svg/navbar/logo.svg";
+import { io } from "next/cache";
 
-export default async function Footer({ session }: { session: Session | null }) {
-    const t = await getTranslations("Footer");
-    const tFeedback = await getTranslations("Feedback");
-    const tNavbar = await getTranslations("Navbar"); // Fetching for Title
+async function CurrentYear() {
+    await io();
+    return new Date().getFullYear();
+}
+
+function FooterLink({
+    href,
+    children,
+}: {
+    href:
+        | "/word-list"
+        | "/words"
+        | "/announcements"
+        | "/offline-dictionary"
+        | "/play"
+        | "/leaderboards"
+        | "/contribute-word"
+        | "/donate"
+        | "/pronunciation-voting"
+        | "/feedback"
+        | "/foreign-term-suggestions"
+        | "/privacy-policy"
+        | "/terms-of-service";
+    children: React.ReactNode;
+}) {
+    const className =
+        "text-sm text-muted-foreground hover:text-primary transition-colors";
+
+    return (
+        <Suspense
+            fallback={<span className={className}>{children}</span>}
+        >
+            <NextIntlLink href={href} className={className}>
+                {children}
+            </NextIntlLink>
+        </Suspense>
+    );
+}
+
+export default async function Footer({
+    locale,
+    feedbackAction,
+}: {
+    locale: string;
+    feedbackAction: React.ReactNode;
+}) {
+    const [t, tNavbar] = await Promise.all([
+        getTranslations({ locale, namespace: "Footer" }),
+        getTranslations({ locale, namespace: "Navbar" }),
+    ]);
 
     const footerLinks = {
         dictionary: [
@@ -74,9 +119,9 @@ export default async function Footer({ session }: { session: Session | null }) {
                             <ul className="space-y-3">
                                 {footerLinks.dictionary.map(link => (
                                     <li key={link.href}>
-                                        <NextIntlLink href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                                        <FooterLink href={link.href}>
                                             {link.label}
-                                        </NextIntlLink>
+                                        </FooterLink>
                                     </li>
                                 ))}
                                 <li>
@@ -100,9 +145,9 @@ export default async function Footer({ session }: { session: Session | null }) {
                             <ul className="space-y-3">
                                 {footerLinks.games.map(link => (
                                     <li key={link.href}>
-                                        <NextIntlLink href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                                        <FooterLink href={link.href}>
                                             {link.label}
-                                        </NextIntlLink>
+                                        </FooterLink>
                                     </li>
                                 ))}
                             </ul>
@@ -116,17 +161,13 @@ export default async function Footer({ session }: { session: Session | null }) {
                             <ul className="space-y-3">
                                 {footerLinks.community.map(link => (
                                     <li key={link.href}>
-                                        <NextIntlLink href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                                        <FooterLink href={link.href}>
                                             {link.label}
-                                        </NextIntlLink>
+                                        </FooterLink>
                                     </li>
                                 ))}
                                 <li>
-                                    <FeedbackModal session={session} variant="link">
-                                        <span className="text-sm text-foreground/80 hover:text-primary cursor-pointer transition-colors">
-                                            {tFeedback("submitFeedback")}
-                                        </span>
-                                    </FeedbackModal>
+                                    {feedbackAction}
                                 </li>
                             </ul>
                         </div>
@@ -139,9 +180,9 @@ export default async function Footer({ session }: { session: Session | null }) {
                             <ul className="space-y-3">
                                 {footerLinks.legal.map(link => (
                                     <li key={link.href}>
-                                        <NextIntlLink href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                                        <FooterLink href={link.href}>
                                             {link.label}
-                                        </NextIntlLink>
+                                        </FooterLink>
                                     </li>
                                 ))}
                             </ul>
@@ -152,7 +193,7 @@ export default async function Footer({ session }: { session: Session | null }) {
                 {/* Bottom Section */}
                 <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-sm text-muted-foreground text-center md:text-left">
-                        © {new Date().getFullYear()} {t("licenseInfo")}
+                        © <Suspense fallback={null}><CurrentYear /></Suspense> {t("licenseInfo")}
                     </p>
                 </div>
             </div>

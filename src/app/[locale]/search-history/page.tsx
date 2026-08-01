@@ -5,6 +5,8 @@ import { api } from '@/src/trpc/server';
 import { HydrateClient } from '@/src/trpc/server';
 import { headers } from "next/headers";
 
+export const instant = false;
+
 export default async function SearchHistoryPage() {
   const session = await auth.api.getSession({
     headers: await headers()

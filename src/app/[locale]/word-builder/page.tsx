@@ -2,6 +2,9 @@ import WordBuilder from "@/src/components/customs/word-builder";
 import { NoScriptNotice } from "@/src/components/progressive-enhancement/no-script-notice";
 import { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getStaticRouteCanonicalPath } from "@/src/lib/seo-utils";
+
+export const instant = false;
 
 type Props = {
   params: Promise<{
@@ -16,6 +19,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
+    alternates: {
+      canonical: getStaticRouteCanonicalPath(
+        "/word-builder",
+        locale === "en" ? "en" : "tr",
+      ),
+    },
     openGraph: {
       title: t("metaTitle"),
       description: t("metaDescription"),

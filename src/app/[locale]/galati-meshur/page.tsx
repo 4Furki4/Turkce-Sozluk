@@ -3,10 +3,23 @@ import { Link } from "@/src/i18n/routing";
 import { api } from "@/src/trpc/server";
 import { BookOpen, CheckCircle2, ChevronLeft, XCircle } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getStaticRouteCanonicalPath } from "@/src/lib/seo-utils";
+import type { Metadata } from "next";
 
 type Props = {
     params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { locale } = await params;
+    const resolvedLocale = locale === "en" ? "en" : "tr";
+
+    return {
+        alternates: {
+            canonical: getStaticRouteCanonicalPath("/galati-meshur", resolvedLocale),
+        },
+    };
+}
 
 export default async function GalatiMeshurListPage({ params }: Props) {
     const { locale } = await params;

@@ -1,13 +1,32 @@
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { use } from "react";
+import { io } from "next/cache";
+import { getStaticRouteCanonicalPath } from "@/src/lib/seo-utils";
+import type { Metadata } from "next";
+
+export const instant = false;
 
 interface TermsOfServicePageProps {
     params: Promise<{ locale: string }>;
 }
 
+export async function generateMetadata({
+    params,
+}: TermsOfServicePageProps): Promise<Metadata> {
+    const { locale } = await params;
+    const resolvedLocale = locale === "en" ? "en" : "tr";
+
+    return {
+        alternates: {
+            canonical: getStaticRouteCanonicalPath("/terms-of-service", resolvedLocale),
+        },
+    };
+}
+
 export default function TermsOfServicePage({ params }: TermsOfServicePageProps) {
     const { locale } = use(params);
+    use(io());
     setRequestLocale(locale);
     const t = useTranslations("TermsOfService");
 

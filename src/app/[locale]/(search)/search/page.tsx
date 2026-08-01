@@ -6,6 +6,23 @@ import {
   OFFLINE_SEARCH_PARAM,
   SEARCH_QUERY_PARAM,
 } from "@/src/lib/search-route";
+import { getStaticRouteCanonicalPath } from "@/src/lib/seo-utils";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const resolvedLocale = locale === "en" ? "en" : "tr";
+
+  return {
+    alternates: {
+      canonical: getStaticRouteCanonicalPath("/search", resolvedLocale),
+    },
+  };
+}
 
 export default async function Page(
   props: {

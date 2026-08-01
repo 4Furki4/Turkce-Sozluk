@@ -1,13 +1,32 @@
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { use } from "react";
+import { io } from "next/cache";
+import { getStaticRouteCanonicalPath } from "@/src/lib/seo-utils";
+import type { Metadata } from "next";
+
+export const instant = false;
 
 interface PrivacyPolicyPageProps {
     params: Promise<{ locale: string }>;
 }
 
+export async function generateMetadata({
+    params,
+}: PrivacyPolicyPageProps): Promise<Metadata> {
+    const { locale } = await params;
+    const resolvedLocale = locale === "en" ? "en" : "tr";
+
+    return {
+        alternates: {
+            canonical: getStaticRouteCanonicalPath("/privacy-policy", resolvedLocale),
+        },
+    };
+}
+
 export default function PrivacyPolicyPage({ params }: PrivacyPolicyPageProps) {
     const { locale } = use(params);
+    use(io());
     setRequestLocale(locale);
     const t = useTranslations("PrivacyPolicy");
 

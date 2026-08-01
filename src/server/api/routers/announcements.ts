@@ -4,6 +4,7 @@ import { z } from "zod";
 import { and, asc, desc, eq, gte, lte, ilike, sql } from "drizzle-orm";
 import { announcements } from "@/db/schema/announcements";
 import { announcementTranslations } from "@/db/schema/announcement_translations";
+import { findPublishedAnnouncementBySlug } from "@/src/server/announcement-queries";
 
 export const announcementsRouter = createTRPCRouter({
   listPublishedAnnouncements: publicProcedure
@@ -94,48 +95,17 @@ export const announcementsRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx: { db }, input }) => {
-      const { slug, locale } = input;
-
       try {
-        const result = await db
-          .select({
-            id: announcements.id,
-            slug: announcements.slug,
-            status: announcements.status,
-            imageUrl: announcements.imageUrl,
-            actionUrl: announcements.actionUrl,
-            actionTextKey: announcements.actionTextKey,
-            publishedAt: announcements.publishedAt,
-            createdAt: announcements.createdAt,
-            title: announcementTranslations.title,
-            content: announcementTranslations.content,
-            excerpt: announcementTranslations.excerpt,
-          })
-          .from(announcements)
-          .leftJoin(
-            announcementTranslations,
-            and(
-              eq(announcements.id, announcementTranslations.announcementId),
-              eq(announcementTranslations.locale, locale)
-            )
-          )
-          .where(
-            and(
-              eq(announcements.slug, slug),
-              eq(announcements.status, "published"),
-              lte(announcements.publishedAt, new Date()) // Changed gte to lte here
-            )
-          )
-          .limit(1);
+        const announcement = await findPublishedAnnouncementBySlug(input, db);
 
-        if (!result.length) {
+        if (!announcement) {
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Announcement not found",
           });
         }
 
-        return result[0];
+        return announcement;
       } catch (error) {
         if (error instanceof TRPCError) {
           throw error;

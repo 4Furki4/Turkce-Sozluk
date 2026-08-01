@@ -34,13 +34,6 @@ function getLocaleFromPath(pathname: string): "en" | "tr" {
   return locale === "en" ? "en" : "tr";
 }
 
-function cloneRequestWithHeaders(request: NextRequest, headers: Headers): NextRequest {
-  return new NextRequest(request.url, {
-    headers,
-    method: request.method,
-  });
-}
-
 function isEnglishPath(pathname: string): boolean {
   const normalized = normalizePathname(pathname);
   return normalized === "/en" || normalized.startsWith("/en/");
@@ -126,10 +119,7 @@ export default function proxy(request: NextRequest) {
     return NextResponse.rewrite(playUrl, { request: { headers: requestHeaders } });
   }
 
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-current-path", canonicalPathname);
-
-  const response = handleI18nRouting(cloneRequestWithHeaders(request, requestHeaders));
+  const response = handleI18nRouting(request);
 
   if (isEnglishPath(canonicalPathname)) {
     response.headers.set("X-Robots-Tag", "noindex, follow");

@@ -5,6 +5,28 @@ import { redirect } from "next/navigation";
 import { auth } from "@/src/lib/auth";
 import { headers } from "next/headers";
 import { NoScriptNotice } from "@/src/components/progressive-enhancement/no-script-notice";
+import { getStaticRouteCanonicalPath } from "@/src/lib/seo-utils";
+import type { Metadata } from "next";
+
+export const instant = false;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const resolvedLocale = locale === "en" ? "en" : "tr";
+
+  return {
+    alternates: {
+      canonical: getStaticRouteCanonicalPath(
+        "/pronunciation-voting",
+        resolvedLocale,
+      ),
+    },
+  };
+}
 
 export default async function Pronunciations() {
 

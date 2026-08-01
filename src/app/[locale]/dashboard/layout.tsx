@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   description: "CRUD operations for the Turkish Dictionary",
 }
 
+export const instant = false;
 
 export default async function DashboardLayout(
   props: {

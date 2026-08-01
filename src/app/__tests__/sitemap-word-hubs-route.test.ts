@@ -2,6 +2,10 @@
 
 jest.mock("@/src/i18n/routing", () => require("@/src/test-support/mock-routing"));
 
+jest.mock("next/cache", () => ({
+  cacheLife: jest.fn(),
+}));
+
 import { GET } from "@/src/app/sitemap-word-hubs.xml/route";
 
 describe("sitemap-word-hubs.xml route", () => {

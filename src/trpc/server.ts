@@ -1,8 +1,9 @@
 import "server-only";
 
 import { createHydrationHelpers } from "@trpc/react-query/rsc";
+import { io } from "next/cache";
 import { headers } from "next/headers";
-import { cache } from "react";
+import { cache, createElement, type ComponentProps } from "react";
 
 import { createCaller, type AppRouter } from "../server/api/root";
 import { createTRPCContext } from "../server/api/trpc";
@@ -24,7 +25,19 @@ const createContext = cache(async () => {
 const getQueryClient = cache(createQueryClient);
 const caller = createCaller(createContext);
 
-export const { trpc: api, HydrateClient } = createHydrationHelpers<AppRouter>(
+const {
+  trpc: api,
+  HydrateClient: BaseHydrateClient,
+} = createHydrationHelpers<AppRouter>(
   caller,
   getQueryClient
 );
+
+export { api };
+
+export async function HydrateClient(
+  props: ComponentProps<typeof BaseHydrateClient>,
+) {
+  await io();
+  return createElement(BaseHydrateClient, props);
+}

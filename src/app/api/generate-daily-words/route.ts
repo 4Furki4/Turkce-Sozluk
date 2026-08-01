@@ -6,8 +6,6 @@ import { sql, eq, exists } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { dailyWords } from "@/db/schema/daily-words";
 
-export const dynamic = 'force-dynamic'; // Important for Cron routes
-
 export async function GET(request: Request) {
     // Security: Verify the call is from Vercel Cron
     const authHeader = request.headers.get('authorization');

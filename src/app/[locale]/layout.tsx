@@ -3,7 +3,6 @@ import "@/app/globals.css";
 import { TRPCReactProvider } from "@/src/trpc/react";
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import Providers from "@/src/components/customs/provider";
-import IOSPWAMeta from "@/src/components/ios-pwa-meta";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { Toaster } from "@/src/components/customs/sonner";
@@ -19,11 +18,14 @@ import { PreferencesInitializer } from "@/src/components/customs/preferences-ini
 import NavigationProgressBar from "@/src/components/customs/navigation-progress-bar";
 // import { SessionProvider } from "next-auth/react"; // Removed
 import ProfileGuard from "@/src/components/customs/profile-guard";
-import { getBaseUrl, getCanonicalPathname } from "@/src/lib/seo-utils";
+import { getBaseUrl } from "@/src/lib/seo-utils";
 import PWAServiceWorker from "@/src/components/pwa-service-worker";
 import OnlineStatusBridge from "@/src/components/online-status-bridge";
 import { AutocompleteSync } from "@/src/components/customs/complete-sync";
 import WebMcpRegistrar from "@/src/components/webmcp/webmcp-registrar";
+import { cache, Suspense } from "react";
+import { FeedbackModal } from "@/src/components/customs/modals/add-feedback";
+import { IOS_PWA_STARTUP_IMAGES } from "@/src/lib/ios-pwa-metadata";
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -49,9 +51,6 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const isEnglish = locale === 'en';
-  const requestHeaders = await headers();
-  const currentPath = requestHeaders.get("x-current-path") ?? (isEnglish ? "/en" : "/tr");
-  const canonicalPath = getCanonicalPathname(currentPath);
 
   // --- Unified, SEO-friendly Description ---
   // Using a single, strong description ensures a consistent message.
@@ -83,6 +82,7 @@ export async function generateMetadata({
           rel: 'apple-touch-icon-precomposed',
           url: '/icons/apple-icon-180.png',
         },
+        ...IOS_PWA_STARTUP_IMAGES,
       ],
       icon: [
         {
@@ -103,6 +103,14 @@ export async function generateMetadata({
     },
     metadataBase: new URL(getBaseUrl()),
     manifest: '/manifest.json',
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "black-translucent",
+      title: isEnglish ? "Modern Turkish Dictionary" : "Çağdaş Türkçe Sözlük",
+    },
+    other: {
+      "debug-ios-pwa": "true",
+    },
     // --- Title ---
     // The title structure is excellent. No changes needed.
     title: {
@@ -131,9 +139,6 @@ export async function generateMetadata({
       description, // Using the unified description
       // The twitter:image is also automatically added
     },
-    alternates: {
-      canonical: canonicalPath,
-    },
     robots: isEnglish
       ? {
         index: false,
@@ -155,6 +160,48 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 }
 
+const getLayoutSession = cache(async () => {
+  const requestHeaders = await headers();
+
+  return auth.api.getSession({
+    headers: requestHeaders,
+  }).catch(() => {
+    console.warn("[RootLayout] Session unavailable; rendering anonymous shell.");
+    return null;
+  });
+});
+
+type NavbarProps = Omit<
+  React.ComponentProps<typeof NavbarAndSidebar>,
+  "session"
+>;
+
+async function SessionNavbar(props: NavbarProps) {
+  const session = await getLayoutSession();
+  return <NavbarAndSidebar {...props} session={session} />;
+}
+
+async function SessionFooterFeedback({ label }: { label: string }) {
+  const session = await getLayoutSession();
+
+  return (
+    <FeedbackModal session={session} variant="link">
+      <span className="text-sm text-foreground/80 hover:text-primary cursor-pointer transition-colors">
+        {label}
+      </span>
+    </FeedbackModal>
+  );
+}
+
+function NavbarFallback() {
+  return (
+    <div
+      aria-hidden="true"
+      className="h-16 w-full border-b border-border/50 bg-background/40 backdrop-blur-md"
+    />
+  );
+}
+
 export default async function RootLayout({
   children,
   params
@@ -163,26 +210,48 @@ export default async function RootLayout({
   params: Promise<Params>
 }) {
   const { locale } = await params;
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({
-    headers: requestHeaders
-  }).catch(() => {
-    console.warn("[RootLayout] Session unavailable; rendering anonymous shell.");
-    return null;
-  });
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
-  const messages = await getMessages();
   setRequestLocale(locale);
-  const t = await getTranslations("Navbar");
+  const [messages, t, tFeedback] = await Promise.all([
+    getMessages({ locale }),
+    getTranslations({ locale, namespace: "Navbar" }),
+    getTranslations({ locale, namespace: "Feedback" }),
+  ]);
+  const navbarProps: NavbarProps = {
+    HomeIntl: t("Home"),
+    SignInIntl: t("Sign In"),
+    WordListIntl: t("Word List"),
+    WordBuilderIntl: t("WordBuilder"),
+    TitleIntl: t("Title"),
+    ProfileIntl: t("Profile"),
+    DashboardIntl: t("Dashboard"),
+    SavedWordsIntl: t("SavedWords"),
+    MyRequestsIntl: t("MyRequests"),
+    SearchHistoryIntl: t("SearchHistory"),
+    LogoutIntl: t("Logout"),
+    AnnouncementsIntl: t("Announcements"),
+    ContributeWordIntl: t("ContributeWord"),
+    DonateIntl: t("Donate"),
+    PronunciationsIntl: t("Pronunciations"),
+    ariaAvatar: t("ariaAvatar"),
+    ariaMenu: t("ariaMenu"),
+    ariaLanguages: t("ariaLanguages"),
+    ariaSwitchTheme: t("ariaSwitchTheme"),
+    ariaBlur: t("ariaBlur"),
+    ContributeIntl: t("Contribute"),
+    FeedbackIntl: t("Feedback"),
+    SearchIntl: t("Search"),
+    LearnIntl: t("Learn"),
+    MainIntl: t("Main"),
+    AccountIntl: t("Account"),
+    PreferencesIntl: t("Preferences"),
+    ForeignTermSuggestionsIntl: t("ForeignTermSuggestions"),
+  };
 
   return (
     <html suppressHydrationWarning lang={locale}>
-      <head>
-        <IOSPWAMeta />
-      </head>
-
       <body className={`${ibmPlexSans.variable} ${ibmPlexMono.variable} font-sans antialiased relative`}>
         <TRPCReactProvider>
           <NextIntlClientProvider messages={messages}>
@@ -191,47 +260,38 @@ export default async function RootLayout({
                 <WebMcpRegistrar />
                 <AutocompleteSync />
                 <PWAServiceWorker />
-                <NavigationProgressBar />
-                <ProfileGuard />
+                <Suspense fallback={null}>
+                  <NavigationProgressBar />
+                </Suspense>
+                <Suspense fallback={null}>
+                  <ProfileGuard />
+                </Suspense>
                 <div className="flex flex-col min-h-screen">
                   <PreferencesInitializer />
-                  <NavbarAndSidebar
-                    session={session}
-                    HomeIntl={t("Home")}
-                    SignInIntl={t("Sign In")}
-                    WordListIntl={t("Word List")}
-                    WordBuilderIntl={t("WordBuilder")}
-                    TitleIntl={t("Title")}
-                    ProfileIntl={t("Profile")}
-                    DashboardIntl={t("Dashboard")}
-                    SavedWordsIntl={t("SavedWords")}
-                    MyRequestsIntl={t("MyRequests")}
-                    SearchHistoryIntl={t("SearchHistory")}
-                    LogoutIntl={t("Logout")}
-                    AnnouncementsIntl={t("Announcements")}
-                    ContributeWordIntl={t("ContributeWord")}
-                    DonateIntl={t("Donate")}
-                    PronunciationsIntl={t("Pronunciations")}
-                    ariaAvatar={t("ariaAvatar")}
-                    ariaMenu={t("ariaMenu")}
-                    ariaLanguages={t("ariaLanguages")}
-                    ariaSwitchTheme={t("ariaSwitchTheme")}
-                    ariaBlur={t("ariaBlur")}
-                    ContributeIntl={t("Contribute")}
-                    FeedbackIntl={t("Feedback")}
-                    SearchIntl={t("Search")}
-                    LearnIntl={t("Learn")}
-                    MainIntl={t("Main")}
-                    AccountIntl={t("Account")}
-                    PreferencesIntl={t("Preferences")}
-                    ForeignTermSuggestionsIntl={t("ForeignTermSuggestions")}
-                  />
+                  <Suspense fallback={<NavbarFallback />}>
+                    <SessionNavbar {...navbarProps} />
+                  </Suspense>
                   <main className="relative w-full flex-grow flex min-h-[calc(100vh-var(--navbar-height))] pt-[env(safe-area-inset-top)] md:pt-0 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-0">
                     {/* ✨ Moved BackgroundGradient here */}
                     <BackgroundGradient />
                     {children}
                   </main>
-                  <Footer session={session} />
+                  <Footer
+                    locale={locale}
+                    feedbackAction={
+                      <Suspense
+                        fallback={
+                          <span className="text-sm text-foreground/40">
+                            {tFeedback("submitFeedback")}
+                          </span>
+                        }
+                      >
+                        <SessionFooterFeedback
+                          label={tFeedback("submitFeedback")}
+                        />
+                      </Suspense>
+                    }
+                  />
                 </div>
             </Providers>
             <Toaster />

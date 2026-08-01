@@ -7,6 +7,8 @@ import React from "react";
 import SavedWordsPage from "@/src/components/customs/saved-words-page";
 import { headers } from "next/headers";
 
+export const instant = false;
+
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { locale } = await params
   return {

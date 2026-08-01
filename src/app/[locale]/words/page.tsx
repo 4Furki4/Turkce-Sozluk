@@ -14,7 +14,7 @@ type Props = {
   params: Promise<{ locale: string }>;
 };
 
-export const dynamic = "force-dynamic";
+export const instant = false;
 
 async function safeSeoRead<T>(read: Promise<T>, fallback: T): Promise<T> {
   try {

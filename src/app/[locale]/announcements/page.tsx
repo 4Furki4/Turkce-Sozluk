@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { getStaticRouteCanonicalPath } from "@/src/lib/seo-utils";
 import { getTranslations } from "next-intl/server";
 import { api } from "@/src/trpc/server";
 import Announcement from "@/src/_pages/announcements/announcements-card";
@@ -12,6 +13,8 @@ interface AnnouncementsPageProps {
   }>;
 }
 
+export const instant = false;
+
 export async function generateMetadata({
   params
 }: AnnouncementsPageProps): Promise<Metadata> {
@@ -21,6 +24,12 @@ export async function generateMetadata({
   return {
     title: t("meta.title"),
     description: t("meta.description"),
+    alternates: {
+      canonical: getStaticRouteCanonicalPath(
+        "/announcements",
+        locale === "en" ? "en" : "tr",
+      ),
+    },
   };
 }
 

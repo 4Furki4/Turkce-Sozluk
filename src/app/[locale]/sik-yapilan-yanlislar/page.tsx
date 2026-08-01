@@ -3,10 +3,28 @@ import { Link } from "@/src/i18n/routing";
 import { api } from "@/src/trpc/server";
 import { CheckCircle2, ChevronLeft, XCircle } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getStaticRouteCanonicalPath } from "@/src/lib/seo-utils";
+import type { Metadata } from "next";
+
+export const instant = false;
 
 type Props = {
     params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { locale } = await params;
+    const resolvedLocale = locale === "en" ? "en" : "tr";
+
+    return {
+        alternates: {
+            canonical: getStaticRouteCanonicalPath(
+                "/sik-yapilan-yanlislar",
+                resolvedLocale,
+            ),
+        },
+    };
+}
 
 export default async function CommonMisspellingsPage({ params }: Props) {
     const { locale } = await params;

@@ -7,6 +7,8 @@ import { redirect } from "next/navigation";
 import { api } from "@/src/trpc/server";
 import { headers } from "next/headers";
 
+export const instant = false;
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Metadata");
 

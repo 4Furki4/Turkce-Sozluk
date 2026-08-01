@@ -3,6 +3,7 @@
 jest.mock("@/src/i18n/routing", () => require("@/src/test-support/mock-routing"));
 
 jest.mock("next/cache", () => ({
+  io: jest.fn(async () => undefined),
   unstable_cache: (fn: (...args: unknown[]) => unknown) => fn,
 }));
 

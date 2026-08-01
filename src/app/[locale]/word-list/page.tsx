@@ -4,6 +4,9 @@ import { Link } from "@/src/i18n/routing";
 import { api, HydrateClient } from "@/src/trpc/server";
 import { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getStaticRouteCanonicalPath } from "@/src/lib/seo-utils";
+
+export const instant = false;
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -46,6 +49,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
         title: t("title"),
         description: t("description"),
+        alternates: {
+            canonical: getStaticRouteCanonicalPath(
+                "/word-list",
+                locale === "en" ? "en" : "tr",
+            ),
+        },
         openGraph: {
             title: t("title"),
             description: t("description"),

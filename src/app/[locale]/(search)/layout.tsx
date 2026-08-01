@@ -2,6 +2,8 @@ import { setRequestLocale } from "next-intl/server";
 import { Params } from "next/dist/server/request/params";
 import React from "react";
 
+export const instant = false;
+
 export default async function SearchLayout({
   children,
   params

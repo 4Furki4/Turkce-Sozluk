@@ -6,6 +6,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Params } from "next/dist/server/request/params";
 import { headers } from "next/headers"; // Added headers
 
+export const instant = false;
+
 // ...
 
 export default async function page({

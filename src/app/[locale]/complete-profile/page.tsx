@@ -5,6 +5,9 @@ import { RedirectType } from 'next/navigation';
 import { redirect } from 'next/navigation';
 import React from 'react'
 import { headers } from 'next/headers';
+
+export const instant = false;
+
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const session = await auth.api.getSession({

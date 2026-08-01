@@ -170,6 +170,25 @@ export function getWordsLetterCanonicalUrl(letter: string, locale: SeoLocale): s
     return getAbsoluteUrl(getWordsLetterCanonicalPath(letter, locale));
 }
 
+export function getLocalizedRouteCanonicalPath(
+    routeKey: RouteKey,
+    locale: SeoLocale,
+    params: PathParams = {},
+): string {
+    const template = getExternalPathTemplate(routeKey, locale);
+    return prefixLocalePath(locale, interpolatePathTemplate(template, params));
+}
+
+export function getAnnouncementCanonicalPath(slug: string, locale: SeoLocale): string {
+    return getLocalizedRouteCanonicalPath("/announcements/[slug]", locale, {
+        slug: encodeURIComponent(slug),
+    });
+}
+
+export function getAnnouncementCanonicalUrl(slug: string, locale: SeoLocale): string {
+    return getAbsoluteUrl(getAnnouncementCanonicalPath(slug, locale));
+}
+
 export function getWordRoute(wordName: string) {
     return {
         pathname: "/search/[word]" as const,
@@ -181,7 +200,7 @@ export function getWordRoute(wordName: string) {
 }
 
 export function getStaticRouteCanonicalPath(routeKey: RouteKey, locale: SeoLocale = "tr"): string {
-    return prefixLocalePath(locale, getExternalPathTemplate(routeKey, locale));
+    return getLocalizedRouteCanonicalPath(routeKey, locale);
 }
 
 export function getStaticRouteCanonicalUrl(routeKey: RouteKey, locale: SeoLocale = "tr"): string {

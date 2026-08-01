@@ -1,6 +1,8 @@
 import CustomCard from "@/src/components/customs/heroui/custom-card";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+export const instant = false;
+
 export const generateMetadata = async ({ params }: { params: Promise<{ locale: string }> }) => {
     const { locale } = await params;
     setRequestLocale(locale);

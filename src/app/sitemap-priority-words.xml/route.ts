@@ -4,10 +4,10 @@ import {
   getSeoWordLastModified,
   PRIORITY_WORD_LIMIT,
 } from "@/src/lib/seo-word-index";
-
-export const dynamic = "force-dynamic";
+import { io } from "next/cache";
 
 export async function GET() {
+  await io();
   const rows = await getPriorityWords(PRIORITY_WORD_LIMIT).catch((error) => {
     console.error("Failed to generate priority word sitemap", error);
     return [];

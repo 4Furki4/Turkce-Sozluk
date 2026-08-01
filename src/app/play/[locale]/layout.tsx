@@ -25,6 +25,8 @@ export function generateStaticParams() {
     return routing.locales.map((locale) => ({ locale }));
 }
 
+export const instant = false;
+
 export default async function PlayRootLayout({
     children,
     params,

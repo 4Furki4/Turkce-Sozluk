@@ -3,10 +3,11 @@ import {
     escapeXml,
     getStaticRouteCanonicalUrl,
 } from "@/src/lib/seo-utils";
+import { cacheLife } from "next/cache";
 
-export const dynamic = "force-static";
-
-export async function GET() {
+async function getSitemapXml() {
+    "use cache";
+    cacheLife("days");
     const lastModified = new Date().toISOString();
 
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
@@ -18,8 +19,11 @@ export async function GET() {
     }
 
     xml += "</urlset>";
+    return xml;
+}
 
-    return new Response(xml, {
+export async function GET() {
+    return new Response(await getSitemapXml(), {
         headers: { "Content-Type": "application/xml; charset=utf-8" },
     });
 }

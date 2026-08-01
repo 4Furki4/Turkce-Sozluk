@@ -5,6 +5,7 @@ jest.mock("@/src/i18n/routing", () => require("@/src/test-support/mock-routing")
 import {
   escapeXml,
   getCanonicalPathname,
+  getLocalizedRouteCanonicalPath,
   getStaticRouteCanonicalPath,
   getWordRoute,
   getWordCanonicalPath,
@@ -41,6 +42,17 @@ describe("seo-utils", () => {
     expect(getWordCanonicalPath("boncukluk", "tr")).toBe("/tr/arama/boncukluk");
     expect(getWordsHubCanonicalPath("tr")).toBe("/tr/kelimeler");
     expect(getWordsLetterCanonicalPath("ç", "tr")).toBe("/tr/kelimeler/%C3%A7");
+  });
+
+  it("interpolates parameters in localized canonical paths", () => {
+    expect(
+      getLocalizedRouteCanonicalPath("/galati-meshur/[id]", "tr", { id: "42" }),
+    ).toBe("/tr/galati-meshur/42");
+    expect(
+      getLocalizedRouteCanonicalPath("/announcements/[slug]", "en", {
+        slug: "about-the-dictionary",
+      }),
+    ).toBe("/en/announcements/about-the-dictionary");
   });
 
   it("builds locale-neutral internal word routes for localized links", () => {

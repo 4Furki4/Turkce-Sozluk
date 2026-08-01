@@ -6,6 +6,8 @@ import { auth } from "@/src/lib/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 
+export const instant = false;
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Metadata");
 
