@@ -531,6 +531,7 @@ export default function SearchContainer({
                                     pathname: "/search/[word]",
                                     params: { word: tag.name },
                                 }}
+                                prefetch={false}
                                 onClick={onSearchComplete}
                                 className="px-4 py-1.5 rounded-md bg-background shadow-sm border border-border  text-sm cursor-pointer hover:text-primary transition-all duration-200"
                             >

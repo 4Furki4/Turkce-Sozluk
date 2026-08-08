@@ -10,6 +10,10 @@ import WordDetailShell from './word-detail-shell';
 import { NoScriptNotice } from '@/src/components/progressive-enhancement/no-script-notice';
 import WordPageFallback from './word-page-fallback';
 
+// Each word page has distinct runtime data. Do not let a prefetched route shell
+// be reused for a different word during client navigation.
+export const prefetch = "force-disabled";
+
 const isDynamicServerUsageError = (error: unknown) =>
     typeof error === "object" &&
     error !== null &&
