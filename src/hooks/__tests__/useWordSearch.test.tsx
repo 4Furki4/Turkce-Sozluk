@@ -148,4 +148,36 @@ describe("useWordSearch offline behavior", () => {
 
     expect(mockGetWordQuery).toHaveBeenCalledWith({ name: "susuz" });
   });
+
+  it("keeps online results isolated by the searched word", async () => {
+    setNavigatorOnline(true);
+    (getOfflineMetadata as jest.Mock).mockResolvedValue({
+      activeVersion: null,
+      status: "not-downloaded",
+    });
+    mockGetWordQuery.mockImplementation(async ({ name }: { name: string }) => [
+      { word_data: makeWord(name.length, name) },
+    ]);
+
+    const { result, rerender } = renderHook(
+      ({ wordName }: { wordName: string }) => useWordSearch(wordName),
+      {
+        initialProps: { wordName: "deneme" },
+        wrapper,
+      },
+    );
+
+    await waitFor(() => {
+      expect(result.current.data).toMatchObject({ word_name: "deneme" });
+    });
+
+    rerender({ wordName: "çeviri" });
+
+    await waitFor(() => {
+      expect(result.current.data).toMatchObject({ word_name: "çeviri" });
+    });
+
+    expect(mockGetWordQuery).toHaveBeenNthCalledWith(1, { name: "deneme" });
+    expect(mockGetWordQuery).toHaveBeenNthCalledWith(2, { name: "çeviri" });
+  });
 });

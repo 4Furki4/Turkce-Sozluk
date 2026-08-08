@@ -10,7 +10,6 @@ import { pronunciations } from "@/db/schema/pronunciations";
 import { pronunciationVotes } from "@/db/schema/pronunciation_votes";
 import { users } from "@/db/schema/users";
 import type { WordSearchResult, DashboardWordList } from "@/types";
-import DOMPurify from "isomorphic-dompurify";
 import { purifyObject } from "@/src/lib/utils";
 import { searchLogs, type NewSearchLog } from "@/db/schema/search_logs";
 import { userSearchHistory, type InsertUserSearchHistory } from "@/db/schema/user_search_history";
@@ -18,7 +17,10 @@ import { generateAccentVariations } from "@/src/lib/search-utils";
 import { partOfSpeechs } from "@/db/schema/part_of_speechs";
 import { languages } from "@/db/schema/languages";
 import { wordAttributes } from "@/db/schema/word_attributes";
-import { NAVIGATION_MEANING_LIKE_PATTERN } from "@/src/lib/word-indexability";
+import {
+  findWordDataByName,
+  normalizeWordLookupName,
+} from "@/src/server/word-queries";
 
 export const wordRouter = createTRPCRouter({
   searchWordsSimple: publicProcedure
@@ -293,136 +295,13 @@ export const wordRouter = createTRPCRouter({
       })
     )
     .query(async ({ input, ctx: { db, session } }) => {
-      const purifiedName = DOMPurify.sanitize(input.name);
-
-      const result = await db.execute(sql`
-        WITH base_word AS (
-          SELECT w.id, w.name, w.phonetic, w.prefix, w.suffix, w.view_count, w.updated_at
-          FROM words w
-          WHERE w.name ILIKE ${purifiedName} -- 1. Find all possible matches (case-insensitive)
-          ORDER BY
-            CASE
-              WHEN w.name = ${purifiedName} THEN 1 -- 2. Prioritize exact case-sensitive match
-              ELSE 2 -- 3. Fallback to case-insensitive match
-            END,
-            CASE
-              WHEN EXISTS (
-                SELECT 1
-                FROM meanings m_quality
-                WHERE m_quality.word_id = w.id
-                  AND LENGTH(TRIM(m_quality.meaning)) > 0
-                  AND LOWER(TRIM(m_quality.meaning)) NOT LIKE ${NAVIGATION_MEANING_LIKE_PATTERN}
-              ) THEN 1
-              ELSE 2
-            END,
-            COALESCE(w.variant, 0),
-            w.id
-          LIMIT 1 -- 4. Select only the single best match
-        )
-        SELECT json_build_object(
-              'word_id', w.id,
-              'word_name', w.name,
-              'phonetic', w.phonetic,
-              'prefix', w.prefix,
-              'suffix', w.suffix,
-              'view_count', COALESCE(w.view_count, 0),
-              'updated_at', w.updated_at,
-              'attributes', COALESCE(
-                (SELECT json_agg(json_build_object(
-                  'attribute_id', wa.id, 
-                  'attribute', wa.attribute
-                ))
-                FROM words_attributes wattr
-                JOIN word_attributes wa ON wattr.attribute_id = wa.id
-                WHERE wattr.word_id = w.id), '[]'::json
-              ),
-              'root', COALESCE(
-                (SELECT json_build_object(
-                  'root', r.root,
-                  'language_en', l.language_en,
-                  'language_tr', l.language_tr,
-                  'language_code', l.language_code
-                )
-                FROM roots r
-                JOIN languages l ON r.language_id = l.id
-                WHERE r.word_id = w.id
-                LIMIT 1), 
-                json_build_object(
-                  'root', null,
-                  'language_en', null,
-                  'language_tr', null,
-                  'language_code', null
-                )
-              ),
-              'meanings', COALESCE(
-                (SELECT json_agg(json_build_object(
-                  'meaning_id', m.id,
-                  'meaning', m.meaning,
-                  'imageUrl', m."imageUrl",
-                  'part_of_speech', p.part_of_speech,
-                  'part_of_speech_id', p.id,
-                  'attributes', COALESCE(
-                    (SELECT json_agg(json_build_object(
-                      'attribute_id', ma.id, 
-                      'attribute', ma.attribute
-                    ))
-                    FROM meanings_attributes mattr
-                    JOIN meaning_attributes ma ON mattr.attribute_id = ma.id
-                    WHERE mattr.meaning_id = m.id), '[]'::json
-                  ),
-                  'sentence', e.sentence,
-                  'author', a.name,
-                  'author_id', a.id
-                ) ORDER BY m."order" ASC)
-                FROM meanings m
-                LEFT JOIN part_of_speechs p ON m.part_of_speech_id = p.id
-                LEFT JOIN examples e ON e.meaning_id = m.id
-                LEFT JOIN authors a ON e.author_id = a.id
-                WHERE m.word_id = w.id), '[]'::json
-              ),
-              'relatedWords', COALESCE(
-                (SELECT json_agg(json_build_object(
-                  'related_word_id', rw.id,
-                  'related_word_name', rw.name,
-                  'relation_type', rel.relation_type
-                ))
-                FROM related_words rel
-                JOIN words rw ON rel.related_word_id = rw.id
-                WHERE rel.word_id = w.id), '[]'::json
-              ),
-              'relatedPhrases', COALESCE(
-                (SELECT json_agg(json_build_object(
-                  'related_phrase_id', rp.id,
-                  'related_phrase', rp.name
-                ))
-                FROM related_phrases rel
-                JOIN words rp ON rel.related_phrase_id = rp.id
-                WHERE rel.phrase_id = w.id), '[]'::json
-              ),
-              'pronunciations', COALESCE(
-                (SELECT json_agg(json_build_object(
-                  'id', p.id,
-                  'audioUrl', p."audio_url",
-                  'user', json_build_object(
-                    'id', u.id,
-                    'name', u.name,
-                    'image', u.image
-                  ),
-                  'voteCount', 0
-                ))
-                FROM pronunciations p
-                JOIN users u ON p."user_id" = u.id
-                WHERE p.word_id = w.id), '[]'::json
-              )
-          ) AS word_data
-        FROM base_word w 
-      `);
-
-      // Filter any null or undefined results
-      const filteredResult = result.filter(Boolean) as any[];
+      const filteredResult = await findWordDataByName(
+        normalizeWordLookupName(input.name),
+        db,
+      );
 
       if (filteredResult.length > 0 && filteredResult[0]?.word_data) {
-        const wordData = filteredResult[0].word_data as WordSearchResult['word_data']; // Type assertion for safety
+        const wordData = filteredResult[0].word_data as WordSearchResult['word_data'];
 
         // --- Conditionally Log search --- 
         if (!input.skipLogging && wordData?.word_id) {
@@ -457,26 +336,10 @@ export const wordRouter = createTRPCRouter({
           }
         }
 
-        // Fix the double-nesting issue - Assuming WordSearchResult expects { word_data: ... }
-        const formattedResult = filteredResult.map(item => {
-          // Original code might have had issues if item structure varied
-          // Ensure consistent structure before returning
-          if (item.word_data) {
-            return { word_data: item.word_data };
-          } else if (item) { // Handle cases where word_data might be missing but item exists
-            console.warn("Unexpected item structure in getWord result:", item);
-            // Return a default/empty structure or handle as needed
-            // For now, let's assume item itself is the word_data if word_data key is absent
-            return { word_data: item };
-          } else {
-            return null; // Or handle null/undefined items appropriately
-          }
-        });
-        // console.log('Formatted database response:', JSON.stringify(formattedResult, null, 2));
-        return formattedResult.filter(Boolean) as WordSearchResult[]; // Ensure no nulls are returned
-      } else {
-        return [];
+        return filteredResult;
       }
+
+      return [];
     }),
 
   /**
