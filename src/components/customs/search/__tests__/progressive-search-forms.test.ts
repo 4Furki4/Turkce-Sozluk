@@ -26,25 +26,47 @@ describe("progressive search forms", () => {
         expect(source).not.toContain('name="offlineWord"');
     });
 
-    it("uses client-side, non-prefetched links for trending words", () => {
+    it("uses client-side, prefetched links for trending words", () => {
         const source = readFileSync(join(root, "src/components/customs/search/search-container.tsx"), "utf8");
 
         expect(source).toMatch(
             /trendingWords\?\.map\(\(tag: any\) => \(\s*<Link[\s\S]*?pathname: "\/search\/\[word\]",[\s\S]*?params: \{ word: tag\.name \}/,
         );
-        expect(source).toMatch(
-            /trendingWords\?\.map\(\(tag: any\) => \(\s*<Link[\s\S]*?prefetch=\{false\}/,
-        );
+        expect(source).not.toContain("prefetch={false}");
         expect(source).not.toContain("onClick={() => handleRecommendationClick(tag.name)}");
     });
 
-    it("opts dictionary-entry routes out of route-level prefetching", () => {
+    it("prefetches the dictionary route shell while keeping word data request-bound", () => {
         const source = readFileSync(
             join(root, "src/app/[locale]/(search)/search/[word]/page.tsx"),
             "utf8",
         );
 
-        expect(source).toContain('export const prefetch = "force-disabled";');
+        expect(source).toContain('export const prefetch = "partial";');
+        expect(source.match(/await connection\(\);/g)).toHaveLength(2);
+        expect(source).toContain("<Suspense fallback={<WordLoadingSkeleton />}>");
+        expect(source).not.toContain('prefetch = "force-disabled"');
+        expect(source).not.toContain("HydrateClient");
+        expect(source).not.toContain("WordPageFallback");
+        expect(source).not.toContain("NoScriptNotice");
+    });
+
+    it("does not disable prefetching on word-result links", () => {
+        const variantSource = readFileSync(
+            join(root, "src/components/customs/search/word-card-variants.tsx"),
+            "utf8",
+        );
+        const legacySource = readFileSync(
+            join(root, "src/components/customs/word-card.tsx"),
+            "utf8",
+        );
+        const wordRouteLinkSource = variantSource.slice(
+            variantSource.indexOf("function WordRouteLink"),
+            variantSource.indexOf("type SearchWordCardVariantGroupProps"),
+        );
+
+        expect(wordRouteLinkSource).not.toContain("prefetch={false}");
+        expect(legacySource).not.toContain("prefetch={false}");
     });
 
     it("uses locale-aware client navigation for online word searches", () => {

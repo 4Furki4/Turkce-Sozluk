@@ -1,4 +1,4 @@
-import { api, HydrateClient } from '@/src/trpc/server';
+import { api } from '@/src/trpc/server';
 import { Metadata } from 'next';
 import { auth } from "@/src/lib/auth";
 import WordResultClient from './word-result-client';
@@ -7,12 +7,13 @@ import WordCardWrapper from '@/src/components/customs/word-card-wrapper';
 import { buildWordJsonLd, buildWordMetadata } from './word-seo';
 import type { WordSearchResult } from '@/types';
 import WordDetailShell from './word-detail-shell';
-import { NoScriptNotice } from '@/src/components/progressive-enhancement/no-script-notice';
-import WordPageFallback from './word-page-fallback';
+import WordLoadingSkeleton from '../_components/word-loading-skeleton';
+import { Suspense } from 'react';
+import { connection } from 'next/server';
 
-// Each word page has distinct runtime data. Do not let a prefetched route shell
-// be reused for a different word during client navigation.
-export const prefetch = "force-disabled";
+// Prefetch only the reusable route shell. The word-specific result stays behind
+// the request-time boundary below and is never shared between word URLs.
+export const prefetch = "partial";
 
 const isDynamicServerUsageError = (error: unknown) =>
     typeof error === "object" &&
@@ -43,6 +44,9 @@ export async function generateMetadata({
 }: {
     params: Promise<{ word: string, locale: string }>
 }): Promise<Metadata> {
+    // Metadata uses the same request-bound word lookup as the page. Keep it out
+    // of the prefetched Cache Components shell as well.
+    await connection();
     const { word, locale } = await params;
     const wordName = decodeURIComponent(word);
     const [result] = await safeServerRead(
@@ -62,18 +66,18 @@ export async function generateMetadata({
 //     return data.map((word) => ({ word: word.name }))
 // }
 
-export default async function SearchResultPage(
-    props: {
-        params: Promise<{ locale: string, word: string }>
+async function FreshWordResult({
+    params,
+}: {
+    params: Promise<{ locale: string, word: string }>;
+}) {
+    // Resolve word data only for the navigation that actually requested it,
+    // never while producing or reusing the Cache Components route shell.
+    await connection();
+    const { locale, word } = await params;
 
-    }
-) {
-    const params = await props.params;
-
-    const { locale } = params;
-
-    // Properly decode URL parameters with special characters like commas
-    const decodedWordName = decodeURIComponent(params.word);
+    // Properly decode URL parameters with special characters like commas.
+    const decodedWordName = decodeURIComponent(word);
 
     const requestHeaders = await headers();
     const session = await safeServerRead(
@@ -93,7 +97,7 @@ export default async function SearchResultPage(
     const resolvedLocale = locale === "en" ? "en" : "tr";
 
     return (
-        <WordDetailShell>
+        <>
             {jsonLd ? (
                 <script
                     type="application/ld+json"
@@ -101,33 +105,34 @@ export default async function SearchResultPage(
                 />
             ) : null}
 
-            <WordPageFallback
-                locale={resolvedLocale}
-                wordName={decodedWordName}
-                wordData={wordData}
-            />
             <div className="js-enhanced-word-result">
                 {wordData ? (
-                    <HydrateClient>
-                        <WordCardWrapper
-                            data={[{ word_data: wordData }]}
-                            locale={resolvedLocale}
-                            session={session as any}
-                            isOnline={true}
-                            headingLevel="h1"
-                        />
-                    </HydrateClient>
+                    <WordCardWrapper
+                        key={decodedWordName}
+                        data={[{ word_data: wordData }]}
+                        locale={resolvedLocale}
+                        session={session as any}
+                        isOnline={true}
+                        headingLevel="h1"
+                    />
                 ) : (
-                    <HydrateClient>
-                        <NoScriptNotice>
-                            {locale === "en"
-                                ? `No server-rendered dictionary entry was found for "${decodedWordName}". Offline and pattern search require JavaScript.`
-                                : `"${decodedWordName}" için sunucuda oluşturulmuş sözlük kaydı bulunamadı. Çevrim dışı arama ve desen arama JavaScript gerektirir.`}
-                        </NoScriptNotice>
-                        <WordResultClient session={session} wordName={decodedWordName} />
-                    </HydrateClient>
+                    <WordResultClient key={decodedWordName} session={session} wordName={decodedWordName} />
                 )}
             </div>
+        </>
+    );
+}
+
+export default function SearchResultPage({
+    params,
+}: {
+    params: Promise<{ locale: string, word: string }>;
+}) {
+    return (
+        <WordDetailShell>
+            <Suspense fallback={<WordLoadingSkeleton />}>
+                <FreshWordResult params={params} />
+            </Suspense>
         </WordDetailShell>
-    )
+    );
 }

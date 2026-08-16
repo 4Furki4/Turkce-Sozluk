@@ -218,7 +218,6 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                                   pathname: '/search/[word]',
                                   params: { word: meaning.meaning.split('Bakınız: ')[1] }
                                 }}
-                                prefetch={false}
                                 className="text-lg underline underline-offset-4 text-primary decoration-primary flex items-center gap-1"
                               >
                                 {meaning.meaning.split('Bakınız: ')[1]}
@@ -260,7 +259,6 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                               params: { word: related.related_word_name }
                             }}
                             className="text-primary px-3 py-1 bg-primary/10 hover:bg-primary/20 rounded-md transition-colors"
-                            prefetch={false}
                           >
                             {related.related_word_name}
                             {related.relation_type && (
@@ -294,7 +292,6 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                               pathname: '/search/[word]',
                               params: { word: related_word.related_word_name }
                             }}
-                            prefetch={false}
                             className="text-primary hover:underline"
                           >
                             {related_word.related_word_name}
@@ -330,7 +327,6 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                               pathname: '/search/[word]',
                               params: { word: related_phrase.related_phrase }
                             }}
-                            prefetch={false}
                             className="text-primary hover:underline"
                           >
                             {related_phrase.related_phrase}

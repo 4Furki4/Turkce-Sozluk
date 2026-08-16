@@ -107,7 +107,6 @@ function WordRouteLink({
         pathname: "/search/[word]",
         params: { word },
       }}
-      prefetch={false}
       className={className}
     >
       {children}
