@@ -48,6 +48,7 @@ const userPerPageOptions = [
         key: "50"
     }
 ]
+const defaultUsersPerPage = 10;
 const roles = rolesEnum.enumValues
 export default function UserList(
     {
@@ -68,23 +69,35 @@ export default function UserList(
         role?: typeof roles[number];
     }>({ userId: "", name: "", role: undefined });
     const [pageNumber, setPageNumber] = React.useState<number>(1);
-    const [usersPerPage, setUsersPerPage] = React.useState<number>(10);
+    const [usersPerPage, setUsersPerPage] = React.useState<number>(defaultUsersPerPage);
     const usersCountQuery = api.user.getUserCount.useQuery(undefined, {
         initialData: userCount,
     });
-    const totalPageNumber = usersCountQuery.data ? Math.ceil(usersCountQuery.data / usersPerPage) : undefined;
-    const skip = (pageNumber - 1) * usersPerPage
+    const totalPageNumber = usersCountQuery.data === undefined
+        ? undefined
+        : Math.max(1, Math.ceil(usersCountQuery.data / usersPerPage));
+    const currentPageNumber = totalPageNumber === undefined
+        ? pageNumber
+        : Math.min(pageNumber, totalPageNumber);
+    const skip = (currentPageNumber - 1) * usersPerPage
+    React.useEffect(() => {
+        if (currentPageNumber !== pageNumber) {
+            setPageNumber(currentPageNumber);
+        }
+    }, [currentPageNumber, pageNumber]);
     const usersQuery = api.user.getUsers.useQuery({
         take: usersPerPage,
         skip
     }, {
-        initialData: users,
+        initialData: currentPageNumber === 1 && usersPerPage === defaultUsersPerPage
+            ? users
+            : undefined,
     })
     const getUserDisplayName = (user: Pick<SelectUser, "name" | "username" | "email" | "id">) =>
         user.name?.trim() || user.username?.trim() || user.email || user.id;
 
     type Row = (typeof rows)[0];
-    const rows = usersQuery.data.map((user) => {
+    const rows = (usersQuery.data ?? []).map((user) => {
         const displayName = getUserDisplayName(user);
 
         return {
@@ -187,12 +200,20 @@ export default function UserList(
         <>
             <Table topContent={
                 <div className="flex gap-4">
-                    <Select label={"Words per page"} defaultSelectedKeys={["10"]}
+                    <Select label={"Words per page"} selectedKeys={[usersPerPage.toString()]}
+                        disallowEmptySelection
                         size="sm"
                         classNames={{
                             base: "ml-auto max-w-64",
                         }} onChange={(e) => {
-                            setUsersPerPage(parseInt(e.target.value));
+                            if (!userPerPageOptions.some(({ key }) => key === e.target.value)) {
+                                return;
+                            }
+
+                            const nextUsersPerPage = Number.parseInt(e.target.value, 10);
+
+                            setPageNumber(1);
+                            setUsersPerPage(nextUsersPerPage);
                         }}>
                         {userPerPageOptions.map((pageCount) => (
                             <SelectItem key={pageCount.key}>
@@ -204,9 +225,8 @@ export default function UserList(
             } bottomContent={
                 <Pagination isDisabled={totalPageNumber === undefined} classNames={{
                     wrapper: ["mx-auto"]
-                }} isCompact showControls total={totalPageNumber ?? 1} initialPage={1} onChange={async (page) => {
-                    setPageNumber(page);
-                }} />
+                }} isCompact showControls total={totalPageNumber ?? 1} initialPage={1} page={currentPageNumber}
+                    onChange={setPageNumber} />
             } classNames={{
                 base: ["min-h-[300px]"],
             }} isStriped aria-label="Example table with dynamic content">
