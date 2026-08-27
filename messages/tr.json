@@ -370,7 +370,8 @@
       "wordMatchingGame": "Kelime Eşleştirme",
       "speedRoundGame": "Hızlı Tur",
       "leaderboards": "Sıralama Tabloları",
-      "foreignTermSuggestions": "Yabancı Terim Önerileri"
+      "foreignTermSuggestions": "Yabancı Terim Önerileri",
+      "preferredSource": "Tercih edilen kaynak olarak ekle"
     }
   },
   "Donation": {

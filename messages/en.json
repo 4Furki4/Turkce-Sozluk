@@ -370,7 +370,8 @@
       "wordMatchingGame": "Word Matching",
       "speedRoundGame": "Speed Round",
       "leaderboards": "Leaderboards",
-      "foreignTermSuggestions": "Foreign Term Suggestions"
+      "foreignTermSuggestions": "Foreign Term Suggestions",
+      "preferredSource": "Add as a preferred source"
     }
   },
   "Donation": {

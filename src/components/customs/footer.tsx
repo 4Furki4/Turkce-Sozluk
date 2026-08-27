@@ -6,6 +6,7 @@ import { Github } from 'lucide-react';
 import { Session } from '@/src/lib/auth';
 import Image from "next/image";
 import logo from "@/public/svg/navbar/logo.svg";
+import PreferredSourceButton from "@/src/components/customs/preferred-source-button";
 
 export default async function Footer({ session }: { session: Session | null }) {
     const t = await getTranslations("Footer");
@@ -62,6 +63,7 @@ export default async function Footer({ session }: { session: Session | null }) {
                                 <span className="font-medium">GitHub</span>
                             </a>
                         </div>
+                        <PreferredSourceButton buttonLabel={t("links.preferredSource")} />
                     </div>
 
                     {/* Links Section */}
