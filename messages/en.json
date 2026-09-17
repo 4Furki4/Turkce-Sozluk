@@ -371,7 +371,7 @@
       "speedRoundGame": "Speed Round",
       "leaderboards": "Leaderboards",
       "foreignTermSuggestions": "Foreign Term Suggestions",
-      "preferredSource": "Add as a preferred source"
+      "preferredSource": "Check Google source availability"
     }
   },
   "Donation": {
@@ -583,6 +583,10 @@
     "Cancel": "Cancel"
   },
   "Dashboard": {
+    "UserList": {
+      "usersPerPage": "Users per page",
+      "tableLabel": "Users"
+    },
     "UnauthorizedMessage": "You are not authorized to view this page, please contact the administrator if you think this is a mistake",
     "GoBackToHomepage": "Go back to homepage",
     "Columns": {

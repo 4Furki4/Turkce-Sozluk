@@ -29,6 +29,8 @@ import RoleEditModal from './role-edit-modal';
 import UserDeleteModal from './user-delete-modal';
 import BadgeAssignmentModal from './badge-assignment-modal';
 import { Award } from 'lucide-react';
+import { keepPreviousData } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 
 const userPerPageOptions = [
     {
@@ -59,6 +61,7 @@ export default function UserList(
             userCount: number | undefined
         }
 ) {
+    const t = useTranslations('Dashboard.UserList');
     const { isOpen: isDeleteModalOpen, onOpen: onDeleteModalOpen, onOpenChange: onDeleteModalChange } = useDisclosure();
     const { isOpen: isEditModalOpen, onOpen: onEditModalOpen, onOpenChange: onEditModalChange } = useDisclosure();
     const { isOpen: isBadgeModalOpen, onOpen: onBadgeModalOpen, onOpenChange: onBadgeModalChange } = useDisclosure();
@@ -72,19 +75,25 @@ export default function UserList(
     const usersCountQuery = api.user.getUserCount.useQuery(undefined, {
         initialData: userCount,
     });
-    const totalPageNumber = usersCountQuery.data ? Math.ceil(usersCountQuery.data / usersPerPage) : undefined;
-    const skip = (pageNumber - 1) * usersPerPage
+    const totalPageNumber = Math.max(1, Math.ceil((usersCountQuery.data ?? 0) / usersPerPage));
+    const currentPage = Math.min(pageNumber, totalPageNumber);
+    const skip = (currentPage - 1) * usersPerPage
+    React.useEffect(() => {
+        setPageNumber(currentPage);
+    }, [currentPage]);
     const usersQuery = api.user.getUsers.useQuery({
         take: usersPerPage,
         skip
     }, {
-        initialData: users,
+        // The server only loaded the first ten users, not every pagination key.
+        initialData: skip === 0 && usersPerPage === 10 ? users : undefined,
+        placeholderData: keepPreviousData,
     })
     const getUserDisplayName = (user: Pick<SelectUser, "name" | "username" | "email" | "id">) =>
         user.name?.trim() || user.username?.trim() || user.email || user.id;
 
     type Row = (typeof rows)[0];
-    const rows = usersQuery.data.map((user) => {
+    const rows = (usersQuery.data ?? []).map((user) => {
         const displayName = getUserDisplayName(user);
 
         return {
@@ -187,12 +196,16 @@ export default function UserList(
         <>
             <Table topContent={
                 <div className="flex gap-4">
-                    <Select label={"Words per page"} defaultSelectedKeys={["10"]}
+                    <Select label={t('usersPerPage')} selectedKeys={[String(usersPerPage)]}
+                        disallowEmptySelection
                         size="sm"
                         classNames={{
                             base: "ml-auto max-w-64",
                         }} onChange={(e) => {
-                            setUsersPerPage(parseInt(e.target.value));
+                            const nextPageSize = Number(e.target.value);
+                            if (!userPerPageOptions.some((option) => Number(option.key) === nextPageSize)) return;
+                            setUsersPerPage(nextPageSize);
+                            setPageNumber(1);
                         }}>
                         {userPerPageOptions.map((pageCount) => (
                             <SelectItem key={pageCount.key}>
@@ -202,14 +215,15 @@ export default function UserList(
                     </Select>
                 </div>
             } bottomContent={
-                <Pagination isDisabled={totalPageNumber === undefined} classNames={{
+                <Pagination isDisabled={usersCountQuery.data === undefined} classNames={{
                     wrapper: ["mx-auto"]
-                }} isCompact showControls total={totalPageNumber ?? 1} initialPage={1} onChange={async (page) => {
+                }} isCompact showControls total={totalPageNumber} page={currentPage} onChange={(page) => {
                     setPageNumber(page);
                 }} />
             } classNames={{
-                base: ["min-h-[300px]"],
-            }} isStriped aria-label="Example table with dynamic content">
+                base: ["min-h-[300px] w-full min-w-0"],
+                wrapper: ["min-w-0"],
+            }} isStriped aria-label={t('tableLabel')}>
                 <TableHeader columns={columns}>
                     {(column) => (
                         <TableColumn align={column.key === "actions" ? "end" : "start"} key={column.key}>{column.label}</TableColumn>

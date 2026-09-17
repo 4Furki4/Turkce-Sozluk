@@ -194,7 +194,8 @@ export const userRouter = createTRPCRouter({
     ).query(async ({ ctx: { db }, input }) => {
         const users = await db.query.users.findMany({
             limit: input.take,
-            offset: input.skip
+            offset: input.skip,
+            orderBy: (users, { asc }) => [asc(users.id)],
         })
         return users
     }),

@@ -371,7 +371,7 @@
       "speedRoundGame": "Hızlı Tur",
       "leaderboards": "Sıralama Tabloları",
       "foreignTermSuggestions": "Yabancı Terim Önerileri",
-      "preferredSource": "Tercih edilen kaynak olarak ekle"
+      "preferredSource": "Google'da kaynak uygunluğunu kontrol et"
     }
   },
   "Donation": {
@@ -578,6 +578,10 @@
     "Cancel": "İptal"
   },
   "Dashboard": {
+    "UserList": {
+      "usersPerPage": "Sayfa başına kullanıcı",
+      "tableLabel": "Kullanıcılar"
+    },
     "UnauthorizedMessage": "Bu sayfayı görüntülemek için yetkiniz yok, aksini düşünüyorsanız lütfen yönetici ile iletişime geçin.",
     "GoBackToHomepage": "Ana sayfaya dön",
     "Columns": {

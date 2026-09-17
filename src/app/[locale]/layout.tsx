@@ -181,11 +181,6 @@ export default async function RootLayout({
     <html suppressHydrationWarning lang={locale}>
       <head>
         <IOSPWAMeta />
-        <script
-          async
-          preferred-sources-control="manual"
-          src="https://news.google.com/swg/js/v1/publisher.js"
-        />
       </head>
 
       <body className={`${ibmPlexSans.variable} ${ibmPlexMono.variable} font-sans antialiased relative`}>
