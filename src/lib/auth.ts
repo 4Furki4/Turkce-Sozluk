@@ -22,6 +22,7 @@ const openIdConfiguration = createOpenIdConfiguration();
 
 export const auth = betterAuth({
     ...(authBaseUrl ? { baseURL: authBaseUrl } : {}),
+    secret: process.env.AUTH_SECRET,
     trustedOrigins,
     user: {
         additionalFields: {

@@ -8,17 +8,8 @@ jest.mock("superjson", () => ({
 }));
 jest.mock("@/db", () => ({ db: {} }));
 jest.mock("@/src/lib/auth", () => ({ auth: { api: { getSession: jest.fn() } } }));
-jest.mock("@upstash/redis", () => ({ Redis: { fromEnv: () => ({}) } }));
-jest.mock("@upstash/ratelimit", () => ({
-    Ratelimit: class {
-        static slidingWindow() {
-            return {};
-        }
-
-        async limit() {
-            return { success: true };
-        }
-    },
+jest.mock("@/src/server/api/rate-limit", () => ({
+    enforceTrpcRateLimit: jest.fn().mockResolvedValue(undefined),
 }));
 
 import { gameRouter } from "@/src/server/api/routers/game";
