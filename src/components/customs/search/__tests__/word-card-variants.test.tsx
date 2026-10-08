@@ -155,6 +155,8 @@ jest.mock("@/src/components/customs/heroui/custom-card", () => {
   ));
 });
 
+jest.mock("@/src/components/customs/pronunciation-button", () => ({ PronunciationButton: () => null }));
+
 jest.mock("@/src/components/customs/save-word", () => () => <button type="button">Save</button>);
 jest.mock("@/src/components/customs/pronunciation-card", () => ({
   PronunciationCard: () => <div>Pronunciations</div>,

@@ -52,6 +52,7 @@ import { badgeRouter } from "./routers/badge";
 import { gameRouter } from "./routers/game";
 import { foreignTermSuggestionRouter } from "./routers/foreign-term-suggestion";
 import { wordGraphRouter } from "./routers/word-graph";
+import { pronunciationRouter } from "./routers/pronunciation";
 
 /**
  * This is the primary router for your server.
@@ -74,6 +75,7 @@ export const appRouter = createTRPCRouter({
   game: gameRouter,
   foreignTermSuggestion: foreignTermSuggestionRouter,
   wordGraph: wordGraphRouter,
+  pronunciation: pronunciationRouter,
 });
 
 // export type definition of API

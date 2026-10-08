@@ -5,6 +5,7 @@ import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button, Progress } from '@heroui/react';
+import { PRONUNCIATION_PLAY_EVENT } from '@/src/hooks/use-pronunciation-audio';
 
 interface CustomAudioPlayerProps {
     src: string;
@@ -31,18 +32,32 @@ export function CustomAudioPlayer({ src, className }: CustomAudioPlayerProps) {
         const setAudioData = () => setDuration(audio.duration);
         const setAudioTime = () => setCurrentTime(audio.currentTime);
         const handleAudioEnd = () => setIsPlaying(false);
+        const handlePlaying = () => {
+            setIsPlaying(true);
+            window.dispatchEvent(new CustomEvent(PRONUNCIATION_PLAY_EVENT, { detail: audio }));
+        };
+        const stopOther = (event: Event) => {
+            if ((event as CustomEvent).detail !== audio) audio.pause();
+        };
 
         audio.addEventListener('loadedmetadata', setAudioData);
         audio.addEventListener('timeupdate', setAudioTime);
         audio.addEventListener('ended', handleAudioEnd);
+        audio.addEventListener('pause', handleAudioEnd);
+        audio.addEventListener('playing', handlePlaying);
+        window.addEventListener(PRONUNCIATION_PLAY_EVENT, stopOther);
 
         // Cleanup
         return () => {
             audio.removeEventListener('loadedmetadata', setAudioData);
             audio.removeEventListener('timeupdate', setAudioTime);
             audio.removeEventListener('ended', handleAudioEnd);
+            audio.removeEventListener('pause', handleAudioEnd);
+            audio.removeEventListener('playing', handlePlaying);
+            window.removeEventListener(PRONUNCIATION_PLAY_EVENT, stopOther);
+            audio.pause();
         };
-    }, []);
+    }, [src]);
 
     // --- Handlers ---
     const togglePlayPause = () => {

@@ -330,6 +330,20 @@
       "when": 1784635975316,
       "tag": "0046_conscious_jack_murdock",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1790937603627,
+      "tag": "0047_spicy_vampiro",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1791354014594,
+      "tag": "0048_nostalgic_jackal",
+      "breakpoints": true
     }
   ]
 }

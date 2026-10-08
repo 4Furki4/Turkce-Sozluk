@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "relations:import": "bun src/scripts/import-word-relation-suggestions.ts",
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
@@ -33,7 +34,10 @@
     "studio:live": "drizzle-kit studio --config ./drizzle.production.config.ts",
     "scan": "next dev & npx react-scan@latest localhost:3000",
     "search:sync": "bun src/scripts/sync-meilisearch.ts",
-    "seo:audit": "dotenv -e .env.production.local -e .env.local -- bun src/scripts/audit-seo-indexability.ts"
+    "seo:audit": "dotenv -e .env.production.local -e .env.local -- bun src/scripts/audit-seo-indexability.ts",
+    "pronunciations:generate": "bun src/scripts/generate-pronunciations.ts",
+    "pronunciations:workflow": "bun src/scripts/pronunciation-workflow.ts",
+    "test:pronunciations": "bun test scripts/pronunciation-workflow.integration.test.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.954.0",

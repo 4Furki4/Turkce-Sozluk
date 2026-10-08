@@ -51,6 +51,14 @@ function isHomepagePath(pathname: string): boolean {
   return normalized === "/tr" || normalized === "/en";
 }
 
+// Next can invoke the proxy again for next-intl's internal rewrite. The first
+// pass already canonicalized the visible URL; redirecting that rewrite loops.
+export function isLocalizedRouteRewrite(pathname: string, canonicalPathname: string, originalPath: string | null, locale: string | null): boolean {
+  if (!originalPath?.startsWith("/") || locale !== getLocaleFromPath(pathname)) return false;
+  const serialize = (path: string) => new URL(path, "http://routing.local").pathname;
+  return serialize(pathname) !== serialize(canonicalPathname) && serialize(originalPath) === serialize(canonicalPathname);
+}
+
 function addAgentDiscoveryHeaders(response: NextResponse, pathname: string): void {
   if (isHomepagePath(pathname)) {
     response.headers.append("Link", AGENT_DISCOVERY_LINK_HEADER);
@@ -102,6 +110,12 @@ export default function proxy(request: NextRequest) {
 
   const normalizedPathname = normalizePathname(pathname);
   const canonicalPathname = getCanonicalPathname(normalizedPathname);
+  if (isLocalizedRouteRewrite(normalizedPathname, canonicalPathname, request.headers.get("x-current-path"), request.headers.get("x-next-intl-locale"))) {
+    const response = NextResponse.next();
+    if (isEnglishPath(canonicalPathname)) response.headers.set("X-Robots-Tag", "noindex, follow");
+    addAgentDiscoveryHeaders(response, canonicalPathname);
+    return response;
+  }
 
   if (shouldRenderMarkdown(request, normalizedPathname)) {
     return rewriteToMarkdownRenderer(request, canonicalPathname);

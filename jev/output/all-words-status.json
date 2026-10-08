@@ -1,0 +1,28 @@
+{
+  "status": "budget_reached",
+  "updatedAt": "2026-09-29T23:10:03.304Z",
+  "runKey": "725e8da2b57a688991e238ec9d60d8e06c90a40dcf955eb1adf840efb77e252b",
+  "databaseSource": "local turkish-dictionary-db-1 snapshot 2026-09-29",
+  "model": "jev-latest",
+  "scoreLevels": [
+    "The two Turkish words have no meaningful dictionary relationship in the supplied meanings.",
+    "The two words share only a broad topic or context; a dictionary relation would be misleading.",
+    "The two words have a useful but indirect semantic relationship in at least one supplied meaning.",
+    "The two words have a clear direct dictionary relationship in at least one supplied meaning, such as synonymy, antonymy, a lexical variant, a compound, or a strong see-also link."
+  ],
+  "candidateMethod": "Turkish lowercased word and meaning token overlap, weighted by inverse document frequency; existing outgoing relations excluded; candidates ranked across the full local corpus",
+  "totalWords": 99438,
+  "eligibleWords": 86630,
+  "candidatePairs": 405578,
+  "scoredPairs": 310260,
+  "scoredSourceWords": 86462,
+  "inputTokens": 115198138,
+  "estimatedNewSpendUsd": 4.838322,
+  "maxNewSpendUsd": 4.84,
+  "inputPricePerMillionUsd": 0.042,
+  "scoreBands": {
+    "weak": 58577,
+    "possible": 96549,
+    "strong": 155134
+  }
+}

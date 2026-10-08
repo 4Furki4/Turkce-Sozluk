@@ -4,8 +4,10 @@ import { relatedWords } from "@/db/schema/related_words";
 import { relatedPhrases } from "@/db/schema/related_phrases";
 import { words } from "@/db/schema/words";
 import { eq, and, sql } from "drizzle-orm";
+import { wordRelationSuggestionProcedures } from "./word-relation-suggestions";
 
 export const wordRelationsAdminRouter = createTRPCRouter({
+  ...wordRelationSuggestionProcedures,
   /**
    * Get all related words for a specific word
    */

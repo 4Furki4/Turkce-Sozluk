@@ -9,9 +9,35 @@ jest.mock("next-intl/middleware", () => ({
   default: () => () => NextResponse.next(),
 }));
 
-import proxy from "@/src/proxy";
+import proxy, { isLocalizedRouteRewrite } from "@/src/proxy";
 
 describe("proxy SEO normalization", () => {
+  it("allows next-intl's second pass through a Turkish internal dashboard route", () => {
+    const response = proxy(new NextRequest("http://localhost:3000/tr/dashboard?view=suggestions", {
+      headers: { "x-current-path": "/tr/panel", "x-next-intl-locale": "tr" },
+    }));
+    expect(response.status).toBe(200);
+    expect(response.headers.get("location")).toBeNull();
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+  });
+
+  it("still canonicalizes first-pass dashboard aliases", () => {
+    const response = proxy(new NextRequest("http://localhost:3000/tr/dashboard?view=suggestions"));
+    expect(response.status).toBe(308);
+    expect(response.headers.get("location")).toBe("http://localhost:3000/tr/panel?view=suggestions");
+  });
+
+  it("recognizes encoded word relation URLs only with matching original path and locale", () => {
+    const internal = "/tr/dashboard/word-relations";
+    const canonical = "/tr/panel/kelime-ilişkileri";
+    const original = "/tr/panel/kelime-ili%C5%9Fkileri";
+    expect(isLocalizedRouteRewrite(internal, canonical, original, "tr")).toBe(true);
+    expect(isLocalizedRouteRewrite(canonical, canonical, original, "tr")).toBe(false);
+    expect(isLocalizedRouteRewrite(internal, canonical, null, "tr")).toBe(false);
+    expect(isLocalizedRouteRewrite(internal, canonical, "/tr/panel", "tr")).toBe(false);
+    expect(isLocalizedRouteRewrite(internal, canonical, original, "en")).toBe(false);
+  });
+
   it("permanently redirects the root path to /tr", () => {
     const response = proxy(new NextRequest("https://turkce-sozluk.com/"));
     expect(response.status).toBe(308);

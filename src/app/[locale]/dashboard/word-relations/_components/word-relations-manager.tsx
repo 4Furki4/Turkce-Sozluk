@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { api } from "@/src/trpc/react";
-import { Card, Button, CardBody, CardHeader, Divider } from "@heroui/react";
+import { Card, Button, CardBody, CardHeader, Divider, Spinner, Tab } from "@heroui/react";
+import { CustomTabs } from "@/src/components/customs/heroui/custom-tabs";
+import { useProgressRouter } from "@/src/hooks/use-progress-router";
+import WordRelationSuggestions from "./word-relation-suggestions";
 import RelatedPhrasesList from "./related-phrases-list";
 import AddRelatedPhraseForm from "./add-related-phrase-form";
 import WordSearch from "./word-search";
@@ -12,9 +16,32 @@ import RelatedWordsList from "./related-words-list";
 import WordRelationsGraph from "@/src/components/word-graph/word-relations-graph";
 
 export default function WordRelationsManager() {
+  return <Suspense fallback={<Spinner />}><WordRelationTabs /></Suspense>;
+}
+
+function WordRelationTabs() {
+  const t = useTranslations("Dashboard.WordRelations.Suggestions");
+  const params = useSearchParams();
+  const pathname = usePathname();
+  const router = useProgressRouter();
+  return <CustomTabs aria-label={t("tabsLabel")} selectedKey={params.get("view") === "manual" ? "manual" : "suggestions"} onSelectionChange={(key) => {
+    const next = new URLSearchParams(params.toString());
+    next.set("view", String(key));
+    router.push(`${pathname}?${next}`, { scroll: false });
+  }}>
+    <Tab key="suggestions" title={t("tab")}><WordRelationSuggestions /></Tab>
+    <Tab key="manual" title={t("manualTab")}><ManualWordRelationsManager /></Tab>
+  </CustomTabs>;
+}
+
+function ManualWordRelationsManager() {
   const t = useTranslations("Dashboard.WordRelations");
-  const [selectedWordId, setSelectedWordId] = useState<number | null>(null);
-  const [selectedWordName, setSelectedWordName] = useState<string>("");
+  const params = useSearchParams();
+  const pathname = usePathname();
+  const router = useProgressRouter();
+  const utils = api.useUtils();
+  const rawId = Number(params.get("wordId"));
+  const selectedWordId = Number.isInteger(rawId) && rawId > 0 ? rawId : null;
 
   // Get the selected word details
   const { data: wordDetails } = api.admin.wordRelations.getWordById.useQuery(
@@ -24,21 +51,20 @@ export default function WordRelationsManager() {
     }
   );
 
-  // Update selected word name when details change
-  if (wordDetails?.name && wordDetails.name !== selectedWordName) {
-    setSelectedWordName(wordDetails.name);
-  }
+  const selectedWordName = wordDetails?.name ?? "";
 
   // Handle word selection
-  const handleWordSelect = (id: number, name: string) => {
-    setSelectedWordId(id);
-    setSelectedWordName(name);
+  const handleWordSelect = (id: number) => {
+    const next = new URLSearchParams(params.toString());
+    next.set("wordId", String(id));
+    router.push(`${pathname}?${next}`, { scroll: false });
   };
 
   // Reset selection
   const handleReset = () => {
-    setSelectedWordId(null);
-    setSelectedWordName("");
+    const next = new URLSearchParams(params.toString());
+    next.delete("wordId");
+    router.push(`${pathname}?${next}`, { scroll: false });
   };
 
   // Get related words for the selected word
@@ -53,10 +79,14 @@ export default function WordRelationsManager() {
     { enabled: !!selectedWordId }
   );
 
+  const refreshWordRelations = () => {
+    void Promise.all([relatedWordsQuery.refetch(), utils.admin.wordRelations.getSuggestions.invalidate(), utils.wordGraph.invalidate()]);
+  };
+
   return (
     <div className="space-y-8">
       {/* Word search section */}
-      <Card>
+      <Card className="bg-background/40">
         <CardHeader>
           <h2 className="text-xl font-semibold">{t("searchWord")}</h2>
         </CardHeader>
@@ -67,7 +97,7 @@ export default function WordRelationsManager() {
 
       {/* Selected word and related words section */}
       {selectedWordId && (
-        <Card>
+        <Card className="bg-background/40">
           <CardHeader>
             <div className="flex justify-between items-center w-full">
               <div>
@@ -96,14 +126,14 @@ export default function WordRelationsManager() {
             {/* Word Relations Section */}
             <div className="mb-8">
               <h3 className="text-xl font-semibold mb-4">{t("relatedWords")}</h3>
-              <Card>
+              <Card className="bg-background/40">
                 <CardBody className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Add related word form */}
                   <div>
                     <h4 className="text-lg font-medium mb-4">{t("addRelatedWord")}</h4>
                     <AddRelatedWordForm
                       wordId={selectedWordId}
-                      onSuccess={() => relatedWordsQuery.refetch()}
+                      onSuccess={refreshWordRelations}
                     />
                   </div>
 
@@ -114,8 +144,8 @@ export default function WordRelationsManager() {
                       wordId={selectedWordId}
                       relatedWords={relatedWordsQuery.data || []}
                       isLoading={relatedWordsQuery.isLoading}
-                      onRelationRemoved={() => relatedWordsQuery.refetch()}
-                      onRelationUpdated={() => relatedWordsQuery.refetch()} // Added this line
+                      onRelationRemoved={refreshWordRelations}
+                      onRelationUpdated={refreshWordRelations}
                     />
                   </div>
                 </CardBody>
@@ -127,7 +157,7 @@ export default function WordRelationsManager() {
             {/* Phrase Relations Section */}
             <div>
               <h3 className="text-xl font-semibold mb-4">{t("relatedPhrases")}</h3>
-              <Card>
+              <Card className="bg-background/40">
                 <CardBody className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Add related phrase form */}
                   <div>

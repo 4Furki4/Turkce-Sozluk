@@ -166,6 +166,12 @@ If a schema or source change requires generated output, change the source first 
 - Use `lucide-react` icons for common actions and navigation.
 - Preserve reduced-motion and theme behavior from `src/components/customs/provider.tsx`.
 
+### HeroUI control alignment
+
+- HeroUI Input, Select, and Button defaults use different heights, label placement, and padding. For controls sharing a row, explicitly set compatible sizes and align their visible edges, labels, text, and icons through the existing wrappers and slot `classNames`.
+- Match the actual Input `inputWrapper` and Select `trigger` heights to adjacent buttons; aligning only the outer component boxes is insufficient. Use consistent borders, corner radii, and horizontal padding. Keep labels in a shared position, preferably above the controls in mixed filter rows.
+- Before completing a UI change, inspect the rendered result at desktop and mobile widths with the relevant Turkish and English labels. Fix uneven heights, shifted baselines, wrapping, and overflow before reporting completion. A successful build or type check alone does not verify visual alignment.
+
 ### Routing and navigation
 
 - Use localized navigation utilities from `@/src/i18n/routing` for locale-aware links, redirects, pathnames, and router usage.

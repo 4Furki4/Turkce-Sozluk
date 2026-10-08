@@ -43,6 +43,7 @@ import WordCardRequestModal, {
   type WordCardRequestModalInitialView,
 } from "@/src/components/customs/modals/word-card-request-modal";
 import { PronunciationCard } from "@/src/components/customs/pronunciation-card";
+import { PronunciationButton } from "@/src/components/customs/pronunciation-button";
 import SaveWord from "@/src/components/customs/save-word";
 import WordNotFoundCard from "@/src/components/customs/word-not-found-card";
 import WordRelationsGraph from "@/src/components/word-graph/word-relations-graph";
@@ -326,6 +327,7 @@ function ReaderWordCard({
   onCapture,
   onShare,
   onEditOpen,
+  onPronunciationRequestOpen,
 }: WordCardVariantBodyProps) {
   const t = useTranslations("WordCard");
 
@@ -340,6 +342,7 @@ function ReaderWordCard({
           onCapture={onCapture}
           onShare={onShare}
           showOnMobile
+          showPronunciation={false}
           className="mb-4 ml-auto sm:absolute sm:right-8 sm:top-8 sm:mb-0"
         />
 
@@ -349,6 +352,7 @@ function ReaderWordCard({
             locale={locale}
             headingLevel={headingLevel}
             size="reader"
+            onCorrect={onPronunciationRequestOpen}
           />
           <WordMetadata word_data={word_data} locale={locale} />
         </div>
@@ -439,6 +443,8 @@ function MagazineWordCard({
                 ) : null}
               </div>
 
+              <PronunciationButton wordId={word_data.word_id} headword={word_data.word_name} offline={word_data.source === "offline" || isOnline === false} onCorrect={onPronunciationRequestOpen} />
+
               <CompactPronunciationPopover
                 word_data={word_data}
                 session={session}
@@ -509,7 +515,9 @@ function WordTitleBlock({
   locale,
   headingLevel = "h2",
   size,
+  onCorrect,
 }: {
+  onCorrect?: () => void;
   word_data: WordEntryData;
   locale: "en" | "tr";
   headingLevel?: "h1" | "h2";
@@ -517,6 +525,7 @@ function WordTitleBlock({
 }) {
   const WordHeading = headingLevel;
   const rootLanguage = getRootLanguage(word_data, locale);
+  const { offlineLinks } = useContext(WordCardNavigationContext);
 
   return (
     <div className="min-w-0">
@@ -538,6 +547,7 @@ function WordTitleBlock({
         >
           {word_data.word_name}
         </WordHeading>
+        <PronunciationButton wordId={word_data.word_id} headword={word_data.word_name} offline={offlineLinks} onCorrect={onCorrect} />
 
         {word_data.suffix ? (
           <span className="text-fs-0 text-muted-foreground">
@@ -730,7 +740,7 @@ function CompactPronunciationPopover({
           {word_data.phonetic ? (
             <span className="font-mono tracking-wide">/{word_data.phonetic}/</span>
           ) : null}
-          <Volume2 className={cn("h-4 w-4", hasPronunciations ? "text-primary" : "text-muted-foreground")} />
+          <ChevronDown className={cn("h-4 w-4", hasPronunciations ? "text-primary" : "text-muted-foreground")} />
         </button>
       </PopoverTrigger>
       <PopoverContent className="p-0">

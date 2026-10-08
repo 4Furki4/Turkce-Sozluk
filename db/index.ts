@@ -5,6 +5,7 @@ import "dotenv/config";
 import { users, usersRelations } from "./schema/users";
 import { words, wordsRelations } from "./schema/words";
 import { relatedWords, relatedWordsToWordsRelations } from "./schema/related_words";
+import { wordRelationSuggestions } from "./schema/word_relation_suggestions";
 import { roots, rootsRelations } from "./schema/roots";
 import { savedWords } from "./schema/saved_words";
 import { meanings, meaningsRelations } from "./schema/meanings";
@@ -23,6 +24,7 @@ import { feedbackVotes, feedbackVotesRelations } from "./schema/feedback_votes";
 import { request_votes } from "./schema/request_votes";
 import { pronunciationVotes, pronunciationVotesRelations } from "./schema/pronunciation_votes";
 import { pronunciations, pronunciationsRelations } from "./schema/pronunciations";
+import { pronunciationAssets, wordPronunciationAudio } from "./schema/pronunciation_assets";
 import { dailyWords, dailyWordsRelations } from "./schema/daily-words";
 import { misspellings, misspellingsRelations } from "./schema/misspellings";
 import { galatiMeshur, galatiMeshurRelations } from "./schema/galatimeshur";
@@ -57,6 +59,7 @@ export const schema = {
   words,
   wordsRelations,
   relatedWords,
+  wordRelationSuggestions,
   roots,
   rootsRelations,
   savedWords,
@@ -77,6 +80,8 @@ export const schema = {
   request_votes,
   pronunciations,
   pronunciationsRelations,
+  pronunciationAssets,
+  wordPronunciationAudio,
   pronunciationVotes,
   pronunciationVotesRelations,
   announcements,

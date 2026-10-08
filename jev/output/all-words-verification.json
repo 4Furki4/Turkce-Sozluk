@@ -1,0 +1,26 @@
+{
+  "valid": true,
+  "batches": 62052,
+  "uniquePairs": 310260,
+  "uniqueSourceWords": 86462,
+  "inputTokens": 115198138,
+  "models": {
+    "jev-1.13.0": 62052
+  },
+  "candidateRankCounts": {
+    "1": 86462,
+    "2": 81294,
+    "3": 79953,
+    "4": 62551
+  },
+  "scoreBands": {
+    "weak": 58577,
+    "possible": 96549,
+    "strong": 155134
+  },
+  "sourceContextTruncatedPairs": 0,
+  "candidateContextTruncatedPairs": 0,
+  "probabilitySumMaxDeviation": 0.009999999999999898,
+  "roundedProbabilityResults": 3615,
+  "probabilityNote": "Provider probabilities have two decimal places; rounding can make their sum differ from 1 by up to 0.02."
+}

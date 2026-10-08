@@ -3,13 +3,14 @@ import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
 import { Divider } from "@heroui/divider";
 import { Chip } from "@heroui/chip";
 import { WordSearchResult } from "@/types";
+import { PronunciationButton } from "./pronunciation-button";
 import SaveWord from "./save-word";
 import { Button, useDisclosure, Popover, PopoverTrigger, PopoverContent, Tabs, Tab } from "@heroui/react";
 import { Link as NextUILink } from "@heroui/react"
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/src/i18n/routing";
 import { useRouter } from "@/src/i18n/routing";
-import { Camera, Eye, Share2, Volume2, WifiOff, WifiSync } from "lucide-react";
+import { Camera, Eye, Share2, WifiOff, WifiSync } from "lucide-react";
 import Image from "next/image";
 import { useRef, } from "react";
 import { captureElementScreenshot } from "../../utils/screenshot";
@@ -73,9 +74,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
     >
       <CardHeader className="w-full flex flex-col items-start">
         <div className="flex w-full items-center gap-4">
-          <Button className="bg-transparent mr-auto" isIconOnly isDisabled> {/* TODO: add voice to word */}
-            <Volume2 className="w-5 h-5 sm:w-6 sm:h-6" />
-          </Button>
+          <span className="mr-auto" />
           {isWordFetching ? (
             <WifiSync className="text-green-400 w-5 h-5 sm:w-6 sm:h-6 animate-pulse" />
           ) : !isOnline ? (
@@ -96,7 +95,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
         </div>
         <div className="w-full flex items-center justify-between">
           <div className="w-full flex items-center gap-2">
-            <div className="flex items-baseline gap-2">
+            <div className="flex min-w-0 flex-wrap items-baseline gap-2">
               {word_data.prefix && (
                 <span className="text-fs-0">
                   <span aria-label="word prefix">{word_data.prefix}</span>
@@ -106,6 +105,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
               <WordHeading className="text-fs-2 md:text-fs-3 text-start break-words hyphens-auto">
                 {word_data.word_name}
               </WordHeading>
+              <PronunciationButton wordId={word_data.word_id} headword={word_data.word_name} offline={isOffline || isOnline === false} onCorrect={onOpenChange} />
               {word_data.suffix && (
                 <span className="text-fs-0">
                   <span aria-hidden> -</span>
