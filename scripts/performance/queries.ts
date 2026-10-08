@@ -42,7 +42,7 @@ try {
     await tx`SET LOCAL statement_timeout = '5s'`;
     await tx`SET LOCAL lock_timeout = '1s'`;
     let captures: { query: string; params: unknown[] }[] = [];
-    const database = drizzle(Object.assign(tx, { options: connection.options }), {
+    const database = drizzle(Object.assign(tx, { options: connection.options }) as unknown as postgres.Sql, {
       schema,
       logger: { logQuery(query, params) { captures.push({ query, params }); } },
     });

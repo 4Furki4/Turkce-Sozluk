@@ -9,8 +9,8 @@ export const runtime = "nodejs";
 export async function GET(request: Request) {
   try {
     const caller = createCaller(await createTRPCContext({ headers: request.headers }));
-    const words = await caller.word.getAllWordNames();
-    const payload = await getAutocompletePayload(words);
+    const snapshot = await caller.word.getAutocompleteSnapshot();
+    const payload = await getAutocompletePayload(snapshot.words);
     const acceptsGzip = (request.headers.get("accept-encoding") ?? "").split(",").some((entry) => {
       const [encoding, quality] = entry.trim().split(";");
       return encoding === "gzip" && (!quality || Number(quality.trim().replace(/^q=/, "")) > 0);
@@ -20,6 +20,7 @@ export async function GET(request: Request) {
         "Content-Type": "application/json; charset=utf-8",
         "Cache-Control": "no-store",
         "Vary": "Accept-Encoding",
+        "X-Autocomplete-Version": snapshot.version,
         ...(acceptsGzip ? { "Content-Encoding": "gzip" } : {}),
       },
     });

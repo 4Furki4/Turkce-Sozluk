@@ -92,7 +92,7 @@ The short-burst allowance is now 120 procedure calls per 10 seconds per user/vis
 
 Browser query/mutation throttling shares one existing Sonner toast. Server-rendered word-list throttling is explicit state, so the list shell survives rather than entering the page error screen. Errors carry the limiter's millisecond retry deadline; the localized toast counts down to it, disables retry while waiting, and stays visible until six seconds after the deadline. Query retries do not automatically repeat a 429, and failed mutations are never automatically replayed. Other server errors still propagate normally.
 
-Validation: production build and 340 Jest tests passed (14 opt-in database fixture tests skipped). Built desktop English and mobile Turkish checks exercised actual 429 responses with the isolated loopback limiter adapter, single-toast behavior, filter history, and successful recovery. These are local behavior checks, not new Pi capacity measurements or a production rollout.
+Validation: production build and 346 Jest tests passed (14 opt-in database fixture tests skipped). Built desktop English and mobile Turkish checks exercised actual 429 responses with the isolated loopback limiter adapter, single-toast behavior, filter history, and successful recovery. The review follow-up reads the autocomplete version and names in one SQL snapshot and stores the bulk download's matching version; regression tests cover external writes and a probe/download version change. These are local behavior checks, not new Pi capacity measurements or a production rollout.
 
 ## Remaining validation and priorities
 
@@ -102,4 +102,4 @@ Validation: production build and 340 Jest tests passed (14 opt-in database fixtu
 - `after` tracks callbacks through the framework lifecycle. SQL execution/lock deadlines do not bound a stalled connected socket or time waiting for the shared connection pool. There is no durable queue. Treat those failure/resource bounds as an explicit gap before promising durable or outage-proof analytics.
 - Normal worker rules are tested from source and offline storage regressions pass; installed service-worker upgrade behavior and offline network-failure journeys need a separate device pass.
 - The owned synthetic load-test database, local preview and disposable limiter/search containers were removed after verification. The original local database and its generated migrations remain.
-- No Pi migrations, deployment, commit, push or pull request was performed. Rollout follows `docs/raspberry-pi-database-migrations.md` after development hardware validation and the required backup/ledger checks.
+- Initial measurements did not change the Pi databases. The read-only Pi ledger/schema audit and execution order are recorded in [the production rollout plan](query-search-production-rollout.md); execution follows the development validation and backup gates in the Pi migration runbook.

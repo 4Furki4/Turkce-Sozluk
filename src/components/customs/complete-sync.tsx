@@ -43,13 +43,15 @@ export function AutocompleteSync() {
                 emitAutocompleteSyncStatus("downloading");
                 const response = await fetch("/api/autocomplete-words", { signal: AbortSignal.timeout(15_000) });
                 if (!response.ok) throw new Error("Autocomplete download unavailable");
+                const downloadedVersion = response.headers.get("X-Autocomplete-Version");
+                if (!downloadedVersion) throw new Error("Autocomplete version unavailable");
                 const wordList: unknown = await response.json();
                 if (!Array.isArray(wordList) || !wordList.every((name) => typeof name === "string")) {
                     throw new Error("Invalid autocomplete word list");
                 }
 
                 // 6. Save new data
-                await updateLocalAutocompleteList(wordList, normalizedServerVersion);
+                await updateLocalAutocompleteList(wordList, downloadedVersion);
                 emitAutocompleteSyncStatus("ready");
             } catch (error) {
                 console.error("[AutocompleteSync] Failed to sync word list:", error);

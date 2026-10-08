@@ -4,8 +4,9 @@ import {
   createTRPCRouter,
   publicProcedure,
 } from "../trpc";
-import { count, desc, eq, gte, sql, inArray, max } from "drizzle-orm";
+import { count, desc, eq, gte, sql, inArray } from "drizzle-orm";
 import { words } from "@/db/schema/words";
+import { getAutocompleteSnapshot } from "@/src/server/autocomplete-dictionary";
 import { pronunciations } from "@/db/schema/pronunciations";
 import { pronunciationVotes } from "@/db/schema/pronunciation_votes";
 import { users } from "@/db/schema/users";
@@ -494,29 +495,17 @@ export const wordRouter = createTRPCRouter({
  * We use the most recent 'updated_at' timestamp as the version.
  */
   getAutocompleteListVersion: publicProcedure.query(async ({ ctx }) => {
-    return readPublicDictionary(ctx.db, "autocomplete-version", async () => {
-    const result = await ctx.db
-      .select({
-        latest: max(words.updated_at),
-      })
-      .from(words);
-    return result[0]?.latest ?? "0";
-
-    });
+    return (await getAutocompleteSnapshot(ctx.db)).version;
   }),
 
   /**
    * Returns all word names for the autocomplete list.
    */
   getAllWordNames: publicProcedure.query(async ({ ctx }) => {
-    return readPublicDictionary(ctx.db, "all-word-names", async () => {
-    const results = await ctx.db.query.words.findMany({
-      columns: { name: true },
-    });
-    return results.map((word) => word.name);
-
-    });
+    return (await getAutocompleteSnapshot(ctx.db)).words;
   }),
+
+  getAutocompleteSnapshot: publicProcedure.query(({ ctx }) => getAutocompleteSnapshot(ctx.db)),
 
   getWordOfTheDay: publicProcedure.query(async ({ ctx }) => {
     const today = new Date().toISOString().split('T')[0];
