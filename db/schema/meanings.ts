@@ -1,6 +1,7 @@
 import {
   date,
   integer,
+  index,
   pgTable,
   serial,
   text,
@@ -27,7 +28,9 @@ export const meanings = pgTable("meanings", {
   requestType: varchar("request_type", { length: 255 }).default("meaning"),
   createdAt: date("created_at").defaultNow(),
   updatedAt: date("updated_at"),
-});
+}, (table) => [
+  index("meanings_word_id_id_idx").on(table.wordId, table.id),
+]);
 
 export const meaningsRelations = relations(meanings, ({ one, many }) => ({
   word: one(words, {

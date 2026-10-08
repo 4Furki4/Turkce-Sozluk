@@ -1,8 +1,8 @@
-import { api, HydrateClient } from '@/src/trpc/server';
+import { api, getServerSession, HydrateClient } from '@/src/trpc/server';
 import { Metadata } from 'next';
-import { auth } from "@/src/lib/auth";
 import WordResultClient from './word-result-client';
-import { headers } from 'next/headers';
+import { cache } from "react";
+import { scheduleSearchLog } from "@/src/server/search-logging";
 import WordCardWrapper from '@/src/components/customs/word-card-wrapper';
 import { buildWordJsonLd, buildWordMetadata } from './word-seo';
 import type { WordSearchResult } from '@/types';
@@ -33,6 +33,8 @@ const safeServerRead = async <T,>(
     }
 };
 
+const getWord = cache((name: string) => api.word.getWord({ name, skipLogging: true }));
+
 // This is the updated metadata generation function
 export async function generateMetadata({
     params,
@@ -43,7 +45,7 @@ export async function generateMetadata({
     const wordName = decodeURIComponent(word);
     const [result] = await safeServerRead(
         "metadata word lookup",
-        api.word.getWord({ name: wordName, skipLogging: true }),
+        getWord(wordName),
         [],
     );
     return buildWordMetadata(wordName, locale, result?.word_data as WordSearchResult["word_data"] | undefined);
@@ -71,20 +73,14 @@ export default async function SearchResultPage(
     // Properly decode URL parameters with special characters like commas
     const decodedWordName = decodeURIComponent(params.word);
 
-    const requestHeaders = await headers();
-    const session = await safeServerRead(
-        "session",
-        auth.api.getSession({
-            headers: requestHeaders
-        }),
-        null,
-    );
-    const [serverResult] = await safeServerRead(
-        "word lookup",
-        api.word.getWord({ name: decodedWordName, skipLogging: false }),
-        [],
-    );
-    const wordData = serverResult?.word_data as WordSearchResult["word_data"] | undefined;
+    const [session, results] = await Promise.all([
+        safeServerRead("session", getServerSession(), null),
+        safeServerRead("word lookup", getWord(decodedWordName), []),
+    ]);
+    const wordData = results[0]?.word_data as WordSearchResult["word_data"] | undefined;
+    if (wordData?.word_id) {
+        scheduleSearchLog({ wordId: wordData.word_id, userId: session?.user?.id ?? null });
+    }
     const jsonLd = wordData ? buildWordJsonLd(wordData, locale) : null;
     const resolvedLocale = locale === "en" ? "en" : "tr";
 

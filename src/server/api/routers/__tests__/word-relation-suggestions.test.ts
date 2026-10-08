@@ -79,6 +79,15 @@ databaseTests("word relation suggestions with PostgreSQL", () => {
     const otherSide = await listWordRelationSuggestions(db, suggestionListInput.parse({ wordId: wordIds[1] }));
     expect(otherSide.items.map((item) => item.id)).toEqual([suggestionIds[0]]);
   });
+  test("name filtering searches either direction and treats SQL wildcards literally", async () => {
+    for (const sort of ["score_desc", "score_asc"] as const) {
+      const page = await listWordRelationSuggestions(db, suggestionListInput.parse({ wordId: wordIds[0], query: reviewerId, sort }));
+      expect(new Set(page.items.map((item) => item.id))).toEqual(new Set(suggestionIds));
+      for (const query of ["%", "_", "\\"]) {
+        expect((await listWordRelationSuggestions(db, suggestionListInput.parse({ wordId: wordIds[0], query, sort }))).items).toEqual([]);
+      }
+    }
+  });
   test("lowest-first pagination includes zero scores and preserves descending confidence ties", async () => {
     await actualDb.update(suggestions).set({ score: 0 }).where(eq(suggestions.id, suggestionIds[3]));
     const input = suggestionListInput.parse({ wordId: wordIds[0], minScore: 0, sort: "score_asc", limit: 1 });

@@ -1,0 +1,157 @@
+{
+  "profile": "Final 80 ms local debounce; typing probes during a short 1000-user verification run; run ended near the final probe",
+  "p50Ms": 92.59999999403954,
+  "p95Ms": 97.69999998807907,
+  "results": [
+    {
+      "ms": 92.59999999403954,
+      "options": [
+        "kit",
+        "Kitab-ı Mukaddes",
+        "kitaba (veya kitabına) uydurmak",
+        "kitaba el basmak",
+        "kitabe",
+        "kitabe taşı",
+        "kitabet",
+        "kitabevi",
+        "kitabi",
+        "kitabı kapamak"
+      ]
+    },
+    {
+      "ms": 93,
+      "options": [
+        "kit",
+        "Kitab-ı Mukaddes",
+        "kitaba (veya kitabına) uydurmak",
+        "kitaba el basmak",
+        "kitabe",
+        "kitabe taşı",
+        "kitabet",
+        "kitabevi",
+        "kitabi",
+        "kitabı kapamak"
+      ]
+    },
+    {
+      "ms": 90,
+      "options": [
+        "kit",
+        "Kitab-ı Mukaddes",
+        "kitaba (veya kitabına) uydurmak",
+        "kitaba el basmak",
+        "kitabe",
+        "kitabe taşı",
+        "kitabet",
+        "kitabevi",
+        "kitabi",
+        "kitabı kapamak"
+      ]
+    },
+    {
+      "ms": 88.30000001192093,
+      "options": [
+        "kit",
+        "Kitab-ı Mukaddes",
+        "kitaba (veya kitabına) uydurmak",
+        "kitaba el basmak",
+        "kitabe",
+        "kitabe taşı",
+        "kitabet",
+        "kitabevi",
+        "kitabi",
+        "kitabı kapamak"
+      ]
+    },
+    {
+      "ms": 96.2999999821186,
+      "options": [
+        "kit",
+        "Kitab-ı Mukaddes",
+        "kitaba (veya kitabına) uydurmak",
+        "kitaba el basmak",
+        "kitabe",
+        "kitabe taşı",
+        "kitabet",
+        "kitabevi",
+        "kitabi",
+        "kitabı kapamak"
+      ]
+    },
+    {
+      "ms": 93.09999999403954,
+      "options": [
+        "kit",
+        "Kitab-ı Mukaddes",
+        "kitaba (veya kitabına) uydurmak",
+        "kitaba el basmak",
+        "kitabe",
+        "kitabe taşı",
+        "kitabet",
+        "kitabevi",
+        "kitabi",
+        "kitabı kapamak"
+      ]
+    },
+    {
+      "ms": 97.69999998807907,
+      "options": [
+        "kit",
+        "Kitab-ı Mukaddes",
+        "kitaba (veya kitabına) uydurmak",
+        "kitaba el basmak",
+        "kitabe",
+        "kitabe taşı",
+        "kitabet",
+        "kitabevi",
+        "kitabi",
+        "kitabı kapamak"
+      ]
+    },
+    {
+      "ms": 94,
+      "options": [
+        "kit",
+        "Kitab-ı Mukaddes",
+        "kitaba (veya kitabına) uydurmak",
+        "kitaba el basmak",
+        "kitabe",
+        "kitabe taşı",
+        "kitabet",
+        "kitabevi",
+        "kitabi",
+        "kitabı kapamak"
+      ]
+    },
+    {
+      "ms": 90,
+      "options": [
+        "kit",
+        "Kitab-ı Mukaddes",
+        "kitaba (veya kitabına) uydurmak",
+        "kitaba el basmak",
+        "kitabe",
+        "kitabe taşı",
+        "kitabet",
+        "kitabevi",
+        "kitabi",
+        "kitabı kapamak"
+      ]
+    },
+    {
+      "ms": 91.10000002384186,
+      "options": [
+        "kit",
+        "Kitab-ı Mukaddes",
+        "kitaba (veya kitabına) uydurmak",
+        "kitaba el basmak",
+        "kitabe",
+        "kitabe taşı",
+        "kitabet",
+        "kitabevi",
+        "kitabi",
+        "kitabı kapamak"
+      ]
+    }
+  ]
+}

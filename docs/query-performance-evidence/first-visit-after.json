@@ -1,0 +1,23 @@
+{
+  "profile": "fresh browser, batched IndexedDB commit, navigation started during final 1000-user run",
+  "wordPaintMs": 150,
+  "sync": [
+    {
+      "status": "downloading",
+      "ms": 438.2000000178814
+    },
+    {
+      "status": "ready",
+      "ms": 2865.600000023842
+    }
+  ],
+  "readyMs": 2865.600000023842,
+  "transfers": [
+    {
+      "start": 438.5,
+      "duration": 233.5,
+      "bytes": 506305,
+      "decodedBytes": 1509891
+    }
+  ]
+}

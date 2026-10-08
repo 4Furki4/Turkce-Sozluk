@@ -4,6 +4,7 @@ import { getOfflineMetadata, getWordByNameOffline, searchByPattern } from "@/src
 import { useState, useEffect } from "react";
 import { api } from "@/src/trpc/react";
 import { OfflineInstallStatus, WordData } from "../lib/db-config";
+import { isRateLimitError } from "@/src/lib/rate-limit-error";
 
 type WordDataWithSource = WordData & { source: "online" | "offline" };
 
@@ -158,9 +159,10 @@ export function useWordSearch(
             return undefined;
         },
         enabled: canUseOnlineSearch,
-        staleTime: 1000 * 60 * 5, // 5 minutes
+        staleTime: 15_000, // Combined with the 45s public server cache: at most 60s.
         networkMode: "online",
-        retry: (failureCount) => {
+        retry: (failureCount, error) => {
+            if (isRateLimitError(error)) return false;
             if (typeof navigator !== "undefined" && !navigator.onLine) {
                 return false;
             }

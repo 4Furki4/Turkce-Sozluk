@@ -27,7 +27,9 @@ export const words = pgTable("words", {
   requestType: varchar("request_type", { length: 255 }).default("word"),
   sourceId: integer("source_id").references(() => wordSources.id),
 }, (t) => [
-  index("name_idx").using('gin', sql`name gin_trgm_ops`)
+  index("name_idx").using('gin', sql`name gin_trgm_ops`),
+  index("words_name_id_idx").on(t.name, t.id),
+  index("words_created_at_name_id_idx").on(t.created_at.desc().nullsFirst(), t.name, t.id)
 ]);
 
 export const wordsRelations = relations(words, ({ many, one }) => ({

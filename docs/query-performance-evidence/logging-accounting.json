@@ -1,0 +1,48 @@
+{
+  "before": {
+    "timestamp": "2026-10-08T22:08:52.717Z",
+    "logs": 26833,
+    "activity": [
+      {
+        "state": "active",
+        "wait_event_type": null,
+        "count": 1
+      }
+    ],
+    "stats": {
+      "xact_commit": "601",
+      "xact_rollback": "35",
+      "deadlocks": "0",
+      "temp_bytes": "0",
+      "numbackends": 1
+    }
+  },
+  "after": {
+    "timestamp": "2026-10-08T22:22:46.818Z",
+    "logs": 146606,
+    "activity": [
+      {
+        "state": "active",
+        "wait_event_type": null,
+        "count": 1
+      },
+      {
+        "state": "idle",
+        "wait_event_type": "Client",
+        "count": 10
+      }
+    ],
+    "stats": {
+      "xact_commit": "201770",
+      "xact_rollback": "35",
+      "deadlocks": "0",
+      "temp_bytes": "0",
+      "numbackends": 11
+    }
+  },
+  "expectedLoadEvents": 119739,
+  "browserEvents": 34,
+  "persistedEvents": 119773,
+  "failures": 0,
+  "eventCountsMatch": true
+}

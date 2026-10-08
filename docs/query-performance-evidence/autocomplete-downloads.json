@@ -1,0 +1,27 @@
+{
+  "profile": "20 simultaneous downloads, then 1000 arrivals at 100/sec; loopback compression/decompression included; no IndexedDB commit",
+  "reports": [
+    {
+      "count": 20,
+      "arrivalSpacingMs": 0,
+      "elapsedMs": 516.103875,
+      "p50Ms": 479.310042,
+      "p95Ms": 500.650209,
+      "p99Ms": 515.337,
+      "errors": 0,
+      "names": 99438,
+      "decodedCharacters": 1390008
+    },
+    {
+      "count": 1000,
+      "arrivalSpacingMs": 10,
+      "elapsedMs": 10057.790125,
+      "p50Ms": 56.34616599999936,
+      "p95Ms": 58.81945900000028,
+      "p99Ms": 61.92329199999995,
+      "errors": 0,
+      "names": 99438,
+      "decodedCharacters": 1390008
+    }
+  ]
+}

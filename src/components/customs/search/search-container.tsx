@@ -6,10 +6,11 @@ import { Input } from "@heroui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@heroui/react";
 import { useDebounce } from "@uidotdev/usehooks";
+import { useLocalSearchSuggestions } from "@/src/hooks/use-local-search-suggestions";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { TurkishKeyboard } from "@/src/components/customs/utils/TurkishKeyboard";
-import { getWordByNameOffline, searchAutocompleteOffline, searchByPattern } from "@/src/lib/offline-db";
+import { getWordByNameOffline } from "@/src/lib/offline-db";
 import { useTypewriter } from "@/src/hooks/use-typewriter";
 import { useOnlineStatus } from "@/src/hooks/use-online-status";
 import { api } from "@/src/trpc/react";
@@ -70,9 +71,8 @@ export default function SearchContainer({
     });
 
     const debouncedInput = useDebounce(wordInput, 300);
-    const [recommendations, setRecommendations] = useState<string[]>([]);
+    const { recommendations, isLoading } = useLocalSearchSuggestions(wordInput, searchMode === "word");
     const [meaningResults, setMeaningResults] = useState<MeaningResult[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
     const [isAutocompleteSyncing, setIsAutocompleteSyncing] = useState(false);
     const { data: meaningSearchData, isFetching: isMeaningFetching } = api.search.searchByMeaning.useQuery(
         { query: debouncedInput },
@@ -120,46 +120,21 @@ export default function SearchContainer({
             return;
         }
         if (searchMode === "meaning") {
+            if (wordInput !== debouncedInput) {
+                setMeaningResults([]);
+                setShowRecommendations(false);
+                return;
+            }
             if (meaningSearchData) {
                 setMeaningResults(meaningSearchData as MeaningResult[]);
                 setShowRecommendations(meaningSearchData.length > 0);
             }
         }
-    }, [meaningSearchData, searchMode]);
+    }, [meaningSearchData, searchMode, wordInput, debouncedInput]);
 
-    // Handle word search (existing behavior)
     useEffect(() => {
-        if (isSelecting.current) {
-            isSelecting.current = false;
-            return;
-        }
-
-        if (searchMode === "meaning") return;
-
-        if (debouncedInput.length < 2) {
-            setRecommendations([]);
-            setShowRecommendations(false);
-            return;
-        }
-
-        const fetchSuggestions = async () => {
-            setIsLoading(true);
-            let results: string[] = [];
-
-            if (debouncedInput.includes("_")) {
-                const patternResults = await searchByPattern(debouncedInput);
-                results = patternResults.map(w => w.word_name);
-            } else {
-                results = await searchAutocompleteOffline(debouncedInput);
-            }
-
-            setRecommendations(results);
-            setShowRecommendations(results.length > 0);
-            setIsLoading(false);
-        };
-
-        fetchSuggestions();
-    }, [debouncedInput, searchMode]);
+        if (searchMode === "word") setShowRecommendations(recommendations.length > 0);
+    }, [recommendations, searchMode]);
 
     useEffect(() => {
         setSelectedIndex(-1);
@@ -493,7 +468,6 @@ export default function SearchContainer({
                             isSelecting.current = true;
                             setSearchMode("meaning");
                             setShowRecommendations(false);
-                            setRecommendations([]);
                             setSelectedIndex(-1);
                         }}
                         disabled={!isOnline}

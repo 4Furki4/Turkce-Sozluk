@@ -1,0 +1,23 @@
+{
+  "profile": "empty browser first visit under 1000-user load",
+  "wordPaintMs": 338.09999999403954,
+  "sync": [
+    {
+      "status": "downloading",
+      "ms": 860.5
+    },
+    {
+      "status": "ready",
+      "ms": 7127.899999976158
+    }
+  ],
+  "readyMs": 7127.899999976158,
+  "transfers": [
+    {
+      "start": 860.7999999821186,
+      "duration": 420.30000001192093,
+      "bytes": 506305,
+      "decodedBytes": 1509891
+    }
+  ]
+}

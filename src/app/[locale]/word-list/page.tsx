@@ -1,7 +1,9 @@
 import WordList from "@/src/_pages/word-list/word-list";
 import { NoScriptNotice } from "@/src/components/progressive-enhancement/no-script-notice";
 import { Link } from "@/src/i18n/routing";
-import { api, HydrateClient } from "@/src/trpc/server";
+import { getServerQueryHelpers, HydrateClient } from "@/src/trpc/server";
+import { readWithRateLimit } from "@/src/server/rate-limited-read";
+import { RateLimitNotification } from "@/src/components/customs/rate-limit-toast";
 import { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -88,17 +90,19 @@ export default async function WordListPage({ params, searchParams }: Props) {
         startsWith: selectedLetter,
     };
 
-    void api.word.getWords.prefetch(queryInput);
-    void api.word.getWordCount.prefetch(countInput);
-
-    const [words, wordCount] = await Promise.all([
-        api.word.getWords(queryInput),
-        api.word.getWordCount(countInput),
+    const queries = await getServerQueryHelpers();
+    const [wordsResult, countResult] = await Promise.all([
+        readWithRateLimit(() => queries.word.getWords.fetch(queryInput)),
+        readWithRateLimit(() => queries.word.getWordCount.fetch(countInput)),
     ]);
-    const totalPages = Math.max(1, Math.ceil(wordCount / perPage));
+    const rateLimited = wordsResult.rateLimited || countResult.rateLimited;
+    const words = wordsResult.data;
+    const totalPages = countResult.data === undefined ? 0 : Math.max(1, Math.ceil(countResult.data / perPage));
+    const errors = await getTranslations({ locale, namespace: "Errors" });
 
     return (
         <main className="max-w-7xl w-full mx-auto p-4">
+            {rateLimited ? <RateLimitNotification key={JSON.stringify(queryInput)} retryAt={Math.max(wordsResult.retryAt ?? 0, countResult.retryAt ?? 0)} /> : null}
             <section className="mb-6 rounded-md border border-border bg-background/40 p-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
@@ -151,7 +155,7 @@ export default async function WordListPage({ params, searchParams }: Props) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {words.map((word) => (
+                                {words?.map((word) => (
                                     <tr key={word.word_id} className="border-b border-border/60">
                                         <td className="py-2 pr-4">
                                             <Link className="text-primary hover:underline" href={{ pathname: "/search/[word]", params: { word: word.name } }}>
@@ -173,6 +177,7 @@ export default async function WordListPage({ params, searchParams }: Props) {
                             </tbody>
                         </table>
                     </div>
+                    {rateLimited ? <p className="mt-4 text-muted-foreground">{errors("TooManyRequests")}</p> : null}
                     <nav className="mt-4 flex flex-wrap gap-2" aria-label={locale === "en" ? "Word list pages" : "Kelime listesi sayfaları"}>
                         {Array.from({ length: totalPages }, (_, index) => index + 1)
                             .slice(Math.max(0, page - 4), page + 3)

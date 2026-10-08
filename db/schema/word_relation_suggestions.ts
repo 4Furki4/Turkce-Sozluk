@@ -23,6 +23,7 @@ export const wordRelationSuggestions = pgTable("word_relation_suggestions", {
 }, (table) => [
   uniqueIndex("word_relation_suggestions_run_pair_idx").on(table.runKey, table.wordId, table.relatedWordId),
   index("word_relation_suggestions_rank_idx").on(table.status, table.score.desc(), table.confidence.desc(), table.id),
+  index("word_relation_suggestions_ascending_rank_idx").on(table.status, table.score.asc(), table.confidence.desc(), table.id),
   index("word_relation_suggestions_word_idx").on(table.wordId),
   index("word_relation_suggestions_related_word_idx").on(table.relatedWordId),
   check("word_relation_suggestions_pair_order", sql`${table.wordId} < ${table.relatedWordId}`),

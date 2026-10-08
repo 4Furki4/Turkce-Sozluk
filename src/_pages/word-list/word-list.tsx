@@ -7,7 +7,6 @@ import { keepPreviousData } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
 import { useDebounce } from "@uidotdev/usehooks";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
 import { useTranslations } from "next-intl";
 import { CustomPagination } from "@/src/components/customs/heroui/custom-pagination";
 import { CustomTable } from "@/src/components/customs/heroui/custom-table";
@@ -48,7 +47,6 @@ const wordPerPageOptions = [
 
 export default function WordList() {
     const t = useTranslations('WordList');
-    const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
     // Get initial values from URL params
@@ -163,8 +161,10 @@ export default function WordList() {
 
         if (nextSearch === searchParamsString) return;
 
-        router.push(`${pathname}?${nextSearch}`);
-    }, [pageNumber, wordsPerPage, debouncedSearch, selectedPos, selectedLang, selectedAttr, sortBy, sortOrder, selectedLetter, viewMode, pathname, router, searchParamsString]);
+        // The client queries already load these filters. Keep shareable URLs and Back/Forward
+        // without triggering a second set of server reads for the same interaction.
+        window.history.pushState(null, '', `${pathname}?${nextSearch}`);
+    }, [pageNumber, wordsPerPage, debouncedSearch, selectedPos, selectedLang, selectedAttr, sortBy, sortOrder, selectedLetter, viewMode, pathname, searchParamsString]);
 
     const { data: wordCount } = api.word.getWordCount.useQuery({
         search: debouncedSearch,
@@ -241,6 +241,7 @@ export default function WordList() {
                 return (
                     <Link
                         target="_blank"
+                        prefetch={false}
                         className="text-primary hover:underline"
                         href={{ pathname: '/search/[word]', params: { word: item.name } }}
                     >
@@ -251,7 +252,7 @@ export default function WordList() {
                 if (!cellValue && item.relatedWord) {
                     return (
                         <span className="text-muted-foreground italic">
-                            {item.relationType === 'turkish_equivalent' ? 'Türkçe karşılığı:' : 'Bakınız:'} <Link href={{ pathname: '/search/[word]', params: { word: item.relatedWord } }} className="ml-1 text-primary hover:underline">{item.relatedWord}</Link>
+                            {item.relationType === 'turkish_equivalent' ? 'Türkçe karşılığı:' : 'Bakınız:'} <Link prefetch={false} href={{ pathname: '/search/[word]', params: { word: item.relatedWord } }} className="ml-1 text-primary hover:underline">{item.relatedWord}</Link>
                         </span>
                     );
                 }

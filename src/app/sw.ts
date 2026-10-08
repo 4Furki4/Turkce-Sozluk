@@ -5,7 +5,7 @@ import type {
     RuntimeCaching,
     SerwistGlobalConfig,
 } from "serwist";
-import { NavigationRoute, Serwist } from "serwist";
+import { NavigationRoute, NetworkOnly, Serwist } from "serwist";
 
 // This declares the value of `injectionPoint` to TypeScript.
 // `injectionPoint` is the string that will be replaced by the
@@ -39,7 +39,20 @@ const OFFLINE_PAGE_PREFIXES = [
     "/tr/~%C3%A7evrim-d%C4%B1%C5%9F%C4%B1",
 ];
 const DOCUMENT_CACHE_NAME = "document-pages";
-const RUNTIME_CACHING = [...defaultCache] satisfies RuntimeCaching[];
+const RUNTIME_CACHING = [
+    {
+        matcher: ({ url, sameOrigin }) => sameOrigin && (
+            url.pathname === "/api/autocomplete-words" ||
+            (url.pathname.startsWith("/api/trpc/") && url.pathname.slice("/api/trpc/".length).split(",").some((path) =>
+                ["word.getWord", "word.getAllWordNames", "word.getAutocompleteListVersion", "word.getFilterOptions", "search.getWords"].includes(path),
+            ))
+        ),
+        // Online freshness is bounded by the application cache. Offline snapshots
+        // live in IndexedDB and must not be replaced with an older HTTP response.
+        handler: new NetworkOnly(),
+    },
+    ...defaultCache,
+] satisfies RuntimeCaching[];
 const NAVIGATION_DENYLIST = [
     /^\/api(?:\/|$)/,
     /^\/_next(?:\/|$)/,

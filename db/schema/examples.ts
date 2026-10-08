@@ -1,4 +1,4 @@
-import { integer, pgTable, serial, text, varchar } from "drizzle-orm/pg-core";
+import { index, integer, pgTable, serial, text, varchar } from "drizzle-orm/pg-core";
 import { authors } from "./authors";
 import { InferInsertModel, InferSelectModel, relations } from "drizzle-orm";
 import { meanings } from "./meanings";
@@ -13,7 +13,9 @@ export const examples = pgTable("examples", {
   meaningId: integer("meaning_id").notNull().references(() => meanings.id, {
     onDelete: "cascade",
   }),
-});
+}, (table) => [
+  index("examples_meaning_id_idx").on(table.meaningId),
+]);
 
 export const examplesRelations = relations(examples, ({ one }) => ({
   author: one(authors, {

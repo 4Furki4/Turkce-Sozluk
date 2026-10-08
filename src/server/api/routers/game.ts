@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getRandomGameWords } from "@/src/server/game/random-words";
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { words } from "@/db/schema/words";
@@ -385,22 +386,7 @@ export const gameRouter = createTRPCRouter({
                 };
             }
 
-            // Get random words from all words using Drizzle ORM
-            const result = await db
-                .select({
-                    id: words.id,
-                    meaningId: meanings.id,
-                    name: words.name,
-                    phonetic: words.phonetic,
-                    meaning: meanings.meaning,
-                    partOfSpeech: partOfSpeechs.partOfSpeech,
-                })
-                .from(words)
-                .innerJoin(meanings, eq(meanings.wordId, words.id))
-                .leftJoin(partOfSpeechs, eq(meanings.partOfSpeechId, partOfSpeechs.id))
-                .where(isNotNull(meanings.meaning))
-                .orderBy(sql`RANDOM()`)
-                .limit(count * 3); // Get more to ensure uniqueness after dedup
+            const result = await getRandomGameWords(db, count * 3);
 
             // Deduplicate by word id (keep first meaning)
             const seenIds = new Set<number>();
@@ -696,18 +682,7 @@ export const gameRouter = createTRPCRouter({
                 };
             }
 
-            // Get random words from all words
-            const result = await db
-                .select({
-                    id: words.id,
-                    name: words.name,
-                    meaning: meanings.meaning,
-                })
-                .from(words)
-                .innerJoin(meanings, eq(meanings.wordId, words.id))
-                .where(isNotNull(meanings.meaning))
-                .orderBy(sql`RANDOM()`)
-                .limit(pairCount * 3);
+            const result = await getRandomGameWords(db, pairCount * 3);
 
             // Deduplicate by word id
             const seenIds = new Set<number>();

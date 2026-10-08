@@ -1,0 +1,422 @@
+[
+  {
+    "path": "word.searchWordsSimple",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "word.getWords",
+    "measured": true,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "word.getFilterOptions",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "word.getWord",
+    "measured": true,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "word.getWordById",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "word.getPronunciationsForWord",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "word.getPopularWords",
+    "measured": true,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "word.getRecommendations",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "word.getWordCount",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "word.getWordsByIds",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "word.getAutocompleteListVersion",
+    "measured": true,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "word.getAllWordNames",
+    "measured": true,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "word.getWordOfTheDay",
+    "measured": true,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "user.getUserSearchHistory",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "user.getSavedWords",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "user.getSavedWordCount",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "user.getWordSaveStatus",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "user.getUsers",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "user.getUserCount",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "user.getUserRole",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "user.getProfile",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "user.getPublicProfileData",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.dynamicParameters.getWordAttributes",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.dynamicParameters.getMeaningAttributes",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.dynamicParameters.getAuthors",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.dynamicParameters.getPartOfSpeeches",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.dynamicParameters.getLanguages",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.dynamicParameters.getRoots",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.wordRelations.getSuggestions",
+    "measured": true,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.wordRelations.getSuggestionDetails",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.wordRelations.getRelatedWords",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.wordRelations.searchWords",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.wordRelations.getRelatedPhrases",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.wordRelations.getWordById",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.announcements.listAnnouncementsAdmin",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.announcements.getAnnouncementForEdit",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.feedback.getAll",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.dailyWords.getDailyWords",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.galatiMeshur.getGalatiMeshur",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.misspellings.getMisspellings",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.searchHistory.list",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.overview.getDashboardOverview",
+    "measured": true,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.checkWord",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "admin.getWordToEdit",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "params.getMeaningAttributes",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "params.getExampleSentenceAuthors",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "params.getPartOfSpeeches",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "params.getLanguages",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "params.getWordAttributes",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "params.getAuthors",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "request.getVotablePronunciationRequests",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "request.getWordAttributesWithRequested",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "request.getMeaningAttributesWithRequested",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "request.getAuthorsWithRequested",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "request.getAllPendingRequests",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "request.getRequestDetails",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "request.getUserRequests",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "request.getUserRequest",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "announcements.listPublishedAnnouncements",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "announcements.getAnnouncementBySlug",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "announcements.searchAnnouncements",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "feedback.list",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "search.getWordId",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "search.getWords",
+    "measured": true,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "search.searchVerbRoots",
+    "measured": true,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "search.searchByMeaning",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "extras.getGalatiMeshur",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "extras.getMisspellings",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "extras.getGalatiMeshurById",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "badge.getAll",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "game.getRandomWordsForFlashcards",
+    "measured": true,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "game.getFlashcardReviewSummary",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "game.getDueFlashcardReviews",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "game.getWordsForMatching",
+    "measured": true,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "game.getWordsForSpeedRound",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "game.getLeaderboard",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "game.getUserGameStats",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "foreignTermSuggestion.getLanguages",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "foreignTermSuggestion.getById",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "foreignTermSuggestion.list",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "foreignTermSuggestion.getUserVote",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "foreignTermSuggestion.getMySuggestions",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "wordGraph.getNeighborhood",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  },
+  {
+    "path": "pronunciation.getSaved",
+    "measured": false,
+    "boundary": "uncached resolver; no auth/rate limiter/HTTP"
+  }
+]

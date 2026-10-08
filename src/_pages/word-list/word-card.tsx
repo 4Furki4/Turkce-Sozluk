@@ -17,7 +17,7 @@ interface WordCardProps {
 
 export function WordCard({ id, name, meanings, partOfSpeech, origin, relatedWord, relationType }: WordCardProps) {
     return (
-        <Link href={{
+        <Link prefetch={false} href={{
             pathname: '/search/[word]',
             params: { word: encodeURIComponent(name) }
         }} className="block h-full">

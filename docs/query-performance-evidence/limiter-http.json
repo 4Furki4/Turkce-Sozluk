@@ -1,0 +1,7 @@
+{
+  "profile": "61 sequential requests with a fresh local fixture IP; real application middleware",
+  "statuses": {
+    "200": 60,
+    "429": 1
+  }
+}
