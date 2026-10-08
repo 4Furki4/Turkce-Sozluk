@@ -11,6 +11,9 @@ npm-debug.log
 .DS_Store
 coverage
 backups
+.pronunciation-cache
+jev/output/all-words.json
+jev/output/all-words.ndjson
 *.dump
 Dockerfile
 docker-compose*.yml
