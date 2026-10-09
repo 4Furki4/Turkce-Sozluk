@@ -30,6 +30,7 @@ import { useLocaleSwitchHref } from "@/src/hooks/useLocaleSwitchHref";
 import { useState } from "react";
 import { startNavigationProgress } from "@/src/lib/navigation-progress";
 import { getPlainSearchAction, getSearchQueryHref, getWordSearchHref } from "@/src/lib/search-route";
+import { useQueryClient } from "@tanstack/react-query";
 
 type NavbarProps = {
   session: Session | null;
@@ -69,6 +70,7 @@ export default function Navbar({
   const locale = useLocale();
   const navT = useTranslations("Navbar");
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [navbarSearchQuery, setNavbarSearchQuery] = useState("");
   const languageSwitchHref = useLocaleSwitchHref();
   const isAuthPage = ["/signup", "/signin", "/forgot-password"].includes(
@@ -83,10 +85,11 @@ export default function Navbar({
     pathName === "/search/[word]" ||
     pathName.startsWith("/search/");
   const shouldShowNavbarSearch = !isHomeRoute && !isSearchRoute;
-  const homeHref = locale === "en" ? "/en" : "/tr";
 
   const handleSignOut = async () => {
     await authClient.signOut();
+    await queryClient.cancelQueries();
+    queryClient.clear();
     router.refresh();
   };
 
@@ -141,10 +144,10 @@ export default function Navbar({
       }}
     >
       <NavbarBrand>
-        <a href={homeHref} className="hidden md:flex items-center gap-2">
+        <NextIntlLink href="/" prefetch className="hidden md:flex items-center gap-2">
           <Image src={logo} alt="Turkish Dictionary Logo" className="h-8 w-8" />
           <span className="text-fs-1 font-bold text-primary">{TitleIntl}</span>
-        </a>
+        </NextIntlLink>
         {/* Mobile menu button moved to bottom nav */}
       </NavbarBrand>
       <NavbarContent justify="end" className="gap-2 md:gap-3 lg:gap-4">

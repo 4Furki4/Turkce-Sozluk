@@ -1,4 +1,5 @@
 {
+  "Navigation": { "loading": "Yükleniyor…" },
   "PronunciationWorkflow": {
     "title": "Telaffuz inceleme kuyruğu",
     "intro": "Yapay zekâ ile üretilen sesleri dinleyin, kararınızı kaydedin ve not ekleyin. Yalnızca onaylanan kayıtlar yayımlanabilir. Kararlar bu bilgisayarda saklanır.",

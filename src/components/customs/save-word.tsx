@@ -21,6 +21,10 @@ export default function SaveWord({
     const t = useTranslations("WordCard");
     const utils = api.useUtils()
     const saveWordMutation = api.user.saveWord.useMutation({
+        onSuccess: () => Promise.all([
+            utils.user.getSavedWords.invalidate(),
+            utils.user.getSavedWordCount.invalidate(),
+        ]),
         onMutate: async ({ wordId }) => {
             await utils.user.getWordSaveStatus.cancel(wordId)
             const previousValue = utils.user.getWordSaveStatus.getData(wordId);

@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { Avatar } from '@heroui/react';
 import { Button } from '@heroui/react';
 import { useLocaleSwitchHref } from '@/src/hooks/useLocaleSwitchHref';
+import { useQueryClient } from '@tanstack/react-query';
 
 type SidebarProps = {
     session: Session | null,
@@ -75,7 +76,7 @@ function SidebarLinkRow({
 
     return (
         <li>
-            <NextIntlLink className={linkClassName} href={item.href} onClick={onSelect}>{content}</NextIntlLink>
+            <NextIntlLink className={linkClassName} href={item.href} prefetch={item.href === '/' || item.href === '/word-list' ? true : null} onClick={onSelect}>{content}</NextIntlLink>
         </li>
     )
 }
@@ -98,9 +99,12 @@ export default function Sidebar(
     const locale = useLocale();
     const pathname = usePathname();
     const router = useRouter();
+    const queryClient = useQueryClient();
     const languageSwitchHref = useLocaleSwitchHref();
     const handleSignOut = async () => {
         await authClient.signOut();
+        await queryClient.cancelQueries();
+        queryClient.clear();
         router.refresh();
         setIsSidebarOpen(false);
     };
