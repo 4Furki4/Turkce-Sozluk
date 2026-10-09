@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import SavedWordsToolbar, { AlphabetOrder, DateOrder } from "./saved-words-toolbar";
 import SavedWordCard from "./saved-word-card";
 import SavedWordCardSkeleton from "./saved-word-card-skeleton";
@@ -52,10 +52,11 @@ export default function SavedWordsPage({ session, locale }: SavedWordsPageProps)
     setSortBy("date");
     setPageNumber(1);
   };
-  const handleSearch = (search: string) => {
-    setSearch(search);
+  const handleSearch = useCallback((value: string) => {
+    if (value === search) return;
+    setSearch(value);
     setPageNumber(1);
-  };
+  }, [search]);
   return (
     <div className="max-w-7xl w-full mx-auto mt-5 space-y-4 p-4">
       <SavedWordsToolbar
