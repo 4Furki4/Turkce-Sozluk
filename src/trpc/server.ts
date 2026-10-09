@@ -1,10 +1,12 @@
 import "server-only";
 
 import { createHydrationHelpers } from "@trpc/react-query/rsc";
+import { createServerSideHelpers } from "@trpc/react-query/server";
 import { headers } from "next/headers";
 import { cache } from "react";
+import SuperJSON from "superjson";
 
-import { createCaller, type AppRouter } from "../server/api/root";
+import { appRouter, createCaller, type AppRouter } from "../server/api/root";
 import { createTRPCContext } from "../server/api/trpc";
 import { createQueryClient } from "./query-client";
 
@@ -21,8 +23,18 @@ const createContext = cache(async () => {
   });
 });
 
+export const getServerSession = async () => (await createContext()).session;
+
 const getQueryClient = cache(createQueryClient);
 const caller = createCaller(createContext);
+
+/** Fetch once for SSR and hydrate the same result for browser queries. */
+export const getServerQueryHelpers = cache(async () => createServerSideHelpers({
+  router: appRouter,
+  ctx: await createContext(),
+  queryClient: getQueryClient(),
+  transformer: SuperJSON,
+}));
 
 export const { trpc: api, HydrateClient } = createHydrationHelpers<AppRouter>(
   caller,

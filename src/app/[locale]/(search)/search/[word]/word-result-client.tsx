@@ -7,6 +7,9 @@ import { Session } from "@/src/lib/auth";
 import WordCardWrapper from "@/src/components/customs/word-card-wrapper";
 import { useLocale } from "next-intl";
 import OfflineSearchStateCard from "@/src/components/customs/search/offline-search-state-card";
+import { getRateLimitRetryAt, isRateLimitError } from "@/src/lib/rate-limit-error";
+import { RateLimitRetry } from "@/src/components/customs/rate-limit-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 type WordResultClientProps = {
     session: Session | null;
@@ -15,6 +18,7 @@ type WordResultClientProps = {
 
 export default function WordResultClient({ session, wordName }: WordResultClientProps) {
     const locale = useLocale();
+    const queryClient = useQueryClient();
     // The initial data from the server is passed directly to our hook.
     // TanStack Query will use this data immediately without refetching on the client.
     const {
@@ -27,6 +31,7 @@ export default function WordResultClient({ session, wordName }: WordResultClient
         isOfflineLoading,
         offlineStatus,
         offlineError,
+        error,
     } = useWordSearch(wordName);
 
     // The loading skeleton will only be shown on subsequent client-side navigation.
@@ -46,6 +51,13 @@ export default function WordResultClient({ session, wordName }: WordResultClient
 
     if (!isOnline && hasOfflineDataset && !data && !isOfflineLoading) {
         return <OfflineSearchStateCard wordName={wordName} state="no-match" />;
+    }
+
+    // Throttling does not mean the dictionary entry is missing.
+    if (!data && isRateLimitError(error)) {
+        return <RateLimitRetry retryAt={getRateLimitRetryAt(error)} retry={() => {
+            void queryClient.invalidateQueries({ queryKey: ["word-online", wordName] });
+        }} />;
     }
 
     // Show the "Not Found" component if there's an error or no data

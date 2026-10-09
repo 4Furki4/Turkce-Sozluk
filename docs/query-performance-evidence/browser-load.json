@@ -1,0 +1,188 @@
+{
+  "profile": "real form submissions during 1000-user load; loopback built app, no browser throttle; 6-word warm corpus",
+  "samples": 30,
+  "p50Ms": 83.19999998807907,
+  "p95Ms": 96.5,
+  "results": [
+    {
+      "name": "kitap",
+      "ms": 86.5,
+      "meaning": "Ciltli veya ciltsiz olarak bir araya getirilmiş, basılı veya yazılı kâğıt yaprakların bütünü; betik",
+      "url": "/tr/arama/kitap"
+    },
+    {
+      "name": "su",
+      "ms": 102.59999999403954,
+      "meaning": "Hidrojenle oksijenden oluşan, sıvı durumunda bulunan, renksiz, kokusuz, tatsız madde; ab",
+      "url": "/tr/arama/su"
+    },
+    {
+      "name": "gelmek",
+      "ms": 91.2999999821186,
+      "meaning": "Ulaşmak, varmak",
+      "url": "/tr/arama/gelmek"
+    },
+    {
+      "name": "ağaç",
+      "ms": 90.59999999403954,
+      "meaning": "Meyve verebilen, gövdesi odun veya kereste olmaya elverişli bulunan ve uzun yıllar yaşayabilen bitki",
+      "url": "/tr/arama/a%C4%9Fa%C3%A7"
+    },
+    {
+      "name": "göz",
+      "ms": 96.5,
+      "meaning": "Görme organı; basar, ayn, çeşm, dide",
+      "url": "/tr/arama/g%C3%B6z"
+    },
+    {
+      "name": "ev",
+      "ms": 88.60000002384186,
+      "meaning": "Bir kimsenin veya ailenin içinde yaşadığı yer; bark, ev bark, beyit, dar (IV), hane, mekân",
+      "url": "/tr/arama/ev"
+    },
+    {
+      "name": "kitap",
+      "ms": 74.39999997615814,
+      "meaning": "Ciltli veya ciltsiz olarak bir araya getirilmiş, basılı veya yazılı kâğıt yaprakların bütünü; betik",
+      "url": "/tr/arama/kitap"
+    },
+    {
+      "name": "su",
+      "ms": 78.7000000178814,
+      "meaning": "Hidrojenle oksijenden oluşan, sıvı durumunda bulunan, renksiz, kokusuz, tatsız madde; ab",
+      "url": "/tr/arama/su"
+    },
+    {
+      "name": "gelmek",
+      "ms": 85.5,
+      "meaning": "Ulaşmak, varmak",
+      "url": "/tr/arama/gelmek"
+    },
+    {
+      "name": "ağaç",
+      "ms": 79.69999998807907,
+      "meaning": "Meyve verebilen, gövdesi odun veya kereste olmaya elverişli bulunan ve uzun yıllar yaşayabilen bitki",
+      "url": "/tr/arama/a%C4%9Fa%C3%A7"
+    },
+    {
+      "name": "göz",
+      "ms": 87.69999998807907,
+      "meaning": "Görme organı; basar, ayn, çeşm, dide",
+      "url": "/tr/arama/g%C3%B6z"
+    },
+    {
+      "name": "ev",
+      "ms": 94,
+      "meaning": "Bir kimsenin veya ailenin içinde yaşadığı yer; bark, ev bark, beyit, dar (IV), hane, mekân",
+      "url": "/tr/arama/ev"
+    },
+    {
+      "name": "kitap",
+      "ms": 77.80000001192093,
+      "meaning": "Ciltli veya ciltsiz olarak bir araya getirilmiş, basılı veya yazılı kâğıt yaprakların bütünü; betik",
+      "url": "/tr/arama/kitap"
+    },
+    {
+      "name": "su",
+      "ms": 81.09999999403954,
+      "meaning": "Hidrojenle oksijenden oluşan, sıvı durumunda bulunan, renksiz, kokusuz, tatsız madde; ab",
+      "url": "/tr/arama/su"
+    },
+    {
+      "name": "gelmek",
+      "ms": 83.59999999403954,
+      "meaning": "Ulaşmak, varmak",
+      "url": "/tr/arama/gelmek"
+    },
+    {
+      "name": "ağaç",
+      "ms": 77.40000000596046,
+      "meaning": "Meyve verebilen, gövdesi odun veya kereste olmaya elverişli bulunan ve uzun yıllar yaşayabilen bitki",
+      "url": "/tr/arama/a%C4%9Fa%C3%A7"
+    },
+    {
+      "name": "göz",
+      "ms": 88,
+      "meaning": "Görme organı; basar, ayn, çeşm, dide",
+      "url": "/tr/arama/g%C3%B6z"
+    },
+    {
+      "name": "ev",
+      "ms": 77.5,
+      "meaning": "Bir kimsenin veya ailenin içinde yaşadığı yer; bark, ev bark, beyit, dar (IV), hane, mekân",
+      "url": "/tr/arama/ev"
+    },
+    {
+      "name": "kitap",
+      "ms": 81.39999997615814,
+      "meaning": "Ciltli veya ciltsiz olarak bir araya getirilmiş, basılı veya yazılı kâğıt yaprakların bütünü; betik",
+      "url": "/tr/arama/kitap"
+    },
+    {
+      "name": "su",
+      "ms": 76.30000001192093,
+      "meaning": "Hidrojenle oksijenden oluşan, sıvı durumunda bulunan, renksiz, kokusuz, tatsız madde; ab",
+      "url": "/tr/arama/su"
+    },
+    {
+      "name": "gelmek",
+      "ms": 79.40000000596046,
+      "meaning": "Ulaşmak, varmak",
+      "url": "/tr/arama/gelmek"
+    },
+    {
+      "name": "ağaç",
+      "ms": 83.19999998807907,
+      "meaning": "Meyve verebilen, gövdesi odun veya kereste olmaya elverişli bulunan ve uzun yıllar yaşayabilen bitki",
+      "url": "/tr/arama/a%C4%9Fa%C3%A7"
+    },
+    {
+      "name": "göz",
+      "ms": 83,
+      "meaning": "Görme organı; basar, ayn, çeşm, dide",
+      "url": "/tr/arama/g%C3%B6z"
+    },
+    {
+      "name": "ev",
+      "ms": 86.09999999403954,
+      "meaning": "Bir kimsenin veya ailenin içinde yaşadığı yer; bark, ev bark, beyit, dar (IV), hane, mekân",
+      "url": "/tr/arama/ev"
+    },
+    {
+      "name": "kitap",
+      "ms": 74.89999997615814,
+      "meaning": "Ciltli veya ciltsiz olarak bir araya getirilmiş, basılı veya yazılı kâğıt yaprakların bütünü; betik",
+      "url": "/tr/arama/kitap"
+    },
+    {
+      "name": "su",
+      "ms": 86.19999998807907,
+      "meaning": "Hidrojenle oksijenden oluşan, sıvı durumunda bulunan, renksiz, kokusuz, tatsız madde; ab",
+      "url": "/tr/arama/su"
+    },
+    {
+      "name": "gelmek",
+      "ms": 81.2999999821186,
+      "meaning": "Ulaşmak, varmak",
+      "url": "/tr/arama/gelmek"
+    },
+    {
+      "name": "ağaç",
+      "ms": 84.80000001192093,
+      "meaning": "Meyve verebilen, gövdesi odun veya kereste olmaya elverişli bulunan ve uzun yıllar yaşayabilen bitki",
+      "url": "/tr/arama/a%C4%9Fa%C3%A7"
+    },
+    {
+      "name": "göz",
+      "ms": 84.09999999403954,
+      "meaning": "Görme organı; basar, ayn, çeşm, dide",
+      "url": "/tr/arama/g%C3%B6z"
+    },
+    {
+      "name": "ev",
+      "ms": 81.90000000596046,
+      "meaning": "Bir kimsenin veya ailenin içinde yaşadığı yer; bark, ev bark, beyit, dar (IV), hane, mekân",
+      "url": "/tr/arama/ev"
+    }
+  ]
+}

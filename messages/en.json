@@ -1654,7 +1654,10 @@
     "OriginalRelationTypeMissing": "Original relation type is missing. Cannot submit edit request.",
     "captchaFailed": "reCAPTCHA verification failed. Please try again as you may be a robot.",
     "captchaError": "Could not get reCAPTCHA token. Please check your connection and try again.",
-    "TooManyRequests": "You are doing that too fast. Please slow down."
+    "TooManyRequests": "Too many requests.",
+    "RateLimitCountdown": "Try again in {seconds, plural, one {# second} other {# seconds}}.",
+    "RateLimitReady": "You can try again now.",
+    "Retry": "Try again"
   },
   "DbFieldLabels": {
     "reason": "Reason",

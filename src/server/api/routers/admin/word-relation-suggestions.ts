@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq, gte, gt, ilike, inArray, lt, lte, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, gt, inArray, lt, lte, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { meanings } from "@/db/schema/meanings";
@@ -60,11 +60,16 @@ export async function listWordRelationSuggestions(db: Database, input: z.infer<t
       lte(suggestions.confidence, input.maxConfidence),
       input.status === "all" ? undefined : eq(suggestions.status, input.status),
       input.wordId ? or(eq(suggestions.wordId, input.wordId), eq(suggestions.relatedWordId, input.wordId)) : undefined,
-      input.query ? or(ilike(left.name, term), ilike(right.name, term)) : undefined,
+      input.query ? sql`${suggestions.id} IN (
+        WITH matching_words AS MATERIALIZED (SELECT id FROM words WHERE name ILIKE ${term})
+        SELECT s.id FROM word_relation_suggestions s JOIN matching_words w ON w.id = s.word_id
+        UNION
+        SELECT s.id FROM word_relation_suggestions s JOIN matching_words w ON w.id = s.related_word_id
+      )` : undefined,
       cursor ? or(lowestFirst ? gt(suggestions.score, cursor.score) : lt(suggestions.score, cursor.score),
         and(eq(suggestions.score, cursor.score), lt(suggestions.confidence, cursor.confidence)),
         and(eq(suggestions.score, cursor.score), eq(suggestions.confidence, cursor.confidence), gt(suggestions.id, cursor.id))) : undefined,
-    )).orderBy(lowestFirst ? asc(suggestions.score) : desc(suggestions.score), desc(suggestions.confidence), asc(suggestions.id)).limit(input.limit + 1);
+    )).orderBy(lowestFirst ? asc(suggestions.score) : sql`${suggestions.score} DESC NULLS LAST`, sql`${suggestions.confidence} DESC NULLS LAST`, asc(suggestions.id)).limit(input.limit + 1);
   const hasMore = rows.length > input.limit;
   const items = rows.slice(0, input.limit).map(({ forwardWordId, forwardType, reverseWordId, reverseType, ...row }) => ({
     ...row, forwardType: forwardWordId === null ? null : forwardType ?? "relatedWord",

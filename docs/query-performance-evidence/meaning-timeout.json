@@ -1,0 +1,6 @@
+{
+  "dependency": "Meilisearch stalled loopback HTTP",
+  "durationMs": 2014.2713750000003,
+  "emptyFallback": true,
+  "budgetMs": 2000
+}

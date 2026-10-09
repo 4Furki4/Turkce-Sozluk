@@ -8,11 +8,11 @@ import { words } from "@/db/schema/words";
 import { ilike, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { Meilisearch } from "meilisearch";
-// Initialize Meilisearch client
-// In a production environment, these should be in your .env file
+import { env } from "@/src/env.mjs";
+import { readPublicDictionary } from "@/src/server/dictionary-cache";
 const meiliClient = new Meilisearch({
-  host: process.env.MEILI_HOST ?? "http://192.168.1.2:7700",
-  apiKey: process.env.MEILI_MASTER_KEY,
+  host: env.MEILI_HOST ?? "http://192.168.1.2:7700",
+  apiKey: env.MEILI_MASTER_KEY,
 });
 export const searchRouter = createTRPCRouter({
   getWordId: publicProcedure
@@ -43,6 +43,7 @@ export const searchRouter = createTRPCRouter({
         return [];
       }
 
+      return readPublicDictionary(ctx.db, JSON.stringify(["name-search", normalizedQuery]), async () => {
       const exactPattern = normalizedQuery;
       const prefixPattern = `${normalizedQuery}%`;
       const containsPattern = `%${normalizedQuery}%`;
@@ -67,6 +68,7 @@ export const searchRouter = createTRPCRouter({
         .limit(25);
 
       return sortDictionarySuggestions(results, normalizedQuery).slice(0, 10);
+      });
     }),
   searchVerbRoots: publicProcedure
     .input(
@@ -93,12 +95,23 @@ export const searchRouter = createTRPCRouter({
         )
       `;
 
+      // A fallback root is a prefix of its word name, so ordinary contains matches
+      // can be narrowed with the name index plus explicit root matches.
+      const candidates = /[%_\\]/.test(query) ? sql`` : sql`
+        WITH candidates AS MATERIALIZED (
+          SELECT id FROM words WHERE name ILIKE ${`%${query}%`}
+          UNION
+          SELECT word_id AS id FROM roots WHERE root ILIKE ${`%${query}%`}
+        )
+      `;
       const results = await ctx.db.execute(sql`
+        ${candidates}
         SELECT DISTINCT ON (${rootExpression})
           w.id,
           w.name,
           ${rootExpression} AS root
         FROM words w
+        ${/[%_\\]/.test(query) ? sql`` : sql`INNER JOIN candidates c ON c.id = w.id`}
         LEFT JOIN roots r ON r.word_id = w.id
         LEFT JOIN meanings m ON m.word_id = w.id
         LEFT JOIN part_of_speechs p ON p.id = m.part_of_speech_id
@@ -123,6 +136,7 @@ export const searchRouter = createTRPCRouter({
         return [];
       }
 
+      const signal = AbortSignal.timeout(2_000);
       try {
         const index = meiliClient.index("meanings");
 
@@ -131,7 +145,7 @@ export const searchRouter = createTRPCRouter({
           attributesToRetrieve: ["wordName", "meaning", "wordId"],
           // Highlights the matching part of the meaning for better UX
           attributesToHighlight: ["meaning"],
-        });
+        }, { signal });
 
         return searchResults.hits.map((hit) => ({
           id: hit.wordId,
@@ -139,8 +153,8 @@ export const searchRouter = createTRPCRouter({
           meaning: hit.meaning,
           formattedMeaning: hit._formatted?.meaning,
         }));
-      } catch (error) {
-        console.error("Meilisearch error:", error);
+      } catch {
+        console.error("Meilisearch search unavailable", { timedOut: signal.aborted });
         // Fallback to empty array so the UI doesn't crash if the Pi is offline
         return [];
       }

@@ -1,0 +1,6 @@
+{
+  "profile": "warm word; analytics table insert blocked by local SHARE lock",
+  "responseMs": 57.448165999999986,
+  "logsAtResponse": 0,
+  "logsAfterRelease": 1
+}

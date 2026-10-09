@@ -33,7 +33,7 @@ export default function SavedWordCard({ wordData, onUnsave, session, locale }: S
 
   const { data: details, isLoading: loadingDetails } = api.word.getWord.useQuery(
     { name: wordData.word_name, skipLogging: true },
-    { enabled: isOpen }
+    { enabled: isOpen, staleTime: 15_000 }
   );
   const fullData = details?.[0];
 

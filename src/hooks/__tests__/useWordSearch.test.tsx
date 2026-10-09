@@ -148,4 +148,14 @@ describe("useWordSearch offline behavior", () => {
 
     expect(mockGetWordQuery).toHaveBeenCalledWith({ name: "susuz" });
   });
+
+  it("does not retry a throttled online word lookup", async () => {
+    setNavigatorOnline(true);
+    (getOfflineMetadata as jest.Mock).mockResolvedValue({ activeVersion: null, status: "not-downloaded" });
+    mockGetWordQuery.mockRejectedValue(Object.assign(new Error("slow down"), { data: { code: "TOO_MANY_REQUESTS" } }));
+    const { result } = renderHook(() => useWordSearch("susuz"), { wrapper });
+    await waitFor(() => expect(result.current.error).toMatchObject({ data: { code: "TOO_MANY_REQUESTS" } }));
+    expect(mockGetWordQuery).toHaveBeenCalledTimes(1);
+    expect(result.current.isOnline).toBe(true);
+  });
 });

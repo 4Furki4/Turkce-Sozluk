@@ -16,8 +16,6 @@ import { emitAutocompleteSyncStatus } from "@/src/lib/autocomplete-sync-status";
  */
 export function AutocompleteSync() {
     const isOnline = useOnlineStatus();
-    // Get the tRPC client
-    const trpcClient = api.useUtils().client;
 
     // 1. Get the server's version
     const { data: serverVersion } =
@@ -43,11 +41,17 @@ export function AutocompleteSync() {
             // 5. Versions are different. Fetch and update.
             try {
                 emitAutocompleteSyncStatus("downloading");
-                // Use the tRPC client for a one-off call
-                const wordList = await trpcClient.word.getAllWordNames.query();
+                const response = await fetch("/api/autocomplete-words", { signal: AbortSignal.timeout(15_000) });
+                if (!response.ok) throw new Error("Autocomplete download unavailable");
+                const downloadedVersion = response.headers.get("X-Autocomplete-Version");
+                if (!downloadedVersion) throw new Error("Autocomplete version unavailable");
+                const wordList: unknown = await response.json();
+                if (!Array.isArray(wordList) || !wordList.every((name) => typeof name === "string")) {
+                    throw new Error("Invalid autocomplete word list");
+                }
 
                 // 6. Save new data
-                await updateLocalAutocompleteList(wordList, normalizedServerVersion);
+                await updateLocalAutocompleteList(wordList, downloadedVersion);
                 emitAutocompleteSyncStatus("ready");
             } catch (error) {
                 console.error("[AutocompleteSync] Failed to sync word list:", error);
@@ -56,7 +60,7 @@ export function AutocompleteSync() {
         };
 
         syncData();
-    }, [isOnline, serverVersion, trpcClient]);
+    }, [isOnline, serverVersion]);
 
     return null; // This component renders nothing
 }

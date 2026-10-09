@@ -1,3 +1,5 @@
+import { invalidateDictionaryCache } from "@/src/server/dictionary-cache";
+import { invalidateWordCache } from "@/src/server/word-cache";
 /**
  * YOU PROBABLY DON'T NEED TO EDIT THIS FILE, UNLESS:
  * 1. You want to modify request context (see Part 1).
@@ -17,6 +19,8 @@ import { db } from "@/db";
 import { and, eq, gt } from "drizzle-orm";
 import { oauthAccessTokens } from "@/db/schema/oauth";
 import { users } from "@/db/schema/users";
+import { RateLimitError } from "./rate-limit-error";
+import { getRateLimitRetryAt } from "@/src/lib/rate-limit-error";
 
 type AuthSession = NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>;
 
@@ -103,6 +107,7 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
       ...shape,
       data: {
         ...shape.data,
+        retryAt: getRateLimitRetryAt(error) ?? null,
         zodError:
           error.cause instanceof ZodError ? error.cause.flatten() : null,
       },
@@ -134,10 +139,10 @@ function isSearchBot(userAgent: string | null): boolean {
   return BOT_USER_AGENTS.some(bot => lowerUA.includes(bot));
 }
 
-// Create a new ratelimiter that allows 60 requests per 10 seconds
+// A single interaction can call several procedures. Allow short browsing bursts.
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(60, "10 s"),
+  limiter: Ratelimit.slidingWindow(120, "10 s"),
   analytics: false,
   prefix: "@upstash/ratelimit",
 });
@@ -171,7 +176,9 @@ const rateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
     identifier = ctx.session.user.id;
   } else {
     // Use IP for anonymous users
-    identifier = ctx.headers.get("x-forwarded-for") ?? "127.0.0.1";
+    identifier = ctx.headers.get("cf-connecting-ip")?.trim()
+      || ctx.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || "127.0.0.1";
   }
 
   if (isRateLimitBackendDisabled) {
@@ -179,13 +186,10 @@ const rateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
   }
 
   try {
-    const { success } = await ratelimit.limit(identifier);
+    const { success, reset } = await ratelimit.limit(identifier);
 
     if (!success) {
-      throw new TRPCError({
-        code: "TOO_MANY_REQUESTS",
-        message: "Rate limit exceeded. Please try again later.",
-      });
+      throw new RateLimitError(Number.isFinite(reset) && reset > 0 ? reset : Date.now() + 10_000);
     }
   } catch (error) {
     if (error instanceof TRPCError) {
@@ -234,20 +238,9 @@ export const createCallerFactory = t.createCallerFactory;
  */
 export const createTRPCRouter = t.router;
 
-/**
- * Middleware for timing procedure execution and adding an artificial delay in development.
- *
- * You can remove this if you don't like it, but it can help catch unwanted waterfalls by simulating
- * network latency that would occur in production but not in local development.
- */
+/** Measure real procedure latency without a synthetic development delay. */
 const timingMiddleware = t.middleware(async ({ next, path }) => {
   const start = Date.now();
-
-  if (t._config.isDev) {
-    // artificial delay in dev
-    const waitMs = Math.floor(Math.random() * 400) + 100;
-    await new Promise((resolve) => setTimeout(resolve, waitMs));
-  }
 
   const result = await next();
 
@@ -264,8 +257,22 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
+// These namespaces can mutate dictionary data or public pronunciation identities.
+const dictionaryMutationNamespaces = new Set([
+  "admin", "word", "wordGraph", "request", "params", "pronunciation", "user", "profile",
+]);
+const dictionaryCacheInvalidation = t.middleware(async ({ type, path, next }) => {
+  const result = await next();
+  if (type === "mutation" && result.ok && dictionaryMutationNamespaces.has(path.split(".")[0])) {
+    invalidateWordCache();
+    invalidateDictionaryCache();
+  }
+  return result;
+});
+
 export const publicProcedure = t.procedure
   .use(timingMiddleware)
+  .use(dictionaryCacheInvalidation)
   .use(rateLimitMiddleware);
 
 /**
@@ -278,6 +285,7 @@ export const publicProcedure = t.procedure
  */
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
+  .use(dictionaryCacheInvalidation)
   .use(rateLimitMiddleware)
   .use(({ ctx, next }) => {
     if (!ctx.session || !ctx.session.user) {
@@ -302,5 +310,6 @@ const forceAdminMiddleware = t.middleware(async ({ ctx: { session }, next }) => 
   });
 })
 export const adminProcedure = t.procedure
+  .use(dictionaryCacheInvalidation)
   .use(rateLimitMiddleware)
   .use(forceAdminMiddleware);

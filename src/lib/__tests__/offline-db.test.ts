@@ -74,6 +74,20 @@ describe("offline dictionary database", () => {
         delete (global as typeof globalThis & { fetch?: typeof fetch }).fetch;
     });
 
+    it("bulk autocomplete batches retain Turkish identity and atomically replace data/version", async () => {
+        const names = Array.from({ length: 1_001 }, (_, i) => `fixture${String(i).padStart(4, "0")}`);
+        await updateLocalAutocompleteList([...names, "İSTANBUL", "istanbul"], "bulk");
+        await expect(getLocalAutocompleteVersion()).resolves.toBe("bulk");
+        await expect(searchAutocompleteOffline("fixture1000")).resolves.toEqual(["fixture1000"]);
+        await expect(searchAutocompleteOffline("ist")).resolves.toEqual(["İSTANBUL"]);
+
+        // Fail after one completed batch: neither partial data nor a new version commits.
+        await expect(updateLocalAutocompleteList([...names.slice(0, 600), null] as unknown as string[], "failed")).rejects.toThrow();
+        await expect(getLocalAutocompleteVersion()).resolves.toBe("bulk");
+        await expect(searchAutocompleteOffline("ist")).resolves.toEqual(["İSTANBUL"]);
+        await expect(searchAutocompleteOffline("fixture1000")).resolves.toEqual(["fixture1000"]);
+    });
+
     it("normalizes Turkish lookup keys and builds dataset lookup records", () => {
         expect(normalizeOfflineSearchKey("  İSTANBUL   IŞIK  ")).toBe("istanbul ışık");
 

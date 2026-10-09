@@ -1,6 +1,7 @@
 import { InferInsertModel, InferSelectModel, relations } from "drizzle-orm";
 import {
   integer,
+  index,
   pgTable,
   serial,
   text,
@@ -19,7 +20,9 @@ export const roots = pgTable("roots", {
     onDelete: "cascade",
   }),
   requestType: varchar("request_type", { length: 255 }).default("root"),
-});
+}, (table) => [
+  index("roots_word_id_idx").on(table.wordId),
+]);
 
 export const rootsRelations = relations(roots, ({ one }) => ({
   user: one(users, {

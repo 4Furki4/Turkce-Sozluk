@@ -421,36 +421,54 @@ export async function updateLocalAutocompleteList(
     const tx = db.transaction([AUTOCOMPLETE_STORE, METADATA_STORE], "readwrite");
     const autocompleteStore = tx.objectStore(AUTOCOMPLETE_STORE);
     const seenKeys = new Set<string>();
+    const writes: Promise<unknown>[] = [];
 
-    await autocompleteStore.clear();
+    // Observe rejection immediately; a request failure also rejects tx.done.
+    void tx.done.catch(() => {});
+    try {
+        await autocompleteStore.clear();
 
-    for (const word of words) {
-        const displayName = word.replace(/\s+/g, " ").trim();
-        const key = normalizeOfflineSearchKey(displayName);
+        for (const word of words) {
+            const displayName = word.replace(/\s+/g, " ").trim();
+            const key = normalizeOfflineSearchKey(displayName);
 
-        if (!key || seenKeys.has(key)) {
-            continue;
+            if (!key || seenKeys.has(key)) {
+                continue;
+            }
+
+            seenKeys.add(key);
+            const write = autocompleteStore.put({
+                key,
+                displayName,
+            } satisfies AutocompleteWord);
+            void write.catch(() => {});
+            writes.push(write);
+            // Queue bounded batches in the same atomic transaction instead of
+            // waiting for a browser/database round trip for every individual word.
+            if (writes.length === 500) {
+                await Promise.all(writes);
+                writes.length = 0;
+            }
         }
+        await Promise.all(writes);
 
-        seenKeys.add(key);
-        await autocompleteStore.put({
-            key,
-            displayName,
-        } satisfies AutocompleteWord);
+        const currentMetadata = await tx.objectStore(METADATA_STORE).get(OFFLINE_METADATA_KEY);
+        await tx.objectStore(METADATA_STORE).put(
+            {
+                ...getDefaultMetadata(),
+                ...(currentMetadata ?? {}),
+                schemaVersion: OFFLINE_SCHEMA_VERSION,
+                autocompleteVersion: newVersion,
+            },
+            OFFLINE_METADATA_KEY,
+        );
+
+        await tx.done;
+    } catch (error) {
+        try { tx.abort(); } catch { /* Transaction may already have aborted. */ }
+        await tx.done.catch(() => {});
+        throw error;
     }
-
-    const currentMetadata = await tx.objectStore(METADATA_STORE).get(OFFLINE_METADATA_KEY);
-    await tx.objectStore(METADATA_STORE).put(
-        {
-            ...getDefaultMetadata(),
-            ...(currentMetadata ?? {}),
-            schemaVersion: OFFLINE_SCHEMA_VERSION,
-            autocompleteVersion: newVersion,
-        },
-        OFFLINE_METADATA_KEY,
-    );
-
-    await tx.done;
 }
 
 export async function searchAutocompleteOffline(

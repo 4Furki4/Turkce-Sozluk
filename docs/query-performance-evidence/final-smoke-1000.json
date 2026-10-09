@@ -1,0 +1,368 @@
+{
+  "timestamp": "2026-10-08T22:30:16.876Z",
+  "base": "http://127.0.0.1:3000",
+  "users": 1000,
+  "periodMs": 5000,
+  "warmupSeconds": 0,
+  "holdSeconds": 60,
+  "mix": "80% word detail, 10% paginated lists, 5% verb roots, 5% meaning search; half of word traffic is long tail",
+  "profile": "loopback production build; real limiter via local REST adapter; anonymous unique fixture IP per user",
+  "aborted": false,
+  "totals": {
+    "starts": 12370,
+    "completed": 12370,
+    "dropped": 0,
+    "errors": {},
+    "byPath": {
+      "word.getWord": {
+        "samples": 9900,
+        "p50Ms": 56.40716599999723,
+        "p95Ms": 59.3607090000005,
+        "p99Ms": 61.37262499999633
+      },
+      "word.getWords": {
+        "samples": 1236,
+        "p50Ms": 58.12737500000367,
+        "p95Ms": 89.45658399999957,
+        "p99Ms": 92.21254200000112
+      },
+      "search.searchVerbRoots": {
+        "samples": 617,
+        "p50Ms": 75.03820899999846,
+        "p95Ms": 81.53937500000029,
+        "p99Ms": 85.29937500000051
+      },
+      "search.searchByMeaning": {
+        "samples": 617,
+        "p50Ms": 58.84937499999796,
+        "p95Ms": 61.43483399999968,
+        "p99Ms": 66.47395799999958
+      }
+    },
+    "expectedLogs": 9900,
+    "maxInFlight": 17
+  },
+  "stages": [
+    {
+      "label": "ramp-1",
+      "users": 1,
+      "seconds": 1,
+      "starts": 1,
+      "completed": 1,
+      "dropped": 0,
+      "errors": 0,
+      "latencies": {
+        "samples": 1,
+        "p50Ms": 82.54099999999994,
+        "p95Ms": 82.54099999999994,
+        "p99Ms": 82.54099999999994,
+        "maxMs": 82.54099999999994
+      },
+      "paths": {
+        "word.getWord": {
+          "samples": 1,
+          "p50Ms": 82.54099999999994,
+          "p95Ms": 82.54099999999994,
+          "p99Ms": 82.54099999999994,
+          "maxMs": 82.54099999999994
+        }
+      },
+      "achievedActionsPerSecond": 1,
+      "errorRate": 0
+    },
+    {
+      "label": "ramp-10",
+      "users": 10,
+      "seconds": 1,
+      "starts": 2,
+      "completed": 2,
+      "dropped": 0,
+      "errors": 0,
+      "latencies": {
+        "samples": 2,
+        "p50Ms": 61.02520800000002,
+        "p95Ms": 83.38241700000026,
+        "p99Ms": 83.38241700000026,
+        "maxMs": 83.38241700000026
+      },
+      "paths": {
+        "word.getWord": {
+          "samples": 2,
+          "p50Ms": 61.02520800000002,
+          "p95Ms": 83.38241700000026,
+          "p99Ms": 83.38241700000026,
+          "maxMs": 83.38241700000026
+        }
+      },
+      "achievedActionsPerSecond": 2,
+      "errorRate": 0
+    },
+    {
+      "label": "ramp-25",
+      "users": 25,
+      "seconds": 1,
+      "starts": 5,
+      "completed": 5,
+      "dropped": 0,
+      "errors": 0,
+      "latencies": {
+        "samples": 5,
+        "p50Ms": 73.51766599999974,
+        "p95Ms": 81.93508400000019,
+        "p99Ms": 81.93508400000019,
+        "maxMs": 81.93508400000019
+      },
+      "paths": {
+        "word.getWord": {
+          "samples": 5,
+          "p50Ms": 73.51766599999974,
+          "p95Ms": 81.93508400000019,
+          "p99Ms": 81.93508400000019,
+          "maxMs": 81.93508400000019
+        }
+      },
+      "achievedActionsPerSecond": 5,
+      "errorRate": 0
+    },
+    {
+      "label": "ramp-100",
+      "users": 100,
+      "seconds": 1,
+      "starts": 20,
+      "completed": 20,
+      "dropped": 0,
+      "errors": 0,
+      "latencies": {
+        "samples": 20,
+        "p50Ms": 62.47699999999986,
+        "p95Ms": 101.46212500000001,
+        "p99Ms": 109.12358300000051,
+        "maxMs": 109.12358300000051
+      },
+      "paths": {
+        "word.getWord": {
+          "samples": 16,
+          "p50Ms": 60.58662500000037,
+          "p95Ms": 70.22112500000003,
+          "p99Ms": 70.22112500000003,
+          "maxMs": 70.22112500000003
+        },
+        "word.getWords": {
+          "samples": 2,
+          "p50Ms": 62.47699999999986,
+          "p95Ms": 101.46212500000001,
+          "p99Ms": 101.46212500000001,
+          "maxMs": 101.46212500000001
+        },
+        "search.searchVerbRoots": {
+          "samples": 1,
+          "p50Ms": 109.12358300000051,
+          "p95Ms": 109.12358300000051,
+          "p99Ms": 109.12358300000051,
+          "maxMs": 109.12358300000051
+        },
+        "search.searchByMeaning": {
+          "samples": 1,
+          "p50Ms": 87.73183400000016,
+          "p95Ms": 87.73183400000016,
+          "p99Ms": 87.73183400000016,
+          "maxMs": 87.73183400000016
+        }
+      },
+      "achievedActionsPerSecond": 20,
+      "errorRate": 0
+    },
+    {
+      "label": "ramp-250",
+      "users": 250,
+      "seconds": 1,
+      "starts": 49,
+      "completed": 49,
+      "dropped": 0,
+      "errors": 0,
+      "latencies": {
+        "samples": 49,
+        "p50Ms": 56.46087499999976,
+        "p95Ms": 85.29937500000051,
+        "p99Ms": 93.6538330000003,
+        "maxMs": 93.6538330000003
+      },
+      "paths": {
+        "word.getWord": {
+          "samples": 41,
+          "p50Ms": 55.94608299999982,
+          "p95Ms": 59.45129199999974,
+          "p99Ms": 60.13774999999987,
+          "maxMs": 60.13774999999987
+        },
+        "word.getWords": {
+          "samples": 4,
+          "p50Ms": 67.5304159999996,
+          "p95Ms": 93.6538330000003,
+          "p99Ms": 93.6538330000003,
+          "maxMs": 93.6538330000003
+        },
+        "search.searchByMeaning": {
+          "samples": 2,
+          "p50Ms": 60.41595799999959,
+          "p95Ms": 61.310583000000406,
+          "p99Ms": 61.310583000000406,
+          "maxMs": 61.310583000000406
+        },
+        "search.searchVerbRoots": {
+          "samples": 2,
+          "p50Ms": 84.09625000000051,
+          "p95Ms": 85.29937500000051,
+          "p99Ms": 85.29937500000051,
+          "maxMs": 85.29937500000051
+        }
+      },
+      "achievedActionsPerSecond": 49,
+      "errorRate": 0
+    },
+    {
+      "label": "ramp-500",
+      "users": 500,
+      "seconds": 1,
+      "starts": 99,
+      "completed": 99,
+      "dropped": 0,
+      "errors": 0,
+      "latencies": {
+        "samples": 99,
+        "p50Ms": 56.840165999999954,
+        "p95Ms": 90.65816600000016,
+        "p99Ms": 96.90020800000002,
+        "maxMs": 96.90020800000002
+      },
+      "paths": {
+        "word.getWord": {
+          "samples": 79,
+          "p50Ms": 56.44474999999966,
+          "p95Ms": 59.971167000000605,
+          "p99Ms": 61.39466699999957,
+          "maxMs": 61.39466699999957
+        },
+        "word.getWords": {
+          "samples": 10,
+          "p50Ms": 60.66479199999958,
+          "p95Ms": 96.90020800000002,
+          "p99Ms": 96.90020800000002,
+          "maxMs": 96.90020800000002
+        },
+        "search.searchByMeaning": {
+          "samples": 5,
+          "p50Ms": 60.20499999999993,
+          "p95Ms": 61.0917500000005,
+          "p99Ms": 61.0917500000005,
+          "maxMs": 61.0917500000005
+        },
+        "search.searchVerbRoots": {
+          "samples": 5,
+          "p50Ms": 81.39829199999986,
+          "p95Ms": 88.4862090000006,
+          "p99Ms": 88.4862090000006,
+          "maxMs": 88.4862090000006
+        }
+      },
+      "achievedActionsPerSecond": 99,
+      "errorRate": 0
+    },
+    {
+      "label": "ramp-1000",
+      "users": 1000,
+      "seconds": 1,
+      "starts": 197,
+      "completed": 197,
+      "dropped": 0,
+      "errors": 0,
+      "latencies": {
+        "samples": 197,
+        "p50Ms": 57.13929199999984,
+        "p95Ms": 87.52937500000007,
+        "p99Ms": 92.02387499999986,
+        "maxMs": 93.90545800000018
+      },
+      "paths": {
+        "word.getWord": {
+          "samples": 159,
+          "p50Ms": 56.68720900000062,
+          "p95Ms": 60.52616599999965,
+          "p99Ms": 62.32054200000039,
+          "maxMs": 62.33808299999964
+        },
+        "word.getWords": {
+          "samples": 20,
+          "p50Ms": 60.74616600000081,
+          "p95Ms": 92.02387499999986,
+          "p99Ms": 93.90545800000018,
+          "maxMs": 93.90545800000018
+        },
+        "search.searchByMeaning": {
+          "samples": 9,
+          "p50Ms": 59.646083000000544,
+          "p95Ms": 66.47395799999958,
+          "p99Ms": 66.47395799999958,
+          "maxMs": 66.47395799999958
+        },
+        "search.searchVerbRoots": {
+          "samples": 9,
+          "p50Ms": 74.69708399999945,
+          "p95Ms": 87.52937500000007,
+          "p99Ms": 87.52937500000007,
+          "maxMs": 87.52937500000007
+        }
+      },
+      "achievedActionsPerSecond": 197,
+      "errorRate": 0
+    },
+    {
+      "label": "steady",
+      "users": 1000,
+      "seconds": 60,
+      "starts": 11997,
+      "completed": 11997,
+      "dropped": 0,
+      "errors": 0,
+      "latencies": {
+        "samples": 11997,
+        "p50Ms": 56.86133300000074,
+        "p95Ms": 75.03820899999846,
+        "p99Ms": 88.3682919999992,
+        "maxMs": 101.16170799999963
+      },
+      "paths": {
+        "word.getWord": {
+          "samples": 9597,
+          "p50Ms": 56.39537499999824,
+          "p95Ms": 59.299417000001995,
+          "p99Ms": 61.09504200000083,
+          "maxMs": 72.21500000000015
+        },
+        "word.getWords": {
+          "samples": 1200,
+          "p50Ms": 58.06300000000192,
+          "p95Ms": 89.20424999999886,
+          "p99Ms": 90.89983399999619,
+          "maxMs": 98.44950000000244
+        },
+        "search.searchByMeaning": {
+          "samples": 600,
+          "p50Ms": 58.8326670000024,
+          "p95Ms": 61.24024999999892,
+          "p99Ms": 64.86916700000074,
+          "maxMs": 74.95074999999633
+        },
+        "search.searchVerbRoots": {
+          "samples": 600,
+          "p50Ms": 74.82904199999757,
+          "p95Ms": 80.96362500000396,
+          "p99Ms": 84.34866699999839,
+          "maxMs": 101.16170799999963
+        }
+      },
+      "achievedActionsPerSecond": 199.95,
+      "errorRate": 0
+    }
+  ]
+}

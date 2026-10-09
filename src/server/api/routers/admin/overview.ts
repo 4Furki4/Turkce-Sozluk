@@ -4,7 +4,7 @@ import { searchLogs } from "@/db/schema/search_logs";
 import { users } from "@/db/schema/users";
 import { words } from "@/db/schema/words";
 import { adminProcedure, createTRPCRouter } from "@/src/server/api/trpc";
-import { and, count, desc, eq, gte, isNotNull, isNull, sql } from "drizzle-orm";
+import { count, desc, eq, gte, sql } from "drizzle-orm";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -32,25 +32,22 @@ export const overviewAdminRouter = createTRPCRouter({
     const [
       totalWordsResult,
       totalUsersResult,
-      searchesTodayResult,
-      searchesLast7DaysResult,
+      searchCounts,
       pendingRequestsResult,
       openFeedbackResult,
-      actorSplit,
       dailySearchRows,
       topSearchRows,
     ] = await Promise.all([
       ctx.db.select({ count: count() }).from(words),
       ctx.db.select({ count: count() }).from(users),
-      ctx.db.select({ count: count() }).from(searchLogs).where(gte(searchLogs.searchTimestamp, todayStart)),
-      ctx.db.select({ count: count() }).from(searchLogs).where(gte(searchLogs.searchTimestamp, last7DaysStart)),
+      ctx.db.select({
+        total: count(),
+        today: sql<number>`count(*) filter (where ${searchLogs.searchTimestamp} >= ${todayStart.toISOString()})`.mapWith(Number),
+        authenticated: sql<number>`count(*) filter (where ${searchLogs.userId} is not null)`.mapWith(Number),
+        anonymous: sql<number>`count(*) filter (where ${searchLogs.userId} is null)`.mapWith(Number),
+      }).from(searchLogs).where(gte(searchLogs.searchTimestamp, last7DaysStart)),
       ctx.db.select({ count: count() }).from(requests).where(eq(requests.status, "pending")),
       ctx.db.select({ count: count() }).from(feedbacks).where(eq(feedbacks.status, "open")),
-      Promise.all([
-        ctx.db.select({ count: count() }).from(searchLogs).where(gte(searchLogs.searchTimestamp, last7DaysStart)),
-        ctx.db.select({ count: count() }).from(searchLogs).where(and(gte(searchLogs.searchTimestamp, last7DaysStart), isNotNull(searchLogs.userId))),
-        ctx.db.select({ count: count() }).from(searchLogs).where(and(gte(searchLogs.searchTimestamp, last7DaysStart), isNull(searchLogs.userId))),
-      ]),
       ctx.db
         .select({
           date: sql<string>`to_char(${searchLogs.searchTimestamp}, 'YYYY-MM-DD')`,
@@ -96,8 +93,8 @@ export const overviewAdminRouter = createTRPCRouter({
       metrics: {
         totalWords: totalWordsResult[0]?.count ?? 0,
         totalUsers: totalUsersResult[0]?.count ?? 0,
-        searchesToday: searchesTodayResult[0]?.count ?? 0,
-        searchesLast7Days: searchesLast7DaysResult[0]?.count ?? 0,
+        searchesToday: searchCounts[0]?.today ?? 0,
+        searchesLast7Days: searchCounts[0]?.total ?? 0,
         pendingRequests: pendingRequestsResult[0]?.count ?? 0,
         openFeedback: openFeedbackResult[0]?.count ?? 0,
       },
@@ -109,9 +106,9 @@ export const overviewAdminRouter = createTRPCRouter({
           count: row.count,
         })),
         actorSplit: {
-          total: actorSplit[0][0]?.count ?? 0,
-          authenticated: actorSplit[1][0]?.count ?? 0,
-          anonymous: actorSplit[2][0]?.count ?? 0,
+          total: searchCounts[0]?.total ?? 0,
+          authenticated: searchCounts[0]?.authenticated ?? 0,
+          anonymous: searchCounts[0]?.anonymous ?? 0,
         },
       },
     };

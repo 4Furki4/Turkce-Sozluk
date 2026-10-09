@@ -1615,7 +1615,10 @@
     "OriginalRelationTypeMissing": "Orijinal ilişki türü eksik. Düzenleme isteği gönderilemiyor.",
     "captchaFailed": "reCAPTCHA doğrulaması başarısız oldu. Bir robot olabileceğinizden lütfen tekrar deneyin.",
     "captchaError": "reCAPTCHA anahtarı alınamadı. Lütfen bağlantınızı kontrol edip tekrar deneyin.",
-    "TooManyRequests": "Çok fazla istek gönderdiniz. Lütfen yavaşlayın."
+    "TooManyRequests": "Çok fazla istek gönderdiniz.",
+    "RateLimitCountdown": "{seconds} saniye sonra tekrar deneyebilirsiniz.",
+    "RateLimitReady": "Şimdi tekrar deneyebilirsiniz.",
+    "Retry": "Tekrar dene"
   },
   "DbFieldLabels": {
     "reason": "Gerekçe",

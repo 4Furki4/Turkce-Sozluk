@@ -595,7 +595,7 @@ export default function WordBuilder() {
       name: selectedDictionaryWord?.name ?? "",
       skipLogging: true,
     },
-    { enabled: Boolean(selectedDictionaryWord?.name) },
+    { enabled: Boolean(selectedDictionaryWord?.name), staleTime: 15_000 },
   );
 
   const dictionaryPosOptions = useMemo(

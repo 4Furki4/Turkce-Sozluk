@@ -4,21 +4,23 @@ import {
   createTRPCRouter,
   publicProcedure,
 } from "../trpc";
-import { count, desc, eq, gte, sql, inArray, max } from "drizzle-orm";
+import { count, desc, eq, gte, sql, inArray } from "drizzle-orm";
 import { words } from "@/db/schema/words";
+import { getAutocompleteSnapshot } from "@/src/server/autocomplete-dictionary";
 import { pronunciations } from "@/db/schema/pronunciations";
 import { pronunciationVotes } from "@/db/schema/pronunciation_votes";
 import { users } from "@/db/schema/users";
 import type { WordSearchResult, DashboardWordList } from "@/types";
 import DOMPurify from "isomorphic-dompurify";
 import { purifyObject } from "@/src/lib/utils";
-import { searchLogs, type NewSearchLog } from "@/db/schema/search_logs";
-import { userSearchHistory, type InsertUserSearchHistory } from "@/db/schema/user_search_history";
+import { searchLogs } from "@/db/schema/search_logs";
 import { generateAccentVariations } from "@/src/lib/search-utils";
 import { partOfSpeechs } from "@/db/schema/part_of_speechs";
 import { languages } from "@/db/schema/languages";
 import { wordAttributes } from "@/db/schema/word_attributes";
-import { NAVIGATION_MEANING_LIKE_PATTERN } from "@/src/lib/word-indexability";
+import { readPublicDictionary } from "@/src/server/dictionary-cache";
+import { readWord } from "@/src/server/word-cache";
+import { scheduleSearchLog } from "@/src/server/search-logging";
 
 export const wordRouter = createTRPCRouter({
   searchWordsSimple: publicProcedure
@@ -84,8 +86,8 @@ export const wordRouter = createTRPCRouter({
       if (purifiedInput.partOfSpeechId?.length) {
         const ids = purifiedInput.partOfSpeechId.map((id: string) => parseInt(id));
         conditions.push(sql`EXISTS (
-          SELECT 1 FROM meanings m_filter 
-          WHERE m_filter.word_id = w.id 
+          SELECT 1 FROM meanings m_filter
+          WHERE m_filter.word_id = w.id
           AND m_filter.part_of_speech_id IN ${ids}
         )`);
       }
@@ -93,8 +95,8 @@ export const wordRouter = createTRPCRouter({
       if (purifiedInput.languageId?.length) {
         const ids = purifiedInput.languageId.map((id: string) => parseInt(id));
         conditions.push(sql`EXISTS (
-          SELECT 1 FROM roots r_filter 
-          WHERE r_filter.word_id = w.id 
+          SELECT 1 FROM roots r_filter
+          WHERE r_filter.word_id = w.id
           AND r_filter.language_id IN ${ids}
         )`);
       }
@@ -102,8 +104,8 @@ export const wordRouter = createTRPCRouter({
       if (purifiedInput.attributeId?.length) {
         const ids = purifiedInput.attributeId.map((id: string) => parseInt(id));
         conditions.push(sql`EXISTS (
-          SELECT 1 FROM words_attributes wa_filter 
-          WHERE wa_filter.word_id = w.id 
+          SELECT 1 FROM words_attributes wa_filter
+          WHERE wa_filter.word_id = w.id
           AND wa_filter.attribute_id IN ${ids}
         )`);
       }
@@ -112,161 +114,58 @@ export const wordRouter = createTRPCRouter({
         ? sql.join(conditions, sql` AND `)
         : sql`TRUE`;
 
-      // Determine Order By Clause
-      let orderBySql;
-      const sortOrder = purifiedInput.sortOrder === 'desc' ? sql`DESC` : sql`ASC`;
+      const sortOrder = purifiedInput.sortOrder === "desc" ? sql`DESC` : sql`ASC`;
+      const searchTerm = purifiedInput.search?.trim() ?? "";
+      const relevance = Boolean(searchTerm) && purifiedInput.sortBy === "alphabetical" && purifiedInput.sortOrder === "asc";
+      const order = (alias: "w" | "page") => {
+        const name = sql.raw(`${alias}.name`);
+        const id = sql.raw(alias === "w" ? "w.id" : "page.word_id");
+        if (relevance) {
+          return sql`match_rank, name_length, ${name}, ${id}`;
+        }
+        if (purifiedInput.sortBy === "date") {
+          return sql`${sql.raw(`${alias}.created_at`)} ${sortOrder}, ${name} ASC, ${id}`;
+        }
+        if (purifiedInput.sortBy === "length") {
+          return sql`name_length ${sortOrder}, ${name} ASC, ${id}`;
+        }
+        return sql`${name} ${sortOrder}, ${id}`;
+      };
 
-      switch (purifiedInput.sortBy) {
-        case 'date':
-          orderBySql = sql`w.created_at ${sortOrder}, w.name ASC`;
-          break;
-        case 'length':
-          orderBySql = sql`LENGTH(w.name) ${sortOrder}, w.name ASC`;
-          break;
-        case 'alphabetical':
-        default:
-          orderBySql = sql`w.name ${sortOrder}`;
-          break;
-      }
-
-      let query;
-
-      if (purifiedInput.search && purifiedInput.search.trim() !== "") {
-        const searchTerm = purifiedInput.search.trim();
-        // If search is active, we might want to prioritize relevance UNLESS specific sort is requested
-        // However, usually explicit sort overrides relevance. 
-        // But let's keep relevance as primary if default 'alphabetical' is selected? 
-        // Actually, 'alphabetical' usually means A-Z, which is NOT relevance.
-        // If user wants relevance, they usually clear the sort. But here 'alphabetical' is default.
-        // Let's assume if user explicitly changes sort, we use that. 
-        // If default 'alphabetical' and search is active, maybe we should stick to relevance?
-        // But the requirement says "Alphabetical: A-Z / Z-A (already default, but explicit toggle)".
-        // So let's respect the sort param.
-
-        // If we are sorting by something other than relevance, we don't strictly need the CTE for ranking,
-        // but we still need the CTE or similar logic if we want to filter by search term effectively.
-        // The current CTE does filtering AND ranking.
-
-        // If sorting by alphabetical/date/length, we can just use the WHERE clause and ORDER BY.
-        // But wait, the search logic uses `match_rank`.
-
-        // Let's modify the logic:
-        // If search is active AND sortBy is 'alphabetical' AND sortOrder is 'asc' (defaults),
-        // we might want to keep the relevance sorting (match_rank).
-        // BUT, the user might explicitly want A-Z even with search.
-        // Let's stick to the requested sorting options.
-
-        // If we use the CTE, we can order by the CTE columns.
-        // w.created_at is not in the CTE currently. We need to add it.
-
-        query = sql`
-        WITH RankedWords AS (
-          SELECT
-            w.id AS word_id,
-            w.name AS name,
-            w.created_at AS created_at,
-            CASE
-              WHEN w.name ILIKE ${searchTerm} THEN 1
-              WHEN w.name ILIKE ${`${searchTerm}%`} THEN 2
-              ELSE 3
-            END AS match_rank,
-            LENGTH(w.name) AS name_length
+      // Bound child reads to the requested page. Lowest-ID child selection is unchanged.
+      const query = sql`
+        WITH page AS MATERIALIZED (
+          SELECT w.id AS word_id, w.name,
+            ${purifiedInput.sortBy === "date" ? sql`w.created_at` : sql`NULL::date`} AS created_at,
+            LENGTH(w.name) AS name_length,
+            CASE WHEN w.name ILIKE ${searchTerm} THEN 1
+                 WHEN w.name ILIKE ${`${searchTerm}%`} THEN 2 ELSE 3 END AS match_rank
           FROM words w
           WHERE ${whereSql}
+          ORDER BY ${order("w")}
+          LIMIT ${purifiedInput.take} OFFSET ${purifiedInput.skip}
         )
-        SELECT
-            rw.word_id,
-            rw.name,
-            rw.word_id,
-            rw.name,
-            m.meaning,
-            w_rel.name AS related_word_name,
-            rw_rel.relation_type
-        FROM
-            RankedWords rw
-            LEFT JOIN (
-                SELECT DISTINCT ON (word_id)
-                    id,
-                    word_id,
-                    meaning
-                FROM
-                    meanings
-                ORDER BY
-                    word_id,
-                    id
-            ) m ON rw.word_id = m.word_id
-            LEFT JOIN (
-                SELECT DISTINCT ON (word_id)
-                    word_id,
-                    related_word_id,
-                    relation_type
-                FROM
-                    related_words
-                ORDER BY
-                    word_id,
-                    related_word_id
-            ) rw_rel ON rw.word_id = rw_rel.word_id
-            LEFT JOIN words w_rel ON rw_rel.related_word_id = w_rel.id
-        ORDER BY
-            ${purifiedInput.sortBy === 'alphabetical' && purifiedInput.sortOrder === 'asc'
-            ? sql`rw.match_rank, rw.name_length, rw.name` // Default search relevance
-            : (purifiedInput.sortBy === 'date'
-              ? sql`rw.created_at ${sortOrder}, rw.name ASC`
-              : (purifiedInput.sortBy === 'length'
-                ? sql`rw.name_length ${sortOrder}, rw.name ASC`
-                : sql`rw.name ${sortOrder}`
-              )
-            )
-          }
-        LIMIT ${purifiedInput.take} OFFSET ${purifiedInput.skip};
+        SELECT page.word_id, page.name, m.meaning,
+          w_rel.name AS related_word_name, rw_rel.relation_type
+        FROM page
+        LEFT JOIN LATERAL (
+          SELECT meaning FROM meanings
+          WHERE word_id = page.word_id ORDER BY id LIMIT 1
+        ) m ON TRUE
+        LEFT JOIN LATERAL (
+          SELECT related_word_id, relation_type FROM related_words
+          WHERE word_id = page.word_id ORDER BY related_word_id LIMIT 1
+        ) rw_rel ON TRUE
+        LEFT JOIN words w_rel ON w_rel.id = rw_rel.related_word_id
+        ORDER BY ${order("page")};
       `;
-      } else {
-        query = sql`
-        SELECT
-            w.id AS word_id,
-            w.name AS name,
-            w.id AS word_id,
-            w.name AS name,
-            m.meaning,
-            w_rel.name AS related_word_name,
-            rw_rel.relation_type
-        FROM
-            words w
-            LEFT JOIN (
-                SELECT DISTINCT ON (word_id)
-                    id,
-                    word_id,
-                    meaning
-                FROM
-                    meanings
-                ORDER BY
-                    word_id,
-                    id
-            ) m ON w.id = m.word_id
-            LEFT JOIN (
-                SELECT DISTINCT ON (word_id)
-                    word_id,
-                    related_word_id,
-                    relation_type
-                FROM
-                    related_words
-                ORDER BY
-                    word_id,
-                    related_word_id
-            ) rw_rel ON w.id = rw_rel.word_id
-            LEFT JOIN words w_rel ON rw_rel.related_word_id = w_rel.id
-        WHERE ${whereSql}
-        ORDER BY
-            ${orderBySql}
-        LIMIT ${purifiedInput.take} OFFSET ${purifiedInput.skip};
-      `;
-      }
 
       const wordsWithMeanings = await db.execute(query) as DashboardWordList[];
       return wordsWithMeanings;
     }),
 
   getFilterOptions: publicProcedure.query(async ({ ctx: { db } }) => {
+    return readPublicDictionary(db, "filter-options", async () => {
     const [pos, langs, attrs] = await Promise.all([
       db.select().from(partOfSpeechs),
       db.select().from(languages),
@@ -278,7 +177,10 @@ export const wordRouter = createTRPCRouter({
       languages: langs,
       attributes: attrs,
     };
+
+    });
   }),
+
   /**
    * Get a word by name quering the database
    */
@@ -295,188 +197,12 @@ export const wordRouter = createTRPCRouter({
     .query(async ({ input, ctx: { db, session } }) => {
       const purifiedName = DOMPurify.sanitize(input.name);
 
-      const result = await db.execute(sql`
-        WITH base_word AS (
-          SELECT w.id, w.name, w.phonetic, w.prefix, w.suffix, w.view_count, w.updated_at
-          FROM words w
-          WHERE w.name ILIKE ${purifiedName} -- 1. Find all possible matches (case-insensitive)
-          ORDER BY
-            CASE
-              WHEN w.name = ${purifiedName} THEN 1 -- 2. Prioritize exact case-sensitive match
-              ELSE 2 -- 3. Fallback to case-insensitive match
-            END,
-            CASE
-              WHEN EXISTS (
-                SELECT 1
-                FROM meanings m_quality
-                WHERE m_quality.word_id = w.id
-                  AND LENGTH(TRIM(m_quality.meaning)) > 0
-                  AND LOWER(TRIM(m_quality.meaning)) NOT LIKE ${NAVIGATION_MEANING_LIKE_PATTERN}
-              ) THEN 1
-              ELSE 2
-            END,
-            COALESCE(w.variant, 0),
-            w.id
-          LIMIT 1 -- 4. Select only the single best match
-        )
-        SELECT json_build_object(
-              'word_id', w.id,
-              'word_name', w.name,
-              'phonetic', w.phonetic,
-              'prefix', w.prefix,
-              'suffix', w.suffix,
-              'view_count', COALESCE(w.view_count, 0),
-              'updated_at', w.updated_at,
-              'attributes', COALESCE(
-                (SELECT json_agg(json_build_object(
-                  'attribute_id', wa.id, 
-                  'attribute', wa.attribute
-                ))
-                FROM words_attributes wattr
-                JOIN word_attributes wa ON wattr.attribute_id = wa.id
-                WHERE wattr.word_id = w.id), '[]'::json
-              ),
-              'root', COALESCE(
-                (SELECT json_build_object(
-                  'root', r.root,
-                  'language_en', l.language_en,
-                  'language_tr', l.language_tr,
-                  'language_code', l.language_code
-                )
-                FROM roots r
-                JOIN languages l ON r.language_id = l.id
-                WHERE r.word_id = w.id
-                LIMIT 1), 
-                json_build_object(
-                  'root', null,
-                  'language_en', null,
-                  'language_tr', null,
-                  'language_code', null
-                )
-              ),
-              'meanings', COALESCE(
-                (SELECT json_agg(json_build_object(
-                  'meaning_id', m.id,
-                  'meaning', m.meaning,
-                  'imageUrl', m."imageUrl",
-                  'part_of_speech', p.part_of_speech,
-                  'part_of_speech_id', p.id,
-                  'attributes', COALESCE(
-                    (SELECT json_agg(json_build_object(
-                      'attribute_id', ma.id, 
-                      'attribute', ma.attribute
-                    ))
-                    FROM meanings_attributes mattr
-                    JOIN meaning_attributes ma ON mattr.attribute_id = ma.id
-                    WHERE mattr.meaning_id = m.id), '[]'::json
-                  ),
-                  'sentence', e.sentence,
-                  'author', a.name,
-                  'author_id', a.id
-                ) ORDER BY m."order" ASC)
-                FROM meanings m
-                LEFT JOIN part_of_speechs p ON m.part_of_speech_id = p.id
-                LEFT JOIN examples e ON e.meaning_id = m.id
-                LEFT JOIN authors a ON e.author_id = a.id
-                WHERE m.word_id = w.id), '[]'::json
-              ),
-              'relatedWords', COALESCE(
-                (SELECT json_agg(json_build_object(
-                  'related_word_id', rw.id,
-                  'related_word_name', rw.name,
-                  'relation_type', rel.relation_type
-                ))
-                FROM related_words rel
-                JOIN words rw ON rel.related_word_id = rw.id
-                WHERE rel.word_id = w.id), '[]'::json
-              ),
-              'relatedPhrases', COALESCE(
-                (SELECT json_agg(json_build_object(
-                  'related_phrase_id', rp.id,
-                  'related_phrase', rp.name
-                ))
-                FROM related_phrases rel
-                JOIN words rp ON rel.related_phrase_id = rp.id
-                WHERE rel.phrase_id = w.id), '[]'::json
-              ),
-              'pronunciations', COALESCE(
-                (SELECT json_agg(json_build_object(
-                  'id', p.id,
-                  'audioUrl', p."audio_url",
-                  'user', json_build_object(
-                    'id', u.id,
-                    'name', u.name,
-                    'image', u.image
-                  ),
-                  'voteCount', 0
-                ))
-                FROM pronunciations p
-                JOIN users u ON p."user_id" = u.id
-                WHERE p.word_id = w.id), '[]'::json
-              )
-          ) AS word_data
-        FROM base_word w 
-      `);
-
-      // Filter any null or undefined results
-      const filteredResult = result.filter(Boolean) as any[];
-
-      if (filteredResult.length > 0 && filteredResult[0]?.word_data) {
-        const wordData = filteredResult[0].word_data as WordSearchResult['word_data']; // Type assertion for safety
-
-        // --- Conditionally Log search --- 
-        if (!input.skipLogging && wordData?.word_id) {
-          const userId = session?.user?.id ?? null; // Get user ID if logged in, else null
-
-          const newLog: NewSearchLog = {
-            wordId: wordData.word_id,
-            userId
-            // searchTimestamp is handled by DB default
-          };
-
-          try {
-            // Insert into general search logs (existing functionality)
-            await db.insert(searchLogs).values(newLog);
-            console.log(`Logged search for wordId: ${wordData.word_id}, userId: ${userId}`);
-
-            // Additionally log to user_search_history if user is logged in
-            if (userId) {
-              const userHistoryLog: InsertUserSearchHistory = {
-                userId,
-                wordId: wordData.word_id,
-                // searchedAt is handled by DB default
-              };
-
-              // Use fire-and-forget pattern (don't await) to avoid slowing down the response
-              db.insert(userSearchHistory).values(userHistoryLog)
-                .then(() => console.log(`Logged user search history for userId: ${userId}, wordId: ${wordData.word_id}`))
-                .catch(err => console.error("Failed to insert user search history:", err));
-            }
-          } catch (error) {
-            console.error("Failed to insert search log:", error);
-          }
-        }
-
-        // Fix the double-nesting issue - Assuming WordSearchResult expects { word_data: ... }
-        const formattedResult = filteredResult.map(item => {
-          // Original code might have had issues if item structure varied
-          // Ensure consistent structure before returning
-          if (item.word_data) {
-            return { word_data: item.word_data };
-          } else if (item) { // Handle cases where word_data might be missing but item exists
-            console.warn("Unexpected item structure in getWord result:", item);
-            // Return a default/empty structure or handle as needed
-            // For now, let's assume item itself is the word_data if word_data key is absent
-            return { word_data: item };
-          } else {
-            return null; // Or handle null/undefined items appropriately
-          }
-        });
-        // console.log('Formatted database response:', JSON.stringify(formattedResult, null, 2));
-        return formattedResult.filter(Boolean) as WordSearchResult[]; // Ensure no nulls are returned
-      } else {
-        return [];
+      const result = await readWord(db, purifiedName);
+      const wordId = result[0]?.word_data?.word_id;
+      if (!input.skipLogging && wordId) {
+        scheduleSearchLog({ wordId, userId: session?.user?.id ?? null });
       }
+      return result;
     }),
 
   /**
@@ -697,8 +423,8 @@ export const wordRouter = createTRPCRouter({
       if (purifiedInput.partOfSpeechId?.length) {
         const ids = purifiedInput.partOfSpeechId.map((id: string) => parseInt(id));
         conditions.push(sql`EXISTS (
-          SELECT 1 FROM meanings m_filter 
-          WHERE m_filter.word_id = words.id 
+          SELECT 1 FROM meanings m_filter
+          WHERE m_filter.word_id = words.id
           AND m_filter.part_of_speech_id IN ${ids}
         )`);
       }
@@ -706,8 +432,8 @@ export const wordRouter = createTRPCRouter({
       if (purifiedInput.languageId?.length) {
         const ids = purifiedInput.languageId.map((id: string) => parseInt(id));
         conditions.push(sql`EXISTS (
-          SELECT 1 FROM roots r_filter 
-          WHERE r_filter.word_id = words.id 
+          SELECT 1 FROM roots r_filter
+          WHERE r_filter.word_id = words.id
           AND r_filter.language_id IN ${ids}
         )`);
       }
@@ -715,8 +441,8 @@ export const wordRouter = createTRPCRouter({
       if (purifiedInput.attributeId?.length) {
         const ids = purifiedInput.attributeId.map((id: string) => parseInt(id));
         conditions.push(sql`EXISTS (
-          SELECT 1 FROM words_attributes wa_filter 
-          WHERE wa_filter.word_id = words.id 
+          SELECT 1 FROM words_attributes wa_filter
+          WHERE wa_filter.word_id = words.id
           AND wa_filter.attribute_id IN ${ids}
         )`);
       }
@@ -769,23 +495,18 @@ export const wordRouter = createTRPCRouter({
  * We use the most recent 'updated_at' timestamp as the version.
  */
   getAutocompleteListVersion: publicProcedure.query(async ({ ctx }) => {
-    const result = await ctx.db
-      .select({
-        latest: max(words.updated_at),
-      })
-      .from(words);
-    return result[0]?.latest ?? "0";
+    return (await getAutocompleteSnapshot(ctx.db)).version;
   }),
 
   /**
    * Returns all word names for the autocomplete list.
    */
   getAllWordNames: publicProcedure.query(async ({ ctx }) => {
-    const results = await ctx.db.query.words.findMany({
-      columns: { name: true },
-    });
-    return results.map((word) => word.name);
+    return (await getAutocompleteSnapshot(ctx.db)).words;
   }),
+
+  getAutocompleteSnapshot: publicProcedure.query(({ ctx }) => getAutocompleteSnapshot(ctx.db)),
+
   getWordOfTheDay: publicProcedure.query(async ({ ctx }) => {
     const today = new Date().toISOString().split('T')[0];
 
