@@ -14,7 +14,7 @@ function SkeletonBlock({ className }: { className: string }) {
 export default function WordLoadingSkeleton() {
   return (
     <main className="mx-auto w-full max-w-7xl" aria-label="Loading word card" role="status">
-      <div className="grid gap-5 animate-pulse">
+      <div className="grid gap-5 motion-safe:animate-pulse">
         <div className="flex w-full justify-stretch sm:justify-end">
           <div className="grid w-full grid-cols-2 rounded-md border border-border/80 bg-background/90 p-1 shadow-sm shadow-black/5 sm:w-auto">
             <div className="inline-flex min-h-7 items-center justify-center gap-2 rounded-sm bg-primary/30 px-3 sm:min-w-36">

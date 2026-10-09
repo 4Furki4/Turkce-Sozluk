@@ -2,6 +2,7 @@ import React from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import { SearchWordCardVariantGroup } from "../word-card-variants";
+import { useNavigationProgress } from "@/src/lib/navigation-progress";
 import {
   SEARCH_WORD_CARD_VARIANT_STORAGE_KEY,
   initializePreferences,
@@ -180,6 +181,7 @@ jest.mock("@/src/utils/screenshot", () => ({
 }));
 jest.mock("@/src/lib/navigation-progress", () => ({
   startNavigationProgress: jest.fn(),
+  useNavigationProgress: jest.fn(() => ({ phase: "idle", version: 0 })),
 }));
 jest.mock("@/src/trpc/react", () => ({
   api: {
@@ -257,6 +259,44 @@ describe("SearchWordCardVariantGroup", () => {
     preferencesState.isBlurEnabled = true;
     preferencesState.searchWordCardVariant = "reader";
     preferencesState.isInitialized = false;
+    jest.mocked(useNavigationProgress).mockReturnValue({ phase: "idle", version: 0 });
+  });
+
+  it("keeps the current word mounted and marks it busy during navigation", () => {
+    const { container, rerender } = render(
+      <SearchWordCardVariantGroup data={[sampleWord]} locale="en" session={null} />,
+    );
+    const currentCard = screen.getByRole("article");
+
+    jest.mocked(useNavigationProgress).mockReturnValue({ phase: "loading", version: 1 });
+    rerender(<SearchWordCardVariantGroup data={[sampleWord]} locale="en" session={null} />);
+
+    expect(container.querySelector(".search-word-results")).toHaveAttribute("aria-busy", "true");
+    expect(screen.getByRole("article")).toBe(currentCard);
+    expect(screen.getByRole("heading", { name: "kitap" })).toBeInTheDocument();
+
+    jest.mocked(useNavigationProgress).mockReturnValue({ phase: "finishing", version: 2 });
+    rerender(<SearchWordCardVariantGroup data={[sampleWord]} locale="en" session={null} />);
+    expect(container.querySelector(".search-word-results")).toHaveAttribute("aria-busy", "false");
+  });
+
+  it("preserves the card on background updates and replaces it for a different word", () => {
+    const { container, rerender } = render(
+      <SearchWordCardVariantGroup data={[sampleWord]} locale="en" session={null} />,
+    );
+    const arrival = container.querySelector(".search-word-results-arrival");
+    const currentCard = screen.getByRole("article");
+    const refreshedWord = { word_data: { ...sampleWord.word_data, view_count: 1201 } };
+
+    rerender(<SearchWordCardVariantGroup data={[refreshedWord]} locale="en" session={null} isWordFetching />);
+    expect(container.querySelector(".search-word-results-arrival")).toBe(arrival);
+    expect(screen.getByRole("article")).toBe(currentCard);
+
+    const nextWord = { word_data: { ...sampleWord.word_data, word_id: 2, word_name: "defter" } };
+    rerender(<SearchWordCardVariantGroup data={[nextWord]} locale="en" session={null} />);
+    expect(container.querySelector(".search-word-results-arrival")).not.toBe(arrival);
+    expect(screen.getByRole("heading", { name: "defter" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "kitap" })).not.toBeInTheDocument();
   });
 
   it("defaults to the reading layout", () => {
