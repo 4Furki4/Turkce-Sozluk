@@ -56,10 +56,11 @@ function GameTile({ game, index }: { game: GameDefinition; index: number }) {
 
     return (
         <motion.div
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 22 }}
+            initial={{ opacity: 0, y: 22 }}
+            animate={shouldReduceMotion ? { opacity: 1, y: 0 } : undefined}
             whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.35, delay: index * 0.08 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.35, delay: shouldReduceMotion ? 0 : index * 0.08 }}
             className={styles.tileMotion}
         >
             <Link href={game.href} className={`${styles.gameTile} ${styles[game.key]}`}>{tileContent}</Link>
@@ -71,15 +72,18 @@ export default function GamesPage() {
     const t = useTranslations("GamesHub");
     const shouldReduceMotion = useReducedMotion();
 
+    // SSR cannot read the motion preference and renders hidden entrance states.
+    // Keep initial styles consistent and set an immediate visible target when reduced.
+
     return (
         <div className={styles.root}>
             <section className={styles.hero}>
                 <div className={styles.heroPattern} />
                 <div className={styles.heroInner}>
                     <motion.div
-                        initial={shouldReduceMotion ? false : { opacity: 0, y: 28 }}
-                        animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
-                        transition={{ duration: 0.45, ease: "easeOut" }}
+                        initial={{ opacity: 0, y: 28 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: shouldReduceMotion ? 0 : 0.45, ease: "easeOut" }}
                         className={styles.heroCopy}
                     >
                         <p className={styles.heroEyebrow}>
@@ -104,9 +108,9 @@ export default function GamesPage() {
                     </motion.div>
 
                     <motion.div
-                        initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.94, rotate: 0 }}
-                        animate={shouldReduceMotion ? undefined : { opacity: 1, scale: 1, rotate: 2 }}
-                        transition={{ duration: 0.52, delay: 0.12, ease: "easeOut" }}
+                        initial={{ opacity: 0, scale: 0.94, rotate: 0 }}
+                        animate={{ opacity: 1, scale: 1, rotate: shouldReduceMotion ? 0 : 2 }}
+                        transition={{ duration: shouldReduceMotion ? 0 : 0.52, delay: shouldReduceMotion ? 0 : 0.12, ease: "easeOut" }}
                         className={styles.cabinetMotion}
                     >
                         <ArcadeCabinet
@@ -123,10 +127,11 @@ export default function GamesPage() {
                 <div className={styles.content}>
                     <section id="games" aria-labelledby="games-title" className={styles.gamesSection}>
                         <motion.div
-                            initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }}
+                            initial={{ opacity: 0, y: 18 }}
+                            animate={shouldReduceMotion ? { opacity: 1, y: 0 } : undefined}
                             whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
                             viewport={{ once: true, amount: 0.3 }}
-                            transition={{ duration: 0.35 }}
+                            transition={{ duration: shouldReduceMotion ? 0 : 0.35 }}
                             className={styles.gamesIntro}
                         >
                             <div>
@@ -164,10 +169,11 @@ export default function GamesPage() {
                                     { icon: Zap, title: t("loop.perform.title"), body: t("loop.perform.description"), tone: "bg-[#5b8def]" },
                                 ].map(({ icon: Icon, title, body }, index) => (
                                     <motion.article
-                                        initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
+                                        initial={{ opacity: 0, y: 14 }}
+                                        animate={shouldReduceMotion ? { opacity: 1, y: 0 } : undefined}
                                         whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
                                         viewport={{ once: true, amount: 0.3 }}
-                                        transition={{ duration: 0.3, delay: index * 0.08 }}
+                                        transition={{ duration: shouldReduceMotion ? 0 : 0.3, delay: shouldReduceMotion ? 0 : index * 0.08 }}
                                         key={title}
                                     >
                                         <span className={`${styles.loopIcon} ${index === 0 ? styles.loopIconYellow : index === 1 ? styles.loopIconMint : styles.loopIconBlue}`}>
@@ -182,10 +188,11 @@ export default function GamesPage() {
                     </section>
 
                     <motion.section
-                        initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }}
+                        initial={{ opacity: 0, y: 18 }}
+                        animate={shouldReduceMotion ? { opacity: 1, y: 0 } : undefined}
                         whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
                         viewport={{ once: true, amount: 0.2 }}
-                        transition={{ duration: 0.35 }}
+                        transition={{ duration: shouldReduceMotion ? 0 : 0.35 }}
                         aria-labelledby="coming-title"
                         className={styles.comingSection}
                     >
