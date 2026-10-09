@@ -87,6 +87,7 @@ export default function MobileBottomNav({
                             <Link
                                 key={index}
                                 href={item.href as any}
+                                prefetch={item.href === "/saved-words" ? null : true}
                                 aria-label={item.label}
                                 className={cn(
                                     "flex min-w-0 w-full flex-col items-center justify-center rounded-md p-2 transition-all duration-200",

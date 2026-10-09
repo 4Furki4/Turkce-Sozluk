@@ -1,4 +1,5 @@
 {
+  "Navigation": { "loading": "Loading…" },
   "PronunciationWorkflow": {
     "title": "Pronunciation review queue",
     "intro": "Listen to the AI-generated recordings, save a decision and add a note. Only approved recordings can be published. Decisions are saved on this computer.",

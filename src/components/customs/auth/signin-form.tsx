@@ -29,7 +29,7 @@ export default function SigninForm({
   InvalidEmailIntl,
 }: IntlProps) {
   const searchParams = useSearchParams()
-  const redirectPath = getSafeAuthReturnUrl(searchParams.get("backTo"), window.location.origin) ?? "/";
+  const redirectPath = (typeof window === "undefined" ? null : getSafeAuthReturnUrl(searchParams.get("backTo"), window.location.origin)) ?? "/";
 
   return (
     <div

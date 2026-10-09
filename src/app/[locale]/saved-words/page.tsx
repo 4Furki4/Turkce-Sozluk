@@ -1,11 +1,11 @@
-import { auth } from "@/src/lib/auth";
-import { api, HydrateClient } from "@/src/trpc/server";
+import { api, getServerSession, HydrateClient } from "@/src/trpc/server";
 import { Metadata } from "next";
 import { Params } from "next/dist/server/request/params";
-import { redirect, RedirectType } from "next/navigation";
+import { RedirectType } from "next/navigation";
+import { redirect } from "@/src/i18n/routing";
 import React from "react";
 import SavedWordsPage from "@/src/components/customs/saved-words-page";
-import { headers } from "next/headers";
+import { savedWordsInitialInput } from "@/src/lib/saved-words-input";
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { locale } = await params
@@ -25,11 +25,12 @@ export default async function SavedWords(
   const {
     locale
   } = params;
-  const session = await auth.api.getSession({
-    headers: await headers()
-  });;
-  if (!session) redirect("/signin", RedirectType.replace);
-  void api.user.getSavedWords.prefetch({});
+  const session = await getServerSession();
+  if (!session) return redirect({ href: "/signin", locale: locale as "en" | "tr" }, RedirectType.replace);
+  await Promise.all([
+    api.user.getSavedWords.prefetch(savedWordsInitialInput),
+    api.user.getSavedWordCount.prefetch({ search: savedWordsInitialInput.search }),
+  ]);
   return (
     <HydrateClient>
       <SavedWordsPage

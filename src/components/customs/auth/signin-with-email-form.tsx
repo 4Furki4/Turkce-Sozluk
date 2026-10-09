@@ -14,7 +14,7 @@ export default function SigninWithEmailForm({ SigninWithEmailIntl, EnterYourEmai
     const [step, setStep] = useState<"email" | "otp">("email")
     const [email, setEmail] = useState("")
     const searchParams = useSearchParams()
-    const backTo = getSafeAuthReturnUrl(searchParams.get("backTo"), window.location.origin)
+    const backTo = typeof window === "undefined" ? null : getSafeAuthReturnUrl(searchParams.get("backTo"), window.location.origin)
 
     const { control, handleSubmit, reset } = useForm({
         resolver: zodResolver(z.object({

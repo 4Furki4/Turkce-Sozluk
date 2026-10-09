@@ -160,8 +160,9 @@ export const wordRouter = createTRPCRouter({
         ORDER BY ${order("page")};
       `;
 
-      const wordsWithMeanings = await db.execute(query) as DashboardWordList[];
-      return wordsWithMeanings;
+      return readPublicDictionary(db, `word-list:${JSON.stringify(purifiedInput)}`, async () =>
+        await db.execute(query) as DashboardWordList[]
+      );
     }),
 
   getFilterOptions: publicProcedure.query(async ({ ctx: { db } }) => {
@@ -451,14 +452,16 @@ export const wordRouter = createTRPCRouter({
         ? sql`WHERE ${sql.join(conditions, sql` AND `)}`
         : sql``;
 
-      const result = await db.execute(
-        sql`
-        SELECT COUNT(*) as count
-        FROM words
-        ${whereSql}
-        `
-      ) as { count: number }[];
-      return Number(result[0].count);
+      return readPublicDictionary(db, `word-list-count:${JSON.stringify(purifiedInput)}`, async () => {
+        const result = await db.execute(
+          sql`
+          SELECT COUNT(*) as count
+          FROM words
+          ${whereSql}
+          `
+        ) as { count: number }[];
+        return Number(result[0].count);
+      });
     }),
 
   getWordsByIds: publicProcedure
