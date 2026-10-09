@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 import type { WordSearchResult } from "@/types";
 import { Link, useRouter } from "@/src/i18n/routing";
 import type { Session } from "@/src/lib/auth-client";
-import { startNavigationProgress } from "@/src/lib/navigation-progress";
+import { startNavigationProgress, useNavigationProgress } from "@/src/lib/navigation-progress";
 import { api } from "@/src/trpc/react";
 import {
   preferencesState,
@@ -151,19 +151,21 @@ export function SearchWordCardVariantGroup({
   headingLevel = "h2",
 }: SearchWordCardVariantGroupProps) {
   const { searchWordCardVariant } = useSnapshot(preferencesState);
+  const { phase } = useNavigationProgress();
+  const resultKey = data?.map(({ word_data }) => `${word_data.word_id}:${word_data.word_name}`).join("|");
 
   if (!data || data.length === 0) {
     return <WordNotFoundCard session={session} />;
   }
 
   return (
-    <div className="grid gap-5">
+    <div className="search-word-results grid gap-5" aria-busy={phase === "loading"}>
       <WordCardVariantToggle
         variant={searchWordCardVariant}
         onVariantChange={setSearchWordCardVariant}
       />
 
-      <div className="grid gap-6">
+      <div key={resultKey} className="search-word-results-arrival grid gap-6">
         {data.map((word, index) => {
           const uniqueKey = word.word_data?.word_id || `word-${index}`;
           const resolvedHeadingLevel = headingLevel === "h1" && index > 0 ? "h2" : headingLevel;
@@ -288,7 +290,7 @@ function SearchWordCardVariant({
       role="article"
       className="overflow-hidden rounded-md p-0 shadow-sm shadow-black/5"
     >
-      <div key={variant} className="animate-in fade-in-0 slide-in-from-bottom-1 duration-200">
+      <div key={variant} className="motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-1 duration-200">
         <WordCardNavigationContext.Provider value={{ locale, offlineLinks }}>
           {variant === "magazine" ? (
             <MagazineWordCard {...bodyProps} />
