@@ -12,7 +12,7 @@
     "seed:daily": "bun src/scripts/seed-daily.ts",
     "seed:tdk": "bun src/scripts/seed-tdk.ts",
     "seed:prod": "NODE_ENV=production bun src/scripts/seed-tdk.ts",
-    "lint": "next lint",
+    "lint": "eslint .",
     "test": "jest",
     "test:watch": "jest --watch",
     "check:package-lock": "node scripts/check-package-lock.mjs",
@@ -37,7 +37,12 @@
     "seo:audit": "dotenv -e .env.production.local -e .env.local -- bun src/scripts/audit-seo-indexability.ts",
     "pronunciations:generate": "bun src/scripts/generate-pronunciations.ts",
     "pronunciations:workflow": "bun src/scripts/pronunciation-workflow.ts",
-    "test:pronunciations": "bun test scripts/pronunciation-workflow.integration.test.mjs"
+    "test:pronunciations": "bun test scripts/pronunciation-workflow.integration.test.mjs",
+    "ci:db": "bun scripts/ci/database.ts",
+    "ci:build": "bun scripts/ci/build.mjs",
+    "ci:services:start": "docker compose -p turkish-dictionary-ci -f scripts/ci/compose.yml up -d --wait",
+    "ci:services:stop": "docker compose -p turkish-dictionary-ci -f scripts/ci/compose.yml down",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.954.0",
@@ -72,8 +77,8 @@
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.7",
-    "eslint": "8.49.0",
-    "eslint-config-next": "16.0.10",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.2",
     "framer-motion": "12.7.4",
     "geist": "^1.5.1",
     "html2canvas-pro": "^1.5.13",
@@ -112,6 +117,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@playwright/test": "1.58.2",
     "@testing-library/jest-dom": "5.16.5",
     "@testing-library/react": "^14.3.1",
     "@testing-library/user-event": "^14.6.1",
@@ -127,7 +133,7 @@
     "dotenv-cli": "^8.0.0",
     "drizzle-kit": "^0.31.8",
     "eslint-plugin-jest-dom": "^5.5.0",
-    "eslint-plugin-testing-library": "^6.5.0",
+    "eslint-plugin-testing-library": "^7",
     "eslint-plugin-unused-imports": "^4.3.0",
     "fake-indexeddb": "^6.2.5",
     "jest": "^29.7.0",
