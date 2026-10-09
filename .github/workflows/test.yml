@@ -1,0 +1,304 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CI: "true"
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.2"
+
+      - name: Cache dependency downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-1.3.2-${{ hashFiles('bun.lockb') }}
+          restore-keys: ${{ runner.os }}-bun-1.3.2-
+
+      - name: Validate npm lockfile
+        run: bun run check:package-lock
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bun run lint
+
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.2"
+
+      - name: Cache dependency downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-1.3.2-${{ hashFiles('bun.lockb') }}
+          restore-keys: ${{ runner.os }}-bun-1.3.2-
+
+      - name: Install dependencies
+        id: install
+        run: bun install --frozen-lockfile
+
+      - name: Run Jest tests
+        run: |
+          mkdir -p test-results
+          bun run test -- --runInBand --ci --json --outputFile=test-results/jest-results.json
+
+      - name: Run pronunciation workflow tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: bun run test:pronunciations
+
+      - name: Test CI environment isolation
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: bun test scripts/ci/env.test.mjs
+
+      - name: Upload unit test report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-report
+          path: test-results/jest-results.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  build_browser:
+    name: Production build and browser tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: turkish_dictionary_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - "127.0.0.1:54329:5432"
+        options: >-
+          --health-cmd "pg_isready -U postgres -d turkish_dictionary_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 6
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.2"
+
+      - name: Cache dependency downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-1.3.2-${{ hashFiles('bun.lockb') }}
+          restore-keys: ${{ runner.os }}-bun-1.3.2-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Prepare disposable test database
+        run: bun run ci:db
+
+      - name: Build production application
+        run: bun run ci:build
+
+      - name: Cache Chromium downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-chromium-${{ hashFiles('bun.lockb') }}
+
+      - name: Install Chromium
+        run: bunx --no-install playwright install --with-deps chromium
+
+      - name: Run browser smoke tests
+        run: bun run test:e2e
+
+      - name: Upload browser failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-failure-evidence
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  ci_passed:
+    name: CI passed
+    needs: [lint, unit, build_browser]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require every check to succeed
+        env:
+          LINT_RESULT: ${{ needs.lint.result }}
+          UNIT_RESULT: ${{ needs.unit.result }}
+          BUILD_BROWSER_RESULT: ${{ needs.build_browser.result }}
+        run: |
+          printf 'Lint: %s\nUnit tests: %s\nProduction build and browser tests: %s\n' \
+            "$LINT_RESULT" "$UNIT_RESULT" "$BUILD_BROWSER_RESULT"
+          test "$LINT_RESULT" = success
+          test "$UNIT_RESULT" = success
+          test "$BUILD_BROWSER_RESULT" = success
+
+  build:
+    name: Build and push ARM64 image
+    needs: ci_passed
+    if: ${{ github.event_name != 'pull_request' }}
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    env:
+      IMAGE_NAME: furki4/turkish-dictionary-app
+    concurrency:
+      group: dictionary-image-${{ github.ref }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check current publishing head
+        id: publication
+        run: |
+          if [ "$GITHUB_REF_NAME" = main ] || [ "$GITHUB_REF_NAME" = develop ]; then
+            PUBLISHING_REF="$(git ls-remote --exit-code origin "$GITHUB_REF")"
+            read -r PUBLISHING_HEAD _ <<< "$PUBLISHING_REF"
+            if [ "$PUBLISHING_HEAD" != "$GITHUB_SHA" ]; then
+              echo "Skipping ARM64 image because $GITHUB_REF has a newer commit."
+              echo "current=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+          echo "current=true" >> "$GITHUB_OUTPUT"
+
+      - name: Set image tag
+        id: image
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "main" ]; then
+            {
+              echo "tags<<EOF"
+              echo "${IMAGE_NAME}:latest"
+              echo "${IMAGE_NAME}:main-${GITHUB_SHA::7}"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+            echo "push=true" >> "$GITHUB_OUTPUT"
+            echo "app_url=https://turkce-sozluk.com" >> "$GITHUB_OUTPUT"
+          elif [ "${GITHUB_REF_NAME}" = "develop" ]; then
+            {
+              echo "tags<<EOF"
+              echo "${IMAGE_NAME}:development"
+              echo "${IMAGE_NAME}:develop-${GITHUB_SHA::7}"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+            echo "push=true" >> "$GITHUB_OUTPUT"
+            echo "app_url=https://development.turkce-sozluk.com" >> "$GITHUB_OUTPUT"
+          else
+            SAFE_BRANCH="$(echo "${GITHUB_REF_NAME}" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9._-]+/-/g; s/^-+|-+$//g' | cut -c1-80)"
+            echo "tags=${IMAGE_NAME}:ci-${SAFE_BRANCH}-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+            echo "push=false" >> "$GITHUB_OUTPUT"
+            echo "app_url=https://development.turkce-sozluk.com" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Docker Buildx
+        if: steps.publication.outputs.current == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        if: steps.publication.outputs.current == 'true' && steps.image.outputs.push == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Validate public build environment
+        if: steps.publication.outputs.current == 'true'
+        env:
+          NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
+        run: |
+          if [ -z "${NEXT_PUBLIC_RECAPTCHA_SITE_KEY}" ]; then
+            echo "NEXT_PUBLIC_RECAPTCHA_SITE_KEY is missing from GitHub Actions secrets." >&2
+            exit 1
+          fi
+
+      - name: Validate npm lockfile
+        if: steps.publication.outputs.current == 'true'
+        run: npm run docker:preflight
+
+      - name: Build and push
+        if: steps.publication.outputs.current == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/arm64
+          push: ${{ steps.image.outputs.push }}
+          tags: ${{ steps.image.outputs.tags }}
+          build-args: |
+            NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
+            NEXT_PUBLIC_APP_URL=${{ steps.image.outputs.app_url }}
+            NEXT_PUBLIC_URL=${{ steps.image.outputs.app_url }}
+            NEXT_PUBLIC_PATREON_URL=${{ vars.NEXT_PUBLIC_PATREON_URL }}
+            NEXT_PUBLIC_R2_CUSTOM_URL=https://data.turkce-sozluk.com
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
