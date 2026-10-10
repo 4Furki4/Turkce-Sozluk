@@ -57,7 +57,12 @@ export default function DailyWordsManagement({ onClose, initialData }: DailyWord
       <CustomInput type="date" label={t("date")} value={date} onValueChange={setDate} isRequired />
       <CustomAutocomplete
         label={t("word")} placeholder={t("searchWord")} selectedKey={selectedWordId}
-        inputValue={searchTerm} onInputChange={(value) => { hasTyped.current = true; setSearchTerm(value); }}
+        inputValue={searchTerm} onInputChange={(value) => {
+          hasTyped.current = true;
+          setSearchTerm(value);
+          // With both values controlled, keyboard clearing must also clear the selection.
+          if (!value) setSelectedWordId(null);
+        }}
         onSelectionChange={(key) => {
           setSelectedWordId(key == null ? null : String(key));
           const item = items.find((item) => String(item.id) === String(key));
