@@ -7,7 +7,7 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "serve": "next build --webpack && next start",
+    "serve": "bun scripts/serve-pi-development.mjs",
     "offline-data:generate": "bun src/scripts/prepare-offline-data.ts",
     "seed:daily": "bun src/scripts/seed-daily.ts",
     "seed:tdk": "bun src/scripts/seed-tdk.ts",
