@@ -1,4 +1,13 @@
 import { z } from "zod";
+import { actionsEnum, entityTypesEnum, statusEnum } from "@/db/schema/requests";
+
+export const UserRequestListInputSchema = z.object({
+  page: z.number().int().min(1).max(2147483647).default(1),
+  limit: z.number().int().min(1).max(50).default(10),
+  entityType: z.enum(entityTypesEnum.enumValues).optional(),
+  action: z.enum(actionsEnum.enumValues).optional(),
+  status: z.enum(statusEnum.enumValues).optional(),
+});
 
 // Base schemas for common entities
 export const MeaningSchema = z.object({

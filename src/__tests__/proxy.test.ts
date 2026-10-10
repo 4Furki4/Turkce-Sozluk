@@ -102,6 +102,18 @@ describe("proxy SEO normalization", () => {
     );
   });
 
+  it.each([
+    ["/play/tr", "/tr/oyna", "tr"],
+    ["/play/en/flashcard-game", "/en/play/flashcards", "en"],
+  ])("allows the internal Play rewrite %s to reach its shell", (internal, original, locale) => {
+    const response = proxy(new NextRequest(`http://localhost:3000${internal}`, {
+      headers: { "x-play-path": original, "x-next-intl-locale": locale },
+    }));
+    expect(response.status).toBe(200);
+    expect(response.headers.get("location")).toBeNull();
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+  });
+
   it("rewrites the Turkish Play flashcards route to its dedicated shell", () => {
     const response = proxy(new NextRequest("http://localhost:3000/tr/oyna/kelime-kartlari"));
 

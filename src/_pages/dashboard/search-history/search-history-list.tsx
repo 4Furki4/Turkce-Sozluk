@@ -2,7 +2,7 @@
 
 import { useCallback, useState, type Key } from "react";
 import { Button, Card, CardBody, User } from "@heroui/react";
-import { Pagination } from "@heroui/pagination";
+import { CustomPagination } from "@/src/components/customs/heroui/custom-pagination";
 import { format } from "date-fns";
 import { enUS, tr } from "date-fns/locale";
 import { FilterX, SearchIcon } from "lucide-react";
@@ -259,7 +259,7 @@ export function SearchHistoryList() {
                 aria-label={t("table.ariaLabel")}
             />
 
-            <Pagination
+            <CustomPagination
                 isDisabled={!data?.totalPages}
                 classNames={{
                     wrapper: ["mx-auto"]

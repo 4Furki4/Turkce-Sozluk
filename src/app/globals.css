@@ -51,6 +51,7 @@
     
     /* YOUR RED: #a91101 -> HSL 5.7 99% 33% */
     --primary: 5.71 98.82% 33.33%; 
+    --primary-text: 5.71 98.82% 33.33%;
     --primary-foreground: 0 0% 98%;
     
     /* NEUTRAL SECONDARY (Slate) instead of Cyan */
@@ -86,6 +87,7 @@
     
     /* YOUR RED: Same as light, or slightly adjusted for dark mode readability */
     --primary: 5.71 98.82% 33.33%;
+    --primary-text: 0 100% 80%;
     --primary-foreground: 0 0% 98%;
     
     --secondary: 240 3.7% 15.9%;
@@ -102,7 +104,7 @@
     
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 5.71 98.82% 33.33%;
+    --ring: 0 100% 80%;
   }
 
   html {
@@ -122,9 +124,45 @@
   
   /* Focus states now use the ring variable which matches your Red */
   button:focus-visible,
-  li a:focus-visible {
+  a:focus-visible {
     box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
   }
+}
+
+/* Keep Turkish spelling intact; split a token only when it cannot fit. */
+@utility dictionary-headword {
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;
+  hyphens: none;
+  text-wrap: balance;
+}
+
+@utility dictionary-prose {
+  min-width: 0;
+  word-break: normal;
+  overflow-wrap: anywhere;
+  hyphens: none;
+  text-wrap: pretty;
+}
+
+@utility dictionary-headword-container {
+  container-type: inline-size;
+}
+
+.dictionary-headword[data-long-headword="true"] {
+  font-size: clamp(1.5rem, calc(100cqi / var(--headword-width)), var(--headword-max, 2.5rem));
+}
+
+.dictionary-headword[data-single-word="true"] {
+  word-break: break-all;
+}
+
+::selection {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
 }
 
 @media (min-width: 768px) {
@@ -244,4 +282,12 @@
   .feature-card-shine:hover::before {
     transform: translateX(100%) skewX(-10deg);
   }
+}
+
+/* React Flow ships unlayered CSS; scope the override at the same cascade level. */
+.dictionary-word-graph .react-flow__controls-button {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
 }

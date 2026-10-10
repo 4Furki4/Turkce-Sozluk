@@ -1,29 +1,63 @@
 {
-  "Navigation": { "loading": "Loading…" },
+  "Navigation": {
+    "loading": "Loading…"
+  },
   "PronunciationWorkflow": {
     "title": "Pronunciation review queue",
     "intro": "Listen to the AI-generated recordings, save a decision and add a note. Only approved recordings can be published. Decisions are saved on this computer.",
-    "filter": "Review status", "batch": "Batch", "attentionOnly": "Needs extra attention", "refresh": "Refresh", "all": "All",
-    "unreviewed": "Unreviewed", "approved": "Approved", "rejected": "Rejected", "deferred": "Needs another take",
-    "approve": "Approve", "reject": "Reject", "defer": "Another take", "reset": "Reset review",
-    "previous": "Previous", "next": "Next", "empty": "No recordings match these filters.", "error": "Could not save or load review",
-    "generated": "Generated", "entries": "Dictionary entries", "nextBatch": "Next batch", "complete": "Complete", "entryIds": "Entry IDs",
-    "automaticApproval": "Owner policy: automatically approve recordings without attention flags", "manualApproval": "Manual approval", "pendingReview": "Awaiting review",
-    "listen": "Listen to", "ai": "AI-generated · EMA", "seed": "Seed", "speed": "Speed", "note": "Review note", "saved": "Decision saved for",
-    "circumflex": "Contains a circumflex", "singleCharacter": "Single character", "veryShort": "Very short word", "shortAudio": "Very short recording", "longAudio": "Long recording", "lostCircumflex": "EMA removed the circumflex"
+    "filter": "Review status",
+    "batch": "Batch",
+    "attentionOnly": "Needs extra attention",
+    "refresh": "Refresh",
+    "all": "All",
+    "unreviewed": "Unreviewed",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "deferred": "Needs another take",
+    "approve": "Approve",
+    "reject": "Reject",
+    "defer": "Another take",
+    "reset": "Reset review",
+    "previous": "Previous",
+    "next": "Next",
+    "empty": "No recordings match these filters.",
+    "error": "Could not save or load review",
+    "generated": "Generated",
+    "entries": "Dictionary entries",
+    "nextBatch": "Next batch",
+    "complete": "Complete",
+    "entryIds": "Entry IDs",
+    "automaticApproval": "Owner policy: automatically approve recordings without attention flags",
+    "manualApproval": "Manual approval",
+    "pendingReview": "Awaiting review",
+    "listen": "Listen to",
+    "ai": "AI-generated · EMA",
+    "seed": "Seed",
+    "speed": "Speed",
+    "note": "Review note",
+    "saved": "Decision saved for",
+    "circumflex": "Contains a circumflex",
+    "singleCharacter": "Single character",
+    "veryShort": "Very short word",
+    "shortAudio": "Very short recording",
+    "longAudio": "Long recording",
+    "lostCircumflex": "EMA removed the circumflex"
   },
   "SavedPronunciation": {
-  "play": "Play pronunciation of {word}",
-  "stop": "Stop pronunciation of {word}",
-  "loading": "Loading pronunciation…",
-  "missing": "No recording yet",
-  "offline": "Audio unavailable offline",
-  "error": "Audio unavailable. Try again.",
-  "ai": "AI-generated · EMA",
-  "reviewed": "Reviewed recording",
-  "correct": "Suggest a correction"
-},
+    "play": "Play pronunciation of {word}",
+    "stop": "Stop pronunciation of {word}",
+    "loading": "Loading pronunciation…",
+    "missing": "No recording yet",
+    "offline": "Audio unavailable offline",
+    "error": "Audio unavailable. Try again.",
+    "ai": "AI-generated · EMA",
+    "reviewed": "Reviewed recording",
+    "correct": "Suggest a correction"
+  },
   "Navbar": {
+    "ThemeLight": "Light",
+    "ThemeDark": "Dark",
+    "ThemeSystem": "System",
     "Home": "Home",
     "Word List": "Word List",
     "WordBuilder": "Word Wizard",
@@ -469,7 +503,8 @@
       "autocompleteLoading": "Preparing word suggestions...",
       "feature1": {
         "title": "Contribute",
-        "description": "You can contribute to the dictionary by suggesting new words, meanings, and features, and by adding pronunciations."
+        "description": "You can contribute to the dictionary by suggesting new words, meanings, and features, and by adding pronunciations.",
+        "action": "Contribute a word"
       },
       "feature2": {
         "title": "Suggest Changes",
@@ -481,11 +516,19 @@
       },
       "offlineFeature": {
         "title": "Blazing Fast & Offline",
-        "description": "Download the offline dictionary to use it without an internet connection and get even faster results when you are online."
+        "description": "Download the offline dictionary to use it without an internet connection and get even faster results when you are online.",
+        "action": "Open offline dictionary"
       },
       "pwaFeature": {
         "title": "Download as a Native App",
-        "description": "You can add the dictionary to your home screen and use it offline."
+        "description": "You can add the dictionary to your home screen and use it offline.",
+        "action": "Install app",
+        "installed": "App installed",
+        "instructionsTitle": "Install the dictionary",
+        "instructionsBrowser": "Open your browser menu and choose “Install app” or “Add to Home Screen”, then confirm.",
+        "instructionsSafari": "On iPhone or iPad in Safari, tap Share, choose “Add to Home Screen”, then tap Add.",
+        "instructionsUnavailable": "If your browser has no install option, you can continue using the dictionary here.",
+        "close": "Got it"
       },
       "WordOfTheDay": {
         "title": "Word of the Day",
@@ -500,8 +543,11 @@
           "phonetic": "pe-pe",
           "origin": "Greek",
           "meaning": "Someone who stutters or has a speech impediment."
-        }
-      }
+        },
+        "example": "Example word"
+      },
+      "searchAction": "Search",
+      "searchMode": "Search mode"
     },
     "HomeExtras": {
       "galatiMeshurTitle": "Galat-ı Meşhur",
@@ -570,6 +616,7 @@
     "RequestPronunciation": "Request pronunciation",
     "Screenshot": "Screenshot",
     "Share": "Share",
+    "CopyLink": "Copy link",
     "NoRelatedWordsFound": "No related words found",
     "NoRelatedPhrasesFound": "No related phrases found",
     "obsolete": "absolete meaning",
@@ -599,7 +646,11 @@
     "UserNotAuthenticated": "User not authenticated. Please sign in.",
     "ViewCountUpdatedAt": "View count updated {date}",
     "ViewCountUpdatedUnknown": "View count update time is not available.",
-    "views": "views"
+    "views": "views",
+    "WordSections": "Word details",
+    "Save": "Save word",
+    "Unsave": "Unsave word",
+    "saveFailed": "Could not update your saved words. Please try again."
   },
   "Actions": {
     "SuggestNewWord": "Suggest New Word",
@@ -1054,6 +1105,27 @@
         "fillAllFields": "Please fill in all fields",
         "deleteConfirm": "Are you sure you want to delete this misspelling?"
       }
+    },
+    "DailyWords": {
+      "title": "Daily words",
+      "add": "Add daily word",
+      "edit": "Edit daily word",
+      "date": "Date",
+      "word": "Word",
+      "actions": "Actions",
+      "table": "Daily words table",
+      "empty": "No daily words found.",
+      "searchWord": "Search for a word",
+      "cancel": "Cancel",
+      "save": "Save",
+      "required": "Choose a date and a word.",
+      "added": "Daily word added.",
+      "updated": "Daily word updated.",
+      "saveFailed": "Could not save the daily word. Check the date and word, then try again.",
+      "deleteFailed": "Could not remove the daily word. Try again.",
+      "confirmDelete": "Remove this word from the daily schedule?",
+      "editWord": "Edit daily word: {word}",
+      "deleteWord": "Remove daily word: {word}"
     }
   },
   "LanguageAndRootInput": {
@@ -1194,7 +1266,10 @@
     "Card": {
       "savedAt": "Saved At",
       "view": "View",
-      "unsave": "Unsave"
+      "unsave": "Unsave",
+      "noMeaning": "No meaning yet.",
+      "details": "Saved word: {word}",
+      "detailsUnavailable": "Could not load word details. Try opening them again."
     }
   },
   "Profile": {
@@ -1285,7 +1360,13 @@
       "turkishEquivalent": "Turkish equivalent",
       "obsolete": "Obsolete",
       "phrase": "Phrase"
-    }
+    },
+    "hideGraph": "Hide graph",
+    "filters": "Relation types",
+    "retry": "Retry",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "fitView": "Fit graph to view"
   },
   "Form": {
     "noWordsFound": "No words found matching your search",
@@ -1396,7 +1477,12 @@
       "confirmCancel": "Yes, Cancel Request",
       "updateRequest": "Update Request",
       "back": "Back",
-      "backToRequests": "Back to Requests"
+      "backToRequests": "Back to Requests",
+      "retry": "Try again",
+      "clearFilters": "Clear filters",
+      "viewSpecific": "View request #{id}",
+      "cancelSpecific": "Cancel request #{id}",
+      "resolutionSpecific": "View decision for request #{id}"
     },
     "errorLoading": "Error loading requests",
     "errorLoadingDetail": "Error loading request details",
@@ -1408,7 +1494,22 @@
       "noRequests": "No requests found",
       "itemsPerPage": "Items per page",
       "previous": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "cancelled": "Request cancelled.",
+      "cancelFailed": "The request could not be cancelled. Please try again.",
+      "cancelUnavailable": "This request was removed or is no longer pending. Return to your requests to check its status.",
+      "cancelCaptchaFailed": "Verification failed. Please try again.",
+      "noMatchingRequests": "No requests match these filters.",
+      "count": "{count, plural, =0 {No requests} one {# request} other {# requests}}",
+      "loadingDetail": "Loading request details…",
+      "sessionExpired": "Your session has expired. Sign in to view your requests.",
+      "permissionDenied": "You do not have permission to view these requests.",
+      "rateLimited": "Too many attempts. Wait a moment, then try again.",
+      "pagination": "Request pages",
+      "jumpPages": "Jump five pages",
+      "firstPage": "First page",
+      "lastPage": "Last page",
+      "pageButton": "Page {page}"
     },
     "details": {
       "modifyingWordLabel": "Modifying Word Name",
@@ -1441,7 +1542,8 @@
       "resolution": "Resolution",
       "resolvedAtLabel": "Resolved At",
       "resolvedByLabel": "Resolved By",
-      "moderationReason": "Moderation Reason"
+      "moderationReason": "Moderation Reason",
+      "unknownResolver": "Not recorded"
     },
     "RequestedAttributeByYou": "Requested Attribute by You",
     "NoChanges": "No changes detected",
@@ -1594,6 +1696,22 @@
       "LanguageInputError": "Language is required when root specified"
     }
   },
+  "SharedUI": {
+    "All": "All",
+    "SelectOptions": "Select options",
+    "Selection": "options",
+    "ClearSelection": "Clear {label} selection",
+    "DataTable": "Data table",
+    "Loading": "Loading data…",
+    "NoRows": "No results to display.",
+    "TableLoadError": "Could not load the table. Refresh the page to try again.",
+    "PageLoadTitle": "This page could not load",
+    "PageLoadDescription": "Try loading the page again. You can also return to the dictionary and continue browsing.",
+    "Home": "Return to dictionary",
+    "Close": "Close",
+    "ClearValue": "Clear value",
+    "ShowOptions": "Show options"
+  },
   "Common": {
     "anonymousUser": "Anonymous User",
     "somethingWentWrong": "Something went wrong",
@@ -1682,7 +1800,8 @@
     "relatedWord": "Related Word",
     "relationType": "Relation Type",
     "relatedPhrase": "Related Phrase",
-    "phrase": "Phrase"
+    "phrase": "Phrase",
+    "description": "Description"
   },
   "RequestActions": {
     "create": "Create",
@@ -1954,7 +2073,19 @@
     "phraseAddedSuccessfully": "Related phrase added successfully",
     "noWordsFound": "No words found matching your search",
     "add": "Add",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "requestAttribute": "Suggest a word attribute",
+    "wordDetails": "Word details (optional)",
+    "wordDetailsHelp": "Add these only if you know them. Language is the word’s origin; attributes describe its usage. Related words can be synonyms, opposites, phrases, or idioms.",
+    "meaningDetails": "Details for this meaning (optional)",
+    "meaningDetailsHelp": "Choose a part of speech such as noun or verb, add usage notes, or include an example and an image. You can leave these blank.",
+    "phoneticHelp": "How the word is pronounced.",
+    "prefixHelp": "A part added before the root.",
+    "rootHelp": "The base that carries the main meaning.",
+    "suffixHelp": "A part added after the root.",
+    "requestMeaningAttribute": "Suggest a meaning attribute",
+    "requestAuthor": "Suggest an author",
+    "removeMeaning": "Remove meaning {number}"
   },
   "VerifyRequest": {
     "title": "Verify Request",
@@ -2000,12 +2131,15 @@
       "title": "New Pronunciation Request",
       "audioRecording": "Audio Recording",
       "relatedWord": "Related Word",
-      "reason": "Reason"
+      "reason": "Reason",
+      "missingRecording": "No audio recording is available for this request.",
+      "unsupportedAudio": "Your browser cannot play this audio recording."
     },
     "DiffTable": {
       "field": "Field",
       "oldValue": "Old Value",
-      "newValue": "New Value"
+      "newValue": "New Value",
+      "noData": "No proposed changes are available."
     },
     "RawDataViewer": {
       "viewRawData": "View Raw Data"
@@ -2029,8 +2163,11 @@
       }
     },
     "errors": {
-      "requestNotFound": "Request not found"
-    }
+      "requestNotFound": "Request not found",
+      "unsupportedType": "A detailed view is not available for this request type. The saved data is shown below.",
+      "invalidPayload": "The saved request data is incomplete or could not be read. You can inspect the original data below."
+    },
+    "unknownWord": "Word name unavailable"
   },
   "Pronunciation": {
     "title": "Pronunciation Requests",
@@ -2121,18 +2258,23 @@
       "failed_title": "Download Failed",
       "failed_desc": "The offline dictionary could not be installed.",
       "failed_previous_kept_desc": "The update failed, but your previous offline dictionary is still available. {error}",
-      "error_title": "An Error Occurred"
+      "error_title": "An Error Occurred",
+      "check_failed_previous_kept_desc": "Could not check for updates. Your installed dictionary is still available. Check your connection and retry."
     },
     "buttons": {
       "download": "Download",
       "update": "Update Now",
       "delete": "Delete Data",
-      "check_status": "Check for Updates"
+      "check_status": "Check for Updates",
+      "retry": "Retry"
     },
     "error": {
-      "metadata_fetch_failed": "Could not fetch version information from the server.",
+      "metadata_fetch_failed": "We could not reach the dictionary server. Check your connection and retry.",
       "no_metadata": "Could not start download. Version information is missing.",
-      "r2_url_missing": "Configuration error: The data source URL is not set."
+      "r2_url_missing": "Configuration error: The data source URL is not set.",
+      "local_storage_failed": "We could not read this device’s dictionary storage. Retry or allow site storage in your browser.",
+      "download_failed": "The download did not finish. Check your connection and try again.",
+      "delete_failed": "The dictionary could not be removed. Please retry."
     },
     "download_info": {
       "title": "Download Information",

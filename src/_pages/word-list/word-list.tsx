@@ -394,7 +394,7 @@ export default function WordList() {
             <p className="text-sm text-muted-foreground">
                 {t('pagination.summary', { from: startWord, to: endWord, total: totalWords })}
             </p>
-            <div className="flex flex-col sm:flex-row items-center gap-3">
+            <div className="flex max-w-full min-w-0 flex-col sm:flex-row items-center gap-3">
                 <CustomPagination
                     total={totalPageNumber ?? 1}
                     initialPage={pageNumber}

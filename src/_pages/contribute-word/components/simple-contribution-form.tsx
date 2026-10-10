@@ -12,8 +12,6 @@ import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { api } from "@/src/trpc/react";
 import CustomCard from "@/src/components/customs/heroui/custom-card";
 import { CustomInput } from "@/src/components/customs/heroui/custom-input";
-import type { TRPCClientErrorLike } from "@trpc/client";
-import type { AppRouter } from "@/src/server/api/root";
 import type { Session } from "@/src/lib/auth";
 
 // Schema for simple form
@@ -42,24 +40,7 @@ export default function SimpleContributionForm({
   const tForms = useTranslations("Forms");
   const { executeRecaptcha } = useGoogleReCaptcha();
 
-  const createSimpleWordRequest = api.request.createSimpleWordRequest.useMutation({
-    onSuccess: () => {
-      toast.success(t("requestSubmitted"));
-      simpleForm.reset();
-      setIsSubmitting(false);
-    },
-    onError: (error: TRPCClientErrorLike<AppRouter>) => {
-      console.error("Submission error:", error);
-      if (error.message?.includes("already requested")) {
-        toast.error(t("wordAlreadyRequested"));
-      } else if (error.message?.includes("reCAPTCHA")) {
-        toast.error(t("captchaFailed"));
-      } else {
-        toast.error(t("requestFailed"));
-      }
-      setIsSubmitting(false);
-    }
-  });
+  const createSimpleWordRequest = api.request.createSimpleWordRequest.useMutation();
 
   // Simple form setup
   const simpleForm = useForm<SimpleFormData>({

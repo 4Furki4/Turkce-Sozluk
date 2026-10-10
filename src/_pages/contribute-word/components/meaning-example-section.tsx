@@ -65,12 +65,15 @@ export default function MeaningExampleSection({
           control={control}
           render={({ field, fieldState: { error } }) => (
             <CustomAutocomplete
-              onSelectionChange={(item) => field.onChange(item)}
+              selectedKey={field.value || null}
+              onSelectionChange={(item) => field.onChange(item || "")}
               isLoading={authorsWithRequestedIsLoading}
               as={'div'}
-              size="lg"
+              size="md"
+              labelPlacement="outside"
+              inputProps={{ classNames: { inputWrapper: "h-12 min-h-12", label: "pb-0" } }}
               classNames={{
-                base: "w-full",
+                base: "w-full max-w-none sm:max-w-none",
               }}
               label={t("exampleAuthor")}
               placeholder={t("exampleAuthorPlaceholder")}
@@ -80,16 +83,7 @@ export default function MeaningExampleSection({
                 key: author.id.toString(),
                 label: author.name
               }))}
-              endContent={
-                <Button
-                  isIconOnly
-                  size="sm"
-                  variant="light"
-                  onPress={onOpenAuthorModal}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              }
+
             >
               {(author) => (
                 <AutocompleteItem
@@ -106,6 +100,9 @@ export default function MeaningExampleSection({
             </CustomAutocomplete>
           )}
         />
+        <Button type="button" isIconOnly aria-label={t("requestAuthor")} variant="flat" color="primary" onPress={onOpenAuthorModal} className="h-12 min-w-12 shrink-0">
+          <Plus className="h-4 w-4" aria-hidden />
+        </Button>
       </div>
     </div>
   );

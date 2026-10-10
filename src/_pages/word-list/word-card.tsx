@@ -4,6 +4,7 @@ import React from "react";
 import { Card, CardHeader, CardBody, CardFooter, Chip } from "@heroui/react";
 import { Link } from "@/src/i18n/routing";
 import { ArrowRight } from "lucide-react";
+import { getHeadwordProps } from "@/src/lib/headword-presentation";
 
 interface WordCardProps {
     id: string;
@@ -28,9 +29,9 @@ export function WordCard({ id, name, meanings, partOfSpeech, origin, relatedWord
                 {/* Subtle primary accent on the left */}
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/0 group-hover:bg-primary transition-colors duration-300" />
 
-                <CardHeader className="flex flex-col items-start gap-1 px-6 pt-6 pb-2">
+                <CardHeader className="dictionary-headword-container flex flex-col items-start gap-1 px-6 pt-6 pb-2">
                     <div className="flex w-full justify-between items-start">
-                        <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
+                        <h3 {...getHeadwordProps(name)} lang="tr" className="dictionary-headword [--headword-max:1.5rem] text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
                             {name}
                         </h3>
                         {partOfSpeech && (
@@ -57,7 +58,7 @@ export function WordCard({ id, name, meanings, partOfSpeech, origin, relatedWord
                     <div className="flex flex-col gap-2">
                         {meanings.length > 0 ? (
                             meanings.slice(0, 2).map((m, idx) => (
-                                <p key={m.id} className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                                <p lang="tr" key={m.id} className="dictionary-prose text-base text-muted-foreground line-clamp-2 leading-relaxed">
                                     <span className="font-semibold text-primary/70 mr-2">{idx + 1}.</span>
                                     {m.meaning}
                                 </p>

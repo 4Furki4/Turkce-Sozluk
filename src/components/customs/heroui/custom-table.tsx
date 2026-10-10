@@ -13,14 +13,15 @@ import {
 } from "@heroui/react";
 import { cn } from '@/lib/utils';
 import { tv } from 'tailwind-variants';
+import { useTranslations } from 'next-intl';
 import { useSnapshot } from 'valtio';
 import { preferencesState } from '@/src/store/preferences';
 
 // Define the default styles for the table slots.
 const customTableStyles = tv({
     slots: {
-        base: "min-h-[300px]",
-        wrapper: "overflow-y-hidden flex flex-col relative h-auto text-foreground box-border outline-hidden data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 rounded-md p-2 w-full",
+        base: "w-full min-w-0 min-h-[300px]",
+        wrapper: "min-w-0 max-w-full overflow-x-auto overflow-y-hidden flex flex-col relative h-auto text-foreground box-border outline-hidden data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 rounded-md p-2 w-full",
         td: "group-data-[odd=true]/tr:before:transition-all group-data-[odd=true]/tr:before:bg-primary/10",
         th: "bg-primary/10",
     }
@@ -50,13 +51,15 @@ export function CustomTable<T extends object>({
 }: CustomTableProps<T>) {
     const { isBlurEnabled } = useSnapshot(preferencesState);
     const styles = customTableStyles();
+    const t = useTranslations("SharedUI");
 
     return (
         <Table
             isCompact
             isStriped
-            aria-label="Custom data table"
+            aria-label={t("DataTable")}
             classNames={{
+                ...classNames,
                 base: cn(styles.base(), classNames?.base),
                 wrapper: cn(
                     styles.wrapper(),
@@ -72,7 +75,6 @@ export function CustomTable<T extends object>({
                     classNames?.td
                 ),
                 th: cn(styles.th(), classNames?.th),
-                ...classNames
             }}
             {...props}
         >
@@ -85,9 +87,9 @@ export function CustomTable<T extends object>({
             </TableHeader>
             <TableBody
                 items={items}
-                loadingContent={<Spinner />}
+                loadingContent={<Spinner label={t("Loading")} />}
                 loadingState={loadingState}
-                emptyContent={emptyContent}
+                emptyContent={loadingState === "error" ? <p role="alert">{t("TableLoadError")}</p> : emptyContent ?? t("NoRows")}
             >
                 {(item) => (
                     // --- The Fix: Let HeroUI handle the key ---

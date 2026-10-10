@@ -21,8 +21,6 @@ import RelatedItemsSection from "./related-items-section";
 import NewWordAttributeRequestModal from "@/src/components/customs/edit-request-modal/word/new-word-attribute-request-modal";
 import NewMeaningAttributeRequestModal from "@/src/components/customs/edit-request-modal/meanings/new-meaning-attribute-request-modal";
 import NewAuthorRequestModal from "@/src/components/customs/edit-request-modal/meanings/new-author-request-modal";
-import type { TRPCClientErrorLike } from "@trpc/client";
-import type { AppRouter } from "@/src/server/api/root";
 
 interface RelatedItem {
     id: number;
@@ -121,24 +119,7 @@ export default function DetailedContributionForm({
     const { data: authorsWithRequested, isLoading: authorsWithRequestedIsLoading } = api.request.getAuthorsWithRequested.useQuery();
 
     // API mutations
-    const createFullWordRequest = api.request.createFullWordRequest.useMutation({
-        onSuccess: () => {
-            toast.success(t("requestSubmitted"));
-            detailedForm.reset();
-            setIsSubmitting(false);
-        },
-        onError: (error: TRPCClientErrorLike<AppRouter>) => {
-            console.error("Submission error:", error);
-            if (error.message?.includes("already requested")) {
-                toast.error(t("wordAlreadyRequested"));
-            } else if (error.message?.includes("reCAPTCHA")) {
-                toast.error(t("captchaFailed"));
-            } else {
-                toast.error(t("requestFailed"));
-            }
-            setIsSubmitting(false);
-        },
-    });
+    const createFullWordRequest = api.request.createFullWordRequest.useMutation();
 
     // Define client-side Zod schemas within the component to access tForms
     const ClientMeaningSchema = ApiMeaningSchema.extend({
@@ -310,8 +291,6 @@ export default function DetailedContributionForm({
 
             // Reset imageIndex for the actual submission
             imageIndex = 0;
-            console.log(data.meanings[0].example?.author?.trim())
-            console.log(data.meanings[0].example?.author?.trim() ? parseInt(data.meanings[0].example.author.trim()) : undefined)
 
             const formattedData: z.infer<typeof CreateWordRequestSchema> = {
                 name: data.name.trim(),
@@ -343,16 +322,27 @@ export default function DetailedContributionForm({
             };
 
             await createFullWordRequest.mutateAsync(formattedData);
+            toast.success(t("requestSubmitted"));
             detailedForm.reset();
+            imagePreviewUrls.forEach((url) => { if (url) URL.revokeObjectURL(url); });
             setImagePreviewUrls([]);
+            setRelatedWords([]);
+            setRelatedPhrases([]);
         } catch (error: any) {
             console.error("Submission error:", error);
-            toast.error(error.message || t("submissionError"));
+            if (error.message?.includes("already requested")) {
+                toast.error(t("wordAlreadyRequested"));
+            } else if (error.message?.includes("reCAPTCHA")) {
+                toast.error(t("captchaFailed"));
+            } else {
+                toast.error(t("requestFailed"));
+            }
         } finally {
             setIsSubmitting(false);
         }
     };
-    console.log('detailedForm', detailedForm.getValues())
+    const hasOptionalWordErrors = ["phonetic", "prefix", "root", "suffix", "languageCode", "attributes"].some((key) => key in detailedForm.formState.errors);
+
     return (
         <>
             <CustomCard className="max-md:p-0">
@@ -369,32 +359,11 @@ export default function DetailedContributionForm({
                     <form onSubmit={detailedForm.handleSubmit(onSubmitDetailed)} className="space-y-6">
                         {/* Word Basic Info */}
                         <WordBasicInfoSection
+                            section="name"
                             control={detailedForm.control}
                             errors={detailedForm.formState.errors}
                         />
 
-                        {/* Language and Attributes */}
-                        <WordLanguageAndAttributesSection
-                            control={detailedForm.control}
-                            errors={detailedForm.formState.errors}
-                            languages={languages as Language[]}
-                            languagesIsLoading={languagesIsLoading}
-                            wordAttributesWithRequested={wordAttributesWithRequested as WordAttribute[]}
-                            wordAttributesWithRequestedIsLoading={wordAttributesWithRequestedIsLoading}
-                            requestedAttributes={requestedAttributes}
-                            locale={locale}
-                            onOpenAttributeModal={() => setIsAttributeModalOpen(true)}
-                        />
-
-                        {/* Related Words and Phrases */}
-                        <RelatedItemsSection
-                            relatedWords={relatedWords}
-                            relatedPhrases={relatedPhrases}
-                            onAddRelatedWord={handleAddRelatedWord}
-                            onRemoveRelatedWord={handleRemoveRelatedWord}
-                            onAddRelatedPhrase={handleAddRelatedPhrase}
-                            onRemoveRelatedPhrase={handleRemoveRelatedPhrase}
-                        />
                         {/* Meanings Section */}
                         <div className="space-y-4">
                             <h3 className="text-lg font-semibold">{t("meanings")}</h3>
@@ -434,6 +403,35 @@ export default function DetailedContributionForm({
                                 />
                             ))}
                         </div>
+                        <details className="rounded-md border border-border bg-background/40 p-4" open={hasOptionalWordErrors || undefined}>
+                            <summary className="min-h-11 cursor-pointer py-2.5 font-medium text-primary">{t("wordDetails")}</summary>
+                            <div className="mt-4 space-y-6">
+                                <p className="max-w-prose text-sm text-muted-foreground">{t("wordDetailsHelp")}</p>
+                                <WordBasicInfoSection section="metadata" control={detailedForm.control} errors={detailedForm.formState.errors} />
+                                {/* Language and Attributes */}
+                                <WordLanguageAndAttributesSection
+                                    control={detailedForm.control}
+                                    errors={detailedForm.formState.errors}
+                                    languages={languages as Language[]}
+                                    languagesIsLoading={languagesIsLoading}
+                                    wordAttributesWithRequested={wordAttributesWithRequested as WordAttribute[]}
+                                    wordAttributesWithRequestedIsLoading={wordAttributesWithRequestedIsLoading}
+                                    requestedAttributes={requestedAttributes}
+                                    locale={locale}
+                                    onOpenAttributeModal={() => setIsAttributeModalOpen(true)}
+                                />
+
+                                {/* Related Words and Phrases */}
+                                <RelatedItemsSection
+                                    relatedWords={relatedWords}
+                                    relatedPhrases={relatedPhrases}
+                                    onAddRelatedWord={handleAddRelatedWord}
+                                    onRemoveRelatedWord={handleRemoveRelatedWord}
+                                    onAddRelatedPhrase={handleAddRelatedPhrase}
+                                    onRemoveRelatedPhrase={handleRemoveRelatedPhrase}
+                                />
+                            </div>
+                        </details>
                         <Button
                             type="submit"
                             color="primary"

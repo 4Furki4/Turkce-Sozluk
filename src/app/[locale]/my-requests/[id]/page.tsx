@@ -1,9 +1,10 @@
 import { Metadata } from "next";
 import RequestDetail from "@/src/_pages/requests/request-detail";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { HydrateClient } from "@/src/trpc/server";
 import { auth } from "@/src/lib/auth";
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { redirect } from "@/src/i18n/routing";
 import { api } from "@/src/trpc/server";
 import { headers } from "next/headers";
 
@@ -18,21 +19,16 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const requestId = /^\d+$/.test(id) ? Number(id) : NaN;
+  if (!Number.isInteger(requestId) || requestId < 1 || requestId > 2147483647) notFound();
 
   // Check if user is authenticated
   const session = await auth.api.getSession({
     headers: await headers()
-  });;
+  });
 
   if (!session) {
-    redirect("/signin");
-  }
-
-  const requestId = parseInt(id, 10);
-
-  if (isNaN(requestId)) {
-    // Handle invalid ID
-    redirect("/requests");
+    redirect({ href: "/signin", locale: await getLocale() });
   }
 
   // Prefetch request data

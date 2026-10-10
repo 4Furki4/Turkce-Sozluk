@@ -1,52 +1,26 @@
-"use client"
+"use client";
 import { api } from "@/src/trpc/react";
-import {
-  CardBody,
-  Chip,
-  Spinner,
-  Button,
-  Textarea,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
-  CardHeader,
-  CardFooter
-} from "@heroui/react";
+import { CardBody, CardFooter, CardHeader, Chip, Spinner, Button } from "@heroui/react";
 import { EntityTypes, Actions, Status } from "@/db/schema/requests";
-import { useState, useCallback, useMemo } from "react";
-import { useRouter } from "@/src/i18n/routing";
-import { formatDistanceToNow } from "date-fns";
-import { useTranslations } from "next-intl";
-import {
-  ArrowLeft,
-  Clock
-} from "lucide-react";
-import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
-import { toast } from "sonner";
+import { useMemo } from "react";
+import { useProgressRouter } from "@/src/hooks/use-progress-router";
+import { getPathname } from "@/src/i18n/routing";
+import { useLocale, useTranslations } from "next-intl";
+import { ArrowLeft, Clock } from "lucide-react";
 import RequestDetails from "@/src/components/requests/details/RequestDetails";
+import { RawDataViewer } from "@/src/components/requests/details/RawDataViewer";
+import { CancelRequestButton } from "@/src/components/requests/cancel-request-button";
 import DisplayWordBeingModified from "@/src/components/shared/DisplayWordBeingModified";
 import CustomCard from "@/src/components/customs/heroui/custom-card";
-import { startNavigationProgress } from "@/src/lib/navigation-progress";
+import { parseRequestPayload, requestDate, requestErrorKey } from "@/src/lib/request-presentation";
 
-
-export interface RequestDetailProps {
-  requestId: number;
-}
-
-type EntityData = Record<string, any>;
+export interface RequestDetailProps { requestId: number; }
 
 export default function RequestDetail({ requestId }: RequestDetailProps) {
   const t = useTranslations("Requests");
   const tDetails = useTranslations("RequestDetails");
-  const router = useRouter();
-  const [reason, setReason] = useState("");
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedData, setEditedData] = useState<Record<string, any>>({});
-  const { executeRecaptcha } = useGoogleReCaptcha()
+  const locale = useLocale();
+  const router = useProgressRouter();
   const entityTypeLabels = useMemo<Record<EntityTypes, string>>(() => ({
     words: t("entityTypes.words"),
     meanings: t("entityTypes.meanings"),
@@ -87,309 +61,81 @@ export default function RequestDetail({ requestId }: RequestDetailProps) {
     rejected: "danger",
   }), []);
 
-  // Fetch request data
-  const { data, isLoading, isError } = api.request.getUserRequest.useQuery({ requestId });
 
-  // Cancel request mutation
-  const cancelRequestMutation = api.request.cancelRequest.useMutation({
-    onSuccess: () => {
-      startNavigationProgress();
-      router.push("/my-requests");
-    },
-  });
-
-  // Update request mutation
-  const updateRequestMutation = api.request.updateRequest.useMutation({
-    onSuccess: () => {
-      startNavigationProgress();
-      router.push("/my-requests");
-    },
-  });
-
-  const handleCancelRequest = useCallback(async () => {
-    if (!executeRecaptcha) {
-      toast.error(t("Errors.captchaError"));
-      return;
-    }
-    try {
-      const captchaToken = await executeRecaptcha("cancel_request");
-      cancelRequestMutation.mutate({ requestId, captchaToken });
-    } catch (error) {
-      console.error("reCAPTCHA execution failed:", error);
-      toast.error(t("Errors.captchaError"));
-    }
-  }, [cancelRequestMutation, requestId, executeRecaptcha, t]);
-
-  const handleUpdateRequest = useCallback(async () => {
-    if (!executeRecaptcha) {
-      toast.error(t("Errors.captchaError"));
-      return;
-    }
-    try {
-      const captchaToken = await executeRecaptcha("update_request");
-      updateRequestMutation.mutate({
-        requestId,
-        newData: editedData,
-        reason: reason || data?.request.reason || "",
-        captchaToken,
-      });
-    } catch (error) {
-      console.error("reCAPTCHA execution failed:", error);
-      toast.error(t("Errors.captchaError"));
-    }
-  }, [updateRequestMutation, requestId, editedData, reason, data, executeRecaptcha, t]);
-
-  const handleEditData = (key: string, value: any) => {
-    setEditedData(prev => ({
-      ...prev,
-      [key]: value
-    }));
+  const { data, isLoading, isError, error, isFetching, refetch } = api.request.getUserRequest.useQuery({ requestId });
+  const loadError = requestErrorKey(error?.data?.code, "errorLoadingDetail");
+  const unavailable = isError && (error?.data?.code === "NOT_FOUND" || error?.data?.code === "UNAUTHORIZED" || error?.data?.code === "FORBIDDEN");
+  const back = () => router.push(getPathname({ locale, href: "/my-requests" }));
+  const dateLabel = (value: Date | null) => {
+    const date = requestDate(value, locale);
+    return date ? <time dateTime={date.dateTime} title={date.title}>{date.relative}</time> : t("details.unknownDate");
   };
 
-  if (isLoading) {
-    return (
-
-      <Spinner className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-    );
-  }
-
-  if (isError || !data) {
-    return (
-      <div className="container mx-auto p-6 text-center">
-        <p className="text-danger">{tDetails("errors.requestNotFound")}</p>
-        <Button
-          color="primary"
-          variant="flat"
-          onPress={() => {
-            startNavigationProgress();
-            router.push("/my-requests");
-          }}
-          className="mt-4"
-        >
-          {t("buttons.backToRequests")}
-        </Button>
+  if (isLoading) return <div role="status" className="container mx-auto flex min-h-64 w-full min-w-0 items-center justify-center p-6">
+    <Spinner label={t("messages.loadingDetail")} />
+  </div>;
+  // A failed refetch retains query data; terminal responses supersede that cached record.
+  if (!data || unavailable) {
+    const notFound = !isError || error?.data?.code === "NOT_FOUND";
+    return <div className="container mx-auto w-full min-w-0 space-y-4 px-4 py-8 sm:px-6">
+      <h1 className="text-2xl font-bold">{t("title")} #{requestId}</h1>
+      <p role="alert">{notFound ? tDetails("errors.requestNotFound") : t(loadError)}</p>
+      <div className="flex flex-wrap gap-3">
+        {!notFound && <Button variant="flat" className="min-h-11" isLoading={isFetching} onPress={() => void refetch()}>{t("buttons.retry")}</Button>}
+        <Button variant="flat" color="primary" className="min-h-11" onPress={back}>{t("buttons.backToRequests")}</Button>
       </div>
-    );
+    </div>;
   }
 
-  const request = data.request;
-  let newData: Record<string, any> = {};
-
-  // Extract new data from request
-  try {
-    if (request.newData && typeof request.newData === 'string') {
-      newData = JSON.parse(request.newData);
-    } else if (request.newData && typeof request.newData === 'object') {
-      newData = request.newData as Record<string, any>;
-    }
-  } catch (error) {
-    console.error("Failed to parse new data:", error);
-  }
-
-  // Get entity data from the API response
-  const entityData = data.entityData as EntityData | null;
-
+  const { request, entityData } = data;
   const isPending = request.status === "pending";
-  const isCreateRequest = data.request.action === "create";
-
-  return (
-    <div className="container mx-auto py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <Button
-          color="default"
-          variant="flat"
-          onPress={() => {
-            startNavigationProgress();
-            router.push("/my-requests");
-          }}
-          startContent={<ArrowLeft className="h-4 w-4" />}
-        >
-          {t("buttons.back")}
-        </Button>
-      </div>
-
-      <CustomCard className="border-default shadow-xs">
-        <CardHeader className="border-b border-default px-6 py-5">
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <h2 className="text-2xl font-semibold text-foreground ">
-                {t("title")}{` #${request.id}: ${entityTypeLabels[request.entityType]} - ${actionLabels[request.action]}`}
-              </h2>
-              {request.entityType === "words" && (request.action === "update" || request.action === "delete") && request.entityId && (
-                <div className="mt-1 flex items-center gap-2">
-                  <span className="text-sm text-default-600">{t("details.modifyingWordLabel")}:</span>
-                  <DisplayWordBeingModified wordId={request.entityId} />
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col md:flex-row md:items-center gap-4 text-sm">
-              <div className="text-default-500 flex items-center gap-1">
-                <Clock className="h-4 w-4" />
-                {request.requestDate
-                  ? formatDistanceToNow(new Date(request.requestDate), {
-                    addSuffix: true,
-                  })
-                  : t("details.unknownDate")}
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <Chip radius="md"
-                  color={statusColors[request.status]}
-                >
-                  {statusLabels[request.status]}
-                </Chip>
-                <Chip
-                  color={actionColors[request.action]}
-                  variant="flat"
-                  radius="md"
-                  classNames={{
-                    base: "px-3 py-1",
-                    content: "font-medium"
-                  }}
-                >
-                  {actionLabels[request.action]}
-                </Chip>
-              </div>
-            </div>
+  const payload = parseRequestPayload(request.newData);
+  // Deletion requests may have no proposed data; their existing entity is the content.
+  const newData = payload ?? (request.action === "delete" && request.newData == null ? {} : null);
+  return <div className="container mx-auto w-full min-w-0 px-4 py-8 sm:px-6">
+    <Button variant="flat" className="mb-6 min-h-11" onPress={back} startContent={<ArrowLeft aria-hidden className="h-4 w-4 shrink-0" />}>{t("buttons.back")}</Button>
+    {isError && <div role="alert" className="mb-4 flex flex-wrap items-center gap-3">
+      <p>{t(loadError)}</p><Button variant="flat" className="min-h-11" isLoading={isFetching} onPress={() => void refetch()}>{t("buttons.retry")}</Button>
+    </div>}
+    <CustomCard className="min-w-0 border-border shadow-xs">
+      <CardHeader className="min-w-0 border-b border-border p-4 sm:px-6 sm:py-5">
+        <div className="flex w-full min-w-0 flex-col gap-4">
+          <div className="min-w-0 space-y-2 [overflow-wrap:anywhere]">
+            <h1 className="text-2xl font-semibold text-foreground">{t("title")} <span className="tabular-nums">#{request.id}</span></h1>
+            <p className="text-foreground">{entityTypeLabels[request.entityType]} · {actionLabels[request.action]}</p>
+            {request.entityType === "words" && request.action !== "create" && request.entityId && <div className="flex min-w-0 flex-wrap items-baseline gap-x-2">
+              <span className="text-sm text-muted-foreground">{t("details.modifyingWordLabel")}:</span>
+              <DisplayWordBeingModified wordId={request.entityId} />
+            </div>}
           </div>
-        </CardHeader>
-
-        <CardBody className="px-6 py-5">
-          {/* Resolution Metadata */}
-          {!isPending && (
-            <div className="mb-8 rounded-md border border-default p-4">
-              <h3 className="mb-2 text-sm uppercase text-default-500">{t("details.resolution")}</h3>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div>
-                  <div className="text-xs text-default-500">{t("details.resolvedAtLabel")}</div>
-                  <div className="text-sm text-foreground">
-                    {request.resolvedAt
-                      ? formatDistanceToNow(new Date(request.resolvedAt), { addSuffix: true })
-                      : t("details.unknownDate")}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xs text-default-500">{t("details.resolvedByLabel")}</div>
-                  <div className="text-sm text-foreground">{request.resolvedBy ?? "—"}</div>
-                </div>
-                <div className="sm:col-span-3">
-                  <div className="text-xs text-default-500">{t("details.moderationReason")}</div>
-                  <p className="text-sm text-foreground whitespace-pre-wrap">{request.moderationReason || t("details.noReason")}</p>
-                </div>
-              </div>
-            </div>
-          )}
-          {/* Request Reason */}
-          {request.reason && (
-            <div className="mb-8 rounded-md border border-default p-4">
-              <h3 className="mb-2 text-sm uppercase text-default-500">{t("details.reason")}</h3>
-              <p className="text-foreground">{request.reason}</p>
-            </div>
-          )}
-
-          {/* Main Content */}
-          <RequestDetails
-            entityType={request.entityType}
-            action={request.action}
-            newData={newData}
-            oldData={entityData}
-            entityId={request.entityId ?? undefined}
-          />
-        </CardBody>
-
-        {/* Actions */}
-        {isPending && (
-          <CardFooter className="border-t border-default px-6 py-4">
-            {/* <div className="flex justify-end gap-3">
-              {!isEditing ? (
-                <>
-                  <Button
-                    color="primary"
-                    variant="flat"
-                    onPress={() => setIsEditing(true)}
-                  >
-                    {t("buttons.edit")}
-                  </Button>
-                  <Button
-                    color="danger"
-                    onPress={onOpen} // Opens modal for cancel confirmation
-                  >
-                    {t("buttons.cancelRequest")}
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    color="default"
-                    variant="flat"
-                    onPress={() => setIsEditing(false)}
-                  >
-                    {t("buttons.cancelEditing")}
-                  </Button>
-                  <Button
-                    color="primary"
-                    onPress={onOpen} // Opens modal for save changes confirmation
-                  >
-                    {t("buttons.saveChanges")}
-                  </Button>
-                </>
-              )}
-            </div> */}
-            <Button
-              color="danger"
-              onPress={onOpen} // Opens modal for cancel confirmation
-            >
-              {t("buttons.cancelRequest")}
-            </Button>
-          </CardFooter>
-        )}
-      </CustomCard>
-
-      {/* Modal for cancel confirmation or edit updates */}
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalContent>
-          {(modalClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                {isEditing ? t("details.updateRequestModalTitle") : tDetails("modals.cancel.title")}
-              </ModalHeader>
-              <ModalBody>
-                {isEditing ? (
-                  <>
-                    <p>{t("prompts.confirmUpdateRequest")}</p>
-                    <Textarea
-                      label={t("inputs.reasonForChangeLabel")}
-                      placeholder={t("inputs.reasonForChangePlaceholder")}
-                      value={reason}
-                      onValueChange={setReason}
-                      className="mt-4"
-                    />
-                  </>
-                ) : (
-                  <p>{tDetails("modals.cancel.description")}</p>
-                )}
-              </ModalBody>
-              <ModalFooter>
-                <Button color="default" variant="flat" onPress={modalClose}>
-                  {tDetails("modals.cancel.cancel")}
-                </Button>
-                <Button
-                  color={isEditing ? "primary" : "danger"}
-                  onPress={() => {
-                    if (isEditing) {
-                      handleUpdateRequest();
-                    } else {
-                      handleCancelRequest();
-                    }
-                    modalClose(); // Close modal after action
-                  }}
-                >
-                  {isEditing ? t("buttons.confirmUpdate") : tDetails("modals.cancel.confirm")}
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-    </div>
-  );
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            <div className="flex items-center gap-2 text-muted-foreground"><Clock aria-hidden className="h-4 w-4 shrink-0" />{dateLabel(request.requestDate)}</div>
+            <Chip radius="md" variant="flat" color={statusColors[request.status]} className="shrink-0 whitespace-nowrap">{statusLabels[request.status]}</Chip>
+            <Chip radius="md" variant="flat" color={actionColors[request.action]} className="shrink-0 whitespace-nowrap">{actionLabels[request.action]}</Chip>
+          </div>
+        </div>
+      </CardHeader>
+      <CardBody className="min-w-0 overflow-visible p-4 sm:px-6 sm:py-5">
+        {!isPending && <section className="mb-8 min-w-0 border-b border-border pb-6">
+          <h2 className="mb-3 text-lg font-semibold">{t("details.resolution")}</h2>
+          <dl className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="min-w-0"><dt className="text-sm text-muted-foreground">{t("details.resolvedAtLabel")}</dt><dd className="mt-1">{dateLabel(request.resolvedAt)}</dd></div>
+            <div className="min-w-0"><dt className="text-sm text-muted-foreground">{t("details.resolvedByLabel")}</dt><dd className="mt-1 [overflow-wrap:anywhere]"><bdi>{request.resolvedBy ?? t("details.unknownResolver")}</bdi></dd></div>
+            <div className="min-w-0 sm:col-span-2"><dt className="text-sm text-muted-foreground">{t("details.moderationReason")}</dt><dd dir="auto" className="mt-1 max-w-[75ch] whitespace-pre-wrap [overflow-wrap:anywhere]">{request.moderationReason || t("details.noReason")}</dd></div>
+          </dl>
+        </section>}
+        {request.reason && <section className="mb-8 min-w-0 border-b border-border pb-6">
+          <h2 className="mb-3 text-lg font-semibold">{t("details.reason")}</h2>
+          <p dir="auto" className="max-w-[75ch] whitespace-pre-wrap leading-relaxed [overflow-wrap:anywhere]">{request.reason}</p>
+        </section>}
+        {newData ? <RequestDetails entityType={request.entityType} action={request.action} newData={newData} oldData={entityData} entityId={request.entityId ?? undefined} /> : <div className="min-w-0">
+          <p role="alert">{tDetails("errors.invalidPayload")}</p>
+          <RawDataViewer data={request.newData} />
+        </div>}
+      </CardBody>
+      {isPending && !isError && <CardFooter className="min-w-0 flex-wrap border-t border-border px-4 py-4 sm:px-6">
+        <CancelRequestButton requestId={request.id} onCancelled={back} />
+      </CardFooter>}
+    </CustomCard>
+  </div>;
 }

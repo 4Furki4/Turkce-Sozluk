@@ -1,5 +1,6 @@
 "use client";
 
+import { CustomPagination } from "@/src/components/customs/heroui/custom-pagination";
 import React, { useState } from "react";
 import {
   Table,
@@ -12,7 +13,6 @@ import {
   Spinner,
   Button,
   Chip,
-  Pagination,
   Select,
   SelectItem,
   Input,
@@ -273,7 +273,7 @@ export default function AnnouncementsList() {
             base: "min-h-[300px]",
           }}
           bottomContent={
-            <Pagination
+            <CustomPagination
               isDisabled={totalPageNumber === undefined}
               classNames={{
                 wrapper: "mx-auto",

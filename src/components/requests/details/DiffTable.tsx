@@ -1,77 +1,39 @@
 import { useTranslations } from "next-intl";
+import { RequestDataValue } from "./DataDisplay";
 
 interface DiffTableProps {
-  oldData?: Record<string, any>;
-  newData?: Record<string, any>;
+  oldData?: Record<string, unknown>;
+  newData?: Record<string, unknown>;
 }
 
-const DiffTable: React.FC<DiffTableProps> = ({ oldData, newData }) => {
+export function DiffTable({ oldData, newData }: DiffTableProps) {
   const t = useTranslations("RequestDetails.DiffTable");
   const tDb = useTranslations("DbFieldLabels");
-
-  if (!newData) {
-    return <div>{t("noData")}</div>;
-  }
-
-  const allKeys = Object.keys(newData);
-
-  const renderValue = (value: any) => {
-    if (value === undefined || value === null) {
-      return <span className="text-muted-foreground">N/A</span>;
-    }
-    if (Array.isArray(value)) {
-      return value.length > 0 ? value.join(', ') : <span className="text-muted-foreground">-</span>;
-    }
-    if (typeof value === 'object') {
-      return JSON.stringify(value);
-    }
-    return String(value);
-  };
-
-  return (
-    <div className="border rounded-md">
-      {/* Desktop Header */}
-      <div className="hidden md:grid md:grid-cols-3 gap-4 px-4 py-2 bg-muted/50 font-semibold text-sm border-b border-border">
-        <div>{t("field")}</div>
-        <div>{t("oldValue")}</div>
-        <div>{t("newValue")}</div>
-      </div>
-
-      {/* Data Rows */}
-      <div className="divide-y divide-border">
-        {allKeys.map((key) => {
-          const oldValue = oldData?.[key];
-          const newValue = newData?.[key];
-          const isChanged = JSON.stringify(oldValue) !== JSON.stringify(newValue);
-          const isNewField = oldValue === undefined;
-
-          return (
-            <div key={key} className="grid grid-cols-1 md:grid-cols-3 gap-x-4 px-4 py-3 text-sm items-start">
-              {/* Field Label */}
-              <div className="font-semibold md:font-medium mb-1 md:mb-0">{tDb(key as any)}</div>
-
-              {/* Values */}
-              <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
-                {/* Old Value */}
-                <div className={isChanged && !isNewField ? "p-2 rounded bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400" : ""}>
-                  <span className="font-bold text-xs text-muted-foreground md:hidden">OLD: </span>
-                  <span className={isChanged && !isNewField ? "line-through" : ""}>
-                    {isNewField ? <span className="text-muted-foreground">-</span> : renderValue(oldValue)}
-                  </span>
-                </div>
-
-                {/* New Value */}
-                <div className={isChanged ? "p-2 rounded bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400" : ""}>
-                  <span className="font-bold text-xs text-muted-foreground md:hidden">NEW: </span>
-                  {isChanged ? renderValue(newValue) : <span className="text-muted-foreground">-</span>}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+  if (!newData || Object.keys(newData).length === 0) return <p>{t("noData")}</p>;
+  return <div className="min-w-0 max-w-full rounded-md border border-border">
+    <div className="hidden grid-cols-3 gap-4 border-b border-border bg-muted/50 px-4 py-3 text-sm font-semibold md:grid">
+      <div>{t("field")}</div><div>{t("oldValue")}</div><div>{t("newValue")}</div>
     </div>
-  );
-};
-
-export { DiffTable };
+    <div className="divide-y divide-border">
+      {Object.keys(newData).map(key => {
+        const oldValue = oldData?.[key];
+        const newValue = newData[key];
+        const changed = JSON.stringify(oldValue) !== JSON.stringify(newValue);
+        const existing = oldValue !== undefined;
+        return <div key={key} className="grid min-w-0 grid-cols-1 items-start gap-x-4 gap-y-2 px-4 py-3 text-base md:grid-cols-3">
+          <div className="min-w-0 font-medium [overflow-wrap:anywhere]">{tDb.has(key) ? tDb(key) : key}</div>
+          <div className="grid min-w-0 grid-cols-1 gap-3 md:col-span-2 md:grid-cols-2">
+            <div className={`min-w-0 [overflow-wrap:anywhere] ${changed && existing ? "rounded-md bg-danger/10 p-2 text-danger-700 dark:text-danger-300" : ""}`}>
+              <p className="mb-1 text-sm font-medium md:hidden">{t("oldValue")}</p>
+              <div className={changed && existing ? "line-through" : ""}><RequestDataValue value={oldValue} field={key} /></div>
+            </div>
+            <div className={`min-w-0 [overflow-wrap:anywhere] ${changed ? "rounded-md bg-success/10 p-2 text-success-800 dark:text-success-300" : ""}`}>
+              <p className="mb-1 text-sm font-medium md:hidden">{t("newValue")}</p>
+              <RequestDataValue value={newValue} field={key} />
+            </div>
+          </div>
+        </div>;
+      })}
+    </div>
+  </div>;
+}

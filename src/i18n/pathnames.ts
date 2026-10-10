@@ -3,6 +3,7 @@ export const localePrefix = "as-needed";
 
 export const pathnames = {
   "/": "/",
+    "/ui-stress/requests": "/ui-stress/requests",
   "/signin": {
     en: "/signin",
     tr: "/giris-yap",

@@ -38,12 +38,13 @@ export const CustomSelect = <T extends object>(
             className={cn("w-full", className)}
             // Deeply merge our default classNames with any custom ones passed in.
             classNames={{
+                ...classNames,
                 base: cn(styles.base(), classNames?.base),
                 trigger: cn(styles.trigger(), classNames?.trigger),
+                mainWrapper: cn(styles.mainWrapper(), classNames?.mainWrapper),
                 label: cn(styles.label(), classNames?.label),
                 listbox: cn(styles.listbox(), classNames?.listbox),
                 popoverContent: cn(styles.popoverContent(), classNames?.popoverContent),
-                ...classNames,
             }}
         >
             {/*

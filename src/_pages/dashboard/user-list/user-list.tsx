@@ -21,7 +21,7 @@ import {
 } from "@heroui/react";
 import { Edit3, MoreVertical, Trash2 } from 'lucide-react';
 import { api } from '@/src/trpc/react';
-import { Pagination } from "@heroui/pagination";
+import { CustomPagination } from "@/src/components/customs/heroui/custom-pagination";
 import { Select, SelectItem } from "@heroui/select";
 import { rolesEnum, SelectUser } from '@/db/schema/users';
 import { Link } from '@/src/i18n/routing';
@@ -215,7 +215,7 @@ export default function UserList(
                     </Select>
                 </div>
             } bottomContent={
-                <Pagination isDisabled={usersCountQuery.data === undefined} classNames={{
+                <CustomPagination isDisabled={usersCountQuery.data === undefined} classNames={{
                     wrapper: ["mx-auto"]
                 }} isCompact showControls total={totalPageNumber} page={currentPage} onChange={(page) => {
                     setPageNumber(page);

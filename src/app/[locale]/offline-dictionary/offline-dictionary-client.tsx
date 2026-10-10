@@ -93,26 +93,23 @@ export default function OfflineDictionaryClient() {
     const checkStatus = useCallback(async () => {
         setStatus("checking");
         setError(null);
-
-        if (!DATA_BASE_URL) {
-            setError(t("error.r2_url_missing"));
-            setStatus("error");
-            return;
-        }
+        let localStatusLoaded = false;
 
         try {
+            // Read the installed state before contacting the server. A failed
+            // update check must not hide a usable local dictionary.
+            const offlineMetadata = await getOfflineMetadata();
+            const localV = await getLocalVersion();
+            setLocalMetadata(offlineMetadata);
+            setLocalVersionState(localV);
+            localStatusLoaded = true;
+            if (!DATA_BASE_URL) throw new Error("Offline data source unavailable");
             // Fetch remote metadata from the R2 public URL
             const response = await fetch(`${DATA_BASE_URL}/${FOLDER_NAME}/metadata.json`);
             if (!response.ok) throw new Error(t("error.metadata_fetch_failed"));
             const remoteMeta: Metadata = await response.json();
             setRemoteVersion(remoteMeta.version);
             setMetadata(remoteMeta);
-
-            const offlineMetadata = await getOfflineMetadata();
-            setLocalMetadata(offlineMetadata);
-
-            const localV = await getLocalVersion();
-            setLocalVersionState(localV);
 
             // Calculate total download size if metadata includes file sizes
             if (remoteMeta.totalSize) {
@@ -133,7 +130,7 @@ export default function OfflineDictionaryClient() {
             }
         } catch (err) {
             console.error(err);
-            setError(err instanceof Error ? err.message : String(err));
+            setError(t(localStatusLoaded ? "error.metadata_fetch_failed" : "error.local_storage_failed"));
             setStatus("error");
         }
     }, [t, calculateDownloadSize]);
@@ -164,11 +161,16 @@ export default function OfflineDictionaryClient() {
                     await checkStatus();
                     worker.terminate();
                 } else if (type === 'ERROR') {
-                    setError(event.data.error);
+                    setError(t("error.download_failed"));
                     setLocalMetadata(await getOfflineMetadata());
                     setStatus("failed");
                     worker.terminate();
                 }
+            };
+            worker.onerror = () => {
+                setError(t("error.download_failed"));
+                setStatus("failed");
+                worker.terminate();
             };
 
             worker.postMessage({
@@ -179,7 +181,7 @@ export default function OfflineDictionaryClient() {
 
         } catch (err) {
             console.error(err);
-            setError(err instanceof Error ? err.message : String(err));
+            setError(t("error.download_failed"));
             setStatus("error");
         }
     };
@@ -192,7 +194,7 @@ export default function OfflineDictionaryClient() {
             await checkStatus();
         } catch (err) {
             console.error(err);
-            setError(err instanceof Error ? err.message : String(err));
+            setError(t("error.delete_failed"));
             setStatus("error");
         }
     };
@@ -225,7 +227,7 @@ export default function OfflineDictionaryClient() {
                     <>
                         <div>
                             <p>{t("status.downloading")}...</p>
-                            <Progress value={progress} className="w-full mt-2" />
+                            <Progress aria-label={t("status.downloading")} value={progress} className="w-full mt-2" />
                             <p className="text-sm text-center mt-1">{Math.round(progress)}%</p>
                         </div>
                         <Alert color="default" title={t("status.downloading_title")} description={t("status.downloading_desc")} />
@@ -241,13 +243,13 @@ export default function OfflineDictionaryClient() {
                         color="danger"
                         title={t("status.failed_title")}
                         description={localMetadata?.activeVersion
-                            ? t("status.failed_previous_kept_desc", { error: localMetadata.lastError ?? error ?? "" })
-                            : (localMetadata?.lastError ?? error ?? t("status.failed_desc"))}
+                            ? t("status.failed_previous_kept_desc", { error: error ?? t("error.download_failed") })
+                            : (error ?? t("status.failed_desc"))}
                     />
                 );
             case "error":
                 return (
-                    <Alert color="danger" title={t("status.error_title")} description={error} />
+                    <Alert color="danger" title={t("status.error_title")} description={localVersion ? t("status.check_failed_previous_kept_desc") : error} />
                 );
             default:
                 return null
@@ -262,6 +264,7 @@ export default function OfflineDictionaryClient() {
                 <div>
                     {renderStatus()}
                 </div>
+                {status === "error" && localVersion ? <p role="status" className="text-sm text-muted-foreground">{t("download_info.installed_words")}: {localMetadata?.installedWordCount.toLocaleString() ?? "—"}</p> : null}
 
                 {/* File Size Information */}
                 {(status === "not-downloaded" || status === "update-available" || status === "failed" || status === "cleared") && (
@@ -326,8 +329,8 @@ export default function OfflineDictionaryClient() {
                     >
                         {t("buttons.delete")}
                     </Button>
-                    <Button onPress={checkStatus} variant="ghost" disabled={isLoading} className="w-full" startContent={<RefreshCw className="mr-2 h-4 w-4" />}>
-                        {t("buttons.check_status")}
+                    <Button onPress={checkStatus} variant="ghost" isDisabled={isLoading} className="w-full" startContent={<RefreshCw className="mr-2 h-4 w-4" />}>
+                        {status === "error" || status === "failed" ? t("buttons.retry") : t("buttons.check_status")}
                     </Button>
                 </div>
             </CardFooter>

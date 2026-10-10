@@ -4,6 +4,7 @@ import React from 'react';
 import { Select, SelectItem, type SelectProps } from "@heroui/react";
 import { cn } from '@/lib/utils';
 import { tv } from 'tailwind-variants';
+import { useTranslations } from 'next-intl';
 
 // Define the structure for the options we'll pass in.
 // It's a simple key-value record, like your `entityTypeLabels` object.
@@ -23,11 +24,12 @@ export interface CustomSelectProps extends Omit<SelectProps, 'children'> {
 export function CustomSelect({
     options,
     showAllOption = false,
-    allOptionLabel = "All",
+    allOptionLabel,
     className,
     classNames,
     ...props
 }: CustomSelectProps) {
+    const t = useTranslations("SharedUI");
     // Get the default styles
 
     // We use tailwind-variants to define the default styles for our component slots.
@@ -54,17 +56,16 @@ export function CustomSelect({
             // Deeply merge our default classNames with any custom ones passed in.
             // This allows you to override specific slots, like `trigger`, while keeping the others.
             classNames={{
+                ...classNames,
                 base: cn(styles.base(), classNames?.base),
                 trigger: cn(styles.trigger(), classNames?.trigger),
                 label: cn(styles.label(), classNames?.label),
                 listbox: cn(styles.listbox(), classNames?.listbox),
                 popoverContent: cn(styles.popoverContent(), classNames?.popoverContent),
-                // Pass through any other classNames not defined in our defaults
-                ...classNames,
             }}
         >
             <>
-                {showAllOption && <SelectItem key="all">{allOptionLabel}</SelectItem>}
+                {showAllOption && <SelectItem key="all">{allOptionLabel ?? t("All")}</SelectItem>}
                 {Object.entries(options).map(([key, label]) => (
                     <SelectItem key={key}>
                         {label}

@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { tv } from 'tailwind-variants';
 import type { RangeValue } from "@react-types/shared";
 import type { DateValue } from "@internationalized/date";
-import { parseDate, getLocalTimeZone } from "@internationalized/date";
+import { fromDate, toCalendarDate, getLocalTimeZone } from "@internationalized/date";
 
 export interface CustomDateRangePickerProps extends Omit<DateRangePickerProps, 'children' | 'value' | 'onChange'> {
     onDateRangeChange?: (startDate: Date | null, endDate: Date | null) => void;
@@ -38,8 +38,8 @@ export function CustomDateRangePicker({
 
         try {
             return {
-                start: parseDate(value.start.toISOString().split('T')[0]),
-                end: parseDate(value.end.toISOString().split('T')[0]),
+                start: toCalendarDate(fromDate(value.start, getLocalTimeZone())),
+                end: toCalendarDate(fromDate(value.end, getLocalTimeZone())),
             };
         } catch (error) {
             console.error('Error parsing dates for DateRangePicker:', error);
@@ -71,11 +71,11 @@ export function CustomDateRangePicker({
             onChange={handleValueChange}
             className={className}
             classNames={{
+                ...classNames,
                 base: cn(styles.base(), classNames?.base),
                 inputWrapper: cn(styles.inputWrapper(), classNames?.inputWrapper),
                 label: cn(styles.label(), classNames?.label),
                 popoverContent: cn(styles.popoverContent(), classNames?.popoverContent),
-                ...classNames,
             }}
             {...props}
         />
