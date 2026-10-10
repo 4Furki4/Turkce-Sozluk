@@ -40,7 +40,10 @@ export function CancelRequestButton({ requestId, compact = false, onCancelled }:
       setOpen(false);
       toast.success(t("messages.cancelled"));
       // A failed refresh must not turn a successful cancellation into a failed action.
-      await Promise.allSettled([utils.request.getUserRequests.invalidate()]);
+      await Promise.allSettled([
+        utils.request.getUserRequests.invalidate(),
+        utils.request.getUserRequest.invalidate({ requestId }),
+      ]);
       onCancelled?.();
     } catch (cause) {
       const code = (cause as { data?: { code?: string } })?.data?.code;

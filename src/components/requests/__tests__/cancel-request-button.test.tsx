@@ -4,10 +4,11 @@ import { CancelRequestButton } from "../cancel-request-button";
 
 const mockCancel = jest.fn();
 const mockInvalidate = jest.fn().mockResolvedValue(undefined);
+const mockInvalidateDetail = jest.fn().mockResolvedValue(undefined);
 const mockCaptcha = jest.fn();
 jest.mock("@/src/trpc/react", () => ({ api: {
   request: { cancelRequest: { useMutation: () => ({ mutateAsync: mockCancel }) } },
-  useUtils: () => ({ request: { getUserRequests: { invalidate: mockInvalidate } } }),
+  useUtils: () => ({ request: { getUserRequests: { invalidate: mockInvalidate }, getUserRequest: { invalidate: mockInvalidateDetail } } }),
 } }));
 jest.mock("react-google-recaptcha-v3", () => ({ useGoogleReCaptcha: () => ({ executeRecaptcha: mockCaptcha }) }));
 jest.mock("sonner", () => ({ toast: { success: jest.fn() } }));
@@ -24,6 +25,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockCaptcha.mockResolvedValue("test-token");
   mockInvalidate.mockResolvedValue(undefined);
+  mockInvalidateDetail.mockResolvedValue(undefined);
 });
 
 it("retains confirmation and shows a retryable error when cancellation fails", async () => {
@@ -37,8 +39,24 @@ it("retains confirmation and shows a retryable error when cancellation fails", a
   expect(done).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole("button", { name: "RequestDetails.modals.cancel.confirm" }));
   await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
-  expect(done).toHaveBeenCalledTimes(1);
+  await waitFor(() => expect(done).toHaveBeenCalledTimes(1));
   expect(mockInvalidate).toHaveBeenCalledTimes(1);
+  expect(mockInvalidateDetail).toHaveBeenCalledWith({ requestId: 42 });
+});
+
+it("keeps a successful cancellation successful when cache refreshes fail", async () => {
+  const done = jest.fn();
+  mockCancel.mockResolvedValueOnce({ success: true });
+  mockInvalidate.mockRejectedValueOnce(new Error("offline"));
+  mockInvalidateDetail.mockRejectedValueOnce({ data: { code: "NOT_FOUND" } });
+  render(<CancelRequestButton requestId={42} onCancelled={done} />);
+  fireEvent.click(screen.getByRole("button", { name: "Requests.buttons.cancelSpecific" }));
+  fireEvent.click(screen.getByRole("button", { name: "RequestDetails.modals.cancel.confirm" }));
+  await waitFor(() => expect(done).toHaveBeenCalledTimes(1));
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(mockCancel).toHaveBeenCalledTimes(1);
+  expect(mockInvalidateDetail).toHaveBeenCalledWith({ requestId: 42 });
 });
 
 it("locks duplicate submissions while verification is still pending", async () => {

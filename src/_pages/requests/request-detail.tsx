@@ -64,6 +64,7 @@ export default function RequestDetail({ requestId }: RequestDetailProps) {
 
   const { data, isLoading, isError, error, isFetching, refetch } = api.request.getUserRequest.useQuery({ requestId });
   const loadError = requestErrorKey(error?.data?.code, "errorLoadingDetail");
+  const unavailable = isError && (error?.data?.code === "NOT_FOUND" || error?.data?.code === "UNAUTHORIZED" || error?.data?.code === "FORBIDDEN");
   const back = () => router.push(getPathname({ locale, href: "/my-requests" }));
   const dateLabel = (value: Date | null) => {
     const date = requestDate(value, locale);
@@ -73,7 +74,8 @@ export default function RequestDetail({ requestId }: RequestDetailProps) {
   if (isLoading) return <div role="status" className="container mx-auto flex min-h-64 w-full min-w-0 items-center justify-center p-6">
     <Spinner label={t("messages.loadingDetail")} />
   </div>;
-  if (!data) {
+  // A failed refetch retains query data; terminal responses supersede that cached record.
+  if (!data || unavailable) {
     const notFound = !isError || error?.data?.code === "NOT_FOUND";
     return <div className="container mx-auto w-full min-w-0 space-y-4 px-4 py-8 sm:px-6">
       <h1 className="text-2xl font-bold">{t("title")} #{requestId}</h1>
@@ -131,7 +133,7 @@ export default function RequestDetail({ requestId }: RequestDetailProps) {
           <RawDataViewer data={request.newData} />
         </div>}
       </CardBody>
-      {isPending && <CardFooter className="min-w-0 flex-wrap border-t border-border px-4 py-4 sm:px-6">
+      {isPending && !isError && <CardFooter className="min-w-0 flex-wrap border-t border-border px-4 py-4 sm:px-6">
         <CancelRequestButton requestId={request.id} onCancelled={back} />
       </CardFooter>}
     </CustomCard>
