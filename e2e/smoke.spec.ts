@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
+import trMessages from "../messages/tr.json";
+import enMessages from "../messages/en.json";
 
 const definition = "Okumak için yazılmış veya basılmış yaprakların bir araya getirilmiş biçimi.";
 
@@ -10,11 +12,12 @@ test.beforeEach(async ({ page }) => {
 
 for (const locale of ["tr", "en"] as const) {
   const searchPath = `/${locale}/${locale === "tr" ? "arama" : "search"}`;
+  const messages = locale === "tr" ? trMessages : enMessages;
 
   test(`${locale}: search by keyboard, render database result, and go Back`, async ({ page }) => {
     await page.goto(`/${locale}`);
     await expect(page.locator("html")).toHaveAttribute("lang", locale);
-    const input = page.getByRole("searchbox", { name: "search words" });
+    const input = page.getByRole("searchbox", { name: messages.Home.hero.searchPlaceholder, exact: true });
     await input.fill("kitap");
     await input.press("Enter");
     await expect(page).toHaveURL(`${searchPath}/kitap`);
@@ -59,22 +62,28 @@ for (const locale of ["tr", "en"] as const) {
 
     await page.goto(`${searchPath}/kitap`);
     await expect(page.getByText(definition, { exact: true })).toBeVisible();
-    const save = page.getByRole("button", { name: "save word" });
+    const save = page.getByRole("button", { name: messages.WordCard.Save, exact: true });
+    const unsave = page.getByRole("button", { name: messages.WordCard.Unsave, exact: true });
+    await expect(save).toHaveAttribute("aria-pressed", "false");
     const [savedResponse] = await Promise.all([
       page.waitForResponse(response => response.url().includes("user.saveWord") && response.request().method() === "POST"),
       save.click(),
     ]);
     expect(savedResponse.ok()).toBe(true);
-    await expect(save.locator("svg")).toHaveClass(/fill-primary/);
+    await expect(unsave).toHaveAttribute("aria-pressed", "true");
+    await expect(unsave.locator("svg")).toHaveClass(/fill-primary/);
     await page.reload();
-    await expect(save.locator("svg")).toHaveClass(/fill-primary/);
+    await expect(unsave).toHaveAttribute("aria-pressed", "true");
+    await expect(unsave.locator("svg")).toHaveClass(/fill-primary/);
     const [unsavedResponse] = await Promise.all([
       page.waitForResponse(response => response.url().includes("user.saveWord") && response.request().method() === "POST"),
-      save.click(),
+      unsave.click(),
     ]);
     expect(unsavedResponse.ok()).toBe(true);
+    await expect(save).toHaveAttribute("aria-pressed", "false");
     await expect(save.locator("svg")).toHaveClass(/fill-transparent/);
     await page.reload();
+    await expect(save).toHaveAttribute("aria-pressed", "false");
     await expect(save.locator("svg")).toHaveClass(/fill-transparent/);
   });
 }
