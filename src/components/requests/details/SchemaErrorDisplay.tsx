@@ -12,7 +12,7 @@ const SchemaErrorDisplay: FC<SchemaErrorDisplayProps> = ({ error, title }) => {
   const t = useTranslations("RequestDetails");
 
   return (
-    <div className="p-4 border border-danger-500 bg-danger-50 rounded-md text-danger-700">
+    <div role="alert" className="min-w-0 rounded-md border border-danger/40 bg-danger/10 p-4 text-danger-700 [overflow-wrap:anywhere] dark:text-danger-300">
       <h3 className="font-bold text-lg mb-2">{title || t("SchemaError.title")}</h3>
       <p className="mb-3">{t("SchemaError.description")}</p>
       <ul className="list-disc list-inside space-y-1">

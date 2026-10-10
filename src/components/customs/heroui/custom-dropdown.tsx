@@ -11,7 +11,7 @@ export interface CustomDropdownProps extends DropdownProps {
 export default function CustomDropdown({ children, ...props }: CustomDropdownProps) {
     const { isBlurEnabled } = useSnapshot(preferencesState);
     return (
-        <Dropdown radius='md' {...props} motionProps={{
+        <Dropdown radius='md' {...props} motionProps={props.motionProps ?? {
             variants: {
                 enter: {
                     opacity: 1,
@@ -30,9 +30,9 @@ export default function CustomDropdown({ children, ...props }: CustomDropdownPro
             },
         }}
             classNames={{
+                ...props.classNames,
                 content: cn("bg-background/70 backdrop-blur-sm", isBlurEnabled && "bg-background/70 backdrop-blur-sm", props.classNames?.content),
 
-                ...props.classNames
             }}>
             {children}
         </Dropdown>

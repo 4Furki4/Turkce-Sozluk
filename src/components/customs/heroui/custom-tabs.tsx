@@ -21,6 +21,7 @@ export function CustomTabs({
             {...props}
             // Deeply merge the default classNames with any provided via props
             classNames={{
+                ...classNames,
                 tabList: cn(
                     "w-full bg-primary/10 border border-primary",
                     classNames?.tabList
@@ -30,8 +31,6 @@ export function CustomTabs({
                     "data-[selected=true]:bg-primary/60",
                     classNames?.tab
                 ),
-                // Pass through any other specific slot overrides
-                ...classNames,
             }}
         >
             {/* Render the children, which will be the <Tab> components */}

@@ -38,9 +38,9 @@ export const CreateRelatedWord: FC<RequestDetailComponentProps> = ({ newData, en
 
   // Combine the word information with the resolved data
   const displayData = {
-    wordName: wordData?.name || 'Unknown Word',
+    wordName: wordData?.name || (entityId ? `ID: ${entityId}` : t("unknownWord")),
     relationType: safeParsedData.data?.relationType,
-    relatedWord: resolvedData.new?.relatedWord || 'Unknown Related Word',
+    relatedWord: resolvedData.new?.relatedWord || `ID: ${safeParsedData.data.relatedWordId}`,
   };
 
   return (

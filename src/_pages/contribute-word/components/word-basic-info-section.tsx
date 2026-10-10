@@ -9,15 +9,16 @@ import { CustomInput } from "@/src/components/customs/heroui/custom-input";
 export interface WordBasicInfoSectionProps {
   control: Control<any>;
   errors: FieldErrors<any>;
+  section?: "name" | "metadata" | "all";
 }
 
-export default function WordBasicInfoSection({ control, errors }: WordBasicInfoSectionProps) {
+export default function WordBasicInfoSection({ control, errors, section = "all" }: WordBasicInfoSectionProps) {
   const t = useTranslations("ContributeWord");
 
   return (
     <div className="space-y-6">
       {/* Word Name */}
-      <Controller
+      {section !== "metadata" && <Controller
         name="name"
         control={control}
         render={({ field, fieldState: { error } }) => (
@@ -30,10 +31,10 @@ export default function WordBasicInfoSection({ control, errors }: WordBasicInfoS
             errorMessage={error?.message}
           />
         )}
-      />
+      />}
 
       {/* Phonetic, Prefix, Root, Suffix Row */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {section !== "name" && <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Phonetic */}
         <Controller
           name="phonetic"
@@ -42,6 +43,7 @@ export default function WordBasicInfoSection({ control, errors }: WordBasicInfoS
             <CustomInput
               {...field}
               label={t("phonetic")}
+              description={t("phoneticHelp")}
               placeholder={t("phoneticPlaceholder")}
               isInvalid={!!error}
               errorMessage={error?.message}
@@ -57,6 +59,7 @@ export default function WordBasicInfoSection({ control, errors }: WordBasicInfoS
             <CustomInput
               {...field}
               label={t("prefix")}
+              description={t("prefixHelp")}
               placeholder={t("prefixPlaceholder")}
               isInvalid={!!error}
               errorMessage={error?.message}
@@ -72,6 +75,7 @@ export default function WordBasicInfoSection({ control, errors }: WordBasicInfoS
             <CustomInput
               {...field}
               label={t("root")}
+              description={t("rootHelp")}
               placeholder={t("rootPlaceholder")}
               isInvalid={!!error}
               errorMessage={error?.message}
@@ -87,13 +91,14 @@ export default function WordBasicInfoSection({ control, errors }: WordBasicInfoS
             <CustomInput
               {...field}
               label={t("suffix")}
+              description={t("suffixHelp")}
               placeholder={t("suffixPlaceholder")}
               isInvalid={!!error}
               errorMessage={error?.message}
             />
           )}
         />
-      </div>
+      </div>}
     </div>
   );
 }

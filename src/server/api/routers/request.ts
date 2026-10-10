@@ -18,6 +18,7 @@ import { words } from "@/db/schema/words";
 import { meanings } from "@/db/schema/meanings";
 import { TRPCError } from "@trpc/server";
 import { verifyRecaptcha } from "@/src/lib/recaptcha";
+import { UserRequestListInputSchema } from "../schemas/requests";
 
 // Import handler modules
 import {
@@ -52,18 +53,7 @@ export const requestRouter = createTRPCRouter({
     // User request management (kept inline)
     // ============================================
     getUserRequests: protectedProcedure
-        .input(z.object({
-            page: z.number().default(1),
-            limit: z.number().default(10),
-            entityType: z.enum([
-                "words", "meanings", "roots", "related_words",
-                "related_phrases",
-                "part_of_speechs", "examples", "authors",
-                "word_attributes", "meaning_attributes", "pronunciations", "misspellings", "galatimeshur"
-            ]).optional(),
-            action: z.enum(["create", "update", "delete"]).optional(),
-            status: z.enum(["pending", "approved", "rejected"]).optional(),
-        }))
+        .input(UserRequestListInputSchema)
         .query(async ({ input, ctx: { db, session: { user } } }) => {
             const { page, limit, entityType, action, status } = input;
             const offset = (page - 1) * limit;
@@ -105,7 +95,7 @@ export const requestRouter = createTRPCRouter({
                 .from(requests)
                 .where(whereClause);
 
-            const totalCount = countResult[0]?.count || 0;
+            const totalCount = Number(countResult[0]?.count ?? 0);
             const totalPages = Math.ceil(totalCount / limit);
 
             return {
@@ -122,7 +112,7 @@ export const requestRouter = createTRPCRouter({
 
     getUserRequest: protectedProcedure
         .input(z.object({
-            requestId: z.number()
+            requestId: z.number().int().min(1).max(2147483647)
         }))
         .query(async ({ input, ctx: { db, session: { user } } }) => {
             const { requestId } = input;
@@ -166,7 +156,7 @@ export const requestRouter = createTRPCRouter({
 
     cancelRequest: protectedProcedure
         .input(z.object({
-            requestId: z.number(),
+            requestId: z.number().int().min(1).max(2147483647),
             captchaToken: z.string(),
         }))
         .mutation(async ({ input, ctx: { db, session: { user } } }) => {
@@ -179,23 +169,22 @@ export const requestRouter = createTRPCRouter({
                 });
             }
 
-            const requestData = await db.select()
-                .from(requests)
+            // Check ownership and pending status in the deletion itself, so a request
+            // approved while the confirmation is open cannot subsequently be removed.
+            const cancelled = await db.delete(requests)
                 .where(and(
                     eq(requests.id, requestId),
                     eq(requests.userId, user.id),
                     eq(requests.status, "pending")
-                ));
+                ))
+                .returning({ id: requests.id });
 
-            if (!requestData.length) {
+            if (!cancelled.length) {
                 throw new TRPCError({
                     code: "NOT_FOUND",
                     message: "Request not found or cannot be canceled"
                 });
             }
-
-            await db.delete(requests)
-                .where(eq(requests.id, requestId));
 
             return { success: true };
         }),

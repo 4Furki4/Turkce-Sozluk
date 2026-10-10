@@ -109,6 +109,14 @@ export default function proxy(request: NextRequest) {
   }
 
   const normalizedPathname = normalizePathname(pathname);
+  // A Play rewrite can enter the proxy again. Its internal shell path must
+  // reach the route instead of receiving another locale prefix from next-intl.
+  const originalPlayPath = request.headers.get("x-play-path");
+  if (originalPlayPath && PLAY_ROUTE_REWRITES.get(originalPlayPath) === normalizedPathname) {
+    const response = NextResponse.next();
+    if (isEnglishPath(originalPlayPath)) response.headers.set("X-Robots-Tag", "noindex, follow");
+    return response;
+  }
   const canonicalPathname = getCanonicalPathname(normalizedPathname);
   if (isLocalizedRouteRewrite(normalizedPathname, canonicalPathname, request.headers.get("x-current-path"), request.headers.get("x-next-intl-locale"))) {
     const response = NextResponse.next();
@@ -136,6 +144,7 @@ export default function proxy(request: NextRequest) {
     playUrl.pathname = playPath;
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set("x-play-path", canonicalPathname);
+    requestHeaders.set("x-next-intl-locale", getLocaleFromPath(canonicalPathname));
 
     return NextResponse.rewrite(playUrl, { request: { headers: requestHeaders } });
   }

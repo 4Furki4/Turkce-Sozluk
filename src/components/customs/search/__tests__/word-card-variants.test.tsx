@@ -42,7 +42,7 @@ jest.mock("next-intl", () => ({
         NoMeaningsFound: "No meanings found",
         NavigationWord: "Navigation Word",
         Screenshot: "Screenshot",
-        Share: "Share",
+        CopyLink: "Copy link",
         PlayPronunciation: "Play pronunciation",
         NoPronunciationsPrompt: "No pronunciations yet.",
         AddPronunciationPrompt: "Request an edit to add one.",
@@ -98,6 +98,7 @@ jest.mock("@heroui/react", () => {
     Avatar: ({ name, src, ...props }: any) => <img alt={name} src={src} {...props} />,
     Chip: ({ children, ...props }: any) => <span {...props}>{children}</span>,
     Popover: ({ children }: any) => <div>{children}</div>,
+    Tooltip: ({ children }: any) => <>{children}</>,
     PopoverTrigger: ({ children }: any) => <>{children}</>,
     PopoverContent: ({ children }: any) => <div>{children}</div>,
     useDisclosure: () => ({

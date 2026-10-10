@@ -8,6 +8,8 @@ import { BentoCommonMistake, BentoGalatiMeshur } from "./hero-client-extras";
 import { Link } from "@/src/i18n/routing";
 import { api } from "@/src/trpc/server";
 import type { RouterOutputs } from "@/src/trpc/shared";
+import InstallAppControl from "./install-app-control";
+import { getHeadwordProps } from "@/src/lib/headword-presentation";
 
 type PopularWords = RouterOutputs["word"]["getPopularWords"];
 type WordOfTheDay = RouterOutputs["word"]["getWordOfTheDay"];
@@ -16,6 +18,7 @@ type GalatiMeshurData = RouterOutputs["extras"]["getGalatiMeshur"];
 type WordOfTheDayLabels = {
   title: string;
   details: string;
+  example: string;
   mock: {
     word: string;
     phonetic: string;
@@ -28,6 +31,7 @@ type FeatureItem = {
   description: string;
   icon: React.ReactNode;
   gradient: string;
+  action: React.ReactNode;
 };
 
 const emptyExtras = { data: [], total: 0 };
@@ -113,6 +117,7 @@ export default async function Hero({
   const wordOfTheDayLabels: WordOfTheDayLabels = {
     title: t("hero.WordOfTheDay.title"),
     details: t("hero.WordOfTheDay.details"),
+    example: t("hero.WordOfTheDay.example"),
     mock: {
       word: t("hero.WordOfTheDay.mock.word"),
       phonetic: t("hero.WordOfTheDay.mock.phonetic"),
@@ -130,6 +135,7 @@ export default async function Hero({
         </div>
       ),
       gradient: "from-blue-500/10 to-transparent",
+      action: <Link href="/offline-dictionary" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary underline-offset-4 hover:underline">{t("hero.offlineFeature.action")} <ArrowRight className="h-4 w-4" aria-hidden /></Link>,
     },
     {
       title: t("hero.pwaFeature.title"),
@@ -140,6 +146,7 @@ export default async function Hero({
         </div>
       ),
       gradient: "from-red-500/10 to-transparent",
+      action: <InstallAppControl />,
     },
     {
       title: t("hero.feature1.title"),
@@ -150,6 +157,7 @@ export default async function Hero({
         </div>
       ),
       gradient: "from-green-500/10 to-transparent",
+      action: <Link href="/contribute-word" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary underline-offset-4 hover:underline">{t("hero.feature1.action")} <ArrowRight className="h-4 w-4" aria-hidden /></Link>,
     },
   ];
 
@@ -172,7 +180,7 @@ export default async function Hero({
                 red: (chunks) => <span className="text-primary">{chunks}</span>,
               })}
             </h1>
-            <p className="text-fs-1 sm:text-fs-2 leading-8 text-muted-foreground sm:text-xl font-sans text-balance">
+            <p className="text-fs-1 sm:text-fs-2 leading-relaxed text-muted-foreground font-sans text-balance">
               {t("hero.motto")}
             </p>
           </div>
@@ -229,26 +237,26 @@ function BentoWordOfTheDay({
     <CustomCard className="h-full min-h-[300px] shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
       <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-md blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors duration-500" />
 
-      <CardHeader className="flex flex-row justify-between items-start pt-6 px-8 relative z-10">
+      <CardHeader className="flex flex-row flex-wrap justify-between items-start gap-3 pt-6 px-5 sm:px-8 relative z-10">
         <div className="space-y-1">
           <span className="text-xs font-mono text-primary uppercase tracking-widest bg-primary/10 px-2 py-1 rounded-md">
-            {labels.title}
+            {initialWordOfTheDay ? labels.title : labels.example}
           </span>
         </div>
         <Link
           href={{ pathname: "/search/[word]", params: { word: wordData.word } }}
-          className="text-sm font-medium text-foreground/70 hover:text-foreground flex items-center gap-1 transition-colors"
+          className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           {labels.details} <ArrowRight className="w-4 h-4" />
         </Link>
       </CardHeader>
 
-      <CardBody className="px-8 py-4 flex flex-col justify-center gap-4 relative z-10">
-        <div>
-          <h2 className="text-fs-4 sm:text-7xl font-serif font-bold text-foreground mb-4 group-hover:text-primary transition-colors duration-300">
-            {wordData.word}
+      <CardBody className="min-w-0 px-5 sm:px-8 py-4 flex flex-col justify-center gap-4 relative z-10">
+        <div className="dictionary-headword-container">
+          <h2 {...getHeadwordProps(wordData.word)} lang="tr" className="dictionary-headword [--headword-max:var(--step-4)] sm:[--headword-max:var(--step-5)] lg:[--headword-max:var(--step-6)] text-fs-4 sm:text-fs-5 lg:text-fs-6 font-serif font-bold leading-[1.1] text-foreground mb-4">
+            <Link href={{ pathname: "/search/[word]", params: { word: wordData.word } }} className="hover:text-primary underline-offset-8 hover:underline transition-colors">{wordData.word}</Link>
           </h2>
-          <div className="flex items-center gap-3 text-muted-foreground font-mono text-sm">
+          <div className="dictionary-prose flex flex-wrap items-center gap-3 text-muted-foreground font-mono text-sm">
             {wordData.phonetic ? <span>/{wordData.phonetic}/</span> : null}
             {wordData.phonetic && wordData.origin ? (
               <span className="w-1 h-1 bg-zinc-700 rounded-md" />
@@ -257,12 +265,12 @@ function BentoWordOfTheDay({
           </div>
         </div>
 
-        <p className="text-xl sm:text-2xl text-zinc-700 dark:text-zinc-300 font-light italic leading-relaxed line-clamp-3">
+        <p lang={initialWordOfTheDay ? "tr" : undefined} className="dictionary-prose max-w-[65ch] text-xl sm:text-2xl text-foreground/85 italic leading-relaxed line-clamp-3">
           &ldquo;{wordData.meaning}&rdquo;
         </p>
       </CardBody>
 
-      <CardFooter className="px-8 pb-8 pt-0 relative z-10">
+      <CardFooter className="px-5 sm:px-8 pb-6 sm:pb-8 pt-0 relative z-10">
         <div className="w-full h-px bg-gradient-to-r from-transparent via-zinc-700 to-transparent opacity-50" />
       </CardFooter>
     </CustomCard>
@@ -281,13 +289,14 @@ function BentoFeatures({ features }: { features: FeatureItem[] }) {
               <Divider className="block md:hidden" orientation="horizontal" />
             </>
           )}
-          <div className="p-6 relative overflow-hidden">
+          <div className="flex min-w-0 flex-1 flex-col p-6 relative overflow-hidden">
             <div className={`absolute top-0 right-0 w-full h-full bg-gradient-to-bl ${feature.gradient} dark:opacity-30 opacity-40 rounded-bl-full pointer-events-none`} />
             <div className="mb-4">{feature.icon}</div>
             <h3 className="text-lg font-bold text-foreground mb-2">{feature.title}</h3>
             <p className="text-sm text-balance text-muted-foreground leading-relaxed">
               {feature.description}
             </p>
+            <div className="mt-auto pt-3">{feature.action}</div>
           </div>
         </div>
       ))}

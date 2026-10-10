@@ -38,12 +38,11 @@ export default async function PlayRootLayout({
         notFound();
     }
 
+    setRequestLocale(locale);
     const [messages, session] = await Promise.all([
         getMessages(),
         auth.api.getSession({ headers: await headers() }).catch(() => null),
     ]);
-
-    setRequestLocale(locale);
 
     return (
         <html lang={locale}>

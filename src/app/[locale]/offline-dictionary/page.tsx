@@ -16,9 +16,9 @@ export default async function OfflineDictionaryPage({ params }: { params: Promis
                     : "Çevrim dışı sözlüğü bu cihaza indirmek, güncellemek ve yönetmek için JavaScript gerekir."}
             </NoScriptNotice>
             <CustomCard >
-                <div className="px-4 pt-4 pb-2 text-lg font-semibold">
+                <h1 className="px-4 pt-4 pb-2 text-2xl font-semibold">
                     {t("title")}
-                </div>
+                </h1>
                 <OfflineDictionaryClient />
             </CustomCard>
         </div>

@@ -29,6 +29,9 @@ jest.mock("next-intl", () => ({
       truncated: "This graph is capped.",
       counts: "{nodes} nodes / {edges} edges",
       loadGraph: "Show graph",
+      hideGraph: "Hide graph",
+      filters: "Relation types",
+      retry: "Retry",
       fullscreen: "Full screen",
       exitFullscreen: "Exit full screen",
       previewTitle: "Preview the relation map",
@@ -119,7 +122,7 @@ describe("WordRelationsGraph", () => {
     mockRouterPush.mockReset();
   });
 
-  it("renders a lazy preview before fetching", () => {
+  it("keeps the graph and advanced controls collapsed before a request", () => {
     mockUseQuery.mockReturnValue({
       data: undefined,
       isLoading: false,
@@ -128,7 +131,10 @@ describe("WordRelationsGraph", () => {
 
     render(<WordRelationsGraph wordId={1} word="kitap" />);
 
-    expect(screen.getByText("Preview the relation map")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Show graph" })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("button", { name: "Full screen" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Synonym" })).not.toBeInTheDocument();
+    expect(screen.queryByTestId("react-flow")).not.toBeInTheDocument();
     expect(mockUseQuery).toHaveBeenLastCalledWith(
       expect.any(Object),
       expect.objectContaining({ enabled: false }),
@@ -241,24 +247,26 @@ describe("WordRelationsGraph", () => {
     });
 
     render(<WordRelationsGraph wordId={1} word="kitap" />);
+    fireEvent.click(screen.getByRole("button", { name: "Show graph" }));
+    fireEvent.click(screen.getByRole("button", { name: "Relation types" }));
     fireEvent.click(screen.getByRole("button", { name: "Synonym" }));
     expect(mockUseQuery).toHaveBeenLastCalledWith(
       expect.objectContaining({
         relationTypes: ["synonym"],
       }),
       expect.objectContaining({
-        enabled: false,
+        enabled: true,
       }),
     );
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Show graph" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "Hide graph" }));
 
     expect(mockUseQuery).toHaveBeenLastCalledWith(
       expect.objectContaining({
         relationTypes: ["synonym"],
       }),
       expect.objectContaining({
-        enabled: true,
+        enabled: false,
       }),
     );
   });
@@ -271,6 +279,7 @@ describe("WordRelationsGraph", () => {
     });
 
     render(<WordRelationsGraph wordId={1} word="kitap" />);
+    fireEvent.click(screen.getByRole("button", { name: "Show graph" }));
     fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
 
     expect(screen.getByRole("button", { name: "Exit full screen" })).toBeInTheDocument();

@@ -22,6 +22,9 @@ module.exports = ({
     },
 
     extend: {
+      textColor: {
+        primary: "hsl(var(--primary-text))",
+      },
       fontFamily: {
         sans: ["var(--font-ibm-plex-sans)", "sans-serif"],
         mono: ["var(--font-ibm-plex-mono)", "monospace"],
@@ -175,7 +178,7 @@ module.exports = ({
               900: '#f8fafc',
               foreground: "#FFFFFF",
             },
-            focus: "#a91101",
+            focus: "#ff9999",
           },
         },
       }

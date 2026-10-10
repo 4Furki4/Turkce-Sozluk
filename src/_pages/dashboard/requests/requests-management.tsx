@@ -18,7 +18,7 @@ import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router"
 import { formatDistanceToNow } from "date-fns";
 import { EntityTypes, Actions } from "@/db/schema/requests";
 import { Link } from "@/src/i18n/routing";
-import { Pagination } from "@heroui/pagination";
+import { CustomPagination } from "@/src/components/customs/heroui/custom-pagination";
 import { keepPreviousData } from "@tanstack/react-query";
 
 const entityTypeLabels: Record<EntityTypes, string> = {
@@ -249,7 +249,7 @@ export default function RequestsManagement() {
         }}
         isStriped
         bottomContent={
-          <Pagination
+          <CustomPagination
             isDisabled={totalPageNumber === undefined}
             classNames={{
               wrapper: ["mx-auto"]

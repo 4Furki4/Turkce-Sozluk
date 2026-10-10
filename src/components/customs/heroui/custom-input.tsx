@@ -44,14 +44,16 @@ export const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
             <Input
                 radius='md'
                 ref={ref}
+                className={className}
                 color="primary"
                 variant="bordered"
                 size="lg"
                 // Deeply merge our default styles with any custom ones passed in.
                 classNames={{
+                    ...classNames,
                     inputWrapper: cn(styles.inputWrapper(), classNames?.inputWrapper),
                     input: cn(styles.input(), classNames?.input),
-                    ...classNames,
+                    label: cn("text-foreground", classNames?.label),
                 }}
                 // Spread the rest of the props.
                 {...props}

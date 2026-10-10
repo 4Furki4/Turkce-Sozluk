@@ -1,76 +1,38 @@
 import { useTranslations } from "next-intl";
 
 interface DataDisplayProps {
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   title?: string;
   isNested?: boolean;
 }
 
-// Keys that should have their values translated using RelationTypes
 const RELATION_TYPE_KEYS = ['relationType', 'newRelationType', 'originalRelationType'];
 
-const DataDisplay: React.FC<DataDisplayProps> = ({ data, title, isNested = false }) => {
+export function RequestDataValue({ value, field }: { value: unknown; field?: string }) {
+  const t = useTranslations("RequestDetails");
+  const tRelations = useTranslations("RelationTypes");
+  if (value === null || value === undefined || value === '') return <span className="text-muted-foreground italic">{t("empty")}</span>;
+  if (Array.isArray(value)) return value.length === 0
+    ? <span className="text-muted-foreground italic">{t("emptyArray")}</span>
+    : <ul className="min-w-0 space-y-2">{value.map((item, index) => <li key={index} className="min-w-0"><RequestDataValue value={item} /></li>)}</ul>;
+  if (typeof value === 'object') return <DataDisplay data={value as Record<string, unknown>} isNested />;
+  const text = field && RELATION_TYPE_KEYS.includes(field) && typeof value === 'string' && tRelations.has(value)
+    ? tRelations(value) : String(value);
+  return <bdi className="whitespace-pre-wrap [overflow-wrap:anywhere]">{text}</bdi>;
+}
+
+export function DataDisplay({ data, title, isNested = false }: DataDisplayProps) {
   const tDb = useTranslations("DbFieldLabels");
-  const tRequestDetails = useTranslations("RequestDetails");
-  const tRelationTypes = useTranslations("RelationTypes");
-
-  const renderValue = (value: any, key?: string): React.ReactNode => {
-    if (value === null || value === undefined || value === '') {
-      return <span className="text-muted-foreground italic">{tRequestDetails("empty")}</span>;
-    }
-
-    // Translate relation type values
-    if (key && RELATION_TYPE_KEYS.includes(key) && typeof value === 'string') {
-      try {
-        return tRelationTypes(value as any);
-      } catch {
-        return String(value);
-      }
-    }
-
-    if (Array.isArray(value)) {
-      if (value.length === 0) {
-        return <span className="text-muted-foreground italic">{tRequestDetails("emptyArray")}</span>;
-      }
-      return (
-        <ul className="list-none list-inside pl-1 space-y-1">
-          {value.map((item, index) => (
-            <li key={index}>{renderValue(item)}</li>
-          ))}
-        </ul>
-      );
-    }
-    if (typeof value === 'object') {
-      // For nested objects, render a simpler version without the outer border and title.
-      return <DataDisplay data={value} isNested />;
-    }
-    return String(value);
-  };
-
-  const allKeys = Object.keys(data);
-
-  const containerClasses = isNested
-    ? "mt-2"
-    : "border rounded-md";
-
-  return (
-    <div className={containerClasses}>
-      {title && !isNested && (
-        <div className="px-4 py-2 bg-muted/50 border-b border-border">
-          <h3 className="text-lg font-semibold">{title}</h3>
-        </div>
-      )}
-      <div className={isNested ? "" : "divide-y divide-border"}>
-        {allKeys.map((key) => (
-          <div key={key} className={`px-4 py-3 md:grid md:grid-cols-3 md:gap-4 text-sm ${isNested ? 'border-t border-border' : ''}`}>
-            <div className="font-semibold md:font-medium text-foreground">{tDb(key as any)}</div>
-            <div className="mt-1 md:mt-0 md:col-span-2 text-muted-foreground">{renderValue(data[key], key)}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-export { DataDisplay };
-
+  const t = useTranslations("RequestDetails");
+  const keys = Object.keys(data);
+  return <div className={`min-w-0 max-w-full ${isNested ? "" : "rounded-md border border-border"}`}>
+    {title && !isNested && <div className="border-b border-border bg-muted/50 px-4 py-3"><h3 className="text-lg font-semibold [overflow-wrap:anywhere]">{title}</h3></div>}
+    <dl className={isNested ? "" : "divide-y divide-border"}>
+      {keys.length === 0 && <div className="px-4 py-3 text-muted-foreground">{t("empty")}</div>}
+      {keys.map(key => <div key={key} className={`grid min-w-0 grid-cols-1 gap-x-4 gap-y-1 py-3 text-base md:grid-cols-3 ${isNested ? 'border-t border-border' : 'px-4'}`}>
+        <dt className="min-w-0 font-medium text-foreground [overflow-wrap:anywhere]">{tDb.has(key) ? tDb(key) : key}</dt>
+        <dd className="min-w-0 [overflow-wrap:anywhere] md:col-span-2"><RequestDataValue value={data[key]} field={key} /></dd>
+      </div>)}
+    </dl>
+  </div>;
+}

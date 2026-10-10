@@ -50,7 +50,7 @@ export default function WordLanguageAndAttributesSection({
   const [selectedAttributes, setSelectedAttributes] = React.useState<string[]>([]);
 
   const sortedLanguages = React.useMemo(
-    () => languages?.sort((a, b) => {
+    () => [...(languages || [])].sort((a, b) => {
       const aName = locale === "en" ? a.language_en : a.language_tr;
       const bName = locale === "en" ? b.language_en : b.language_tr;
       return aName.localeCompare(bName);
@@ -59,7 +59,7 @@ export default function WordLanguageAndAttributesSection({
   );
 
   const sortedWordAttributes = React.useMemo(
-    () => wordAttributesWithRequested?.sort((a, b) => a.attribute.localeCompare(b.attribute)) || [],
+    () => [...(wordAttributesWithRequested || [])].sort((a, b) => a.attribute.localeCompare(b.attribute)) || [],
     [wordAttributesWithRequested]
   );
 
@@ -71,9 +71,13 @@ export default function WordLanguageAndAttributesSection({
         control={control}
         render={({ field, fieldState: { error } }) => (
           <CustomAutocomplete
-            onSelectionChange={(key) => field.onChange(key)}
+            selectedKey={field.value || null}
+            onSelectionChange={(key) => field.onChange(key || "")}
+            labelPlacement="outside"
+            size="md"
+            inputProps={{ classNames: { inputWrapper: "h-12 min-h-12", label: "pb-0" } }}
             classNames={{
-              base: "w-full",
+              base: "w-full max-w-none sm:max-w-none",
             }}
             isLoading={languagesIsLoading}
             label={t("language")}
@@ -103,6 +107,8 @@ export default function WordLanguageAndAttributesSection({
             <CustomSelect
               items={sortedWordAttributes || []}
               label={t("attributes")}
+              labelPlacement="outside"
+              size="md"
               placeholder={t("selectAttributes")}
               selectionMode="multiple"
               selectedKeys={new Set(value)}
@@ -111,20 +117,11 @@ export default function WordLanguageAndAttributesSection({
               isInvalid={!!error}
               errorMessage={error?.message}
               classNames={{
-                base: "w-full"
+                base: "w-full max-w-none sm:max-w-none",
+                trigger: "h-12 min-h-12",
+                mainWrapper: "h-12",
               }}
               as={"div"}
-              endContent={
-                <Button
-                  isIconOnly
-                  size="sm"
-                  variant="light"
-                  onPress={onOpenAttributeModal}
-                  className="mb-4"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              }
             >
               {(attr) => (
                 <SelectItem
@@ -141,6 +138,9 @@ export default function WordLanguageAndAttributesSection({
             </CustomSelect>
           )}
         />
+        <Button type="button" isIconOnly aria-label={t("requestAttribute")} variant="flat" color="primary" onPress={onOpenAttributeModal} className="h-12 min-w-12 shrink-0">
+          <Plus className="h-4 w-4" aria-hidden />
+        </Button>
       </div>
     </div>
   );

@@ -306,13 +306,13 @@ export default function Navbar({
             }}
           >
             <DropdownItem key="light" startContent={<Sun className="w-4 h-4" />}>
-              Light
+              {navT("ThemeLight")}
             </DropdownItem>
             <DropdownItem key="dark" startContent={<Moon className="w-4 h-4" />}>
-              Dark
+              {navT("ThemeDark")}
             </DropdownItem>
             <DropdownItem key="system" startContent={<Monitor className="w-4 h-4" />}>
-              System
+              {navT("ThemeSystem")}
             </DropdownItem>
           </DropdownMenu>
         </CustomDropdown>

@@ -32,14 +32,10 @@ export default function SaveWord({
             return { previousValue };
         },
         onError: (error, { wordId }, context) => {
-            switch (error.message) {
-                case "UNAUTHORIZED":
-                    toast.error(t("UnauthSave"), {
-                        position: "bottom-center",
-                    });
-                    utils.user.getWordSaveStatus.setData(wordId, context?.previousValue)
-                    break;
-            }
+            utils.user.getWordSaveStatus.setData(wordId, context?.previousValue);
+            toast.error(t(error.data?.code === "UNAUTHORIZED" ? "UnauthSave" : "saveFailed"), {
+                position: "bottom-center",
+            });
         },
         // Always refetch after error or success:
         onSettled: (newValue, error, { wordId }) => {
@@ -48,17 +44,19 @@ export default function SaveWord({
     });
     return (
         <Button
-            className={cn("cursor-pointer z-50 sm:hover:scale-125 transition-all bg-transparent", className)}
+            className={cn("cursor-pointer h-11 min-w-11 bg-transparent", className)}
+            aria-label={t(savedWordsQuery.data ? "Unsave" : "Save")}
+            aria-pressed={Boolean(savedWordsQuery.data)}
             onPress={() => {
                 saveWordMutation.mutate({ wordId: word_data.word_id });
             }}
             isIconOnly
             disableRipple
 
-            disabled={saveWordMutation.isPending}
+            isDisabled={saveWordMutation.isPending}
         >
             <Heart
-                aria-label="save word"
+                aria-hidden
                 className={cn(
                     "h-5 w-5 sm:h-6 sm:w-6 transition-colors",
                     savedWordsQuery.data ? "fill-primary text-primary" : "fill-transparent",

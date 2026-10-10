@@ -1,29 +1,63 @@
 {
-  "Navigation": { "loading": "Yükleniyor…" },
+  "Navigation": {
+    "loading": "Yükleniyor…"
+  },
   "PronunciationWorkflow": {
     "title": "Telaffuz inceleme kuyruğu",
     "intro": "Yapay zekâ ile üretilen sesleri dinleyin, kararınızı kaydedin ve not ekleyin. Yalnızca onaylanan kayıtlar yayımlanabilir. Kararlar bu bilgisayarda saklanır.",
-    "filter": "İnceleme durumu", "batch": "Parti", "attentionOnly": "Özellikle kontrol edilmeli", "refresh": "Yenile", "all": "Tümü",
-    "unreviewed": "İncelenmedi", "approved": "Onaylandı", "rejected": "Reddedildi", "deferred": "Yeni kayıt gerekli",
-    "approve": "Onayla", "reject": "Reddet", "defer": "Yeni kayıt", "reset": "İncelemeyi sıfırla",
-    "previous": "Önceki", "next": "Sonraki", "empty": "Bu filtrelere uygun kayıt bulunamadı.", "error": "İnceleme kaydedilemedi veya yüklenemedi",
-    "generated": "Üretildi", "entries": "Sözlük maddeleri", "nextBatch": "Sonraki parti", "complete": "Tamamlandı", "entryIds": "Madde kimlikleri",
-    "automaticApproval": "Sözlük sahibi tercihi: kontrol işareti olmayan kayıtlar otomatik onaylanır", "manualApproval": "Elle onay", "pendingReview": "İnceleme bekliyor",
-    "listen": "Telaffuzu dinle:", "ai": "Yapay zekâ sesi · EMA", "seed": "Tohum", "speed": "Hız", "note": "İnceleme notu", "saved": "Karar kaydedildi:",
-    "circumflex": "Düzeltme işareti içeriyor", "singleCharacter": "Tek karakter", "veryShort": "Çok kısa sözcük", "shortAudio": "Çok kısa kayıt", "longAudio": "Uzun kayıt", "lostCircumflex": "EMA düzeltme işaretini kaldırdı"
+    "filter": "İnceleme durumu",
+    "batch": "Parti",
+    "attentionOnly": "Özellikle kontrol edilmeli",
+    "refresh": "Yenile",
+    "all": "Tümü",
+    "unreviewed": "İncelenmedi",
+    "approved": "Onaylandı",
+    "rejected": "Reddedildi",
+    "deferred": "Yeni kayıt gerekli",
+    "approve": "Onayla",
+    "reject": "Reddet",
+    "defer": "Yeni kayıt",
+    "reset": "İncelemeyi sıfırla",
+    "previous": "Önceki",
+    "next": "Sonraki",
+    "empty": "Bu filtrelere uygun kayıt bulunamadı.",
+    "error": "İnceleme kaydedilemedi veya yüklenemedi",
+    "generated": "Üretildi",
+    "entries": "Sözlük maddeleri",
+    "nextBatch": "Sonraki parti",
+    "complete": "Tamamlandı",
+    "entryIds": "Madde kimlikleri",
+    "automaticApproval": "Sözlük sahibi tercihi: kontrol işareti olmayan kayıtlar otomatik onaylanır",
+    "manualApproval": "Elle onay",
+    "pendingReview": "İnceleme bekliyor",
+    "listen": "Telaffuzu dinle:",
+    "ai": "Yapay zekâ sesi · EMA",
+    "seed": "Tohum",
+    "speed": "Hız",
+    "note": "İnceleme notu",
+    "saved": "Karar kaydedildi:",
+    "circumflex": "Düzeltme işareti içeriyor",
+    "singleCharacter": "Tek karakter",
+    "veryShort": "Çok kısa sözcük",
+    "shortAudio": "Çok kısa kayıt",
+    "longAudio": "Uzun kayıt",
+    "lostCircumflex": "EMA düzeltme işaretini kaldırdı"
   },
   "SavedPronunciation": {
-  "play": "{word} sözcüğünün telaffuzunu dinle",
-  "stop": "{word} sözcüğünün sesini durdur",
-  "loading": "Telaffuz yükleniyor…",
-  "missing": "Henüz ses kaydı yok",
-  "offline": "Ses çevrim dışıyken kullanılamıyor",
-  "error": "Ses açılamadı. Yeniden deneyin.",
-  "ai": "Yapay zekâ sesi · EMA",
-  "reviewed": "İncelenmiş ses kaydı",
-  "correct": "Düzeltme öner"
-},
+    "play": "{word} sözcüğünün telaffuzunu dinle",
+    "stop": "{word} sözcüğünün sesini durdur",
+    "loading": "Telaffuz yükleniyor…",
+    "missing": "Henüz ses kaydı yok",
+    "offline": "Ses çevrim dışıyken kullanılamıyor",
+    "error": "Ses açılamadı. Yeniden deneyin.",
+    "ai": "Yapay zekâ sesi · EMA",
+    "reviewed": "İncelenmiş ses kaydı",
+    "correct": "Düzeltme öner"
+  },
   "Navbar": {
+    "ThemeLight": "Açık",
+    "ThemeDark": "Koyu",
+    "ThemeSystem": "Sistem",
     "Home": "Ana Sayfa",
     "Word List": "Kelime Listesi",
     "WordBuilder": "Kelime Sihirbazı",
@@ -469,7 +503,8 @@
       "autocompleteLoading": "Kelime önerileri hazırlanıyor...",
       "feature1": {
         "title": "Katkıda Bulunun",
-        "description": "Yeni kelimeler, anlamlar ve özellikler önererek ve telaffuzlar ekleyerek sözlüğe katkıda bulunabilirsiniz"
+        "description": "Yeni kelimeler, anlamlar ve özellikler önererek ve telaffuzlar ekleyerek sözlüğe katkıda bulunabilirsiniz",
+        "action": "Kelime öner"
       },
       "feature2": {
         "title": "Değişiklik Önerin",
@@ -481,11 +516,19 @@
       },
       "offlineFeature": {
         "title": "Işık Hızında & Çevrim dışı",
-        "description": "Çevrim dışı sözlüğü indirerek internetiniz yokken de sözlüğü kullanın ve internetiniz varken daha hızlı sonuçlara ulaşın"
+        "description": "Çevrim dışı sözlüğü indirerek internetiniz yokken de sözlüğü kullanın ve internetiniz varken daha hızlı sonuçlara ulaşın",
+        "action": "Çevrim dışı sözlüğü aç"
       },
       "pwaFeature": {
         "title": "Uygulama Olarak Yükle",
-        "description": "Cihazınıza yükleyerek yerel uygulama deneyimi yaşayın. Ana ekranınızdan tek tıkla erişin."
+        "description": "Cihazınıza yükleyerek yerel uygulama deneyimi yaşayın. Ana ekranınızdan tek tıkla erişin.",
+        "action": "Uygulamayı yükle",
+        "installed": "Uygulama yüklendi",
+        "instructionsTitle": "Sözlüğü uygulama olarak yükle",
+        "instructionsBrowser": "Tarayıcı menüsünden “Uygulamayı yükle” veya “Ana ekrana ekle” seçeneğini seçip onaylayın.",
+        "instructionsSafari": "iPhone veya iPad’de Safari’nin Paylaş menüsünü açın, “Ana Ekrana Ekle”yi seçip Ekle’ye dokunun.",
+        "instructionsUnavailable": "Tarayıcınızda yükleme seçeneği yoksa sözlüğü burada kullanmaya devam edebilirsiniz.",
+        "close": "Anladım"
       },
       "WordOfTheDay": {
         "title": "Günün Kelimesi",
@@ -500,8 +543,11 @@
           "phonetic": "pe-pe",
           "origin": "Rumca",
           "meaning": "Konuşma bozukluğu olan, kekeleyen (kimse)."
-        }
-      }
+        },
+        "example": "Örnek kelime"
+      },
+      "searchAction": "Ara",
+      "searchMode": "Arama türü"
     },
     "HomeExtras": {
       "galatiMeshurTitle": "Galat-ı Meşhur",
@@ -571,6 +617,7 @@
     "RequestPronunciation": "Telaffuz talep et",
     "Screenshot": "Ekran görüntüsü",
     "Share": "Paylaş",
+    "CopyLink": "Bağlantıyı kopyala",
     "NoRelatedWordsFound": "İlgili kelime bulunamadı",
     "NoRelatedPhrasesFound": "İlgili atasöz bulunamadı",
     "turkish_equivalent": "türkçe karşılığı",
@@ -594,7 +641,11 @@
     "RequestDeletion": "Silme Talep Et",
     "ViewCountUpdatedAt": "Görüntülenme sayısı {date} tarihinde güncellendi",
     "ViewCountUpdatedUnknown": "Görüntülenme güncelleme zamanı bulunmuyor.",
-    "views": "görüntüleme"
+    "views": "görüntüleme",
+    "WordSections": "Kelime bilgileri",
+    "Save": "Kelimeyi kaydet",
+    "Unsave": "Kelimenin kaydını kaldır",
+    "saveFailed": "Kaydedilen kelimeler güncellenemedi. Lütfen tekrar deneyin."
   },
   "Actions": {
     "SuggestNewWord": "Yeni Kelime Öner",
@@ -1043,6 +1094,27 @@
         "fillAllFields": "Lütfen tüm alanları doldurun",
         "deleteConfirm": "Bu yazım yanlışını silmek istediğinizden emin misiniz?"
       }
+    },
+    "DailyWords": {
+      "title": "Günün kelimeleri",
+      "add": "Günün kelimesini ekle",
+      "edit": "Günün kelimesini düzenle",
+      "date": "Tarih",
+      "word": "Kelime",
+      "actions": "İşlemler",
+      "table": "Günün kelimeleri tablosu",
+      "empty": "Henüz günün kelimesi bulunmuyor.",
+      "searchWord": "Kelime ara",
+      "cancel": "Vazgeç",
+      "save": "Kaydet",
+      "required": "Bir tarih ve kelime seçin.",
+      "added": "Günün kelimesi eklendi.",
+      "updated": "Günün kelimesi güncellendi.",
+      "saveFailed": "Günün kelimesi kaydedilemedi. Tarihi ve kelimeyi kontrol edip tekrar deneyin.",
+      "deleteFailed": "Günün kelimesi kaldırılamadı. Tekrar deneyin.",
+      "confirmDelete": "Bu kelime günlük takvimden kaldırılsın mı?",
+      "editWord": "Günün kelimesini düzenle: {word}",
+      "deleteWord": "Günün kelimesini kaldır: {word}"
     }
   },
   "LanguageAndRootInput": {
@@ -1183,7 +1255,10 @@
     "Card": {
       "savedAt": "Kaydedilme Tarihi",
       "view": "Görüntüle",
-      "unsave": "Kaydı Kaldır"
+      "unsave": "Kaydı Kaldır",
+      "noMeaning": "Henüz anlam bulunmuyor.",
+      "details": "Kaydedilen kelime: {word}",
+      "detailsUnavailable": "Kelime bilgileri yüklenemedi. Tekrar açmayı deneyin."
     }
   },
   "Profile": {
@@ -1274,7 +1349,13 @@
       "turkishEquivalent": "Türkçe karşılığı",
       "obsolete": "Eskimiş",
       "phrase": "Deyim"
-    }
+    },
+    "hideGraph": "Grafiği gizle",
+    "filters": "İlişki türleri",
+    "retry": "Tekrar dene",
+    "zoomIn": "Yakınlaştır",
+    "zoomOut": "Uzaklaştır",
+    "fitView": "Grafiği ekrana sığdır"
   },
   "Form": {
     "noWordsFound": "Aramanızla eşleşen kelime bulunamadı.",
@@ -1357,7 +1438,12 @@
       "confirmCancel": "Evet, İsteği İptal Et",
       "updateRequest": "İsteği Güncelle",
       "back": "Geri",
-      "backToRequests": "İsteklere Geri Dön"
+      "backToRequests": "İsteklere Geri Dön",
+      "retry": "Tekrar dene",
+      "clearFilters": "Filtreleri temizle",
+      "viewSpecific": "{id} numaralı isteğin detaylarını görüntüle",
+      "cancelSpecific": "{id} numaralı isteği iptal et",
+      "resolutionSpecific": "{id} numaralı isteğin kararını görüntüle"
     },
     "errorLoading": "İstekler yüklenirken hata oluştu",
     "errorLoadingDetail": "İstek detayları yüklenirken hata oluştu",
@@ -1369,7 +1455,22 @@
       "noRequests": "İstek bulunamadı",
       "itemsPerPage": "Sayfa başına öğe",
       "previous": "Önceki",
-      "next": "Sonraki"
+      "next": "Sonraki",
+      "cancelled": "İstek iptal edildi.",
+      "cancelFailed": "İstek iptal edilemedi. Lütfen tekrar deneyin.",
+      "cancelUnavailable": "Bu istek kaldırılmış veya artık beklemede değil. Durumunu kontrol etmek için isteklerinize dönün.",
+      "cancelCaptchaFailed": "Doğrulama başarısız oldu. Lütfen tekrar deneyin.",
+      "noMatchingRequests": "Bu filtrelerle eşleşen istek bulunamadı.",
+      "count": "{count, plural, =0 {İstek yok} other {# istek}}",
+      "loadingDetail": "İstek detayları yükleniyor…",
+      "sessionExpired": "Oturumunuzun süresi doldu. İsteklerinizi görmek için giriş yapın.",
+      "permissionDenied": "Bu istekleri görüntüleme izniniz yok.",
+      "rateLimited": "Çok fazla deneme yapıldı. Biraz bekleyip tekrar deneyin.",
+      "pagination": "İstek sayfaları",
+      "jumpPages": "Beş sayfa atla",
+      "firstPage": "İlk sayfa",
+      "lastPage": "Son sayfa",
+      "pageButton": "{page}. sayfa"
     },
     "details": {
       "modifyingWordLabel": "Değiştirilen Kelime",
@@ -1400,7 +1501,8 @@
       "resolution": "Karar",
       "resolvedAtLabel": "Karar Tarihi",
       "resolvedByLabel": "Karar Veren Kişi",
-      "moderationReason": "Kararın Nedeni"
+      "moderationReason": "Kararın Nedeni",
+      "unknownResolver": "Kaydedilmemiş"
     },
     "RequestedAttributeByYou": "Sizin eklediğiniz özellik",
     "NoChanges": "Değişiklik tespit edilmedi, lütfen değişiklik yapınız.",
@@ -1555,6 +1657,22 @@
       "title": "Popüler Aramalar"
     }
   },
+  "SharedUI": {
+    "All": "Tümü",
+    "SelectOptions": "Seçenekleri seçin",
+    "Selection": "seçenekler",
+    "ClearSelection": "{label} seçimini temizle",
+    "DataTable": "Veri tablosu",
+    "Loading": "Veriler yükleniyor…",
+    "NoRows": "Gösterilecek sonuç yok.",
+    "TableLoadError": "Tablo yüklenemedi. Tekrar denemek için sayfayı yenileyin.",
+    "PageLoadTitle": "Bu sayfa yüklenemedi",
+    "PageLoadDescription": "Sayfayı tekrar yüklemeyi deneyin. Sözlüğe dönerek gezinmeye de devam edebilirsiniz.",
+    "Home": "Sözlüğe dön",
+    "Close": "Kapat",
+    "ClearValue": "Değeri temizle",
+    "ShowOptions": "Seçenekleri göster"
+  },
   "Common": {
     "anonymousUser": "Anonim Kullanıcı",
     "somethingWentWrong": "Bir şeyler yanlış gitti",
@@ -1644,7 +1762,8 @@
     "relatedWord": "İlgili Kelime",
     "relationType": "İlişki Türü",
     "relatedPhrase": "İlgili Deyim",
-    "phrase": "Deyim"
+    "phrase": "Deyim",
+    "description": "Açıklama"
   },
   "RequestActions": {
     "create": "Oluştur",
@@ -1920,7 +2039,19 @@
     "noWordsFound": "Aramanızla eşleşen kelime bulunamadı",
     "add": "Ekle",
     "cancel": "İptal",
-    "itemAlreadyAdded": "Bu öğe aynı ilişki türüyle zaten eklenmiş"
+    "itemAlreadyAdded": "Bu öğe aynı ilişki türüyle zaten eklenmiş",
+    "requestAttribute": "Yeni kelime özelliği öner",
+    "wordDetails": "Sözcük ayrıntıları (isteğe bağlı)",
+    "wordDetailsHelp": "Yalnızca bildiğiniz bilgileri ekleyin. Dil, sözcüğün kökenidir; özellikler kullanımını açıklar. İlgili sözcükler eş veya karşıt anlamlı sözcükler, söz öbekleri ya da deyimler olabilir.",
+    "meaningDetails": "Bu anlamın ayrıntıları (isteğe bağlı)",
+    "meaningDetailsHelp": "İsim veya fiil gibi bir sözcük türü seçebilir, kullanım bilgisi, örnek cümle veya görsel ekleyebilirsiniz. Bu alanları boş bırakabilirsiniz.",
+    "phoneticHelp": "Sözcüğün nasıl okunduğu.",
+    "prefixHelp": "Kökün önüne eklenen bölüm.",
+    "rootHelp": "Temel anlamı taşıyan bölüm.",
+    "suffixHelp": "Kökün sonuna eklenen bölüm.",
+    "requestMeaningAttribute": "Anlam özelliği öner",
+    "requestAuthor": "Yazar öner",
+    "removeMeaning": "{number}. anlamı kaldır"
   },
   "VerifyRequest": {
     "title": "Doğrulama Talebi",
@@ -1966,12 +2097,15 @@
       "title": "Yeni Telaffuz Talebi",
       "audioRecording": "Telaffuz Kaydı",
       "relatedWord": "İlgili Kelime",
-      "reason": "Gerekçe"
+      "reason": "Gerekçe",
+      "missingRecording": "Bu istek için ses kaydı bulunmuyor.",
+      "unsupportedAudio": "Tarayıcınız bu ses kaydını oynatamıyor."
     },
     "DiffTable": {
       "field": "Alan",
       "oldValue": "Eski Değer",
-      "newValue": "Yeni Değer"
+      "newValue": "Yeni Değer",
+      "noData": "Önerilen değişiklik bulunmuyor."
     },
     "RawDataViewer": {
       "viewRawData": "Ham Veriyi Görüntüle"
@@ -1995,8 +2129,11 @@
       }
     },
     "errors": {
-      "requestNotFound": "İstek bulunamadı"
-    }
+      "requestNotFound": "İstek bulunamadı",
+      "unsupportedType": "Bu istek türü için ayrıntılı görünüm bulunmuyor. Kaydedilmiş veriler aşağıda gösteriliyor.",
+      "invalidPayload": "Kaydedilmiş istek verileri eksik veya okunamıyor. Özgün verileri aşağıdan inceleyebilirsiniz."
+    },
+    "unknownWord": "Kelime adı bulunamadı"
   },
   "Pronunciation": {
     "title": "Telaffuz İstekleri",
@@ -2087,18 +2224,23 @@
       "failed_title": "İndirme Başarısız",
       "failed_desc": "Çevrim dışı sözlük kurulamadı.",
       "failed_previous_kept_desc": "Güncelleme başarısız oldu, ancak önceki çevrim dışı sözlüğünüz kullanılabilir durumda. {error}",
-      "error_title": "Bir Hata Oluştu"
+      "error_title": "Bir Hata Oluştu",
+      "check_failed_previous_kept_desc": "Güncellemeler kontrol edilemedi. Yüklü sözlüğünüz hâlâ kullanılabilir. Bağlantınızı kontrol edip tekrar deneyin."
     },
     "buttons": {
       "download": "İndir",
       "update": "Şimdi Güncelle",
       "delete": "Verileri Sil",
-      "check_status": "Güncellemeleri Kontrol Et"
+      "check_status": "Güncellemeleri Kontrol Et",
+      "retry": "Tekrar dene"
     },
     "error": {
-      "metadata_fetch_failed": "Sunucudan sürüm bilgisi alınamadı.",
+      "metadata_fetch_failed": "Sözlük sunucusuna ulaşılamadı. Bağlantınızı kontrol edip tekrar deneyin.",
       "no_metadata": "İndirme başlatılamadı. Sürüm bilgisi eksik.",
-      "r2_url_missing": "Yapılandırma hatası: Veri kaynağı URL'si ayarlanmamış."
+      "r2_url_missing": "Yapılandırma hatası: Veri kaynağı URL'si ayarlanmamış.",
+      "local_storage_failed": "Bu cihazdaki sözlük verileri okunamadı. Tekrar deneyin veya tarayıcınızda site depolamasına izin verin.",
+      "download_failed": "İndirme tamamlanamadı. Bağlantınızı kontrol edip tekrar deneyin.",
+      "delete_failed": "Sözlük kaldırılamadı. Tekrar deneyin."
     },
     "download_info": {
       "title": "İndirme Bilgileri",

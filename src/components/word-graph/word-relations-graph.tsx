@@ -10,9 +10,9 @@ import {
   type Node,
 } from "@xyflow/react";
 import { Chip, Spinner } from "@heroui/react";
-import { GitBranch, Maximize2, Minimize2, Network } from "lucide-react";
+import { ChevronDown, ChevronUp, GitBranch, Maximize2, Minimize2, Network, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { type CSSProperties, type MouseEvent, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type CSSProperties, type MouseEvent, type ReactNode, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 import { useRouter } from "@/src/i18n/routing";
@@ -106,7 +106,10 @@ export default function WordRelationsGraph({
   const router = useRouter();
   const [depth, setDepth] = useState<1 | 2>(1);
   const [selectedRelationTypes, setSelectedRelationTypes] = useState<string[]>([]);
-  const [hasRequestedGraph, setHasRequestedGraph] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const graphId = useId();
+  const filtersId = useId();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const sectionRef = useRef<HTMLElement | null>(null);
 
@@ -119,7 +122,7 @@ export default function WordRelationsGraph({
       includePhrases: true,
     },
     {
-      enabled: Boolean(wordId || word) && hasRequestedGraph,
+      enabled: Boolean(wordId || word) && isExpanded,
       staleTime: 60_000,
     },
   );
@@ -225,6 +228,7 @@ export default function WordRelationsGraph({
     <section
       ref={sectionRef}
       className={cn(
+        "dictionary-word-graph",
         isFullscreen
           ? "fixed inset-0 z-[9999] flex h-dvh flex-col gap-4 overflow-hidden border-0 bg-background p-4 sm:p-6"
           : "space-y-4 border border-border/70 bg-background/40 p-4",
@@ -243,6 +247,7 @@ export default function WordRelationsGraph({
         </div>
 
         <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {isExpanded ? <>
           <div className="inline-flex rounded-md border border-border/70 bg-background/70 p-1">
             {[1, 2].map((value) => (
               <button
@@ -251,7 +256,7 @@ export default function WordRelationsGraph({
                 aria-pressed={depth === value}
                 onClick={() => setDepth(value as 1 | 2)}
                 className={cn(
-                  "min-h-8 rounded-sm px-3 text-sm font-medium transition-colors",
+                  "min-h-11 rounded-sm px-3 text-sm font-medium transition-colors",
                   depth === value
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
@@ -264,25 +269,30 @@ export default function WordRelationsGraph({
           <button
             type="button"
             onClick={toggleFullscreen}
-            className="inline-flex min-h-9 items-center gap-2 rounded-md border border-border/70 bg-background/70 px-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+            className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border/70 bg-background/70 px-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
           >
             {isFullscreen ? <Minimize2 className="h-4 w-4" aria-hidden /> : <Maximize2 className="h-4 w-4" aria-hidden />}
             <span>{isFullscreen ? t("exitFullscreen") : t("fullscreen")}</span>
           </button>
-          {!hasRequestedGraph ? (
-            <button
-              type="button"
-              onClick={() => setHasRequestedGraph(true)}
-              className="inline-flex min-h-9 items-center gap-2 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-            >
-              <Network className="h-4 w-4" aria-hidden />
-              {t("loadGraph")}
-            </button>
-          ) : null}
+          <button type="button" aria-expanded={showFilters} aria-controls={filtersId} onClick={() => setShowFilters((value) => !value)} className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border/70 px-3 text-sm text-muted-foreground hover:text-foreground">
+            <SlidersHorizontal className="h-4 w-4" aria-hidden />{t("filters")}{selectedRelationTypes.length ? ` (${selectedRelationTypes.length})` : ""}
+          </button>
+          </> : null}
+          {!isFullscreen ? <button
+            type="button"
+            aria-expanded={isExpanded}
+            aria-controls={graphId}
+            onClick={() => setIsExpanded((value) => !value)}
+            className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border/70 bg-background/70 px-3 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+          >
+            {isExpanded ? <ChevronUp className="h-4 w-4" aria-hidden /> : <ChevronDown className="h-4 w-4" aria-hidden />}
+            {isExpanded ? t("hideGraph") : t("loadGraph")}
+          </button> : null}
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div id={graphId} hidden={!isExpanded} className={cn("min-h-0 space-y-4", isFullscreen && "flex flex-1 flex-col")}>
+      <div id={filtersId} hidden={!showFilters} className={cn("flex flex-wrap gap-2", !showFilters && "hidden")}>
         {RELATION_FILTERS.map((relationType) => {
           const selected = selectedRelationTypes.includes(relationType);
 
@@ -293,7 +303,7 @@ export default function WordRelationsGraph({
               aria-pressed={selected}
               onClick={() => toggleRelationType(relationType)}
               className={cn(
-                "min-h-8 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors",
+                "min-h-11 rounded-md border px-3 py-2 text-sm font-medium transition-colors",
                 selected
                   ? "border-primary/70 bg-primary/10 text-primary"
                   : "border-border/70 bg-background/60 text-muted-foreground hover:border-primary/40 hover:text-primary",
@@ -307,7 +317,7 @@ export default function WordRelationsGraph({
           <button
             type="button"
             onClick={() => setSelectedRelationTypes([])}
-            className="min-h-8 rounded-md border border-border/70 bg-background/60 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+            className="min-h-11 rounded-md border border-border/70 bg-background/60 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
           >
             {t("clearFilters")}
           </button>
@@ -317,12 +327,10 @@ export default function WordRelationsGraph({
       <div
         className={cn(
           "relative overflow-hidden rounded-md border border-border/70 bg-background/70",
-          isFullscreen ? "min-h-0 flex-1" : compact ? "h-80" : "h-[34rem]",
+          isFullscreen ? "min-h-0 flex-1" : graphQuery.isError || (graph && graph.nodes.length <= 1 && graph.edges.length === 0) ? "h-40" : compact ? "h-80" : "h-[26rem]",
         )}
       >
-        {!hasRequestedGraph ? (
-          <GraphPlaceholder onLoad={() => setHasRequestedGraph(true)} />
-        ) : graphQuery.isLoading ? (
+        {isExpanded && graphQuery.isLoading ? (
           <GraphState>
             <Spinner size="sm" />
             <span>{t("loading")}</span>
@@ -330,14 +338,20 @@ export default function WordRelationsGraph({
         ) : graphQuery.isError ? (
           <GraphState>
             <span>{t("error")}</span>
+            <button type="button" onClick={() => graphQuery.refetch()} className="min-h-11 px-3 text-primary underline underline-offset-4">{t("retry")}</button>
           </GraphState>
         ) : graph && graph.nodes.length <= 1 && graph.edges.length === 0 ? (
           <GraphState>
             <GitBranch className="h-5 w-5 text-muted-foreground" aria-hidden />
             <span>{t("empty")}</span>
           </GraphState>
-        ) : graph ? (
+        ) : isExpanded && graph ? (
           <ReactFlow
+            ariaLabelConfig={{
+              'controls.zoomIn.ariaLabel': t('zoomIn'),
+              'controls.zoomOut.ariaLabel': t('zoomOut'),
+              'controls.fitView.ariaLabel': t('fitView'),
+            }}
             key={isFullscreen ? "word-graph-fullscreen" : "word-graph-inline"}
             style={graphControlsStyle}
             nodes={nodes}
@@ -368,65 +382,8 @@ export default function WordRelationsGraph({
           </ReactFlow>
         ) : null}
       </div>
+      </div>
     </section>
-  );
-}
-
-function GraphPlaceholder({ onLoad }: { onLoad: () => void }) {
-  const t = useTranslations("WordGraph");
-  const previewNodes = [
-    { label: t("nodeKinds.center"), x: "48%", y: "46%", tone: "center" },
-    { label: t("relations.synonym"), x: "25%", y: "24%", tone: "word" },
-    { label: t("relations.relatedWord"), x: "73%", y: "24%", tone: "word" },
-    { label: t("relations.phrase"), x: "28%", y: "72%", tone: "phrase" },
-    { label: t("relations.antonym"), x: "76%", y: "70%", tone: "word" },
-  ];
-
-  return (
-    <div className="absolute inset-0 bg-background">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,hsl(var(--border))_1px,transparent_0)] [background-size:22px_22px]" aria-hidden />
-      <div className="absolute inset-0 blur-[2px]" aria-hidden>
-        <svg className="absolute inset-0 h-full w-full opacity-55" role="presentation">
-          <line x1="50%" y1="50%" x2="25%" y2="24%" stroke="currentColor" strokeWidth="2" className="text-muted-foreground" />
-          <line x1="50%" y1="50%" x2="73%" y2="24%" stroke="currentColor" strokeWidth="2" className="text-muted-foreground" />
-          <line x1="50%" y1="50%" x2="28%" y2="72%" stroke="currentColor" strokeWidth="2" className="text-muted-foreground" />
-          <line x1="50%" y1="50%" x2="76%" y2="70%" stroke="currentColor" strokeWidth="2" className="text-muted-foreground" />
-          <line x1="25%" y1="24%" x2="73%" y2="24%" stroke="currentColor" strokeWidth="1.5" className="text-muted-foreground/60" />
-        </svg>
-        {previewNodes.map((node) => (
-          <div
-            key={`${node.label}-${node.x}-${node.y}`}
-            className={cn(
-              "absolute min-w-28 -translate-x-1/2 -translate-y-1/2 rounded-md border px-3 py-2 text-center text-sm font-medium shadow-sm",
-              node.tone === "center"
-                ? "border-primary/60 bg-primary text-primary-foreground"
-                : node.tone === "phrase"
-                  ? "border-teal-500/30 bg-teal-500/10 text-foreground"
-                  : "border-border bg-background text-foreground",
-            )}
-            style={{ left: node.x, top: node.y }}
-          >
-            {node.label}
-          </div>
-        ))}
-      </div>
-      <div className="absolute inset-0 flex items-center justify-center bg-background/45 backdrop-blur-[1px]">
-        <div className="mx-4 max-w-sm rounded-md border border-border/80 bg-background/95 p-5 text-center shadow-lg shadow-black/10">
-          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
-            <Network className="h-5 w-5" aria-hidden />
-          </div>
-          <p className="mt-3 text-sm font-semibold text-foreground">{t("previewTitle")}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{t("previewDescription")}</p>
-          <button
-            type="button"
-            onClick={onLoad}
-            className="mt-4 inline-flex min-h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            {t("loadGraph")}
-          </button>
-        </div>
-      </div>
-    </div>
   );
 }
 

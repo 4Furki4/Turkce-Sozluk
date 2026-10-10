@@ -5,12 +5,11 @@ import { Chip } from "@heroui/chip";
 import { WordSearchResult } from "@/types";
 import { PronunciationButton } from "./pronunciation-button";
 import SaveWord from "./save-word";
-import { Button, useDisclosure, Popover, PopoverTrigger, PopoverContent, Tabs, Tab } from "@heroui/react";
-import { Link as NextUILink } from "@heroui/react"
+import { Button, useDisclosure, Popover, PopoverTrigger, PopoverContent, Tooltip, Tabs, Tab } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/src/i18n/routing";
 import { useRouter } from "@/src/i18n/routing";
-import { Camera, Eye, Share2, WifiOff, WifiSync } from "lucide-react";
+import { Camera, Eye, Link as LinkIcon, WifiOff, WifiSync } from "lucide-react";
 import Image from "next/image";
 import { useRef, } from "react";
 import { captureElementScreenshot } from "../../utils/screenshot";
@@ -21,6 +20,7 @@ import CustomCard from "./heroui/custom-card";
 import PronunciationCard from "./pronunciation-card";
 import { Session } from '@/src/lib/auth-client';
 import { startNavigationProgress } from "@/src/lib/navigation-progress";
+import { getHeadwordProps } from "@/src/lib/headword-presentation";
 
 type WordCardProps = {
   word_data: WordSearchResult["word_data"] & { source?: "online" | "offline" };
@@ -84,16 +84,18 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
             null
           )}
           <SaveWord word_data={word_data} isSavedWord={!session ? false : undefined} />
-          <Button disableRipple isIconOnly className="bg-transparent" onPress={(e) => {
+          <Button disableRipple isIconOnly aria-label={t("Screenshot")} className="h-11 min-w-11 bg-transparent" onPress={() => {
             handleCameraPress();
           }}>
             <Camera className="w-5 h-5 sm:w-6 sm:h-6" />
           </Button>
-          <Button disableRipple isIconOnly className="bg-transparent" onPress={() => handleSharePress()}>
-            <Share2 className="w-5 h-5 sm:w-6 sm:h-6" />
+          <Tooltip content={t("CopyLink")}>
+          <Button disableRipple isIconOnly aria-label={t("CopyLink")} className="h-11 min-w-11 bg-transparent" onPress={() => handleSharePress()}>
+            <LinkIcon className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden />
           </Button>
+          </Tooltip>
         </div>
-        <div className="w-full flex items-center justify-between">
+        <div className="dictionary-headword-container w-full flex items-center justify-between">
           <div className="w-full flex items-center gap-2">
             <div className="flex min-w-0 flex-wrap items-baseline gap-2">
               {word_data.prefix && (
@@ -102,7 +104,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                   <span aria-hidden>- </span>
                 </span>
               )}
-              <WordHeading className="text-fs-2 md:text-fs-3 text-start break-words hyphens-auto">
+              <WordHeading {...getHeadwordProps(word_data.word_name)} lang="tr" className="dictionary-headword [--headword-max:var(--step-2)] md:[--headword-max:var(--step-3)] text-fs-2 md:text-fs-3 text-start leading-tight">
                 {word_data.word_name}
               </WordHeading>
               <PronunciationButton wordId={word_data.word_id} headword={word_data.word_name} offline={isOffline || isOnline === false} onCorrect={onOpenChange} />
@@ -167,10 +169,12 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
       </CardHeader>
       <CardBody>
         <>
-          <Tabs color="primary" disableAnimation classNames={{
-            tabList: "w-full bg-primary/10 border border-primary",
-            tabContent: "text-primary md:w-full",
-            tab: "dark:data-[selected=true]:bg-primary/60 ",
+          <Tabs aria-label={t("WordSections")} color="primary" disableAnimation classNames={{
+            base: "w-full min-w-0",
+            tabList: "grid w-full min-w-0 grid-cols-2 gap-1 bg-primary/10 border border-border sm:grid-cols-4",
+            tabContent: "whitespace-normal text-primary",
+            tab: "min-h-11 h-auto px-2 py-2",
+            panel: "min-w-0 px-0",
           }}>
             <Tab value={"meaning"} title={t("Meanings")} >
               {word_data.meanings && word_data.meanings.length > 0 ? (
@@ -198,12 +202,12 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
                         })}>
                           {meaning.meaning.search('Bakınız: ') === -1 ? (
                             <>
-                              <p className="text-fs-1 break-words hyphens-auto">
+                              <p lang="tr" className="dictionary-prose max-w-[65ch] text-fs-1 leading-relaxed">
                                 {meaning.meaning}
                               </p>
                               {meaning.sentence ? (
                                 <div className="w-full italic px-2 text-fs--1 text-left bg-primary/15 p-2">
-                                  <p>
+                                  <p lang="tr" className="dictionary-prose">
                                     <q>{meaning.sentence}</q>
                                   </p>
                                   {meaning.author && <p>-{meaning.author}</p>}

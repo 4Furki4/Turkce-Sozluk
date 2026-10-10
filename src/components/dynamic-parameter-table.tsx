@@ -7,7 +7,7 @@ import { useCallback, useState } from "react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/react";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownSection, DropdownItem } from "@heroui/react";
 import { Edit3, MoreVertical, Trash2 } from 'lucide-react';
-import { Pagination } from "@heroui/pagination";
+import { CustomPagination } from "@/src/components/customs/heroui/custom-pagination";
 import { Select, SelectItem } from "@heroui/select";
 
 interface DynamicParameterTableProps {
@@ -135,7 +135,7 @@ export default function DynamicParameterTable({
             </div>
           }
           bottomContent={
-            <Pagination
+            <CustomPagination
               isCompact
               showControls
               page={pageNumber}

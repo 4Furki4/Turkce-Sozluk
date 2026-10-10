@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, Button, Chip, Popover, PopoverContent, PopoverTrigger, useDisclosure } from "@heroui/react";
+import { Avatar, Button, Chip, Popover, PopoverContent, PopoverTrigger, Tooltip, useDisclosure } from "@heroui/react";
 import {
   BookOpen,
   Blocks,
@@ -11,7 +11,6 @@ import {
   Link as LinkIcon,
   PenLine,
   Quote,
-  Share2,
   Volume2,
   WifiOff,
   WifiSync,
@@ -34,6 +33,7 @@ import {
   type SearchWordCardVariant,
 } from "@/src/store/preferences";
 import { getOfflineSearchHref } from "@/src/lib/search-route";
+import { getHeadwordProps } from "@/src/lib/headword-presentation";
 import { copyPageUrl } from "@/src/utils/clipboard";
 import { captureElementScreenshot } from "@/src/utils/screenshot";
 
@@ -213,9 +213,18 @@ function WordCardVariantToggle({
               type="button"
               role="radio"
               aria-checked={isSelected}
+              tabIndex={isSelected ? 0 : -1}
+              onKeyDown={(event) => {
+                if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+                event.preventDefault();
+                const next = event.key === "Home" ? "reader" : event.key === "End" ? "magazine" : value === "reader" ? "magazine" : "reader";
+                onVariantChange(next);
+                const buttons = event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>("[role=radio]");
+                buttons?.[next === "reader" ? 0 : 1]?.focus();
+              }}
               onClick={() => onVariantChange(value)}
               className={cn(
-                "relative inline-flex min-h-7 items-center justify-center gap-2 rounded-sm px-3 text-sm font-medium transition-all duration-200 sm:min-w-36",
+                "relative inline-flex min-h-11 items-center justify-center gap-2 rounded-sm px-3 text-sm font-medium transition-all duration-200 sm:min-w-36",
                 isSelected
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
@@ -423,7 +432,7 @@ function MagazineWordCard({
     <div className="bg-background/40">
       <header className="relative border-b border-border/70 px-5 py-4 sm:px-6 sm:py-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0 flex-1">
+          <div className="dictionary-headword-container min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
               <div className="flex min-w-0 flex-wrap items-baseline gap-x-2">
                 {word_data.prefix ? (
@@ -433,7 +442,7 @@ function MagazineWordCard({
                   </span>
                 ) : null}
 
-                <WordHeading className="break-words text-fs-4 font-semibold leading-none text-foreground hyphens-auto">
+                <WordHeading {...getHeadwordProps(word_data.word_name)} lang="tr" className="dictionary-headword [--headword-max:var(--step-4)] text-fs-4 font-semibold leading-[1.1] text-foreground">
                   {word_data.word_name}
                 </WordHeading>
 
@@ -530,7 +539,7 @@ function WordTitleBlock({
   const { offlineLinks } = useContext(WordCardNavigationContext);
 
   return (
-    <div className="min-w-0">
+    <div className="dictionary-headword-container min-w-0">
       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-2">
         {word_data.prefix ? (
           <span className="text-fs-0 text-muted-foreground">
@@ -540,11 +549,13 @@ function WordTitleBlock({
         ) : null}
 
         <WordHeading
+          {...getHeadwordProps(word_data.word_name)}
+          lang="tr"
           className={cn(
-            "break-words font-semibold text-foreground hyphens-auto",
+            "dictionary-headword font-semibold text-foreground",
             size === "reader"
-              ? "text-fs-4 leading-tight sm:text-fs-5"
-              : "text-fs-3 leading-tight sm:text-fs-4",
+              ? "[--headword-max:var(--step-4)] sm:[--headword-max:var(--step-5)] text-fs-4 leading-tight sm:text-fs-5"
+              : "[--headword-max:var(--step-3)] sm:[--headword-max:var(--step-4)] text-fs-3 leading-tight sm:text-fs-4",
           )}
         >
           {word_data.word_name}
@@ -846,8 +857,7 @@ function WordUtilityActions({
 }) {
   const t = useTranslations("WordCard");
   const actionButtonClassName = cn(
-    "h-10 min-h-10 w-10 min-w-10 rounded-md bg-transparent p-0 text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground",
-    compact && "h-9 min-h-9 w-9 min-w-9",
+    "h-11 min-h-11 w-11 min-w-11 rounded-md bg-transparent p-0 text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground",
   );
   const iconClassName = compact ? "h-4 w-4" : "h-[18px] w-[18px]";
 
@@ -897,15 +907,17 @@ function WordUtilityActions({
         <Camera className={iconClassName} />
       </Button>
 
+      <Tooltip content={t("CopyLink")}>
       <Button
         disableRipple
         isIconOnly
         className={actionButtonClassName}
         onPress={onShare}
-        aria-label={t("Share")}
+        aria-label={t("CopyLink")}
       >
-        <Share2 className={iconClassName} />
+        <LinkIcon className={iconClassName} aria-hidden />
       </Button>
+      </Tooltip>
     </div>
   );
 }
@@ -981,7 +993,7 @@ function MeaningContent({
       ) : null}
 
       <div className={cn("grid gap-4", meaning.imageUrl ? "md:grid-cols-[minmax(0,1fr)_16rem]" : "")}>
-        <div className="min-w-0 space-y-3">
+        <div className="dictionary-prose max-w-[65ch] space-y-3">
           {seeAlsoWord ? (
             <p
               className={cn(
@@ -992,15 +1004,16 @@ function MeaningContent({
               <span className="text-muted-foreground">{locale === "en" ? "See also" : "Bakınız"}</span>
               <WordRouteLink
                 word={seeAlsoWord}
-                className="text-primary underline decoration-primary underline-offset-4"
+                className="dictionary-headword text-primary underline underline-offset-4"
               >
                 {seeAlsoWord}
               </WordRouteLink>
             </p>
           ) : (
             <p
+              lang="tr"
               className={cn(
-                "break-words text-foreground hyphens-auto",
+                "dictionary-prose text-foreground",
                 compact
                   ? "text-fs-0 leading-relaxed"
                   : "text-fs-1 leading-relaxed",
@@ -1013,16 +1026,16 @@ function MeaningContent({
           {meaning.sentence ? (
             <figure
               className={cn(
-                "border-l-2 border-primary/70 bg-primary/5",
+                "border-l border-primary/70 bg-primary/5",
                 compact ? "px-3 py-2.5" : "px-4 py-3",
               )}
             >
               <Quote className={cn("text-primary", compact ? "mb-1.5 h-3.5 w-3.5" : "mb-2 h-4 w-4")} />
-              <blockquote className={cn("italic leading-relaxed text-foreground/90", compact ? "text-sm" : "text-sm")}>
+              <blockquote lang="tr" className={cn("dictionary-prose italic leading-relaxed text-foreground/90", compact ? "text-base" : "text-fs--1")}>
                 {meaning.sentence}
               </blockquote>
               {meaning.author ? (
-                <figcaption className="mt-2 text-xs text-muted-foreground">-{meaning.author}</figcaption>
+                <figcaption lang="tr" className="dictionary-prose mt-2 text-sm text-muted-foreground">-{meaning.author}</figcaption>
               ) : null}
             </figure>
           ) : null}

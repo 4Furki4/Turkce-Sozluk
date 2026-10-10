@@ -94,6 +94,9 @@ export default function MeaningFormSection({
     ? [...authorsWithRequested].sort((a, b) => a.name.localeCompare(b.name))
     : [];
 
+  const meaningErrors = (errors.meanings as any)?.[meaningIndex];
+  const hasOptionalErrors = Boolean(meaningErrors?.partOfSpeechId || meaningErrors?.attributes || meaningErrors?.example || meaningErrors?.image);
+
   return (
     <div key={meaningIndex} className="p-4 border rounded-md space-y-4">
       <div className="flex justify-between items-center">
@@ -103,7 +106,9 @@ export default function MeaningFormSection({
             type="button"
             color="danger"
             variant="light"
-            size="sm"
+            isIconOnly
+            aria-label={t("removeMeaning", { number: meaningIndex + 1 })}
+            className="h-11 min-w-11"
             onPress={() => onRemoveMeaning(meaningIndex)}
           >
             <Trash2 className="h-4 w-4" />
@@ -126,104 +131,112 @@ export default function MeaningFormSection({
           />
         )}
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Part of Speech */}
-        <Controller
-          name={`meanings.${meaningIndex}.partOfSpeechId`}
-          control={control}
-          render={({ field, fieldState: { error } }) => (
-            <CustomSelect
-              {...field}
-              classNames={{
-                base: "w-full",
-              }}
-              isLoading={partsOfSpeechIsLoading}
-              label={t("partOfSpeech")}
-              placeholder={t("selectPartOfSpeech")}
-              isInvalid={!!error}
-              errorMessage={error?.message}
-              items={sortedPartsOfSpeech.map((pos) => ({
-                key: pos.id.toString(),
-                label: pos.name
-              }))}
-            >
-              {sortedPartsOfSpeech.map((pos) => (
-                <SelectItem key={pos.id.toString()}>
-                  {pos.name}
-                </SelectItem>
-              )) || []}
-            </CustomSelect>
-          )}
-        />
+      <details className="border-t border-border pt-2" open={hasOptionalErrors || undefined}>
+        <summary className="min-h-11 cursor-pointer py-2.5 font-medium text-primary">{t("meaningDetails")}</summary>
+        <div className="mt-4 space-y-4">
+          <p className="text-sm text-muted-foreground">{t("meaningDetailsHelp")}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Part of Speech */}
+            <Controller
+              name={`meanings.${meaningIndex}.partOfSpeechId`}
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <CustomSelect
+                  {...field}
+                  classNames={{
+                    base: "w-full max-w-none sm:max-w-none",
+                    trigger: "h-12 min-h-12",
+                    mainWrapper: "h-12",
+                  }}
+                  isLoading={partsOfSpeechIsLoading}
+                  label={t("partOfSpeech")}
+                  labelPlacement="outside"
+                  size="md"
+                  placeholder={t("selectPartOfSpeech")}
+                  isInvalid={!!error}
+                  errorMessage={error?.message}
+                  items={sortedPartsOfSpeech.map((pos) => ({
+                    key: pos.id.toString(),
+                    label: pos.name
+                  }))}
+                >
+                  {sortedPartsOfSpeech.map((pos) => (
+                    <SelectItem key={pos.id.toString()}>
+                      {pos.name}
+                    </SelectItem>
+                  )) || []}
+                </CustomSelect>
+              )}
+            />
 
-        {/* Meaning Attributes */}
-        <div className="flex items-end gap-2">
-          <Controller
-            name={`meanings.${meaningIndex}.attributes`}
-            control={control}
-            render={({ field: { onChange, value }, fieldState: { error } }) => (
-              <CustomSelect
-                items={sortedMeaningAttributes || []}
-                label={t("meaningAttributes")}
-                placeholder={t("selectMeaningAttributes")}
-                selectionMode="multiple"
-                selectedKeys={new Set(value)}
-                onSelectionChange={(keys) => onChange(Array.from(keys))}
-                isLoading={meaningAttributesWithRequestedIsLoading}
-                isInvalid={!!error}
-                errorMessage={error?.message}
-                classNames={{
-                  base: "w-full"
-                }}
-                as={"div"}
-                endContent={
-                  <Button
-                    isIconOnly
-                    size="sm"
-                    variant="light"
-                    onPress={onOpenMeaningAttributeModal}
-                    className="mb-4"
+            {/* Meaning Attributes */}
+            <div className="flex items-end gap-2">
+              <Controller
+                name={`meanings.${meaningIndex}.attributes`}
+                control={control}
+                render={({ field: { onChange, value }, fieldState: { error } }) => (
+                  <CustomSelect
+                    items={sortedMeaningAttributes || []}
+                    label={t("meaningAttributes")}
+                    labelPlacement="outside"
+                    size="md"
+                    placeholder={t("selectMeaningAttributes")}
+                    selectionMode="multiple"
+                    selectedKeys={new Set(value)}
+                    onSelectionChange={(keys) => onChange(Array.from(keys))}
+                    isLoading={meaningAttributesWithRequestedIsLoading}
+                    isInvalid={!!error}
+                    errorMessage={error?.message}
+                    classNames={{
+                      base: "w-full max-w-none sm:max-w-none",
+                      trigger: "h-12 min-h-12",
+                      mainWrapper: "h-12"
+                    }}
+                    as={"div"}
+
                   >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                }
-              >
-                {(attr) => (
-                  <SelectItem
-                    endContent={Number(attr.id) < 0 ? (
-                      <Tooltip content={tRequests("RequestedAttributeByYou")}>
-                        <FileClock className="text-warning" />
-                      </Tooltip>
-                    ) : ""}
-                    key={attr.id.toString()}
-                  >
-                    {attr.attribute}
-                  </SelectItem>
+                    {(attr) => (
+                      <SelectItem
+                        endContent={Number(attr.id) < 0 ? (
+                          <Tooltip content={tRequests("RequestedAttributeByYou")}>
+                            <FileClock className="text-warning" />
+                          </Tooltip>
+                        ) : ""}
+                        key={attr.id.toString()}
+                      >
+                        {attr.attribute}
+                      </SelectItem>
+                    )}
+                  </CustomSelect>
                 )}
-              </CustomSelect>
-            )}
+              />
+              <Button type="button" isIconOnly aria-label={t("requestMeaningAttribute")} variant="flat" color="primary" onPress={onOpenMeaningAttributeModal} className="h-12 min-w-12 shrink-0">
+                <Plus className="h-4 w-4" aria-hidden />
+              </Button>
+            </div>
+          </div>
+
+          {/* Example Section */}
+          <MeaningExampleSection
+            meaningIndex={meaningIndex}
+            control={control}
+            errors={errors}
+            authorsWithRequested={sortedAuthors}
+            authorsWithRequestedIsLoading={authorsWithRequestedIsLoading}
+            requestedAuthors={requestedAuthors}
+            onOpenAuthorModal={onOpenAuthorModal}
           />
+
+          {/* Image Upload */}
+          <ImageUploadSection
+            meaningIndex={meaningIndex}
+            imagePreviewUrl={imagePreviewUrl}
+            onImageSelect={onImageSelect}
+            onRemoveImage={onRemoveImage}
+          />
+
         </div>
-      </div>
-
-      {/* Example Section */}
-      <MeaningExampleSection
-        meaningIndex={meaningIndex}
-        control={control}
-        errors={errors}
-        authorsWithRequested={sortedAuthors}
-        authorsWithRequestedIsLoading={authorsWithRequestedIsLoading}
-        requestedAuthors={requestedAuthors}
-        onOpenAuthorModal={onOpenAuthorModal}
-      />
-
-      {/* Image Upload */}
-      <ImageUploadSection
-        meaningIndex={meaningIndex}
-        imagePreviewUrl={imagePreviewUrl}
-        onImageSelect={onImageSelect}
-        onRemoveImage={onRemoveImage}
-      />
+      </details>
 
       {/* Add/Remove Meaning Buttons */}
       {isLastMeaning && (

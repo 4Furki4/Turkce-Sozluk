@@ -1,9 +1,9 @@
 "use client";
 
+import { CustomPagination } from "@/src/components/customs/heroui/custom-pagination";
 import React, { useState } from "react";
 import {
     Button,
-    Pagination,
     ModalContent,
     useDisclosure,
 } from "@heroui/react";
@@ -112,7 +112,7 @@ export default function MisspellingsList() {
                 bottomContent={
                     totalPages > 0 ? (
                         <div className="flex w-full justify-center">
-                            <Pagination
+                            <CustomPagination
                                 isCompact
                                 showControls
                                 showShadow

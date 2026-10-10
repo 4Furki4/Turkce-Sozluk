@@ -44,7 +44,7 @@ export default async function Footer({ session }: { session: Session | null }) {
                     <div className="lg:col-span-4 space-y-4">
                         <div className="flex items-center gap-2">
                             <Image src={logo} alt="Turkish Dictionary Logo" className="h-8 w-8" />
-                            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
+                            <span className="text-xl font-bold text-primary">
                                 {tNavbar("Title")}
                             </span>
                         </div>

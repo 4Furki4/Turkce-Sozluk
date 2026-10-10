@@ -333,17 +333,17 @@ export default function SearchContainer({
                             input: [
                                 "text-lg",
                                 "text-foreground",
-                                "placeholder:text-muted-foreground/50",
+                                "placeholder:text-muted-foreground",
                             ]
                         }}
                         startContent={
-                            <button type="submit" className="p-2 hover:bg-white/5 rounded-md transition-colors mr-2" aria-label="search button">
+                            <button type="submit" className="grid h-11 w-11 shrink-0 place-items-center hover:bg-muted/60 rounded-md transition-colors mr-2" aria-label={t("hero.searchAction")}>
                                 <SearchIcon className="w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             </button>
                         }
                         aria-required
                         autoFocus={autoFocus}
-                        aria-label="search words"
+                        aria-label={searchMode === "meaning" ? t("hero.searchByMeaningPlaceholder") : t("hero.searchPlaceholder")}
                         value={wordInput}
                         onKeyDown={handleKeyDown}
                         onValueChange={(val) => {
@@ -441,9 +441,10 @@ export default function SearchContainer({
 
             {/* Search Mode Toggle */}
             <div className="flex justify-center mt-3">
-                <div className="inline-flex items-center rounded-md bg-background/50 backdrop-blur-md border border-zinc-800 p-0.5 gap-0.5">
+                <div role="group" aria-label={t("hero.searchMode")} className="inline-flex items-center rounded-md bg-background/50 border border-border p-0.5 gap-0.5">
                     <button
                         type="button"
+                        aria-pressed={searchMode === "word"}
                         onClick={() => {
                             isSelecting.current = true;
                             setSearchMode("word");
@@ -452,10 +453,10 @@ export default function SearchContainer({
                             setSelectedIndex(-1);
                         }}
                         className={cn(
-                            "flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-sm font-medium transition-all duration-200",
+                            "flex min-h-11 items-center gap-1.5 px-3 py-2 rounded-sm text-sm font-medium transition-colors duration-200",
                             searchMode === "word"
                                 ? "bg-primary/15 text-primary shadow-sm"
-                                : "text-zinc-500 hover:text-zinc-300"
+                                : "text-muted-foreground hover:text-foreground"
                         )}
                     >
                         <TypeIcon className="w-3.5 h-3.5" />
@@ -463,6 +464,7 @@ export default function SearchContainer({
                     </button>
                     <button
                         type="button"
+                        aria-pressed={searchMode === "meaning"}
                         onClick={() => {
                             if (!isOnline) return;
                             isSelecting.current = true;
@@ -472,10 +474,10 @@ export default function SearchContainer({
                         }}
                         disabled={!isOnline}
                         className={cn(
-                            "flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-sm font-medium transition-all duration-200",
+                            "flex min-h-11 items-center gap-1.5 px-3 py-2 rounded-sm text-sm font-medium transition-colors duration-200",
                             searchMode === "meaning"
                                 ? "bg-primary/15 text-primary shadow-sm"
-                                : "text-zinc-500 hover:text-zinc-300",
+                                : "text-muted-foreground hover:text-foreground",
                             !isOnline && "cursor-not-allowed opacity-50 hover:text-zinc-500"
                         )}
                     >
@@ -506,9 +508,10 @@ export default function SearchContainer({
                                     params: { word: tag.name },
                                 }}
                                 onClick={onSearchComplete}
-                                className="px-4 py-1.5 rounded-md bg-background shadow-sm border border-border  text-sm cursor-pointer hover:text-primary transition-all duration-200"
+                                title={tag.name}
+                                className="inline-flex min-h-11 max-w-full min-w-0 items-center px-4 py-1.5 rounded-md bg-background shadow-sm border border-border text-sm cursor-pointer hover:text-primary transition-all duration-200"
                             >
-                                {tag.name}
+                                <span className="min-w-0 truncate">{tag.name}</span>
                             </Link>
                         ))
                     )}

@@ -162,9 +162,9 @@ export default function Sidebar(
     }
 
     const themeOptions = [
-        { key: "light", label: "Light", icon: <Sun className="h-4 w-4" /> },
-        { key: "dark", label: "Dark", icon: <Moon className="h-4 w-4" /> },
-        { key: "system", label: "System", icon: <Monitor className="h-4 w-4" /> },
+        { key: "light", label: t("Navbar.ThemeLight"), icon: <Sun className="h-4 w-4" /> },
+        { key: "dark", label: t("Navbar.ThemeDark"), icon: <Moon className="h-4 w-4" /> },
+        { key: "system", label: t("Navbar.ThemeSystem"), icon: <Monitor className="h-4 w-4" /> },
     ];
 
     return (

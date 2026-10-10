@@ -61,13 +61,14 @@ export function BentoCommonMistake({
         </Link>
       </CardHeader>
 
+      {item && (data?.total ?? 0) > 1 ? (
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-4">
         <Button
           isIconOnly
           size="sm"
           variant="light"
           aria-label={t("HomeExtras.previous")}
-          className="text-muted-foreground hover:text-foreground"
+          className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
           onPress={handlePrev}
           isDisabled={offset === 0}
         >
@@ -78,13 +79,15 @@ export function BentoCommonMistake({
           size="sm"
           variant="light"
           aria-label={t("HomeExtras.next")}
-          className="text-muted-foreground hover:text-foreground"
+          className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
           onPress={handleNext}
           isDisabled={!data?.total || offset >= data.total - 1}
         >
           <ArrowRight className="w-4 h-4" />
         </Button>
       </div>
+
+      ) : null}
 
       <CardBody className="flex flex-row items-center justify-center gap-8 z-10">
         {isLoading ? (
@@ -208,7 +211,7 @@ export function BentoGalatiMeshur({
         )}
       </CardBody>
 
-      <CardFooter className="pt-0 pb-3 px-6 z-10 flex items-center justify-between gap-2">
+      {item ? <CardFooter className="pt-0 pb-3 px-6 z-10 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1">
           <Button
             isIconOnly
@@ -255,7 +258,7 @@ export function BentoGalatiMeshur({
             {t("HomeExtras.readMore")}
           </span>
         )}
-      </CardFooter>
+      </CardFooter> : null}
     </CustomCard>
   );
 }
