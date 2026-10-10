@@ -85,13 +85,16 @@ export default function RequestsList() {
     action: action === "all" ? undefined : action,
     status: status === "all" ? undefined : status,
   }, { placeholderData: keepPreviousData });
-  const totalPages = Math.max(1, data?.pagination.totalPages ?? 1);
-  const totalCount = Number(data?.pagination.totalCount ?? 0);
+  // Authorization errors supersede retained query data, including rows and pagination.
+  const unavailable = isError && (error?.data?.code === "UNAUTHORIZED" || error?.data?.code === "FORBIDDEN");
+  const visibleData = unavailable ? undefined : data;
+  const totalPages = Math.max(1, visibleData?.pagination.totalPages ?? 1);
+  const totalCount = Number(visibleData?.pagination.totalCount ?? 0);
   const loadError = requestErrorKey(error?.data?.code, "errorLoading");
   useEffect(() => {
     // A deletion or another tab can reduce the last page. Never clamp placeholder data.
-    if (data && !isFetching && !isPlaceholderData && page > totalPages) changeParams({ page: totalPages }, true);
-  }, [data, isFetching, isPlaceholderData, page, totalPages, changeParams]);
+    if (visibleData && !isError && !isFetching && !isPlaceholderData && page > totalPages) changeParams({ page: totalPages }, true);
+  }, [visibleData, isError, isFetching, isPlaceholderData, page, totalPages, changeParams]);
 
   const dateLabel = useCallback((value: Date | null) => {
     const date = requestDate(value, locale);
@@ -121,13 +124,13 @@ export default function RequestsList() {
           href={{ pathname: "/my-requests/[id]", params: { id: String(request.key) } }}>
           {t("buttons.viewDetails")}
         </Link>
-        {request.status === "pending" && <CancelRequestButton requestId={request.key} compact />}
+        {request.status === "pending" && !isError && <CancelRequestButton requestId={request.key} compact />}
       </div>;
       default: return null;
     }
-  }, [t, actionColors, actionLabels, entityTypeLabels, statusColors, statusLabels, dateLabel]);
+  }, [t, actionColors, actionLabels, entityTypeLabels, statusColors, statusLabels, dateLabel, isError]);
 
-  const rows = (data?.requests ?? []).map(request => ({ ...request, key: request.id }));
+  const rows = (visibleData?.requests ?? []).map(request => ({ ...request, key: request.id }));
   const columns = [
     { key: "entityType", label: t("tableColumns.entityType") },
     { key: "action", label: t("tableColumns.action") },
