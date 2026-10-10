@@ -61,6 +61,7 @@ Uygulama varsayılan olarak [http://localhost:3000](http://localhost:3000) adres
 bun run dev
 bun run build
 bun run start
+bun run serve # Pi geliştirme veritabanına SSH tüneli açar, derler ve başlatır
 
 # Testler
 bun run test

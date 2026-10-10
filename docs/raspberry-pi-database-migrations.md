@@ -25,6 +25,39 @@ Use the direct `db-*` containers for Studio and migrations. The apps connect
 through PgBouncer in transaction pooling mode, which is correct for runtime
 traffic but is not the migration connection to depend on.
 
+## Test a local production build with the Pi development database
+
+```bash
+bun run serve
+```
+
+This opens a loopback-only SSH tunnel to `furkipie`, resolves the current IP of
+`turkish-dictionary-db-development`, and reads its PostgreSQL credentials over
+SSH without printing them or changing local `.env` files. It checks the database
+connection, runs `next build --webpack`, then runs `next start` with the same
+development database connection. Stop it with `Ctrl-C` to close both the app and
+the tunnel. A build failure or lost SSH tunnel also stops the session.
+
+SSH key access and `sudo -n docker inspect` access on the Pi are required.
+Other app settings continue to come from the normal local environment files.
+This command does not run migrations; app actions use the Pi development data.
+
+The SSH host defaults to `furkipie` and the local database port to `15432`.
+Override them if needed, and pass Next.js start options as usual:
+
+```bash
+PI_SSH_HOST=furkipie PI_DB_LOCAL_PORT=15434 bun run serve --port 3001
+```
+
+To check just the tunnel and database connection, then close it without building:
+
+```bash
+bun run serve --check
+```
+
+`bun run build` and `bun run start` remain available separately with your normal
+database configuration.
+
 ## Preconditions
 
 Before changing a database:
