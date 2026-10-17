@@ -1,0 +1,208 @@
+name: Branch previews
+
+on:
+  push:
+    branches-ignore: [main, develop]
+  delete:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Feature branch to deploy, or deleted branch to clean up
+        required: true
+        type: string
+      action:
+        description: Preview lifecycle action
+        required: true
+        type: choice
+        options: [deploy, delete]
+        default: deploy
+
+permissions:
+  contents: read
+
+env:
+  PREVIEW_PROJECT: ${{ vars.PREVIEW_PROJECT || 'dictionary' }}
+  PREVIEW_BASE_DOMAIN: ${{ vars.PREVIEW_BASE_DOMAIN || 'furkan-cengiz.com' }}
+  PREVIEW_IMAGE_REPOSITORY: ${{ vars.PREVIEW_IMAGE_REPOSITORY || 'furki4/turkish-dictionary-app' }}
+  PREVIEW_BRANCH: ${{ github.event_name == 'delete' && github.event.ref || inputs.branch || github.ref_name }}
+  PREVIEW_ACTION: ${{ github.event_name == 'delete' && 'delete' || inputs.action || 'deploy' }}
+
+jobs:
+  prepare:
+    if: ${{ github.event_name != 'delete' || github.event.ref_type == 'branch' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      sha: ${{ steps.identity.outputs.sha }}
+      identity: ${{ steps.identity.outputs.identity }}
+      url: ${{ steps.identity.outputs.url }}
+      app_image: ${{ steps.identity.outputs.app_image }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ (github.event_name == 'delete' || inputs.action == 'delete') && github.event.repository.default_branch || (github.event_name == 'push' && github.sha) || inputs.branch || github.ref_name }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate target and compute stable preview identity
+        id: identity
+        env:
+          PREVIEW_ACTION: identity
+        run: |
+          PREVIEW_SHA="$(git rev-parse HEAD)"
+          export PREVIEW_SHA
+          echo "sha=$PREVIEW_SHA" >> "$GITHUB_OUTPUT"
+          node scripts/preview/lifecycle.mjs
+
+  checks:
+    needs: prepare
+    if: ${{ github.event_name != 'delete' && inputs.action != 'delete' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: turkish_dictionary_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-only-password
+        ports: ['127.0.0.1:54329:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d turkish_dictionary_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.2'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-1.3.2-${{ hashFiles('bun.lockb') }}
+          restore-keys: ${{ runner.os }}-bun-1.3.2-
+      - run: bun install --frozen-lockfile
+      - run: bun run check:package-lock
+      - run: bun run lint
+      - run: bun run test -- --runInBand --ci
+      - run: bun run test:pronunciations
+      - run: bun test scripts/ci/env.test.mjs scripts/preview/*.test.mjs
+      - run: bun run ci:db
+      - run: bun run ci:build
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-chromium-${{ hashFiles('bun.lockb') }}
+      - run: bunx --no-install playwright install --with-deps chromium
+      - run: bun run test:e2e
+      - name: Upload browser failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-browser-failure
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  publish_deploy:
+    needs: [prepare, checks]
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 60
+    # Hashes avoid GitHub's case-insensitive concurrency-group collisions for
+    # otherwise distinct branch names. Cleanup uses this exact same group.
+    concurrency:
+      group: dictionary-preview-${{ needs.prepare.outputs.identity }}
+      cancel-in-progress: false
+      queue: max
+    env:
+      PREVIEW_SHA: ${{ needs.prepare.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reject superseded publishing heads
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module -e '
+            import { assertCurrent } from "./scripts/preview/lifecycle.mjs";
+            import { previewIdentity } from "./scripts/preview/identity.mjs";
+            import { jsonClient } from "./scripts/preview/client.mjs";
+            const identity = previewIdentity({repository:process.env.GITHUB_REPOSITORY,branch:process.env.PREVIEW_BRANCH,project:process.env.PREVIEW_PROJECT,domain:process.env.PREVIEW_BASE_DOMAIN});
+            await assertCurrent({identity,sha:process.env.PREVIEW_SHA,github:jsonClient({baseUrl:"https://api.github.com",token:process.env.GITHUB_TOKEN,service:"GitHub"})});
+          '
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Validate public build configuration
+        env:
+          NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
+        run: test -n "$NEXT_PUBLIC_RECAPTCHA_SITE_KEY"
+      - name: Build and push branch application
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/arm64
+          push: true
+          tags: ${{ needs.prepare.outputs.app_image }}
+          build-args: |
+            NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
+            NEXT_PUBLIC_APP_URL=${{ needs.prepare.outputs.url }}
+            NEXT_PUBLIC_URL=${{ needs.prepare.outputs.url }}
+            NEXT_PUBLIC_PATREON_URL=${{ vars.NEXT_PUBLIC_PATREON_URL }}
+            NEXT_PUBLIC_R2_CUSTOM_URL=https://data.turkce-sozluk.com
+          cache-from: type=gha,scope=branch-previews
+          cache-to: type=gha,scope=branch-previews,mode=max
+      - name: Deploy and verify exact preview revision
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          COOLIFY_URL: ${{ vars.COOLIFY_URL }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          COOLIFY_PROJECT_UUID: ${{ vars.COOLIFY_PROJECT_UUID }}
+          COOLIFY_ENVIRONMENT_UUID: ${{ vars.COOLIFY_ENVIRONMENT_UUID }}
+          COOLIFY_SERVER_UUID: ${{ vars.COOLIFY_SERVER_UUID }}
+          COOLIFY_DESTINATION_UUID: ${{ vars.COOLIFY_DESTINATION_UUID }}
+          PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET }}
+        run: node scripts/preview/lifecycle.mjs
+
+  cleanup:
+    needs: prepare
+    if: ${{ github.event_name == 'delete' || inputs.action == 'delete' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    concurrency:
+      group: dictionary-preview-${{ needs.prepare.outputs.identity }}
+      cancel-in-progress: false
+      queue: max
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Remove only the absent branch's owned preview
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          COOLIFY_URL: ${{ vars.COOLIFY_URL }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          COOLIFY_PROJECT_UUID: ${{ vars.COOLIFY_PROJECT_UUID }}
+          COOLIFY_ENVIRONMENT_UUID: ${{ vars.COOLIFY_ENVIRONMENT_UUID }}
+          COOLIFY_SERVER_UUID: ${{ vars.COOLIFY_SERVER_UUID }}
+        run: node scripts/preview/lifecycle.mjs

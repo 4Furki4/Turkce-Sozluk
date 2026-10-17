@@ -8,6 +8,18 @@ the same Raspberry Pi.
 - Production: `main` branch -> `furki4/turkish-dictionary-app:latest`
 - Development: `develop` branch -> `furki4/turkish-dictionary-app:development`
 
+## Branch previews
+
+Feature branches deploy through GitHub Actions and
+[Coolify](https://coolify.furkan-cengiz.com), using a separate app for each branch
+and sharing the existing development database through a private
+gateway. Preview writes affect development data. URLs use
+`dictionary-<branch>-<hash>.furkan-cengiz.com`.
+
+See [the preview runbook](coolify-previews.md) for setup, credentials, cleanup,
+resource limits, and recovery. The workflow must reach the default branch before
+GitHub activates automatic branch-deletion cleanup and manual dispatch.
+
 ## Environment Files
 
 Create these files on the Pi from the examples and fill in real secrets:
