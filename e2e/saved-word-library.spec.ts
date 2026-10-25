@@ -103,7 +103,17 @@ for (const locale of ["tr", "en"] as const) {
 
       const practice = page.getByRole("link", { name: copy.practiceCollection, exact: true });
       await expect(practice).toHaveAttribute("href", new RegExp(`collectionId=${collection!.id}`));
-      await practice.click();
+      const playScripts = /\/_next\/static\/chunks\/app\/play\/.*\.js(?:\?.*)?$/;
+      let releasePlayScripts!: () => void;
+      const playScriptsReleased = new Promise<void>(resolve => { releasePlayScripts = resolve; });
+      await page.route(playScripts, async route => { await playScriptsReleased; await route.continue(); });
+      try {
+        await practice.click({ noWaitAfter: true });
+        await expect(page.locator("[data-practice-ready]")).toHaveAttribute("data-practice-ready", "false");
+        await expect(page.getByRole("button", { name: messages.Play.flashcards.reviewDue.replace("{count}", "1"), exact: true })).toBeDisabled();
+      } finally { releasePlayScripts(); }
+      await expect(page.locator("[data-practice-ready]")).toHaveAttribute("data-practice-ready", "true");
+      await page.unroute(playScripts);
       await expect(page).toHaveURL(new RegExp(`source=saved.*collectionId=${collection!.id}`));
       await expect(page.getByText(messages.Play.flashcards.collectionScope.replace("{name}", collectionName), { exact: true })).toBeVisible();
       await page.getByRole("button", { name: messages.Play.flashcards.reviewDue.replace("{count}", "1"), exact: true }).click();

@@ -77,6 +77,8 @@ export default function PlayFlashcardGame({
     const play = useTranslations("Play.flashcards");
     const shouldReduceMotion = useReducedMotion();
     const utils = api.useUtils();
+    const [ready, setReady] = useState(false);
+    useEffect(() => { setReady(true); }, []);
     const [cardCount, setCardCount] = useState(10);
     const [source, setSource] = useState<"all" | "saved">(initialCollectionId || initialCollectionInvalid ? "saved" : initialSource);
     const [collectionId, setCollectionId] = useState(initialCollectionId);
@@ -108,7 +110,8 @@ export default function PlayFlashcardGame({
     const collectionUnavailable = collectionInvalid || Boolean(collectionId && (
         !isSignedIn || collections.isError || (!collections.isLoading && !activeCollection)
     ));
-    const canPractice = !collectionLoading && !collectionUnavailable && (source !== "saved" || isSignedIn);
+    const validPracticeScope = !collectionLoading && !collectionUnavailable && (source !== "saved" || isSignedIn);
+    const canPractice = ready && validPracticeScope;
     const reviewInput = source === "saved" ? { source: "saved" as const, collectionId } : undefined;
     const { refetch: loadPracticeDeck } = api.game.getRandomWordsForFlashcards.useQuery(
         { count: cardCount, source, collectionId },
@@ -417,11 +420,11 @@ export default function PlayFlashcardGame({
     }, [flipCard, gameState, goNext, goPrevious]);
 
     if (gameState === "setup") {
-        const hasDueReviews = canPractice && (reviewSummary.data?.dueCount ?? 0) > 0;
+        const hasDueReviews = validPracticeScope && (reviewSummary.data?.dueCount ?? 0) > 0;
         const hasStartedReviews = (reviewSummary.data?.totalCount ?? 0) > 0;
 
         return (
-            <section className={styles.page} aria-labelledby="flashcard-title">
+            <section className={styles.page} aria-labelledby="flashcard-title" data-practice-ready={ready}>
                 <header className={styles.intro}>
                     <p className={styles.kicker}><Sparkles aria-hidden="true" /> {play("roundKicker")}</p>
                     <h1 id="flashcard-title">{t("title")}</h1>
@@ -435,17 +438,17 @@ export default function PlayFlashcardGame({
                         {activeCollection ? <p>{play("collectionScope", { name: activeCollection.name })}</p> : null}
                         {collectionUnavailable ? <p role="alert">{play("collectionUnavailable")}</p> : null}
                         {collectionId && collections.isError ? (
-                            <button type="button" onClick={() => void collections.refetch()}>{play("retryCollection")}</button>
+                            <button type="button" disabled={!ready} onClick={() => void collections.refetch()}>{play("retryCollection")}</button>
                         ) : null}
                         {collectionId || collectionInvalid ? (
-                            <button type="button" onClick={() => changeSource("saved")}>{play("clearCollection")}</button>
+                            <button type="button" disabled={!ready} onClick={() => changeSource("saved")}>{play("clearCollection")}</button>
                         ) : null}
                     </div>
                 ) : null}
 
                 <div className={styles.setupLayout}>
                     <form className={styles.setupPanel} onSubmit={(event) => { event.preventDefault(); void startPracticeDeck(); }}>
-                        <fieldset>
+                        <fieldset disabled={!ready}>
                             <legend>{t("cardCount")}</legend>
                             <div className={styles.choiceGrid}>
                                 {[10, 20, 30, 50].map((count) => (
@@ -456,7 +459,7 @@ export default function PlayFlashcardGame({
                             </div>
                         </fieldset>
 
-                        <fieldset>
+                        <fieldset disabled={!ready}>
                             <legend>{t("source")}</legend>
                             <div className={styles.choiceGrid}>
                                 <ControlButton className={source === "all" ? styles.selected : ""} aria-pressed={source === "all"} onClick={() => changeSource("all")}>{t("sourceAll")}</ControlButton>
@@ -465,7 +468,7 @@ export default function PlayFlashcardGame({
                             {!session && <p className={styles.hint}>{t("signInForSaved")}</p>}
                         </fieldset>
 
-                        <fieldset>
+                        <fieldset disabled={!ready}>
                             <legend>{t("defaultSide")}</legend>
                             <div className={styles.choiceGrid}>
                                 <ControlButton className={defaultSide === "word" ? styles.selected : ""} aria-pressed={defaultSide === "word"} onClick={() => setDefaultSide("word")}>{t("showWordFirst")}</ControlButton>
@@ -483,7 +486,7 @@ export default function PlayFlashcardGame({
                                     <p>{play("caughtUp", { due: reviewSummary.data?.nextDueAt ? formatDueDate(reviewSummary.data.nextDueAt) : "" })}</p>
                                 ) : null}
                                 {hasDueReviews ? (
-                                    <button type="button" className={styles.dueAction} onClick={() => void startDueDeck()}>
+                                    <button type="button" className={styles.dueAction} disabled={!ready} onClick={() => void startDueDeck()}>
                                         <Clock3 aria-hidden="true" /> {play("reviewDue", { count: reviewSummary.data?.dueCount ?? 0 })}
                                     </button>
                                 ) : null}
