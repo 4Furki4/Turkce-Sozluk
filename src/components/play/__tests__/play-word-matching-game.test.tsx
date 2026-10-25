@@ -112,12 +112,19 @@ describe("PlayWordMatchingGame result review", () => {
         });
         (mockApi.useUtils as jest.Mock).mockReturnValue({
             user: {
+                getSavedWords: { invalidate: jest.fn() },
+                getSavedWordCount: { invalidate: jest.fn() },
+                getSavedWordCollections: { invalidate: jest.fn() },
                 getWordSaveStatus: {
                     cancel: mockSaveStatusCancel,
                     getData: mockSaveStatusGetData,
                     setData: mockSaveStatusSetData,
                     invalidate: mockSaveStatusInvalidate,
                 },
+            },
+            game: {
+                getFlashcardReviewSummary: { invalidate: jest.fn() },
+                getDueFlashcardReviews: { invalidate: jest.fn() },
             },
         });
         (mockApi.user.getWordSaveStatus.useQuery as jest.Mock).mockReturnValue({

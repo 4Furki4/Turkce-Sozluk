@@ -1,0 +1,30 @@
+services:
+  database-gateway:
+    image: haproxy:3.2-alpine@sha256:254e6370f01cd654e0744edf607c67f33777c1b6a9dc0d4b28bcba7171460122
+    container_name: dictionary-preview-development-gateway
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    mem_limit: 64m
+    cpus: 0.25
+    volumes:
+      - ./development-gateway.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    networks:
+      development:
+      previews:
+        aliases: [preview-development-db]
+    labels:
+      com.centurylinklabs.watchtower.enable: "false"
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+networks:
+  development:
+    external: true
+    name: turkce-sozluk_default
+  previews:
+    name: dictionary-preview-development
+    internal: true

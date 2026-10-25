@@ -10,6 +10,7 @@ jest.mock("@/src/trpc/react", () => ({
             getDueFlashcardReviews: { useQuery: jest.fn() },
             rateFlashcardReview: { useMutation: jest.fn() },
         },
+        user: { getSavedWordCollections: { useQuery: jest.fn() } },
     },
 }));
 
@@ -22,6 +23,7 @@ const { api: mockApi } = jest.requireMock("@/src/trpc/react") as {
             getDueFlashcardReviews: { useQuery: jest.Mock };
             rateFlashcardReview: { useMutation: jest.Mock };
         };
+        user: { getSavedWordCollections: { useQuery: jest.Mock } };
     };
 };
 const mockPracticeRefetch = jest.fn();
@@ -52,6 +54,12 @@ jest.mock("framer-motion", () => {
 jest.mock("next-intl", () => ({
     useTranslations: (namespace: string) => (key: string, values?: Record<string, string | number>) => (
         `${namespace}.${key}${values ? `:${Object.values(values).join(",")}` : ""}`
+    ),
+}));
+
+jest.mock("@/src/i18n/routing", () => ({
+    Link: ({ children, href, locale, ...props }: { children: ReactNode; href: { pathname: string; query?: Record<string, string> }; locale: string }) => (
+        <a href={`${href.pathname}${href.query ? `?${new URLSearchParams(href.query)}` : ""}`} {...props}>{children}</a>
     ),
 }));
 
@@ -94,6 +102,7 @@ describe("PlayFlashcardGame learning loop", () => {
             refetch: mockSummaryRefetch,
         });
         mockDueQuery.mockReturnValue({ refetch: mockDueRefetch });
+        mockApi.user.getSavedWordCollections.useQuery.mockReturnValue({ data: [], isLoading: false, isError: false });
         mockRateMutation.mockReturnValue({ mutateAsync: mockRateMutateAsync });
         mockRateMutateAsync.mockResolvedValue({
             meaningId: 11,
@@ -113,6 +122,79 @@ describe("PlayFlashcardGame learning loop", () => {
         expect(screen.getByText("Play.flashcards.untrackedPractice")).toBeInTheDocument();
         expect(screen.queryByText(/Play\.flashcards\.reviewDue/)).not.toBeInTheDocument();
         expect(mockSummaryQuery).toHaveBeenCalledWith(undefined, expect.objectContaining({ enabled: false }));
+    });
+
+    it("opens saved-word practice with a scoped review queue", () => {
+        render(<PlayFlashcardGame session={signedInSession} locale="en" initialSource="saved" />);
+        expect(mockPracticeQuery).toHaveBeenCalledWith({ count: 10, source: "saved", collectionId: undefined }, expect.anything());
+        expect(mockSummaryQuery).toHaveBeenCalledWith({ source: "saved", collectionId: undefined }, expect.objectContaining({ enabled: true }));
+        expect(mockDueQuery).toHaveBeenCalledWith({ limit: 10, source: "saved", collectionId: undefined }, expect.anything());
+        expect(screen.getByRole("link", { name: /backToSavedWords/ })).toHaveAttribute("href", "/saved-words");
+    });
+
+    it("keeps collection practice and due cards scoped until an explicit source change", () => {
+        const collectionId = "50000000-0000-4000-8000-000000000001";
+        mockApi.user.getSavedWordCollections.useQuery.mockReturnValue({ data: [{ id: collectionId, name: "Reading", wordCount: 2 }], isLoading: false, isError: false });
+        render(<PlayFlashcardGame session={signedInSession} locale="en" initialSource="saved" initialCollectionId={collectionId} />);
+        expect(screen.getByText("Play.flashcards.collectionScope:Reading")).toBeInTheDocument();
+        expect(mockPracticeQuery).toHaveBeenCalledWith({ count: 10, source: "saved", collectionId }, expect.anything());
+        expect(mockSummaryQuery).toHaveBeenCalledWith({ source: "saved", collectionId }, expect.objectContaining({ enabled: true }));
+        expect(mockDueQuery).toHaveBeenCalledWith({ limit: 10, source: "saved", collectionId }, expect.anything());
+        expect(screen.getByRole("link", { name: /backToSavedWords/ })).toHaveAttribute("href", `/saved-words?collectionId=${collectionId}`);
+        fireEvent.click(screen.getByText("Play.flashcards.clearCollection"));
+        expect(mockPracticeQuery).toHaveBeenLastCalledWith({ count: 10, source: "saved", collectionId: undefined }, expect.anything());
+        expect(screen.queryByText("Play.flashcards.collectionScope:Reading")).not.toBeInTheDocument();
+    });
+
+    it("blocks missing or malformed collections instead of practicing all saved words", () => {
+        const { rerender } = render(<PlayFlashcardGame session={signedInSession} locale="en" initialCollectionInvalid />);
+        expect(screen.getByRole("alert")).toHaveTextContent("Play.flashcards.collectionUnavailable");
+        expect(screen.getByRole("button", { name: /FlashcardGame.startGame/ })).toBeDisabled();
+        expect(mockSummaryQuery).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ enabled: false }));
+        rerender(<PlayFlashcardGame key="missing" session={signedInSession} locale="en" initialCollectionId="50000000-0000-4000-8000-000000000001" />);
+        expect(screen.getByRole("button", { name: /FlashcardGame.startGame/ })).toBeDisabled();
+        fireEvent.click(screen.getByRole("button", { name: /FlashcardGame.startGame/ }));
+        expect(mockPracticeRefetch).not.toHaveBeenCalled();
+    });
+
+    it("does not reopen stale practice data after a deleted collection or network failure", async () => {
+        const collectionId = "50000000-0000-4000-8000-000000000001";
+        mockApi.user.getSavedWordCollections.useQuery.mockReturnValue({ data: [{ id: collectionId, name: "Reading", wordCount: 1 }], isLoading: false, isError: false });
+        mockPracticeRefetch.mockResolvedValue({ data: { words: [makeDueCard()], error: null }, error: { data: { code: "NOT_FOUND" } } });
+        render(<PlayFlashcardGame session={signedInSession} locale="en" initialCollectionId={collectionId} />);
+        fireEvent.click(screen.getByRole("button", { name: /FlashcardGame.startGame/ }));
+        expect(await screen.findByText("Play.flashcards.collectionUnavailable")).toBeInTheDocument();
+        expect(screen.queryByText("kitap")).not.toBeInTheDocument();
+    });
+
+    it("retries a failed collection load without broadening the deck", () => {
+        const collectionId = "50000000-0000-4000-8000-000000000001";
+        const refetch = jest.fn();
+        mockApi.user.getSavedWordCollections.useQuery.mockReturnValue({ data: undefined, isLoading: false, isError: true, refetch });
+        render(<PlayFlashcardGame session={signedInSession} locale="en" initialCollectionId={collectionId} />);
+        expect(screen.getByRole("button", { name: /FlashcardGame.startGame/ })).toBeDisabled();
+        fireEvent.click(screen.getByText("Play.flashcards.retryCollection"));
+        expect(refetch).toHaveBeenCalledTimes(1);
+        expect(mockPracticeQuery).toHaveBeenLastCalledWith({ count: 10, source: "saved", collectionId }, expect.anything());
+    });
+
+    it("retains a return link after practice and blocks it while a rating outcome is unresolved", async () => {
+        mockPracticeRefetch.mockResolvedValue({ data: { words: [makeDueCard()], error: null } });
+        mockRateMutateAsync.mockRejectedValue(new Error("transport lost"));
+        render(<PlayFlashcardGame session={signedInSession} locale="en" initialSource="saved" />);
+        fireEvent.click(screen.getByRole("button", { name: /FlashcardGame.startGame/ }));
+        await screen.findByText("kitap");
+        expect(screen.getByRole("link", { name: /backToSavedWords/ })).toHaveAttribute("aria-disabled", "false");
+        fireEvent.click(screen.getAllByRole("button", { name: "FlashcardGame.flip" })[0]!);
+        fireEvent.click(screen.getByText("Play.flashcards.ratingGood"));
+        await screen.findByText("Play.flashcards.ratingError");
+        const backLink = screen.getByRole("link", { name: /backToSavedWords/ });
+        expect(backLink).toHaveAttribute("aria-disabled", "true");
+        expect(fireEvent.click(backLink)).toBe(false);
+        mockRateMutateAsync.mockResolvedValue({ dueAt: "2026-10-22T12:00:00.000Z" });
+        fireEvent.click(screen.getByText("Play.flashcards.retryRating"));
+        await screen.findByText("Play.flashcards.roundCompleteTitle");
+        expect(screen.getByRole("link", { name: /backToSavedWords/ })).toHaveAttribute("aria-disabled", "false");
     });
 
     it("opens due cards with their stored direction and sends only card identity, rating, and action ID", async () => {

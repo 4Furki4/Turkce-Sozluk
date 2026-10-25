@@ -24,6 +24,9 @@ export default function SaveWord({
         onSuccess: () => Promise.all([
             utils.user.getSavedWords.invalidate(),
             utils.user.getSavedWordCount.invalidate(),
+            utils.user.getSavedWordCollections.invalidate(),
+            utils.game.getFlashcardReviewSummary.invalidate(),
+            utils.game.getDueFlashcardReviews.invalidate(),
         ]),
         onMutate: async ({ wordId }) => {
             await utils.user.getWordSaveStatus.cancel(wordId)

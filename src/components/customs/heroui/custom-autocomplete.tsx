@@ -38,7 +38,7 @@ const customAutocompleteStyles = tv({
 export interface CustomAutocompleteProps<T extends object> extends AutocompleteProps<T> { }
 
 export const CustomAutocomplete = <T extends object>(
-    { children, className, classNames, inputProps, clearButtonProps, selectorButtonProps, ...props }: CustomAutocompleteProps<T>) => {
+    { children, className, classNames, inputProps, clearButtonProps, selectorButtonProps, disableAnimation = true, ...props }: CustomAutocompleteProps<T>) => {
     const t = useTranslations("SharedUI");
     const { isBlurEnabled } = useSnapshot(preferencesState);
     const styles = customAutocompleteStyles({ isBlurred: isBlurEnabled });
@@ -48,6 +48,8 @@ export const CustomAutocomplete = <T extends object>(
             // Apply default props
             color="primary"
             variant="bordered"
+            // Unmount closed popups immediately; retained exit portals can block form actions.
+            disableAnimation={disableAnimation}
             // Pass through any other props like `label`, `items`, etc.
             {...props}
             clearButtonProps={{ "aria-label": t("ClearValue"), ...clearButtonProps }}

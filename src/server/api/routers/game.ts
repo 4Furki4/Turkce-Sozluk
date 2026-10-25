@@ -6,6 +6,7 @@ import { words } from "@/db/schema/words";
 import { meanings } from "@/db/schema/meanings";
 import { relatedWords } from "@/db/schema/related_words";
 import { savedWords } from "@/db/schema/saved_words";
+import { savedWordCollectionMembers, savedWordCollections } from "@/db/schema/saved_word_collections";
 import { partOfSpeechs } from "@/db/schema/part_of_speechs";
 import { users } from "@/db/schema/users";
 import { gameScores } from "@/db/schema/game_scores";
@@ -45,11 +46,15 @@ import {
     toWordMatchingSessionSnapshot,
 } from "@/src/server/game/rated-session-state";
 import { isSameFlashcardReviewAction } from "@/src/server/game/flashcard-review-actions";
-import { and, asc, eq, gt, inArray, isNotNull, lte, sql } from "drizzle-orm";
+import { and, asc, eq, exists, gt, inArray, isNotNull, lte, sql } from "drizzle-orm";
 
 const gameSourceSchema = z.enum(["all", "saved"]);
 const flashcardDirectionSchema = z.enum(["word", "meaning"]);
 const flashcardRatingSchema = z.enum(["again", "hard", "good", "easy"]);
+const flashcardScopeSchema = z.object({
+    source: gameSourceSchema.optional(),
+    collectionId: z.string().uuid().optional(),
+});
 
 const speedRoundSessionInput = z.object({
     questionCount: z.number().int().min(5).max(30).default(10),
@@ -64,6 +69,39 @@ const wordMatchingSessionInput = z.object({
 });
 
 type GameDatabase = typeof import("@/db").db;
+
+async function assertFlashcardCollectionOwner(db: GameDatabase, userId: string, collectionId?: string) {
+    if (!collectionId) return;
+    const [collection] = await db.select({ id: savedWordCollections.id })
+        .from(savedWordCollections)
+        .where(and(eq(savedWordCollections.id, collectionId), eq(savedWordCollections.userId, userId)))
+        .limit(1);
+    if (!collection) throw new TRPCError({ code: "NOT_FOUND", message: "Saved word collection not found" });
+}
+
+function flashcardCollectionMember(db: GameDatabase, userId: string, collectionId?: string) {
+    if (!collectionId) return undefined;
+    return exists(db.select({ wordId: savedWordCollectionMembers.wordId })
+        .from(savedWordCollectionMembers)
+        .where(and(
+            eq(savedWordCollectionMembers.collectionId, collectionId),
+            eq(savedWordCollectionMembers.userId, userId),
+            eq(savedWordCollectionMembers.wordId, savedWords.wordId),
+        )));
+}
+
+function flashcardReviewScope(db: GameDatabase, userId: string, scope?: z.infer<typeof flashcardScopeSchema>) {
+    const scopedMeaningIds = scope?.source === "saved" || scope?.collectionId
+        ? db.select({ meaningId: meanings.id })
+            .from(meanings)
+            .innerJoin(savedWords, and(eq(savedWords.wordId, meanings.wordId), eq(savedWords.userId, userId)))
+            .where(flashcardCollectionMember(db, userId, scope.collectionId))
+        : undefined;
+    return and(
+        eq(flashcardReviewStates.userId, userId),
+        scopedMeaningIds ? inArray(flashcardReviewStates.meaningId, scopedMeaningIds) : undefined,
+    );
+}
 
 type PlayableSpeedQuestion = {
     token: string;
@@ -320,34 +358,44 @@ export const gameRouter = createTRPCRouter({
     getRandomWordsForFlashcards: publicProcedure
         .input(
             z.object({
-                count: z.number().min(5).max(100).default(10),
+                count: z.number().int().min(5).max(100).default(10),
                 source: z.enum(["all", "saved"]).default("all"),
+                collectionId: z.string().uuid().optional(),
             })
         )
         .query(async ({ input, ctx: { db, session } }) => {
-            const { count, source } = input;
+            const { count, source, collectionId } = input;
 
             // If source is "saved", user must be authenticated
-            if (source === "saved") {
+            if (source === "saved" || collectionId) {
                 if (!session?.user?.id) {
                     return { words: [], error: "authRequired" };
                 }
+                await assertFlashcardCollectionOwner(db, session.user.id, collectionId);
 
                 // Get saved words for the user
                 const savedWordIds = await db
                     .select({ wordId: savedWords.wordId })
                     .from(savedWords)
-                    .where(eq(savedWords.userId, session.user.id));
+                    .where(and(
+                        eq(savedWords.userId, session.user.id),
+                        flashcardCollectionMember(db, session.user.id, collectionId),
+                        exists(db.select({ id: meanings.id }).from(meanings).where(and(
+                            eq(meanings.wordId, savedWords.wordId), isNotNull(meanings.meaning),
+                        ))),
+                    ))
+                    .orderBy(sql`random()`)
+                    .limit(count);
 
                 if (savedWordIds.length === 0) {
-                    return { words: [], error: "noSavedWords" };
+                    return { words: [], error: collectionId ? "noCollectionWords" : "noSavedWords" };
                 }
 
                 const wordIds = savedWordIds.map((sw) => sw.wordId);
 
                 // Get words with their first meaning using Drizzle ORM
                 const result = await db
-                    .select({
+                    .selectDistinctOn([words.id], {
                         id: words.id,
                         meaningId: meanings.id,
                         name: words.name,
@@ -358,9 +406,8 @@ export const gameRouter = createTRPCRouter({
                     .from(words)
                     .innerJoin(meanings, eq(meanings.wordId, words.id))
                     .leftJoin(partOfSpeechs, eq(meanings.partOfSpeechId, partOfSpeechs.id))
-                    .where(inArray(words.id, wordIds))
-                    .orderBy(asc(meanings.order))
-                    .limit(count * 2); // Get more to ensure uniqueness after dedup
+                    .where(and(inArray(words.id, wordIds), isNotNull(meanings.meaning)))
+                    .orderBy(asc(words.id), asc(meanings.order), asc(meanings.id));
 
                 // Deduplicate by word id (keep first meaning)
                 const seenIds = new Set<number>();
@@ -414,20 +461,23 @@ export const gameRouter = createTRPCRouter({
 
     /** Summary deliberately distinguishes a new learner from a caught-up one. */
     getFlashcardReviewSummary: protectedProcedure
-        .query(async ({ ctx: { db, session } }) => {
+        .input(flashcardScopeSchema.optional())
+        .query(async ({ input, ctx: { db, session } }) => {
+            await assertFlashcardCollectionOwner(db, session.user.id, input?.collectionId);
             const now = new Date();
+            const scopeWhere = flashcardReviewScope(db, session.user.id, input);
             const [counts] = await db
                 .select({
                     totalCount: sql<number>`count(*)`.mapWith(Number),
-                    dueCount: sql<number>`count(*) filter (where ${flashcardReviewStates.dueAt} <= ${now})`.mapWith(Number),
+                    dueCount: sql<number>`count(*) filter (where ${flashcardReviewStates.dueAt} <= ${now.toISOString()})`.mapWith(Number),
                 })
                 .from(flashcardReviewStates)
-                .where(eq(flashcardReviewStates.userId, session.user.id));
+                .where(scopeWhere);
             const [nextReview] = await db
                 .select({ dueAt: flashcardReviewStates.dueAt })
                 .from(flashcardReviewStates)
                 .where(and(
-                    eq(flashcardReviewStates.userId, session.user.id),
+                    scopeWhere,
                     gt(flashcardReviewStates.dueAt, now),
                 ))
                 .orderBy(asc(flashcardReviewStates.dueAt))
@@ -442,15 +492,16 @@ export const gameRouter = createTRPCRouter({
 
     /**
      * A due queue preserves the exact meaning and prompt direction that were
-     * previously rated. It is not based on saved words, so unsaving a word
-     * never erases or hides learning history.
+     * previously rated. The default queue includes unsaved words; an explicit
+     * saved/collection scope filters the queue without changing learning history.
      */
     getDueFlashcardReviews: protectedProcedure
-        .input(z.object({ limit: z.number().int().min(1).max(100).default(10) }))
+        .input(flashcardScopeSchema.extend({ limit: z.number().int().min(1).max(100).default(10) }))
         .query(async ({ input, ctx: { db, session } }) => {
+            await assertFlashcardCollectionOwner(db, session.user.id, input.collectionId);
             const now = new Date();
             const dueWhere = and(
-                eq(flashcardReviewStates.userId, session.user.id),
+                flashcardReviewScope(db, session.user.id, input),
                 lte(flashcardReviewStates.dueAt, now),
             );
             const [countResult] = await db
