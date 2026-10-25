@@ -51,6 +51,18 @@ stay `https://development.turkce-sozluk.com`. Other runtime values are managed i
 the service editor. Preview settings remain in their separate Coolify environment;
 editing development settings does not automatically update previews.
 
+## Branch previews
+
+Feature branches deploy through GitHub Actions and
+[Coolify](https://coolify.furkan-cengiz.com), using a separate app for each branch
+and sharing the existing development database through a private
+gateway. Preview writes affect development data. URLs use
+`dictionary-<branch>-<hash>.furkan-cengiz.com`.
+
+See [the preview runbook](coolify-previews.md) for setup, credentials, cleanup,
+resource limits, and recovery. The workflow must reach the default branch before
+GitHub activates automatic branch-deletion cleanup and manual dispatch.
+
 ## Environment Files
 
 Production and the development data services still use these Pi files:
