@@ -59,7 +59,7 @@ jobs:
     needs: prepare
     if: ${{ github.event_name != 'delete' && inputs.action != 'delete' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 45
     services:
       postgres:
         image: postgres:17-alpine

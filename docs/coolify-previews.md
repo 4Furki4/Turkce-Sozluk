@@ -1,10 +1,11 @@
 # Branch previews on the Raspberry Pi
 
 Coolify manages disposable feature-branch deployments at
-[`coolify.furkan-cengiz.com`](https://coolify.furkan-cengiz.com). Production and
-development keep their existing Compose stacks, Watchtower image channels, cron
-jobs, databases, and exact Cloudflare Tunnel routes. They are not managed by
-Coolify.
+[`coolify.furkan-cengiz.com`](https://coolify.furkan-cengiz.com). Development
+runs in its separate Coolify environment; production retains its existing Compose
+stack. Watchtower is stopped globally. Previews preserve the release services,
+cron jobs, private databases, and exact Cloudflare Tunnel routes described in the
+[deployment runbook](raspberry-pi-deployments.md).
 
 ## Open a preview
 
