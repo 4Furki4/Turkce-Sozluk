@@ -78,7 +78,7 @@ export const adminRouter = createTRPCRouter({
         wordAlreadyExists: word.length > 0,
       };
     }),
-  getWordToEdit: adminProcedure.input(z.string()).query(async ({ ctx: { db }, input: queriedWord }) => {
+  getWordToEdit: adminProcedure.input(z.union([z.string(), z.object({ id: z.number().int().positive() })])).query(async ({ ctx: { db }, input: queriedWord }) => {
     const result = await db.execute(sql
       `
         -- word attributes
@@ -158,7 +158,7 @@ export const adminRouter = createTRPCRouter({
           LEFT JOIN roots r ON r.word_id = w.id
           LEFT JOIN languages langs ON r.language_id = langs.id
           LEFT JOIN meanings_agg m_agg ON m_agg.word_id = w.id
-          WHERE w.name = ${queriedWord}
+          WHERE ${typeof queriedWord === "string" ? sql`w.name = ${queriedWord}` : sql`w.id = ${queriedWord.id}`}
         )
           -- combine all data as a single json object
           SELECT

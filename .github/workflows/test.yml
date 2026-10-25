@@ -99,6 +99,10 @@ jobs:
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: bun test scripts/ci/env.test.mjs
 
+      - name: Test Coolify development deployment
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: bun test scripts/deploy/*.test.mjs
+
       - name: Upload unit test report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
@@ -111,7 +115,8 @@ jobs:
   build_browser:
     name: Production build and browser tests
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    # Includes three repetitions of each desktop/mobile journey.
+    timeout-minutes: 45
     services:
       postgres:
         image: postgres:17
@@ -286,6 +291,7 @@ jobs:
         run: npm run docker:preflight
 
       - name: Build and push
+        id: published
         if: steps.publication.outputs.current == 'true'
         uses: docker/build-push-action@v6
         with:
@@ -302,3 +308,15 @@ jobs:
             NEXT_PUBLIC_R2_CUSTOM_URL=https://data.turkce-sozluk.com
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Deploy development through Coolify
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' && github.repository == '4Furki4/Turkce-Sozluk' && steps.publication.outputs.current == 'true' && steps.image.outputs.push == 'true' && steps.published.outcome == 'success' }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PUBLISHED_IMAGE_DIGEST: ${{ steps.published.outputs.digest }}
+          COOLIFY_URL: ${{ vars.COOLIFY_URL }}
+          COOLIFY_PROJECT_UUID: ${{ vars.COOLIFY_PROJECT_UUID }}
+          COOLIFY_DEVELOPMENT_ENVIRONMENT_UUID: ${{ vars.COOLIFY_DEVELOPMENT_ENVIRONMENT_UUID }}
+          COOLIFY_DEVELOPMENT_SERVICE_UUID: ${{ vars.COOLIFY_DEVELOPMENT_SERVICE_UUID }}
+          COOLIFY_DEVELOPMENT_TOKEN: ${{ secrets.COOLIFY_DEVELOPMENT_TOKEN }}
+        run: node scripts/deploy/development.mjs

@@ -25,7 +25,7 @@ export default function PartOfSpeechInput({
     const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedAttribute = e.target.value
         setValue(() => new Set([selectedAttribute]))
-        setFieldValue(`meanings.${index}.partOfSpeechId`, selectedAttribute)
+        setFieldValue(`meanings.${index}.partOfSpeechId`, selectedAttribute, { shouldDirty: true, shouldValidate: true })
     };
     return (
         <Controller control={control} name={`meanings.${index}.partOfSpeechId`}
@@ -34,7 +34,7 @@ export default function PartOfSpeechInput({
                     items={partOfSpeeches}
                     selectionMode='single'
                     {...field}
-                    selectedKeys={value}
+                    selectedKeys={field.value ? [String(field.value)] : []}
                     onChange={handleSelectionChange}
                     radius='md'
                     label={t("PartOfSpeech")}

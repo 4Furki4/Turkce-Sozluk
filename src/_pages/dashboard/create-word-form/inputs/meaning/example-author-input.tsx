@@ -1,5 +1,6 @@
 "use client"
-import AddAuthorModal from '@/src/components/customs/modals/add-author';
+import { meaningSelectClasses } from "./field-styles";
+import AddAuthorModal from '@/src/components/customs/modals/add-author-inline';
 import { api } from '@/src/trpc/react';
 import { WordForm } from '@/types'
 import { Button, Select, Selection, SelectItem, useDisclosure } from "@heroui/react"
@@ -32,7 +33,7 @@ export default function MeaningExampleSentenceAuthorInput({
     const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedAuthor = e.target.value
         setValue(() => new Set(selectedAuthor))
-        setFieldValue(`meanings.${index}.example.author`, selectedAuthor)
+        setFieldValue(`meanings.${index}.example.author`, selectedAuthor, { shouldDirty: true, shouldValidate: true })
     };
     const { data } = api.params.getExampleSentenceAuthors.useQuery(undefined, {
         initialData: defaultExampleSentenceAuthors
@@ -61,11 +62,13 @@ export default function MeaningExampleSentenceAuthorInput({
                         tabIndex={0}
                         {...field}
                         onChange={handleSelectionChange}
-                        selectedKeys={value}
+                        selectedKeys={field.value ? [String(field.value)] : []}
                         selectionMode='single'
                         radius='md'
                         label={t('Author')}
-                        labelPlacement='outside'
+                        labelPlacement='outside-top'
+                        size='lg'
+                        classNames={meaningSelectClasses}
                         placeholder={t('SelectAuthor')}
                         description={t('Forms.ExampleSentence.Description')}
                         endContent={(

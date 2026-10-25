@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+import React, { Suspense } from "react";
+import { TaskSourceRestoration } from "@/src/components/task-pages/task-source-restoration";
 import { HeroUIProvider } from "@heroui/react";
 import { type ThemeProviderProps } from 'next-themes'
 import { ThemeProvider } from "next-themes";
@@ -19,6 +20,7 @@ export default function Providers({ children, ...props }: ThemeProviderProps) {
         enableSystem
         themes={["dark", "light", "system"]}
       >
+        <Suspense><TaskSourceRestoration /></Suspense>
         {children}
       </ThemeProvider>
     </HeroUIProvider>

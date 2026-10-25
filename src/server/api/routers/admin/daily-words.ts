@@ -7,6 +7,11 @@ import { DailyWordSchema } from "../../schemas/admin";
 import { TRPCError } from "@trpc/server";
 
 export const dailyWordsAdminRouter = createTRPCRouter({
+    getById: adminProcedure.input(z.object({ id: z.number().int().positive() })).query(async ({ ctx: { db }, input }) => {
+      const [item] = await db.select({ id: dailyWords.id, date: dailyWords.date, wordId: dailyWords.wordId, wordName: words.name }).from(dailyWords).innerJoin(words, eq(dailyWords.wordId, words.id)).where(eq(dailyWords.id, input.id));
+      if (!item) throw new TRPCError({ code: "NOT_FOUND" });
+      return item;
+    }),
     getDailyWords: adminProcedure
         .input(z.object({
             limit: z.number().default(10),

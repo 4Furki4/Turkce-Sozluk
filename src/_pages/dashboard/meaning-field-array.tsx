@@ -45,13 +45,21 @@ export default function MeaningFieldArray({
             <div key={field.id} className="w-full">
                 <h2 className="text-center text-fs-1">{t('Meaning')}</h2>
                 <Card className="mb-4 rounded-md">
-                    <CardBody>
+                    <CardBody className="gap-6">
                         <WordMeaningInput index={index} control={control} />
-                        <div className="sm:grid sm:grid-cols-2 gap-2">
-                            <MeaningPartOfSpeechInput index={index} control={control} partOfSpeeches={partOfSpeeches} />
-                            <MeaningAttributesInput index={index} control={control} meaningAttributes={meaningAttributes} setFieldValue={setValue} />
-                            <MeaningExampleSentenceInput index={index} control={control} />
-                            <MeaningExampleAuthorInput index={index} control={control} defaultExampleSentenceAuthors={authors} setFieldValue={setValue} clearErrors={clearErrors} watch={watch} />
+                        <div className="grid min-w-0 grid-cols-1 items-start gap-x-4 gap-y-6 sm:grid-cols-2">
+                            <div className="min-w-0">
+                                <MeaningPartOfSpeechInput index={index} control={control} partOfSpeeches={partOfSpeeches} />
+                            </div>
+                            <div className="min-w-0">
+                                <MeaningAttributesInput index={index} control={control} meaningAttributes={meaningAttributes} setFieldValue={setValue} />
+                            </div>
+                            <div className="min-w-0">
+                                <MeaningExampleSentenceInput index={index} control={control} />
+                            </div>
+                            <div className="min-w-0">
+                                <MeaningExampleAuthorInput index={index} control={control} defaultExampleSentenceAuthors={authors} setFieldValue={setValue} clearErrors={clearErrors} watch={watch} />
+                            </div>
                         </div>
                         <div className="grid gap-2">
                             <MeaningImageInput index={index} control={control} formState={formState} clearErrors={clearErrors} field={field} setImagePreviewUrls={setImagePreviewUrls} imagePreviewUrls={imagePreviewUrls} />

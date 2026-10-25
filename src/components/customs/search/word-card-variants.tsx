@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, Button, Chip, Popover, PopoverContent, PopoverTrigger, Tooltip, useDisclosure } from "@heroui/react";
+import { Avatar, Button, Chip, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@heroui/react";
 import {
   BookOpen,
   Blocks,
@@ -39,9 +39,11 @@ import { captureElementScreenshot } from "@/src/utils/screenshot";
 
 import CustomCard from "@/src/components/customs/heroui/custom-card";
 import { CustomAudioPlayer } from "@/src/components/customs/custom-audio";
-import WordCardRequestModal, {
-  type WordCardRequestModalInitialView,
-} from "@/src/components/customs/modals/word-card-request-modal";
+import { SourceReturn } from "@/src/components/task-pages/source-return";
+import { TaskButton } from "@/src/components/task-pages/task-link";
+import { useTaskHref } from "@/src/components/task-pages/task-page";
+import { useProgressRouter } from "@/src/hooks/use-progress-router";
+import { withTaskReturn } from "@/src/lib/task-navigation";
 import { PronunciationCard } from "@/src/components/customs/pronunciation-card";
 import { PronunciationButton } from "@/src/components/customs/pronunciation-button";
 import SaveWord from "@/src/components/customs/save-word";
@@ -60,9 +62,11 @@ const RELATED_LINK_COLLAPSE_LIMIT = 24;
 const WordCardNavigationContext = createContext<{
   locale: "en" | "tr";
   offlineLinks: boolean;
+  wordId: number;
 }>({
   locale: "tr",
   offlineLinks: false,
+  wordId: 0,
 });
 
 type WordEntryData = WordSearchResult["word_data"] & {
@@ -160,6 +164,7 @@ export function SearchWordCardVariantGroup({
 
   return (
     <div className="search-word-results grid gap-5" aria-busy={phase === "loading"}>
+      <SourceReturn entries={resultKey ?? ""} />
       <WordCardVariantToggle
         variant={searchWordCardVariant}
         onVariantChange={setSearchWordCardVariant}
@@ -249,10 +254,10 @@ function SearchWordCardVariant({
   headingLevel = "h2",
   variant,
 }: SearchWordCardVariantProps) {
-  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+  const taskRouter = useProgressRouter();
+  const pronunciationHref = useTaskHref({ pathname: "/contribute-word/[wordId]/pronunciations/new", params: { wordId: word_data.word_id } });
   const t = useTranslations("WordCard");
   const cardRef = useRef<HTMLDivElement>(null);
-  const [requestModalInitialView, setRequestModalInitialView] = useState<WordCardRequestModalInitialView>("word");
   const offlineLinks = isOnline === false || word_data.source === "offline";
 
   const handleCapture = async () => {
@@ -281,13 +286,9 @@ function SearchWordCardVariant({
         successMessage: t("urlCopiedDescription"),
       });
     },
-    onEditOpen: () => {
-      setRequestModalInitialView("word");
-      onOpen();
-    },
+    onEditOpen: () => {},
     onPronunciationRequestOpen: () => {
-      setRequestModalInitialView("pronunciation");
-      onOpen();
+      taskRouter.push(withTaskReturn(pronunciationHref, window.location.pathname + window.location.search + window.location.hash));
     },
   };
 
@@ -295,12 +296,13 @@ function SearchWordCardVariant({
     <CustomCard
       ref={cardRef}
       as="article"
+      id={`word-${word_data.word_id}`}
       aria-label={t("Words")}
       role="article"
       className="overflow-hidden rounded-md p-0 shadow-sm shadow-black/5"
     >
       <div key={variant} className="motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-1 duration-200">
-        <WordCardNavigationContext.Provider value={{ locale, offlineLinks }}>
+        <WordCardNavigationContext.Provider value={{ locale, offlineLinks, wordId: word_data.word_id }}>
           {variant === "magazine" ? (
             <MagazineWordCard {...bodyProps} />
           ) : (
@@ -308,15 +310,6 @@ function SearchWordCardVariant({
           )}
         </WordCardNavigationContext.Provider>
       </div>
-
-      <WordCardRequestModal
-        word={{ word_data }}
-        session={session}
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        onClose={onClose}
-        initialView={requestModalInitialView}
-      />
 
       <div
         data-screenshot-watermark
@@ -1385,79 +1378,20 @@ function DossierStats({ word_data, compact = false }: { word_data: WordEntryData
   );
 }
 
-function RequestEditControl({
-  session,
-  onEditOpen,
-  fullWidth = false,
-  compact = false,
-}: {
+function RequestEditControl({ fullWidth = false, compact = false }: {
   session: Session | null;
   onEditOpen: () => void;
   fullWidth?: boolean;
   compact?: boolean;
 }) {
   const t = useTranslations("WordCard");
-  const router = useRouter();
-
-  if (session) {
-    if (compact) {
-      return (
-        <button
-          type="button"
-          onClick={onEditOpen}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
-        >
-          <PenLine className="h-3.5 w-3.5" />
-          {t("RequestEdit")}
-        </button>
-      );
-    }
-
-    return (
-      <Button onPress={onEditOpen} color="primary" variant="solid" className={cn(fullWidth && "w-full")}>
-        {t("RequestEdit")}
-      </Button>
-    );
-  }
-
-  return (
-    <Popover showArrow placement="bottom">
-      <PopoverTrigger>
-        {compact ? (
-          <button
-            type="button"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
-          >
-            <PenLine className="h-3.5 w-3.5" />
-            {t("RequestEdit")}
-          </button>
-        ) : (
-          <Button color="primary" variant="faded" className={cn(fullWidth && "w-full")}>
-            {t("RequestEdit")}
-          </Button>
-        )}
-      </PopoverTrigger>
-      <PopoverContent>
-        <div className="max-w-64 px-1 py-2">
-          <p className="text-sm text-foreground">{t("You can request an edit if you are signed in")}</p>
-          <button
-            onClick={() => {
-              startNavigationProgress();
-              router.push({
-                pathname: "/signin",
-                query: {
-                  backTo: window.location.pathname,
-                },
-              });
-            }}
-            className="mt-2 cursor-pointer text-sm text-primary underline underline-offset-2"
-          >
-            {t("SignIn")}
-          </button>
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
+  const { wordId } = useContext(WordCardNavigationContext);
+  return <TaskButton href={{ pathname: "/contribute-word/[wordId]", params: { wordId } }}
+    color="primary" variant={compact ? "light" : "solid"}
+    className={cn(fullWidth && "w-full", compact && "text-xs")}
+    startContent={compact ? <PenLine className="h-3.5 w-3.5" /> : undefined}>
+    {t("RequestEdit")}
+  </TaskButton>;
 }
 
 function SectionHeader({ icon: Icon, title }: { icon?: LucideIcon; title: string }) {

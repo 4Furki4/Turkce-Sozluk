@@ -1,18 +1,16 @@
 "use client";
 
-import DynamicParameterForm from "@/src/components/dynamic-parameter-form";
 import DynamicParameterTable from "@/src/components/dynamic-parameter-table";
-import { useState } from "react";
+import { useListState } from "@/src/hooks/use-list-state";
 import { api } from "@/src/trpc/react";
 import { keepPreviousData } from "@tanstack/react-query";
 
 export default function LanguagesPage() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<any>(null);
-
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [list, setList] = useListState({ page: 1, size: 10, search: "" });
+  const page = list.page; const search = list.search; const itemsPerPage = list.size;
+  const setPage = (page: number) => setList(old => ({ ...old, page }));
+  const setSearch = (search: string) => setList(old => ({ ...old, page: 1, search }));
+  const setItemsPerPage = (size: number) => setList(old => ({ ...old, page: 1, size }));
   const skip = (page - 1) * itemsPerPage;
 
   const { data, refetch, isLoading } = api.admin.dynamicParameters.getLanguages.useQuery({
@@ -21,20 +19,6 @@ export default function LanguagesPage() {
     search
   }, {
     placeholderData: keepPreviousData
-  });
-
-  const createMutation = api.admin.dynamicParameters.createLanguage.useMutation({
-    onSuccess: () => {
-      refetch();
-      setIsFormOpen(false);
-    }
-  });
-
-  const updateMutation = api.admin.dynamicParameters.updateLanguage.useMutation({
-    onSuccess: () => {
-      refetch();
-      setIsFormOpen(false);
-    }
   });
 
   const deleteMutation = api.admin.dynamicParameters.deleteLanguage.useMutation({
@@ -49,34 +33,6 @@ export default function LanguagesPage() {
     { key: "actions", label: "Actions" }
   ];
 
-  const formFields = [
-    { key: "language_code", label: "Language Code", type: "text" as const },
-    { key: "language_en", label: "English Name", type: "text" as const },
-    { key: "language_tr", label: "Turkish Name", type: "text" as const }
-  ];
-
-  const handleAdd = () => {
-    setSelectedItem(null);
-    setIsFormOpen(true);
-  };
-
-  const handleEdit = (item: any) => {
-    setSelectedItem(item);
-    setIsFormOpen(true);
-  };
-
-  const handleSubmit = (formData: any) => {
-    if (selectedItem) {
-      updateMutation.mutate({
-        id: selectedItem.id,
-        ...formData
-      });
-    } else {
-      createMutation.mutate(formData);
-    }
-  };
-
-
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Languages</h1>
@@ -86,23 +42,15 @@ export default function LanguagesPage() {
         totalCount={data?.total || 1}
         setPageNumber={setPage}
         pageNumber={page}
+        search={search}
         onSearch={setSearch}
-        onAdd={handleAdd}
-        onEdit={handleEdit}
+        taskType="languages"
         onDelete={(item) => deleteMutation.mutate({ id: item.id })}
         itemsPerPage={itemsPerPage}
         setItemsPerPage={setItemsPerPage}
         isLoading={isLoading}
       />
 
-      <DynamicParameterForm
-        isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        onSubmit={handleSubmit}
-        title={selectedItem ? "Edit Language" : "Add Language"}
-        fields={formFields}
-        initialData={selectedItem}
-      />
     </div>
   );
 }

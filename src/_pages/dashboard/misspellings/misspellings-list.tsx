@@ -1,30 +1,19 @@
 "use client";
 
 import { CustomPagination } from "@/src/components/customs/heroui/custom-pagination";
-import React, { useState } from "react";
-import {
-    Button,
-    ModalContent,
-    useDisclosure,
-} from "@heroui/react";
+import React from "react";
+import { useListPage } from "@/src/hooks/use-list-page";
+import { TaskButton } from "@/src/components/task-pages/task-link";
+import { Button } from "@heroui/react";
 import { api } from "@/src/trpc/react";
 import { Edit, Trash2, Plus } from "lucide-react";
-import MisspellingsManagement from "./misspellings-management";
 import { CustomTable } from "@/src/components/customs/heroui/custom-table";
-import { CustomModal } from "@/src/components/customs/heroui/custom-modal";
 import { useTranslations } from "next-intl";
 
-export default function MisspellingsList({ initialTerm, correctionId }: { initialTerm?: string; correctionId?: number }) {
+export default function MisspellingsList({ correctionId }: { correctionId?: number }) {
     const t = useTranslations("Dashboard.Misspellings");
-    const [page, setPage] = useState(1);
+    const [page, setPage] = useListPage();
     const limit = 10;
-    const { isOpen, onOpen, onOpenChange } = useDisclosure({ defaultOpen: Boolean(initialTerm) });
-    const [selectedItem, setSelectedItem] = useState<{
-        id?: number;
-        correctWordId: number;
-        incorrectSpelling: string;
-    } | null>(initialTerm ? { correctWordId: 0, incorrectSpelling: initialTerm } : null);
-
     const { data, isLoading, refetch } = api.admin.misspellings.getMisspellings.useQuery({
         limit,
         offset: (page - 1) * limit,
@@ -33,6 +22,7 @@ export default function MisspellingsList({ initialTerm, correctionId }: { initia
 
     const deleteMutation = api.admin.misspellings.deleteMisspelling.useMutation({
         onSuccess: () => {
+            if (data?.data.length === 1 && page > 1) setPage(page - 1);
             refetch();
         },
     });
@@ -43,29 +33,16 @@ export default function MisspellingsList({ initialTerm, correctionId }: { initia
         }
     };
 
-    const handleEdit = (item: any) => {
-        setSelectedItem({
-            id: item.id,
-            correctWordId: item.correctWordId,
-            incorrectSpelling: item.incorrectSpelling,
-        });
-        onOpen();
-    };
-
-    const handleCreate = () => {
-        setSelectedItem(null);
-        onOpen();
-    };
-
     const totalPages = data ? Math.ceil(data.total / limit) : 0;
+    React.useEffect(() => { if (data && page > Math.max(totalPages, 1)) setPage(Math.max(totalPages, 1)); }, [data, page, totalPages]);
 
     return (
         <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-wrap gap-3 justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">{t("pageTitle")}</h1>
-                <Button color="primary" startContent={<Plus size={20} />} onPress={handleCreate}>
+                <TaskButton color="primary" startContent={<Plus size={20} />} href="/dashboard/misspellings/new">
                     {t("addMisspelling")}
-                </Button>
+                </TaskButton>
             </div>
 
             <CustomTable
@@ -87,14 +64,14 @@ export default function MisspellingsList({ initialTerm, correctionId }: { initia
                         case "actions":
                             return (
                                 <div className="flex gap-2">
-                                    <Button
+                                    <TaskButton
                                         isIconOnly
                                         size="sm"
                                         variant="light"
-                                        onPress={() => handleEdit(item)}
+                                        href={{ pathname: "/dashboard/misspellings/[id]/edit", params: { id: item.id } }}
                                     >
                                         <Edit size={20} />
-                                    </Button>
+                                    </TaskButton>
                                     <Button
                                         isIconOnly
                                         size="sm"
@@ -127,19 +104,6 @@ export default function MisspellingsList({ initialTerm, correctionId }: { initia
                 }
             />
 
-            <CustomModal isOpen={isOpen} onOpenChange={onOpenChange} size="2xl">
-                <ModalContent>
-                    {(onClose) => (
-                        <MisspellingsManagement
-                            onClose={() => {
-                                onClose();
-                                refetch();
-                            }}
-                            initialData={selectedItem}
-                        />
-                    )}
-                </ModalContent>
-            </CustomModal>
         </div>
     );
 }

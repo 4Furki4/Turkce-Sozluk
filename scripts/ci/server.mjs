@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import { cpSync, createWriteStream, mkdirSync } from "node:fs";
 import { createServer } from "node:http";
+import { resolve } from "node:path";
 import { ciEnvironment } from "./env.mjs";
 
 // Mirror the image's standalone runtime, including its static files.
@@ -43,7 +44,7 @@ const app = spawn("node", ["server.js"], {
   cwd: ".next/standalone",
   // Next normalizes loopback URLs to localhost. Match that origin so localized
   // rewrites stay inside the router instead of opening extra HTTP proxy hops.
-  env: { ...ciEnvironment(), HOSTNAME: "localhost", PORT: "3100" },
+  env: { ...ciEnvironment(), NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ""} --require=${JSON.stringify(resolve("scripts/ci/recaptcha.cjs"))}`.trim(), HOSTNAME: "localhost", PORT: "3100" },
   stdio: ["ignore", "pipe", "pipe"],
 });
 app.stdout.pipe(log, { end: false });

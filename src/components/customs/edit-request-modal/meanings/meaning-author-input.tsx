@@ -1,6 +1,6 @@
 import { Control, Controller } from 'react-hook-form'
 import { Select, SelectItem } from '@heroui/react'
-import { MeaningEditRequestForm } from '../meanings-edit-request'
+import { MeaningEditRequestForm } from './meaning-form-types'
 import { useTranslations } from 'next-intl'
 export default function MeaningAuthorInput({ control, meaningAuthors, meaningAuthorsIsLoading }:
     {

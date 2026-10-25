@@ -1,23 +1,24 @@
-// src/_pages/dashboard/feedback/feedback-list.tsx
 "use client";
+import { useTaskMenuLinks } from "@/src/components/task-pages/task-link";
+import { useListState } from "@/src/hooks/use-list-state";
+// src/_pages/dashboard/feedback/feedback-list.tsx
+
 
 import { Key, useCallback, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Link } from "@/src/i18n/routing";
 import { User, Chip, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button, DropdownSection } from "@heroui/react";
-import { EditIcon, MoreVertical, Trash2Icon, PencilRuler } from "lucide-react";
+import { MoreVertical, Trash2Icon } from "lucide-react";
 
 import { api } from "@/src/trpc/react";
 import { feedbackStatusEnum, feedbackTypeEnum } from "@/db/schema/feedbacks";
-import { UpdateStatusModal } from "./modals/update-status-feedback";
 import { DeleteFeedbackModal } from "./modals/delete-feedback";
 import { formatDistanceToNow } from "date-fns";
 import { CustomTable } from "@/src/components/customs/heroui/custom-table";
 import { CustomPagination } from "@/src/components/customs/heroui/custom-pagination";
 import { tr } from "date-fns/locale";
 import { useDebounce } from "@/src/hooks/use-debounce";
-import { UpdateTypeModal } from "./modals/update-type";
 import { FeedbackFilterBar, type FeedbackFilters } from "@/src/_pages/dashboard/feedback/feedback-filter-bar";
 import { FeedbackTableSkeleton } from "@/src/_pages/feedback/table-skeleton";
 
@@ -52,30 +53,21 @@ export const statusColorMap: Record<typeof feedbackStatusEnum.enumValues[number]
 };
 
 export function FeedbackList() {
+    const taskMenuLink = useTaskMenuLinks();
     const locale = useLocale()
     const t = useTranslations("Dashboard.feedback");
     const searchParams = useSearchParams();
     const requestedId = Number(searchParams.get("feedbackId"));
     const feedbackId = Number.isInteger(requestedId) && requestedId > 0 && requestedId <= 2147483647 ? requestedId : undefined;
 
-    const [page, setPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(20);
     const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
-    const [isUpdateStatusModalOpen, setUpdateStatusModalOpen] = useState(false);
-    const [isUpdateTypeModalOpen, setUpdateTypeModalOpen] = useState(false);
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 
-    // Initialize filters with default values
-    const [filters, setFilters] = useState<FeedbackFilters>({
-        types: [],
-        statuses: [],
-        searchTerm: "",
-        sortBy: "votes",
-        sortOrder: "desc",
-        startDate: null,
-        endDate: null,
-    });
-
+    const [list, setList] = useListState({ page: 1, size: 20, filters: { types: [] as string[], statuses: [] as string[], searchTerm: "", sortBy: "votes" as "votes" | "createdAt", sortOrder: "desc" as "asc" | "desc", startDate: null as string | null, endDate: null as string | null } });
+    const page = list.page; const itemsPerPage = list.size;
+    const setPage = (page: number) => setList(old => ({ ...old, page }));
+    const filters: FeedbackFilters = { ...list.filters, startDate: list.filters.startDate ? new Date(list.filters.startDate) : null, endDate: list.filters.endDate ? new Date(list.filters.endDate) : null };
+    const setFilters = (value: FeedbackFilters) => setList(old => ({ ...old, page: 1, filters: { ...value, startDate: value.startDate?.toISOString() ?? null, endDate: value.endDate?.toISOString() ?? null } }));
     const debouncedSearchTerm = useDebounce(filters.searchTerm, 500);
 
     const { data, isLoading } = api.admin.feedback.getAll.useQuery({
@@ -94,7 +86,6 @@ export function FeedbackList() {
 
     const handleFiltersChange = (newFilters: FeedbackFilters) => {
         setFilters(newFilters);
-        setPage(1); // Reset to first page when filters change
     };
 
     const handleClearFilters = () => {
@@ -107,17 +98,6 @@ export function FeedbackList() {
             startDate: null,
             endDate: null,
         });
-        setPage(1);
-    };
-
-    const openUpdateStatusModal = (feedback: Feedback) => {
-        setSelectedFeedback(feedback);
-        setUpdateStatusModalOpen(true);
-    };
-
-    const openUpdateTypeModal = (feedback: Feedback) => {
-        setSelectedFeedback(feedback);
-        setUpdateTypeModalOpen(true);
     };
 
     const openDeleteModal = (feedback: Feedback) => {
@@ -180,14 +160,8 @@ export function FeedbackList() {
                             </DropdownTrigger>
                             <DropdownMenu onAction={(key) => {
                                 switch (key) {
-                                    case "edit_status":
-                                        setSelectedFeedback(feedbackItem);
-                                        setUpdateStatusModalOpen(true);
-                                        break;
-                                    case "edit_type":
-                                        setSelectedFeedback(feedbackItem);
-                                        setUpdateTypeModalOpen(true);
-                                        break;
+
+
                                     case "delete":
                                         setSelectedFeedback(feedbackItem);
                                         setDeleteModalOpen(true);
@@ -196,20 +170,8 @@ export function FeedbackList() {
                             }}>
 
                                 <DropdownSection aria-label={t("actions.title")}>
-                                    <DropdownItem
-                                        key="edit_status"
-                                        startContent={<EditIcon className="text-default-500" size={18} />}
-                                        onPress={() => openUpdateStatusModal(feedbackItem)}
-                                    >
-                                        {t("actions.edit_status")}
-                                    </DropdownItem>
-                                    <DropdownItem
-                                        key="edit_type"
-                                        startContent={<PencilRuler className="text-default-500" size={18} />}
-                                        onPress={() => openUpdateTypeModal(feedbackItem)}
-                                    >
-                                        {t("actions.edit_type")}
-                                    </DropdownItem>
+                                    <DropdownItem key="edit" textValue={t("actions.edit_status")} {...taskMenuLink({ pathname: "/dashboard/feedback/[id]/edit", params: { id: feedbackItem.id } })}> {t("actions.edit_status")} / {t("actions.edit_type")}</DropdownItem>
+
                                     <DropdownItem
                                         key="delete"
                                         className="text-danger"
@@ -227,7 +189,7 @@ export function FeedbackList() {
             default:
                 return null;
         }
-    }, [t, locale]);
+    }, [t, locale, taskMenuLink]);
 
     return (
         <div className="container mx-auto p-4">
@@ -264,16 +226,8 @@ export function FeedbackList() {
             )}
             {selectedFeedback && (
                 <>
-                    <UpdateStatusModal
-                        isOpen={isUpdateStatusModalOpen}
-                        onClose={() => setUpdateStatusModalOpen(false)}
-                        feedback={selectedFeedback}
-                    />
-                    <UpdateTypeModal
-                        isOpen={isUpdateTypeModalOpen}
-                        onClose={() => setUpdateTypeModalOpen(false)}
-                        feedback={selectedFeedback}
-                    />
+
+
                     <DeleteFeedbackModal
                         isOpen={isDeleteModalOpen}
                         onClose={() => setDeleteModalOpen(false)}

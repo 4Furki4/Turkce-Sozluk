@@ -158,8 +158,9 @@ After restoring a production dump into development, remove user/session/log data
 
 ```bash
 CONFIRM_SANITIZE_DEVELOPMENT_DB=yes npm run pi:sanitize:development
-docker compose --env-file .env.development.pi -f docker-compose.development.yml restart app-development
 ```
+
+Restart `dictionary-development` through Coolify after sanitization.
 
 This keeps dictionary content while removing accounts, sessions, saved words,
 search logs, feedback, requests, pronunciations, and other user-linked data.

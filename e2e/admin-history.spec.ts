@@ -193,7 +193,8 @@ for (const locale of ["tr", "en"] as const) test(`${locale}: real admin mutation
     await form.getByRole("textbox", { name: copy.filters.targetId, exact: true }).fill(String(requestId));
     const trigger = form.getByRole("button", { name: copy.filters.targetType, exact: true });
     await trigger.scrollIntoViewIfNeeded();
-    if (testInfo.project.name === "mobile") await trigger.tap(); else await trigger.click();
+    await trigger.focus();
+    await trigger.press("Enter");
     await expect(page.getByRole("listbox")).toBeVisible();
     await page.getByRole("option", { name: copy.entities.request, exact: true }).press("Enter");
     await expect(trigger).toContainText(copy.entities.request);

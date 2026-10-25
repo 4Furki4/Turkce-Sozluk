@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect } from "react";
 import {
   useDisclosure,
   Button,
@@ -16,14 +16,10 @@ import { api } from "@/src/trpc/react";
 import { Link as NextUILink } from "@heroui/react";
 import { usePathname, useSearchParams } from "next/navigation";
 import NextLink from "next/link";
-import { useProgressRouter as useRouter } from "@/src/hooks/use-progress-router";
-import { Link } from "@/src/i18n/routing";
 import WordListDeleteModal from "./word-list-delete-modal";
-import EditWordModal from "./edit-modal/edit-word-modal";
+import { useTaskMenuLinks, TaskButton } from "@/src/components/task-pages/task-link";
 import { keepPreviousData } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
 import { useDebounce } from "@uidotdev/usehooks";
-import { Controller } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { CustomTable } from "@/src/components/customs/heroui/custom-table";
 import { CustomPagination } from '@/src/components/customs/heroui/custom-pagination'
@@ -51,76 +47,41 @@ const wordPerPageOptions = [
   }
 ]
 export default function WordList() {
+  const taskMenuLink = useTaskMenuLinks();
   const t = useTranslations();
   const { isOpen: isDeleteModalOpen, onOpen: onDeleteModalOpen, onOpenChange: onDeleteModalChange } = useDisclosure();
-  const { isOpen: isEditModalOpen, onOpen: onEditModalOpen, onOpenChange: onEditModalChange } = useDisclosure();
   const [selectedWord, setSelectedWord] = React.useState<{
     wordId: number;
     name: string;
   }>({ wordId: 0, name: "" });
 
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Get initial values from URL params
-  const initialPage = Number(searchParams.get('page')) || 1;
-  const initialPerPage = Number(searchParams.get('per_page')) || 10;
-  const initialSearch = searchParams.get('search') || "";
-
-  const [pageNumber, setPageNumber] = React.useState<number>(initialPage);
-  const [wordsPerPage, setWordsPerPage] = React.useState<number>(initialPerPage);
-
-  const { control, watch, setValue } = useForm({
-    defaultValues: {
-      search: initialSearch
-    }
-  });
-
-  // Update URL when parameters change
-  const debouncedSearch = useDebounce(watch("search"), 500);
-  const isFirstRender = useRef(true);
-
-  // reset to first page when search changes
+  const rawPage = Number(searchParams.get("page") ?? 1);
+  const pageNumber = Number.isSafeInteger(rawPage) && rawPage > 0 ? rawPage : 1;
+  const rawSize = Number(searchParams.get("per_page") ?? 10);
+  const wordsPerPage = [5, 10, 20, 50].includes(rawSize) ? rawSize : 10;
+  const urlSearch = searchParams.get("search") ?? "";
+  const [search, setSearch] = React.useState(urlSearch);
   useEffect(() => {
-    setPageNumber(1);
-  }, [debouncedSearch]);
-
-  // update state on URL param changes (back/forward)
-  useEffect(() => {
-    if (isFirstRender.current) return;
-    const paramPage = Number(searchParams.get('page')) || 1;
-    const paramPer = Number(searchParams.get('per_page')) || 10;
-    const paramSearch = searchParams.get('search') || '';
-    setPageNumber(paramPage);
-    setWordsPerPage(paramPer);
-    setValue('search', paramSearch, { shouldDirty: false });
-  }, [searchParams, setValue]);
-
-  // sync state to URL, enable back/forward history
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    const params = new URLSearchParams();
-    if (debouncedSearch) params.set('search', debouncedSearch);
-    params.set('page', pageNumber.toString());
-    params.set('per_page', wordsPerPage.toString());
-    router.push(`${pathname}?${params.toString()}`);
-  }, [pageNumber, wordsPerPage, debouncedSearch, pathname, router]);
-
+    if (urlSearch === (new URLSearchParams(window.location.search).get("search") ?? "")) setSearch(urlSearch);
+  }, [urlSearch]);
+  const updateQuery = useCallback((changes: Record<string, string | number>) => {
+    const query = new URLSearchParams(window.location.search);
+    for (const [key, value] of Object.entries(changes)) query.set(key, String(value));
+    const next = `${pathname}?${query}`;
+    if (next !== window.location.pathname + window.location.search) window.history.replaceState(null, "", next + window.location.hash);
+  }, [pathname]);
+  const debouncedSearch = useDebounce(search, 500);
 
   const { data: wordCount } = api.word.getWordCount.useQuery({
     search: debouncedSearch
   })
-  const { data: languages } = api.params.getLanguages.useQuery()
-  const { data: partOfSpeechRaw } = api.params.getPartOfSpeeches.useQuery()
-  const partOfSpeeches = partOfSpeechRaw?.map(pos => ({
-    ...pos,
-    id: pos.id.toString()
-  })) ?? []
-  const totalPageNumber = wordCount ? Math.ceil(wordCount / wordsPerPage) : undefined;
+  const totalPageNumber = wordCount == null ? undefined : Math.max(1, Math.ceil(wordCount / wordsPerPage));
+  useEffect(() => {
+    if (totalPageNumber != null && pageNumber > totalPageNumber) updateQuery({ page: totalPageNumber });
+  }, [totalPageNumber, pageNumber, updateQuery]);
   const wordsQuery = api.word.getWords.useQuery({
     take: wordsPerPage,
     skip: (pageNumber - 1) * wordsPerPage,
@@ -162,9 +123,9 @@ export default function WordList() {
         return (
           <Dropdown>
             <DropdownTrigger key={cellValue} className="flex justify-around items-center">
-              <button className="ml-auto">
+              <Button isIconOnly variant="light" className="ml-auto h-11 min-w-11" aria-label={t("Dashboard.Columns.Actions")}>
                 <MoreVertical aria-description="more action button" />
-              </button>
+              </Button>
             </DropdownTrigger>
             <DropdownMenu
               onAction={(key) => {
@@ -175,13 +136,7 @@ export default function WordList() {
                   });
                   onDeleteModalOpen();
                 }
-                if (key === "Edit") {
-                  setSelectedWord({
-                    wordId: item.key,
-                    name: item.name,
-                  });
-                  onEditModalOpen();
-                }
+
               }}
             >
               <DropdownSection title={t("Dashboard.Columns.Actions")}>
@@ -192,7 +147,12 @@ export default function WordList() {
                 >
                   {t("Dashboard.Actions.Delete")}
                 </DropdownItem>
-                <DropdownItem key={'Edit'} startContent={<Edit3 />} color={"warning"}>
+                <DropdownItem
+                  key="Edit"
+                  textValue={t("Dashboard.Actions.Edit")}
+                  startContent={<Edit3 />}
+                  {...taskMenuLink({ pathname: "/dashboard/word-list/[wordId]/edit", params: { wordId: item.key } })}
+                >
                   {t("Dashboard.Actions.Edit")}
                 </DropdownItem>
               </DropdownSection>
@@ -221,7 +181,7 @@ export default function WordList() {
       default:
         return cellValue;
     }
-  }, [onDeleteModalOpen, onEditModalOpen, t, setSelectedWord]);
+  }, [onDeleteModalOpen, t, setSelectedWord, taskMenuLink]);
   return (
     <section>
       <CustomTable
@@ -230,35 +190,27 @@ export default function WordList() {
         renderCell={renderCell}
         bottomContent={
           <CustomPagination
-            total={totalPageNumber ?? 1} initialPage={pageNumber} onChange={async (page) => {
-              setPageNumber(page);
+            total={totalPageNumber ?? 1} page={pageNumber} onChange={async (page) => {
+              updateQuery({ page });
             }}
           />
         }
         topContent={
           <div className="flex flex-col gap-4">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <NextUILink as={Link} href={"/dashboard/create-word"} className="w-fit">
-                <Button
-                  startContent={<Plus className="w-4 h-4" />}
-                  color="primary"
-                  size="lg"
-                >
-                  {t("Dashboard.CreateWord")}
-                </Button>
-              </NextUILink>
-              <Controller name="search" control={control} render={({ field }) => (
-                <CustomInput {...field} placeholder={t("SearchWord")} size="lg" />
-              )}
-              />
+              <TaskButton href="/dashboard/create-word" className="w-fit shrink-0" startContent={<Plus className="h-4 w-4 shrink-0" />} color="primary" size="lg">
+                {t("Dashboard.CreateWord")}
+              </TaskButton>
+              <CustomInput className="min-w-0 sm:flex-1" value={search} onValueChange={value => { setSearch(value); updateQuery({ search: value, page: 1 }); }} aria-label={t("SearchWord")} placeholder={t("SearchWord")} size="lg" />
               <CustomSelect
+                className="min-w-0 sm:flex-1"
                 options={wordPerPageOptions.reduce((acc, option) => {
                   acc[option.key] = option.label;
                   return acc;
                 }, {} as OptionsMap)}
                 label={t("WordList.wordsPerPage")}
                 selectedKeys={[wordsPerPage.toString()]}
-                onChange={(e) => setWordsPerPage(Number(e.target.value))}
+                onChange={(e) => updateQuery({ per_page: e.target.value, page: 1 })}
               />
             </div>
           </div>
@@ -266,7 +218,7 @@ export default function WordList() {
       />
 
       <WordListDeleteModal key={`word-delete-modal-${selectedWord.wordId}-${selectedWord.name}`} isOpen={isDeleteModalOpen} onOpen={onDeleteModalOpen} onOpenChange={onDeleteModalChange} wordId={selectedWord.wordId} name={selectedWord.name} take={wordsPerPage} skip={(pageNumber - 1) * wordsPerPage} />
-      <EditWordModal partOfSpeeches={partOfSpeeches ?? []} languages={languages ?? []} key={`word-edit-modal-${selectedWord.wordId}-${selectedWord.name}`} isOpen={isEditModalOpen} onOpen={onEditModalOpen} onOpenChange={onEditModalChange} wordName={selectedWord.name} wordsPerPage={wordsPerPage} skip={(pageNumber - 1) * wordsPerPage} />
+
     </section>
   );
 }

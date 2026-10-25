@@ -76,9 +76,11 @@ services:
       - pgdata-production:/var/lib/postgresql/data
 
   watchtower:
+    # Global automatic updates are disabled; starting this is an explicit opt-in.
+    profiles: [legacy-watchtower]
     image: containrrr/watchtower:latest
     container_name: watchtower-1
-    restart: unless-stopped
+    restart: "no"
     security_opt:
       - no-new-privileges:true
     environment:

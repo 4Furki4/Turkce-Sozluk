@@ -1,4 +1,6 @@
 "use client";
+import { TaskPage, TaskCancel, useTaskActions } from "@/src/components/task-pages/task-page";
+import { FormDraft } from "@/src/hooks/use-task-draft";
 import { MeaningInputs, WordForm, WordFormSubmit } from "@/types";
 import {
   Button,
@@ -33,10 +35,11 @@ const meaningDefaultValues: MeaningInputs = {
     sentence: undefined,
   },
 };
-export default function CreateWord({ locale, initialName = "" }: {
-  locale: string;
-  initialName?: string;
-}) {
+export default function CreateWordTask({ locale, initialName = "" }: { locale: string; initialName?: string }) {
+  const t = useTranslations(); return <TaskPage title={t("TaskPage.createWord")} parent="/dashboard/word-list" parentLabel={t("TaskPage.word")} capability="admin" media><CreateWord locale={locale} initialName={initialName} /></TaskPage>;
+}
+function CreateWord({ locale, initialName }: { locale: string; initialName: string }) {
+  const { complete } = useTaskActions();
   const t = useTranslations();
   const {
     handleSubmit,
@@ -48,6 +51,7 @@ export default function CreateWord({ locale, initialName = "" }: {
     getFieldState,
     setValue,
     getValues,
+    reset,
   } = useForm<WordForm>({
     defaultValues: {
       name: initialName,
@@ -77,7 +81,8 @@ export default function CreateWord({ locale, initialName = "" }: {
   const [imagePreviewUrls, setImagePreviewUrls] = React.useState<string[]>([]);
   const wordMutation = api.admin.addWord.useMutation({
     onSuccess: () => {
-      toast.success(t('Dashboard.WordCreated'))
+      toast.success(t('Dashboard.WordCreated'));
+      complete();
     }
   });
   const [isUploading, setIsUploading] = React.useState(false);
@@ -144,8 +149,10 @@ export default function CreateWord({ locale, initialName = "" }: {
 
   return (
     <section className="max-w-7xl w-full mx-auto">
-      <h1 className="text-center text-fs-2">{t('Dashboard.CreateWord')}</h1>
+      <h2 className="text-center text-fs-2">{t('Dashboard.CreateWord')}</h2>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
+        <FormDraft identity="admin-word:new" control={control} reset={reset} baseline={formState.defaultValues as WordForm} />
+        <TaskCancel />
         <div className="flex flex-col max-w-full sm:grid sm:grid-cols-2 gap-2">
           <WordNameInput control={control} />
           <WordPhoneticInput control={control} />

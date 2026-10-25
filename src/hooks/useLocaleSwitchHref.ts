@@ -28,15 +28,10 @@ export function useLocaleSwitchHref(): LocaleSwitchHref {
         const resolvedParams: Record<string, string> = {};
         const resolvedWordFromPath = extractSearchWordFromPathname(rawPathname);
         const wordParam = toSingleRouteParam(params.word);
-        const idParam = toSingleRouteParam(params.id);
-        const slugParam = toSingleRouteParam(params.slug);
-
-        if (idParam) {
-            resolvedParams.id = idParam;
-        }
-
-        if (slugParam) {
-            resolvedParams.slug = slugParam;
+        for (const [key, value] of Object.entries(params)) {
+            if (key === "locale") continue;
+            const routeParam = toSingleRouteParam(value);
+            if (routeParam) resolvedParams[key] = routeParam;
         }
 
         if (wordParam) {

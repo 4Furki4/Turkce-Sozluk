@@ -6,6 +6,8 @@ import DailyWordsManagement from "../daily-words-management";
 const mockCreate = jest.fn();
 const mockUpdate = jest.fn();
 const mockToastError = jest.fn();
+jest.mock("@/src/hooks/use-task-draft", () => ({ FormDraft: () => null, useTaskDraft: () => ({ notice: null }) }));
+jest.mock("@/src/components/task-pages/task-page", () => ({ useTaskActions: () => ({ complete: jest.fn(), cancel: jest.fn() }), TaskCancel: () => null }));
 jest.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
 jest.mock("sonner", () => ({ toast: { success: jest.fn(), error: (...args: unknown[]) => mockToastError(...args) } }));
 jest.mock("@/src/trpc/react", () => ({ api: {

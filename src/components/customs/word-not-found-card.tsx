@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import { Card, CardBody, Button, useDisclosure, Tooltip } from "@heroui/react";
+import { Card, CardBody, Button, useDisclosure } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { Link as NextIntlLink, usePathname } from "@/src/i18n/routing";
 import { useRouter } from "@/src/i18n/routing";
 import { Plus, Search, BookOpen } from "lucide-react";
-import SimpleWordRequestModal from "./modals/simple-word-request-modal";
+import { TaskButton } from "@/src/components/task-pages/task-link";
 
 import { useParams, usePathname as useRawPathname } from "next/navigation";
 import { useSearchParams } from "next/navigation";
@@ -22,7 +22,6 @@ import {
   SEARCH_QUERY_PARAM,
   toSingleRouteParam,
 } from "@/src/lib/search-route";
-import { startNavigationProgress } from "@/src/lib/navigation-progress";
 
 interface WordNotFoundCardProps {
   session: Session | null;
@@ -71,32 +70,7 @@ export default function WordNotFoundCard({ session, searchedWord }: WordNotFound
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-            {session ? (
-              <Button
-                color="primary"
-                variant="solid"
-                onPress={onOpen}
-                startContent={<Plus className="w-4 h-4" />}
-                size="lg"
-                className="min-w-48"
-              >
-                {t("requestWord")}
-              </Button>
-            ) : (
-              <Tooltip content={t("signInToRequestWord")}>
-                <Button color="primary" variant="solid" size="lg" onPress={() => {
-                  startNavigationProgress();
-                  router.push({
-                    pathname: "/signin",
-                    query: {
-                      backTo: pathname
-                    }
-                  });
-                }}>
-                  {t("signIn")}
-                </Button>
-              </Tooltip>
-            )}
+            <TaskButton color="primary" size="lg" startContent={<Plus className="w-4 h-4" />} href={{ pathname: "/contribute-word", query: { mode: "simple", word: wordName } }}>{t("requestWord")}</TaskButton>
 
             <NextIntlLink
               href={{
@@ -138,14 +112,7 @@ export default function WordNotFoundCard({ session, searchedWord }: WordNotFound
         </CardBody>
       </Card>
 
-      {/* Simple Word Request Modal */}
-      {session ? (
-        <SimpleWordRequestModal
-          isOpen={isOpen}
-          onOpenChange={onOpenChange}
-          wordName={wordName}
-        />
-      ) : null}
+
     </>
   );
 }

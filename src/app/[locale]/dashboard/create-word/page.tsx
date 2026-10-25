@@ -1,3 +1,4 @@
+export const metadata = { robots: { index: false, follow: false } };
 import CreateWord from "@/src/_pages/dashboard/create-word";
 import { api, HydrateClient } from "@/src/trpc/server";
 import React from "react";

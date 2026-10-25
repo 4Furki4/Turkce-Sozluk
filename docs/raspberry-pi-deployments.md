@@ -1,12 +1,55 @@
 # Raspberry Pi Deployments
 
-This setup runs production and development as separate Docker Compose stacks on
-the same Raspberry Pi.
+Development runs as the `dictionary-development` Compose service in
+[Coolify](https://coolify.furkan-cengiz.com), under Turkish Dictionary → development.
+Production and portfolio apps retain their existing stacks. Watchtower is stopped
+globally with restart disabled; those apps keep their current images until an
+explicit deployment.
 
 ## Channels
 
 - Production: `main` branch -> `furki4/turkish-dictionary-app:latest`
-- Development: `develop` branch -> `furki4/turkish-dictionary-app:development`
+- Development: `develop` branch -> CI-gated ARM64 image -> Coolify, pinned by digest
+
+After this workflow change reaches `develop`, a same-repository push must pass
+lint, unit tests, production build and browser tests before image publication and
+deployment. The final build job sends the published digest to Coolify and waits
+for fresh application/database health evidence. Runs superseded before dispatch
+skip deployment; dispatched releases always finish health verification. Main and
+pull request runs do not trigger the development deployment hook.
+
+Readiness requires two fresh successful probes observed separately, at least
+eight seconds apart. Repeated markers survive ordinary log bursts; proof expires
+after 30 seconds. Keep the Pi and runner clocks synchronized. Failed readiness
+fails Actions and requires inspecting the service or following the rollback runbook.
+
+The service retains init, no-new-privileges, dropped capabilities, `/tmp` tmpfs,
+bounded logs and the existing `turkce-sozluk_default` network. Its database and
+PgBouncer remain in the original stack without published ports. Deployment has a
+brief restart interval because port 3002 belongs to one container at a time.
+
+## Coolify development configuration
+
+GitHub repository variables are `COOLIFY_URL`, `COOLIFY_PROJECT_UUID`,
+`COOLIFY_DEVELOPMENT_ENVIRONMENT_UUID` and `COOLIFY_DEVELOPMENT_SERVICE_UUID`.
+The separate secret `COOLIFY_DEVELOPMENT_TOKEN` has Coolify team permissions
+`read`, `read:sensitive`, `write`, `deploy`. Sensitive read is needed for private
+readiness logs. Coolify scopes the token to the team, not one service; the script
+also verifies project/environment membership, UUID/name, ownership description and
+the current develop head before mutations. Keep the ownership description intact.
+
+Edit runtime settings in **dictionary-development → Environment Variables**, then
+redeploy. The initial settings were copied privately from the existing development
+container. Future Actions deployments update Compose/image identity and preserve
+saved runtime values. Use literal values for secrets containing `$`; exclude
+registry credentials and `POSTGRES_*` database bootstrap values from the app.
+Development continues to use `pgbouncer-development:5432` and its existing database.
+
+The generated Compose owns `NODE_ENV`, `HOSTNAME`, `PORT`, deployment identity and
+`BETTER_AUTH_URL`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_URL`. All three URL fields
+stay `https://development.turkce-sozluk.com`. Other runtime values are managed in
+the service editor. Preview settings remain in their separate Coolify environment;
+editing development settings does not automatically update previews.
 
 ## Branch previews
 
@@ -22,7 +65,7 @@ GitHub activates automatic branch-deletion cleanup and manual dispatch.
 
 ## Environment Files
 
-Create these files on the Pi from the examples and fill in real secrets:
+Production and the development data services still use these Pi files:
 
 ```bash
 cp .env.production.pi.example .env.production.pi
@@ -43,13 +86,15 @@ Optional GitHub variable:
 
 - `NEXT_PUBLIC_PATREON_URL`
 
-## Start Development
+## Start Development Data Services
 
 ```bash
 docker compose --env-file .env.development.pi -f docker-compose.development.yml up -d
 ```
 
-Development listens on the Pi at `127.0.0.1:3002`.
+This starts only PostgreSQL and PgBouncer. Coolify manages the development app on
+`127.0.0.1:3002`; use Coolify for its logs, restart and redeployment. The legacy app
+is behind profile `legacy-development` and must not run while Coolify owns 3002.
 
 ## Start Production
 
@@ -110,15 +155,11 @@ monitor setup.
 
 ## Watchtower
 
-Watchtower is defined in the production compose file and updates containers with
-the `com.centurylinklabs.watchtower.enable=true` label. Both app containers are
-labeled, so production follows `latest` and development follows `development`.
-
-Start production first, or start Watchtower explicitly with:
-
-```bash
-docker compose --env-file .env.production.pi -f docker-compose.production.yml up -d watchtower
-```
+Watchtower is stopped across the Pi with restart policy `no`. Its Compose service
+has profile `legacy-watchtower` and restart `no`, so normal Compose startup does
+not resume it. Do not start it during normal releases or recovery: it also updates
+production and portfolio apps. Publishing `latest` alone no longer deploys
+production; intentionally recreate only the affected app for a manual release.
 
 ## Rollback
 

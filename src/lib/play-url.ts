@@ -20,7 +20,11 @@ export function getSafeAuthReturnUrl(backTo: string | null, currentOrigin: strin
     }
 
     try {
-        const target = new URL(decodeURIComponent(backTo), currentOrigin);
+        // Legacy callers sometimes encode the entire target. Decode only that envelope;
+        // normal query parameters may legitimately contain %26, %25, and nested URLs.
+        const candidate = /^(?:%2f|https?%3a)/i.test(backTo) ? decodeURIComponent(backTo) : backTo;
+        if (/^[\\\u0000-\u0020]/.test(candidate) || candidate.startsWith("//") || candidate.includes("\\")) return null;
+        const target = new URL(candidate, currentOrigin);
 
         if (target.origin !== new URL(currentOrigin).origin) {
             return null;

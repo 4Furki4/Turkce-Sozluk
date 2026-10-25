@@ -7,6 +7,11 @@ import { MisspellingSchema } from "../../schemas/admin";
 import { TRPCError } from "@trpc/server";
 
 export const misspellingsAdminRouter = createTRPCRouter({
+    getById: adminProcedure.input(z.object({ id: z.number().int().positive() })).query(async ({ ctx: { db }, input }) => {
+      const [item] = await db.select({ id: misspellings.id, correctWordId: misspellings.correctWordId, incorrectSpelling: misspellings.incorrectSpelling, correctWordName: words.name }).from(misspellings).innerJoin(words, eq(misspellings.correctWordId, words.id)).where(eq(misspellings.id, input.id));
+      if (!item) throw new TRPCError({ code: "NOT_FOUND" });
+      return item;
+    }),
     getMisspellings: adminProcedure
         .input(z.object({
             limit: z.number().int().min(1).max(100).default(10),

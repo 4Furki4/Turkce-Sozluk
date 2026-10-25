@@ -151,6 +151,7 @@ export default function proxy(request: NextRequest) {
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-current-path", canonicalPathname);
+  requestHeaders.set("x-current-url", `${canonicalPathname}${request.nextUrl.search}`);
 
   const response = handleI18nRouting(cloneRequestWithHeaders(request, requestHeaders));
 

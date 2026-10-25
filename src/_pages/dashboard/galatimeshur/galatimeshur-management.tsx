@@ -1,13 +1,11 @@
 "use client";
+import { CustomTextarea as Textarea } from "@/src/components/customs/heroui/custom-textarea";
+import { CustomAutocomplete as Autocomplete } from "@/src/components/customs/heroui/custom-autocomplete";
+import { useTaskDraft } from "@/src/hooks/use-task-draft";
 
 import React, { useState } from "react";
 import {
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
     Button,
-    Textarea,
-    Autocomplete,
     AutocompleteItem,
 } from "@heroui/react";
 import { api } from "@/src/trpc/react";
@@ -16,8 +14,10 @@ import { useTranslations } from "next-intl";
 
 interface GalatiMeshurManagementProps {
     onClose: () => void;
+    onSuccess?: () => void;
     initialData?: {
         id?: number;
+        wordName?: string;
         wordId: number;
         explanation: string;
         correctUsage: string;
@@ -26,6 +26,7 @@ interface GalatiMeshurManagementProps {
 
 export default function GalatiMeshurManagement({
     onClose,
+    onSuccess,
     initialData,
 }: GalatiMeshurManagementProps) {
     const t = useTranslations("Dashboard.GalatiMeshur");
@@ -34,7 +35,7 @@ export default function GalatiMeshurManagement({
     const [selectedWordId, setSelectedWordId] = useState<string | number | null>(
         initialData?.wordId ? String(initialData.wordId) : null
     );
-    const [searchTerm, setSearchTerm] = useState("");
+    const [searchTerm, setSearchTerm] = useState(initialData?.wordName || "");
 
     const { data: searchResults, isLoading: isSearchLoading } =
         api.word.searchWordsSimple.useQuery(
@@ -44,13 +45,22 @@ export default function GalatiMeshurManagement({
 
     const { data: initialWord } = api.word.getWordById.useQuery(
         { id: Number(selectedWordId) },
-        { enabled: !!selectedWordId && !searchTerm }
+        { enabled: !!selectedWordId }
     );
 
+    const selectedItem = initialWord
+        ? { id: initialWord.id, word: initialWord.name }
+        : initialData?.wordName && String(initialData.wordId) === String(selectedWordId)
+          ? { id: initialData.wordId, word: initialData.wordName }
+          : undefined;
+    const items = [...(selectedItem ? [selectedItem] : []), ...(searchResults?.words ?? []).filter(item => item.id !== selectedItem?.id)];
+
+  const draft = useTaskDraft("galatimeshur:" + (initialData?.id ?? "new"), { explanation, correctUsage, selectedWordId, searchTerm }, (value) => { setExplanation(value.explanation); setCorrectUsage(value.correctUsage); setSelectedWordId(value.selectedWordId); setSearchTerm(value.searchTerm); }, { explanation: initialData?.explanation || "", correctUsage: initialData?.correctUsage || "", selectedWordId: initialData?.wordId ? String(initialData.wordId) : null, searchTerm: initialData?.wordName || "" });
+    React.useEffect(() => { if (initialWord && !searchTerm) setSearchTerm(initialWord.name); }, [initialWord]);
     const createMutation = api.admin.galatiMeshur.addGalatiMeshur.useMutation({
         onSuccess: () => {
             toast.success(t("toasts.addedSuccess"));
-            onClose();
+            (onSuccess ?? onClose)();
         },
         onError: (error) => {
             toast.error(error.message);
@@ -60,7 +70,7 @@ export default function GalatiMeshurManagement({
     const updateMutation = api.admin.galatiMeshur.updateGalatiMeshur.useMutation({
         onSuccess: () => {
             toast.success(t("toasts.updatedSuccess"));
-            onClose();
+            (onSuccess ?? onClose)();
         },
         onError: (error) => {
             toast.error(error.message);
@@ -87,23 +97,29 @@ export default function GalatiMeshurManagement({
     };
 
     return (
-        <>
-            <ModalHeader className="flex flex-col gap-1">
-                {initialData ? t("modalTitleEdit") : t("modalTitleAdd")}
-            </ModalHeader>
-            <ModalBody>
+        <form onSubmit={(event) => { event.preventDefault(); if (!createMutation.isPending && !updateMutation.isPending) handleSubmit(); }}>
+            {draft.notice}
+
+            <div>
                 <div className="flex flex-col gap-4">
                     <Autocomplete
                         label={t("wordLabel")}
                         placeholder={t("wordPlaceholder")}
-                        defaultSelectedKey={selectedWordId ? String(selectedWordId) : undefined}
+                        selectedKey={selectedWordId ? String(selectedWordId) : null}
                         inputValue={searchTerm}
-                        onInputChange={setSearchTerm}
-                        onSelectionChange={(key) => setSelectedWordId(key)}
+                        onInputChange={(value) => {
+                            setSearchTerm(value);
+                            if (value !== items.find(item => String(item.id) === String(selectedWordId))?.word) setSelectedWordId(null);
+                        }}
+                        onSelectionChange={(key) => {
+                            setSelectedWordId(key);
+                            const item = items.find(item => String(item.id) === String(key));
+                            if (item) setSearchTerm(item.word);
+                        }}
                         isLoading={isSearchLoading}
                         isRequired
                     >
-                        {(searchTerm.length > 1 ? searchResults?.words : initialWord ? [{ id: initialWord.id, word: initialWord.name }] : [])?.map((item: any) => (
+                        {items.map((item) => (
                             <AutocompleteItem key={item.id} textValue={String(item.word)}>
                                 {item.word}
                             </AutocompleteItem>
@@ -124,19 +140,19 @@ export default function GalatiMeshurManagement({
                         isRequired
                     />
                 </div>
-            </ModalBody>
-            <ModalFooter>
+            </div>
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-6">
                 <Button color="danger" variant="light" onPress={onClose}>
                     {t("cancel")}
                 </Button>
                 <Button
                     color="primary"
-                    onPress={handleSubmit}
+                    type="submit"
                     isLoading={createMutation.isPending || updateMutation.isPending}
                 >
                     {t("save")}
                 </Button>
-            </ModalFooter>
-        </>
+            </div>
+        </form>
     );
 }

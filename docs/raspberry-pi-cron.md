@@ -186,8 +186,9 @@ Uptime Kuma marks the push monitor down after the heartbeat window.
 
 ```bash
 sudo docker compose --env-file .env.production.pi -f docker-compose.production.yml logs --tail=200 app-production
-sudo docker compose --env-file .env.development.pi -f docker-compose.development.yml logs --tail=200 app-development
 ```
+
+For development, open the `dictionary-development` logs in Coolify.
 
 Connection refused:
 

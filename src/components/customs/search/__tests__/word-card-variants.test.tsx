@@ -166,12 +166,11 @@ jest.mock("@/src/components/customs/pronunciation-card", () => ({
 jest.mock("@/src/components/customs/custom-audio", () => ({
   CustomAudioPlayer: ({ src }: { src: string }) => <audio src={src} />,
 }));
-jest.mock("@/src/components/customs/modals/word-card-request-modal", () => ({
-  __esModule: true,
-  default: ({ initialView }: { initialView: string }) => (
-    <div data-testid="request-modal-initial-view">{initialView}</div>
-  ),
-}));
+const mockTaskPush = jest.fn();
+jest.mock("@/src/hooks/use-progress-router", () => ({ useProgressRouter: () => ({ push: mockTaskPush }) }));
+jest.mock("@/src/components/task-pages/task-page", () => ({ useTaskHref: ({ pathname, params }: any) => '/en' + pathname.replace('[wordId]', params.wordId) }));
+jest.mock("@/src/components/task-pages/source-return", () => ({ SourceReturn: () => null }));
+jest.mock("@/src/components/task-pages/task-link", () => ({ TaskButton: ({ href, children }: any) => <a href={href.pathname.replace('[wordId]', href.params.wordId)}>{children}</a> }));
 jest.mock("@/src/components/customs/word-not-found-card", () => () => <div>Not Found</div>);
 jest.mock("@/src/components/word-graph/word-relations-graph", () => () => <div>Word graph</div>);
 jest.mock("@/src/utils/clipboard", () => ({
@@ -433,7 +432,7 @@ describe("SearchWordCardVariantGroup", () => {
     });
   });
 
-  it("opens the request modal on the pronunciation request view from compact CTA", () => {
+  it("navigates to the pronunciation request page from the compact CTA", () => {
     localStorage.setItem(SEARCH_WORD_CARD_VARIANT_STORAGE_KEY, "magazine");
     initializePreferences();
 
@@ -446,12 +445,12 @@ describe("SearchWordCardVariantGroup", () => {
       />,
     );
 
-    expect(screen.getByTestId("request-modal-initial-view")).toHaveTextContent("word");
+    expect(screen.getByRole("link", { name: "Request Edit" })).toHaveAttribute("href", "/contribute-word/1");
 
     const requestPronunciationButtons = screen.getAllByRole("button", { name: "Request pronunciation" });
     fireEvent.click(requestPronunciationButtons[requestPronunciationButtons.length - 1]);
 
-    expect(screen.getByTestId("request-modal-initial-view")).toHaveTextContent("pronunciation");
+    expect(mockTaskPush).toHaveBeenCalledWith(expect.stringMatching(/^\/en\/contribute-word\/1\/pronunciations\/new\?returnTo=/));
   });
 
   it("collapses long related phrase lists to the first 24 items", () => {

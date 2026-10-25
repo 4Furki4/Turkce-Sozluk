@@ -1,4 +1,5 @@
 "use client"
+import { meaningInputClasses } from "./field-styles";
 import { WordForm } from '@/types'
 import { Input } from "@heroui/react"
 import React from 'react'
@@ -23,7 +24,9 @@ export default function MeaningExampleSentenceInput({
                         {...field}
                         radius='md'
                         label={t('ExampleSentence')}
-                        labelPlacement='outside'
+                        labelPlacement='outside-top'
+                        size='lg'
+                        classNames={meaningInputClasses}
                         description={t('Forms.ExampleSentence.Description')}
                     />
                 </>

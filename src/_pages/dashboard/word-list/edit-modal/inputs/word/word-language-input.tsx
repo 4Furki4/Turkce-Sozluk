@@ -24,7 +24,7 @@ export default function WordLanguageInput({
                     label="Language"
                     labelPlacement='outside'
                     placeholder="Select Language"
-                    defaultSelectedKey={selectedLanguage}
+                    selectedKey={field.value || null}
                     onSelectionChange={(item) => {
                         field.onChange(item);
                         setFieldValue("language", item as string)

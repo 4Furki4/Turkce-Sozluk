@@ -1,15 +1,16 @@
+export const metadata = { robots: { index: false, follow: false } };
 import React from 'react';
 
 import { HydrateClient } from '@/src/trpc/server';
 import UserContributeWordPage from '@/src/_pages/contribute-word/user-contribute-word-page';
 import { auth } from "@/src/lib/auth";
 import { setRequestLocale } from 'next-intl/server';
-import { redirect } from '@/src/i18n/routing';
+import { redirect, getPathname } from '@/src/i18n/routing';
 import { headers } from 'next/headers';
 
 interface ContributeWordPageProps {
     params: Promise<{ locale: string }>;
-    searchParams: Promise<{ word?: string }>;
+    searchParams: Promise<{ word?: string; mode?: string; returnTo?: string }>;
 }
 
 export default async function ContributeWord({
@@ -17,7 +18,8 @@ export default async function ContributeWord({
     searchParams: searchParamsPromise
 }: ContributeWordPageProps) {
     const { locale } = await paramsPromise;
-    const { word } = await searchParamsPromise;
+    const query = await searchParamsPromise;
+    const { word } = query;
     const session = await auth.api.getSession({
         headers: await headers()
     });;
@@ -26,7 +28,7 @@ export default async function ContributeWord({
         href: {
             pathname: "/signin",
             query: {
-                backTo: `/contribute-word${word ? `?word=${word}` : ""}`,
+                backTo: getPathname({ locale: locale as "tr" | "en", href: { pathname: "/contribute-word", query } }),
             }
         },
         locale,

@@ -1,7 +1,9 @@
 "use client"
+import { useTaskActions, TaskState } from "@/src/components/task-pages/task-page";
+import { FormDraft } from "@/src/hooks/use-task-draft";
 import { api } from '@/src/trpc/react';
-import { EditMeaningForm, EditWordForm, Language } from '@/types';
-import { Button, ButtonGroup, Card, CardBody, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Spinner } from "@heroui/react";
+import { EditMeaningForm, EditWordForm } from '@/types';
+import { Button, ButtonGroup, Card, CardBody, Spinner } from "@heroui/react";
 import React, { useEffect } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form';
 import WordNameInput from './inputs/word/word-name-input';
@@ -53,30 +55,13 @@ const editWordFormSchema = z.object({
     path: ["language"],
 })
 
-export default function EditWordModal({
-    isOpen,
-    onOpenChange,
-    wordName,
-    languages,
-    partOfSpeeches,
-    wordsPerPage,
-    skip
-}: {
-    isOpen: boolean;
-    onOpen: () => void;
-    onOpenChange: () => void;
-    wordName: string;
-    languages: Language[];
-    partOfSpeeches: {
-        id: string;
-        partOfSpeech: string;
-    }[];
-    wordsPerPage: number;
-    skip: number;
-}) {
-    const { data, isError, status, isLoading } = api.admin.getWordToEdit.useQuery(wordName, {
-        enabled: isOpen,
-    })
+export default function EditWordFormPage({ wordId }: { wordId: number }) {
+    const { complete, cancel } = useTaskActions();
+    const { data, isError, isLoading, error, refetch } = api.admin.getWordToEdit.useQuery({ id: wordId });
+    const { data: languages = [] } = api.params.getLanguages.useQuery();
+    const { data: pos = [] } = api.params.getPartOfSpeeches.useQuery();
+    const partOfSpeeches = pos.map(item => ({ ...item, id: String(item.id) }));
+    const wordName = data?.[0]?.word_data.word_name ?? "";
     const { data: wordAttributes, } = api.params.getWordAttributes.useQuery()
     const { data: meaningAttributesData } = api.params.getMeaningAttributes.useQuery()
     const { data: authorsData } = api.params.getExampleSentenceAuthors.useQuery()
@@ -101,17 +86,15 @@ export default function EditWordModal({
     const editWordMutation = api.admin.editWord.useMutation({
         onSuccess: async (data) => {
             toast.success("Successfully updated.")
-            await utils.word.getWords.refetch({
-                skip,
-                take: wordsPerPage
-            })
+            await utils.word.getWords.invalidate();
+            complete();
         },
         onError: (data) => {
             toast.error(data.message)
         }
     })
 
-    const word_data = data ? data[0].word_data : undefined
+    const word_data = data?.[0]?.word_data
     const attributes = word_data?.attributes?.map(att => (att.attribute_id.toString())) ?? []
     const language = word_data?.root.language_code ?? ''
     const name = word_data?.word_name ?? ''
@@ -181,22 +164,16 @@ export default function EditWordModal({
         }
         editWordMutation.mutate(preparedData)
     }
-    if (isOpen && isLoading) {
+    if (isLoading) {
         return <Spinner className='absolute top-1/2 left-1/2 translate-x-1/2 translate-y-1/2' />
     }
-    if (isError || !data) {
-        return <></> // TODO: handle error management when no data for the word wanted to be edited
+    if (isError || !data?.length) {
+        return <TaskState error={error} missing={!isError} retry={() => void refetch()} />
     }
     return (
-        <Modal placement='center' size='5xl' backdrop='blur' scrollBehavior='outside' isOpen={isOpen} onOpenChange={onOpenChange} key={`edit-word-modal-${wordName}`}>
-            <ModalContent>
-                {(onClose) => (
-                    <>
-                        <ModalHeader className="flex flex-col gap-1">
-                            <h5>Edit Word: <b>{wordName}</b></h5>
-                        </ModalHeader>
                         <form onSubmit={handleSubmit(onSubmit)}>
-                            <ModalBody>
+                            <FormDraft identity={"admin-word:" + wordId} control={control} reset={reset} baseline={{ attributes, language, name, root, phonetic, prefix, suffix, meanings }} />
+                            <div className="space-y-4">
                                 <WordNameInput control={control} />
                                 <div className='grid sm:grid-cols-2 gap-2 '>
                                     <WordPhoneticInput control={control} />
@@ -242,8 +219,8 @@ export default function EditWordModal({
                                         </AlertDescription>
                                     </Alert>
                                 )}
-                            </ModalBody>
-                            <ModalFooter>
+                            </div>
+                            <div className="pt-6">
                                 <ButtonGroup radius='md' className="w-full gap-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
                                     <Button
                                         type="button"
@@ -265,18 +242,12 @@ export default function EditWordModal({
                                     >
                                         Append <span className="max-sm:hidden">Meaning</span>
                                     </Button>
-                                    <Button type='button' onPress={discardChanges} color='danger'>
-                                        Discard Changes
-                                    </Button>
+                                    <Button type="button" onPress={cancel}>Cancel</Button>
                                     <Button type='submit' color='primary' isLoading={editWordMutation.isPending}>
                                         Submit
                                     </Button>
                                 </ButtonGroup>
-                            </ModalFooter>
+                            </div>
                         </form>
-                    </>
-                )}
-            </ModalContent>
-        </Modal>
     )
 }

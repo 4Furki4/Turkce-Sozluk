@@ -1,4 +1,6 @@
 "use client";
+import { FormDraft } from "@/src/hooks/use-task-draft";
+import { TaskCancel, useTaskActions } from "@/src/components/task-pages/task-page";
 
 import React from "react";
 import { useForm, Controller } from "react-hook-form";
@@ -36,6 +38,7 @@ export default function SimpleContributionForm({
   isSubmitting,
   setIsSubmitting
 }: SimpleContributionFormProps) {
+  const { complete } = useTaskActions();
   const t = useTranslations("ContributeWord");
   const tForms = useTranslations("Forms");
   const { executeRecaptcha } = useGoogleReCaptcha();
@@ -52,6 +55,7 @@ export default function SimpleContributionForm({
 
   // Submit simple form
   const onSubmitSimple = async (data: SimpleFormData) => {
+    if (isSubmitting || createSimpleWordRequest.isPending) return;
     if (!executeRecaptcha) {
       toast.error(t("captchaFailed"));
       return;
@@ -67,7 +71,8 @@ export default function SimpleContributionForm({
       });
 
       toast.success(t("requestSubmitted"));
-      simpleForm.reset();
+      simpleForm.reset({ name: "" });
+      complete();
     } catch (error: any) {
       console.error("Submission error:", error);
       if (error.message?.includes("already requested")) {
@@ -95,6 +100,8 @@ export default function SimpleContributionForm({
         </div>
 
         <form onSubmit={simpleForm.handleSubmit(onSubmitSimple)} className="space-y-6">
+          <FormDraft identity={"word-simple:new:" + (prefillWord ?? "")} control={simpleForm.control} reset={simpleForm.reset} baseline={{ name: prefillWord || "" }} />
+          <TaskCancel />
           <Controller
             name="name"
             control={simpleForm.control}

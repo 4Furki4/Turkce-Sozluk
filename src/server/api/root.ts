@@ -36,6 +36,7 @@
 //  *       ^? Post[]
 //  */
 // export const createCaller = createCallerFactory(appRouter);
+import { taskRouter } from "./routers/task";
 import { wordRouter } from "./routers/word";
 import { userRouter } from "./routers/user";
 import { adminRouter } from "./routers/admin";
@@ -61,6 +62,7 @@ import { searchTelemetryRouter } from "./routers/search-telemetry";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
+  task: taskRouter,
   word: wordRouter,
   user: userRouter,
   admin: adminRouter,

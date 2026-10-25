@@ -1,11 +1,11 @@
 "use client"
+import { TaskButton } from "@/src/components/task-pages/task-link";
 import { api } from "@/src/trpc/react";
 import {
   CardBody,
   Chip,
   Spinner,
   Button,
-  Textarea,
   Modal,
   ModalContent,
   ModalHeader,
@@ -16,7 +16,7 @@ import {
   CardFooter
 } from "@heroui/react";
 import { EntityTypes, Actions, Status } from "@/db/schema/requests";
-import { useState, useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useRouter } from "@/src/i18n/routing";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslations } from "next-intl";
@@ -41,8 +41,6 @@ type EntityData = Record<string, any>;
 export default function AdminRequestDetail({ requestId }: AdminRequestDetailProps) {
   const t = useTranslations("Requests");
   const router = useRouter();
-  const [rejectReason, setRejectReason] = useState("");
-  const { isOpen: isRejectModalOpen, onOpen: onRejectModalOpen, onClose: onRejectModalClose } = useDisclosure();
   const { isOpen: isApproveModalOpen, onOpen: onApproveModalOpen, onClose: onApproveModalClose } = useDisclosure();
 
   // Entity type labels
@@ -107,29 +105,9 @@ export default function AdminRequestDetail({ requestId }: AdminRequestDetailProp
     },
   });
 
-  // Reject request mutation
-  const rejectRequestMutation = api.request.rejectRequest.useMutation({
-    onSuccess: () => {
-      toast.success("Request rejected successfully");
-      refetch();
-      onRejectModalClose();
-      setRejectReason("");
-    },
-    onError: (error) => {
-      toast.error(`Error rejecting request: ${error.message}`);
-    },
-  });
-
   const handleApprove = useCallback(() => {
     approveRequestMutation.mutate({ requestId });
   }, [approveRequestMutation, requestId]);
-
-  const handleReject = useCallback(() => {
-    rejectRequestMutation.mutate({
-      requestId,
-      reason: rejectReason.trim() || undefined,
-    });
-  }, [rejectRequestMutation, requestId, rejectReason]);
 
   if (isLoading) {
     return (
@@ -266,15 +244,14 @@ export default function AdminRequestDetail({ requestId }: AdminRequestDetailProp
         {isPending && (
           <CardFooter className="border-t border-default px-6 py-4">
             <div className="flex justify-end gap-3">
-              <Button
+              <TaskButton
                 color="danger"
                 variant="flat"
-                onPress={onRejectModalOpen}
+                href={{ pathname: "/dashboard/requests/[id]/reject", params: { id: requestId } }}
                 startContent={<X className="h-4 w-4" />}
-                isDisabled={rejectRequestMutation.isPending}
               >
                 Reject
-              </Button>
+              </TaskButton>
               <Button
                 color="success"
                 onPress={onApproveModalOpen}
@@ -344,47 +321,7 @@ export default function AdminRequestDetail({ requestId }: AdminRequestDetailProp
         </ModalContent>
       </Modal>
 
-      {/* Reject Confirmation Modal */}
-      <Modal isOpen={isRejectModalOpen} onClose={onRejectModalClose}>
-        <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <X className="h-5 w-5 text-danger" />
-              Reject Request
-            </div>
-          </ModalHeader>
-          <ModalBody>
-            <p className="mb-4">Are you sure you want to reject this request?</p>
-            <Textarea
-              label="Rejection Reason"
-              placeholder="Enter the reason for rejection (optional)..."
-              value={rejectReason}
-              onValueChange={setRejectReason}
-              minRows={3}
-              maxRows={6}
-              description="Providing a reason helps contributors understand why their request was rejected."
-            />
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              color="default"
-              variant="flat"
-              onPress={onRejectModalClose}
-              isDisabled={rejectRequestMutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              color="danger"
-              onPress={handleReject}
-              isLoading={rejectRequestMutation.isPending}
-              startContent={!rejectRequestMutation.isPending ? <X className="h-4 w-4" /> : undefined}
-            >
-              Confirm Rejection
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+
     </div>
   );
 }

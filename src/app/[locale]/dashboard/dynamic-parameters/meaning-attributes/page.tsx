@@ -1,37 +1,21 @@
 "use client";
 
 import DynamicParameterTable from "@/src/components/dynamic-parameter-table";
-import DynamicParameterForm from "@/src/components/dynamic-parameter-form";
-import { useState } from "react";
+import { useListState } from "@/src/hooks/use-list-state";
 import { api } from "@/src/trpc/react";
 
 export default function MeaningAttributesPage() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-
+  const [list, setList] = useListState({ page: 1, size: 10, search: "" });
+  const page = list.page; const search = list.search; const itemsPerPage = list.size;
+  const setPage = (page: number) => setList(old => ({ ...old, page }));
+  const setSearch = (search: string) => setList(old => ({ ...old, page: 1, search }));
+  const setItemsPerPage = (size: number) => setList(old => ({ ...old, page: 1, size }));
   const skip = (page - 1) * itemsPerPage;
 
   const { data, refetch, isLoading } = api.admin.dynamicParameters.getMeaningAttributes.useQuery({
     take: itemsPerPage,
     skip,
     search
-  });
-
-  const createMutation = api.admin.dynamicParameters.createMeaningAttribute.useMutation({
-    onSuccess: () => {
-      refetch();
-      setIsFormOpen(false);
-    }
-  });
-
-  const updateMutation = api.admin.dynamicParameters.updateMeaningAttribute.useMutation({
-    onSuccess: () => {
-      refetch();
-      setIsFormOpen(false);
-    }
   });
 
   const deleteMutation = api.admin.dynamicParameters.deleteMeaningAttribute.useMutation({
@@ -44,31 +28,6 @@ export default function MeaningAttributesPage() {
     { key: "actions", label: "Actions" }
   ];
 
-  const formFields = [
-    { key: "attribute", label: "Attribute Name", type: "text" as const }
-  ];
-
-  const handleAdd = () => {
-    setSelectedItem(null);
-    setIsFormOpen(true);
-  };
-
-  const handleEdit = (item: any) => {
-    setSelectedItem(item);
-    setIsFormOpen(true);
-  };
-
-  const handleSubmit = (formData: any) => {
-    if (selectedItem) {
-      updateMutation.mutate({
-        id: selectedItem.id,
-        ...formData
-      });
-    } else {
-      createMutation.mutate(formData);
-    }
-  };
-
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Meaning Attributes</h1>
@@ -80,21 +39,13 @@ export default function MeaningAttributesPage() {
         pageNumber={page}
         setItemsPerPage={setItemsPerPage}
         itemsPerPage={itemsPerPage}
+        search={search}
         onSearch={setSearch}
-        onAdd={handleAdd}
-        onEdit={handleEdit}
+        taskType="meaning-attributes"
         onDelete={(item) => deleteMutation.mutate({ id: item.id })}
         isLoading={isLoading}
       />
 
-      <DynamicParameterForm
-        isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        onSubmit={handleSubmit}
-        title={selectedItem ? "Edit Meaning Attribute" : "Add Meaning Attribute"}
-        fields={formFields}
-        initialData={selectedItem}
-      />
     </div>
   );
 }

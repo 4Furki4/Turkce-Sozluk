@@ -1,18 +1,15 @@
 "use client";
 
+import { TaskButton } from "@/src/components/task-pages/task-link";
 import { api } from "@/src/trpc/react";
 import {
     Button,
     CardBody,
     CardHeader,
-    Input,
     ModalBody,
     ModalContent,
     ModalFooter,
     ModalHeader,
-    Select,
-    SelectItem,
-    Textarea,
     useDisclosure,
     Tooltip,
 } from "@heroui/react";
@@ -20,7 +17,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Pencil, Trash2, Plus } from "lucide-react";
-import { badgeRequirementTypeEnum, badgeCategoryEnum } from "@/db/schema/gamification";
 import { CustomTable } from "@/src/components/customs/heroui/custom-table";
 import CustomCard from "@/src/components/customs/heroui/custom-card";
 import { CustomModal } from "@/src/components/customs/heroui/custom-modal";
@@ -48,31 +44,6 @@ export default function BadgeManagement() {
 
     const { data: badges, isLoading } = api.badge.getAll.useQuery();
 
-    const createMutation = api.badge.create.useMutation({
-        onSuccess: () => {
-            toast.success("Badge created successfully");
-            utils.badge.getAll.invalidate();
-            onClose();
-            reset();
-        },
-        onError: (error) => {
-            toast.error(error.message);
-        },
-    });
-
-    const updateMutation = api.badge.update.useMutation({
-        onSuccess: () => {
-            toast.success("Badge updated successfully");
-            utils.badge.getAll.invalidate();
-            onClose();
-            reset();
-            setSelectedBadge(null);
-        },
-        onError: (error) => {
-            toast.error(error.message);
-        },
-    });
-
     const deleteMutation = api.badge.delete.useMutation({
         onSuccess: () => {
             toast.success("Badge deleted successfully");
@@ -85,37 +56,9 @@ export default function BadgeManagement() {
         },
     });
 
-    const onSubmit = (data: BadgeFormData) => {
-        if (selectedBadge) {
-            updateMutation.mutate(data);
-        } else {
-            createMutation.mutate(data);
-        }
-    };
-
-    const handleEdit = (badge: any) => {
-        setSelectedBadge(badge);
-        setValue("slug", badge.slug);
-        setValue("nameTr", badge.nameTr);
-        setValue("nameEn", badge.nameEn);
-        setValue("descriptionTr", badge.descriptionTr);
-        setValue("descriptionEn", badge.descriptionEn);
-        setValue("icon", badge.icon);
-        setValue("requirementType", badge.requirementType);
-        setValue("requirementValue", badge.requirementValue);
-        setValue("category", badge.category);
-        onOpen();
-    };
-
     const handleDelete = (slug: string) => {
         setBadgeToDelete(slug);
         onDeleteOpen();
-    };
-
-    const handleAddNew = () => {
-        setSelectedBadge(null);
-        reset();
-        onOpen();
     };
 
     const columns = [
@@ -156,9 +99,7 @@ export default function BadgeManagement() {
                 return (
                     <div className="flex gap-2">
                         <Tooltip content="Edit">
-                            <span className="text-lg text-default-400 cursor-pointer active:opacity-50" onClick={() => handleEdit(badge)}>
-                                <Pencil size={16} />
-                            </span>
+                            <TaskButton isIconOnly variant="light" aria-label="Edit" href={{ pathname: "/dashboard/badges/[slug]/edit", params: { slug: badge.slug } }}><Pencil size={16} /></TaskButton>
                         </Tooltip>
                         <Tooltip color="danger" content="Delete">
                             <span className="text-lg text-danger cursor-pointer active:opacity-50" onClick={() => handleDelete(badge.slug)}>
@@ -177,9 +118,9 @@ export default function BadgeManagement() {
             <CustomCard>
                 <CardHeader className="flex justify-between items-center">
                     <h1 className="text-2xl font-bold">Badge Management</h1>
-                    <Button color="primary" startContent={<Plus size={16} />} onPress={handleAddNew}>
+                    <TaskButton color="primary" startContent={<Plus size={16} />} href="/dashboard/badges/new">
                         Add New Badge
-                    </Button>
+                    </TaskButton>
                 </CardHeader>
                 <CardBody>
                     <CustomTable
@@ -191,96 +132,6 @@ export default function BadgeManagement() {
                     />
                 </CardBody>
             </CustomCard>
-
-            {/* Create/Edit Modal */}
-            <CustomModal isOpen={isOpen} onClose={onClose} size="2xl" scrollBehavior="inside">
-                <ModalContent>
-                    <form onSubmit={handleSubmit(onSubmit)}>
-                        <ModalHeader>{selectedBadge ? "Edit Badge" : "Create New Badge"}</ModalHeader>
-                        <ModalBody className="gap-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input
-                                    label="Slug"
-                                    placeholder="unique-slug"
-                                    {...register("slug", { required: true })}
-                                    isDisabled={!!selectedBadge}
-                                />
-                                <Input
-                                    label="Icon (Emoji)"
-                                    placeholder="🏆"
-                                    {...register("icon", { required: true })}
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input
-                                    label="Name (TR)"
-                                    placeholder="Rozet Adı"
-                                    {...register("nameTr", { required: true })}
-                                />
-                                <Input
-                                    label="Name (EN)"
-                                    placeholder="Badge Name"
-                                    {...register("nameEn", { required: true })}
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <Textarea
-                                    label="Description (TR)"
-                                    placeholder="Açıklama"
-                                    {...register("descriptionTr", { required: true })}
-                                />
-                                <Textarea
-                                    label="Description (EN)"
-                                    placeholder="Description"
-                                    {...register("descriptionEn", { required: true })}
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <Select
-                                    label="Requirement Type"
-                                    {...register("requirementType", { required: true })}
-                                    defaultSelectedKeys={selectedBadge ? [selectedBadge.requirementType] : []}
-                                >
-                                    {badgeRequirementTypeEnum.enumValues.map((type) => (
-                                        <SelectItem key={type}>
-                                            {type}
-                                        </SelectItem>
-                                    ))}
-                                </Select>
-                                <Input
-                                    type="number"
-                                    label="Requirement Value"
-                                    placeholder="10"
-                                    {...register("requirementValue", { required: true, valueAsNumber: true })}
-                                />
-                            </div>
-
-                            <Select
-                                label="Category"
-                                {...register("category", { required: true })}
-                                defaultSelectedKeys={selectedBadge ? [selectedBadge.category] : []}
-                            >
-                                {badgeCategoryEnum.enumValues.map((cat) => (
-                                    <SelectItem key={cat}>
-                                        {cat}
-                                    </SelectItem>
-                                ))}
-                            </Select>
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button variant="light" onPress={onClose}>
-                                Cancel
-                            </Button>
-                            <Button color="primary" type="submit" isLoading={createMutation.isPending || updateMutation.isPending}>
-                                {selectedBadge ? "Update" : "Create"}
-                            </Button>
-                        </ModalFooter>
-                    </form>
-                </ModalContent>
-            </CustomModal>
 
             {/* Delete Confirmation Modal */}
             <CustomModal isOpen={isDeleteOpen} onClose={onDeleteClose}>

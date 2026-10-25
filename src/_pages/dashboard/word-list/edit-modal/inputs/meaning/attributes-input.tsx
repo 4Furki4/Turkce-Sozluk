@@ -1,4 +1,4 @@
-import AddMeaningAttributeModal from '@/src/components/customs/modals/add-meaning-attribute'
+import AddMeaningAttributeModal from '@/src/components/customs/modals/add-meaning-attribute-inline'
 import { EditWordForm } from '@/types'
 import { Button, Select, Selection, SelectItem, useDisclosure } from "@heroui/react"
 import { Plus } from 'lucide-react'
@@ -26,7 +26,7 @@ export default function AttributesInput({
     const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedAttributes = e.target.value.split(",").filter((val) => val)
         setValues(() => new Set(selectedAttributes))
-        setFieldValue(`meanings.${index}.attributes`, selectedAttributes)
+        setFieldValue(`meanings.${index}.attributes`, selectedAttributes, { shouldDirty: true, shouldValidate: true })
     };
     return (
         <Controller control={control} name={`meanings.${index}.attributes`} render={({ field }) => (
@@ -36,7 +36,7 @@ export default function AttributesInput({
                     as={"div"}
                     {...field}
                     onChange={handleSelectionChange}
-                    selectedKeys={values}
+                    selectedKeys={field.value ?? []}
                     selectionMode='multiple'
                     radius='md'
                     label="Attributes"

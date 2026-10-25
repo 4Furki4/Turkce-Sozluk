@@ -5,7 +5,7 @@ import { Chip } from "@heroui/chip";
 import { WordSearchResult } from "@/types";
 import { PronunciationButton } from "./pronunciation-button";
 import SaveWord from "./save-word";
-import { Button, useDisclosure, Popover, PopoverTrigger, PopoverContent, Tooltip, Tabs, Tab } from "@heroui/react";
+import { Button, Popover, PopoverTrigger, PopoverContent, Tooltip, Tabs, Tab } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/src/i18n/routing";
 import { useRouter } from "@/src/i18n/routing";
@@ -15,7 +15,9 @@ import { useRef, } from "react";
 import { captureElementScreenshot } from "../../utils/screenshot";
 import { copyPageUrl } from "../../utils/clipboard";
 import clsx from "clsx";
-import WordCardRequestModal from "./modals/word-card-request-modal";
+import { TaskButton } from "@/src/components/task-pages/task-link";
+import { useTaskHref } from "@/src/components/task-pages/task-page";
+import { useProgressRouter } from "@/src/hooks/use-progress-router";
 import CustomCard from "./heroui/custom-card";
 import PronunciationCard from "./pronunciation-card";
 import { Session } from '@/src/lib/auth-client';
@@ -33,7 +35,8 @@ type WordCardProps = {
 
 export default function WordCard({ word_data, locale, session, isWordFetching, isOnline, headingLevel = "h2" }: WordCardProps) {
 
-  const { isOpen, onOpenChange, onClose } = useDisclosure()
+  const taskRouter = useProgressRouter();
+  const pronunciationHref = useTaskHref({ pathname: "/contribute-word/[wordId]/pronunciations/new", params: { wordId: word_data.word_id } });
   const t = useTranslations("WordCard");
   const router = useRouter();
   const pathname = usePathname();
@@ -67,6 +70,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
   };
   return (
     <CustomCard
+      id={`word-${word_data.word_id}`}
       ref={cardRef}
       as={"article"}
       aria-label={t("Words")}
@@ -107,7 +111,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
               <WordHeading {...getHeadwordProps(word_data.word_name)} lang="tr" className="dictionary-headword [--headword-max:var(--step-2)] md:[--headword-max:var(--step-3)] text-fs-2 md:text-fs-3 text-start leading-tight">
                 {word_data.word_name}
               </WordHeading>
-              <PronunciationButton wordId={word_data.word_id} headword={word_data.word_name} offline={isOffline || isOnline === false} onCorrect={onOpenChange} />
+              <PronunciationButton wordId={word_data.word_id} headword={word_data.word_name} offline={isOffline || isOnline === false} onCorrect={() => taskRouter.push(pronunciationHref + "?" + new URLSearchParams({ returnTo: window.location.pathname + window.location.search }))} />
               {word_data.suffix && (
                 <span className="text-fs-0">
                   <span aria-hidden> -</span>
@@ -363,9 +367,9 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
         <>
           {
             session ?
-              (<Button onPress={onOpenChange} color="primary" variant="solid">
+              (<TaskButton href={{ pathname: "/contribute-word/[wordId]", params: { wordId: word_data.word_id } }} color="primary" variant="solid">
                 {t("RequestEdit")}
-              </Button>)
+              </TaskButton>)
               : (
                 <Popover showArrow placement="bottom">
                   <PopoverTrigger>
@@ -397,7 +401,7 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
               )
           }
         </>
-        <WordCardRequestModal word={{ word_data }} session={session} isOpen={isOpen} onOpenChange={onOpenChange} onClose={onClose} />
+
       </CardFooter>
       <div data-screenshot-watermark className="w-full text-center text-xs text-muted-foreground pt-2">
         turkce-sozluk.com

@@ -7,6 +7,11 @@ import { GalatiMeshurSchema } from "../../schemas/admin";
 import { TRPCError } from "@trpc/server";
 
 export const galatiMeshurAdminRouter = createTRPCRouter({
+    getById: adminProcedure.input(z.object({ id: z.number().int().positive() })).query(async ({ ctx: { db }, input }) => {
+      const [item] = await db.select({ id: galatiMeshur.id, wordId: galatiMeshur.wordId, explanation: galatiMeshur.explanation, correctUsage: galatiMeshur.correctUsage, wordName: words.name }).from(galatiMeshur).innerJoin(words, eq(galatiMeshur.wordId, words.id)).where(eq(galatiMeshur.id, input.id));
+      if (!item) throw new TRPCError({ code: "NOT_FOUND" });
+      return item;
+    }),
     getGalatiMeshur: adminProcedure
         .input(z.object({
             limit: z.number().default(10),

@@ -1,5 +1,5 @@
 "use client"
-import AddWordAttributeModal from '@/src/components/customs/modals/add-word-attribute';
+import AddWordAttributeModal from '@/src/components/customs/modals/add-word-attribute-inline';
 import { EditWordForm } from '@/types'
 import { Button, Select, Selection, SelectItem, useDisclosure } from "@heroui/react"
 import { Plus } from 'lucide-react';
@@ -29,7 +29,7 @@ export default function WordAttributesInput({
     const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedAttributes = e.target.value.split(",").filter((val) => val)
         setValues(() => new Set(selectedAttributes))
-        setFieldValue("attributes", selectedAttributes)
+        setFieldValue("attributes", selectedAttributes, { shouldDirty: true, shouldValidate: true })
     };
     const { isOpen, onOpenChange, onOpen, onClose } = useDisclosure()
     return (
@@ -48,7 +48,7 @@ export default function WordAttributesInput({
                     <Select
                         labelPlacement='outside'
                         radius='md'
-                        selectedKeys={values}
+                        selectedKeys={field.value ?? []}
                         items={wordAttributes}
                         as={"div"}
                         {...field}
@@ -68,7 +68,6 @@ export default function WordAttributesInput({
                         onChange={handleSelectionChange}
                         placeholder='Please select an attribute'
                         label="Attribute"
-                        defaultSelectedKeys={selecetedKeys}
                         selectionMode='multiple'>
                         {wordAttributes?.map((wordAttribute => (
                             <SelectItem textValue={wordAttribute.attribute} key={wordAttribute.id}>

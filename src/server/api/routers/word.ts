@@ -3,14 +3,20 @@ import { TRPCError } from "@trpc/server";
 import {
   createTRPCRouter,
   publicProcedure,
+  protectedProcedure,
 } from "../trpc";
 import { count, desc, eq, gte, sql, inArray } from "drizzle-orm";
+import { meanings } from "@/db/schema/meanings";
+import { relatedWords } from "@/db/schema/related_words";
+import { relatedPhrases } from "@/db/schema/related_phrases";
+import { findWordDataByName } from "@/src/server/word-queries";
+import { and } from "drizzle-orm";
 import { words } from "@/db/schema/words";
 import { getAutocompleteSnapshot } from "@/src/server/autocomplete-dictionary";
 import { pronunciations } from "@/db/schema/pronunciations";
 import { pronunciationVotes } from "@/db/schema/pronunciation_votes";
 import { users } from "@/db/schema/users";
-import type { WordSearchResult, DashboardWordList } from "@/types";
+import type { DashboardWordList } from "@/types";
 import DOMPurify from "isomorphic-dompurify";
 import { purifyObject } from "@/src/lib/utils";
 import { searchLogs } from "@/db/schema/search_logs";
@@ -23,6 +29,23 @@ import { readWord } from "@/src/server/word-cache";
 import { scheduleSearchLog } from "@/src/server/search-logging";
 
 export const wordRouter = createTRPCRouter({
+  getTaskWord: protectedProcedure.input(z.object({ wordId: z.number().int().positive(), meaningId: z.number().int().positive().optional(), relationId: z.number().int().positive().optional(), relationKind: z.enum(["related-words", "related-phrases"]).optional() })).query(async ({ ctx: { db }, input }) => {
+    const word = await db.query.words.findFirst({ where: eq(words.id, input.wordId), columns: { id: true, name: true } });
+    if (!word) throw new TRPCError({ code: "NOT_FOUND" });
+    if (input.meaningId) {
+      const [meaning] = await db.select({ id: meanings.id }).from(meanings).where(and(eq(meanings.id, input.meaningId), eq(meanings.wordId, input.wordId)));
+      if (!meaning) throw new TRPCError({ code: "NOT_FOUND" });
+    }
+    if (input.relationId) {
+      const table = input.relationKind === "related-words" ? relatedWords : relatedPhrases;
+      const target = input.relationKind === "related-words" ? relatedWords.relatedWordId : relatedPhrases.relatedPhraseId;
+      const [relation] = await db.select().from(table).where(and(eq(table.wordId, input.wordId), eq(target, input.relationId)));
+      if (!relation) throw new TRPCError({ code: "NOT_FOUND" });
+    }
+    const result = (await findWordDataByName(db, word.name)).find(item => item.word_data.word_id === word.id);
+    if (!result) throw new TRPCError({ code: "NOT_FOUND" });
+    return result;
+  }),
   searchWordsSimple: publicProcedure
     .input(
       z.object({

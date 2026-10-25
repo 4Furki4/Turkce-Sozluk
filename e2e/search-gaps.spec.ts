@@ -174,7 +174,8 @@ for (const locale of ["tr", "en"] as const) {
       await page.goBack();
       await items.first().getByRole("button", { name: copy.actions.inspect, exact: true }).click();
       await items.first().getByRole("link", { name: copy.actions.correctSpelling, exact: true }).click();
-      await expect(page.getByRole("dialog")).toBeVisible();
+      await expect(page).toHaveURL(new RegExp(locale === "tr" ? "/tr/panel/yazim-yanlislari/yeni" : "/en/dashboard/misspellings/new"));
+      await expect(page.getByRole("heading", { name: (locale === "tr" ? tr : en).TaskPage.newMisspelling, exact: true })).toBeVisible();
       await expect(page.getByLabel((locale === "tr" ? tr : en).Dashboard.Misspellings.incorrectSpellingLabel, { exact: true })).toHaveValue(term);
       await page.goto(url);
       const [word] = await sql`INSERT INTO words (name, variant) VALUES (${term}, 0) RETURNING id`;

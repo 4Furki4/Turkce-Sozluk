@@ -1,5 +1,5 @@
 "use client"
-import AddAuthorModal from '@/src/components/customs/modals/add-author'
+import AddAuthorModal from '@/src/components/customs/modals/add-author-inline'
 import { EditWordForm } from '@/types'
 import { Button, Select, Selection, SelectItem, useDisclosure } from "@heroui/react"
 import { Plus } from 'lucide-react'
@@ -27,7 +27,7 @@ export default function AuthorInput({
     const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedAuthor = e.target.value
         setValue(() => new Set(selectedAuthor))
-        setFieldValue(`meanings.${index}.authorId`, selectedAuthor)
+        setFieldValue(`meanings.${index}.authorId`, selectedAuthor, { shouldDirty: true, shouldValidate: true })
     };
 
     return (
@@ -38,7 +38,7 @@ export default function AuthorInput({
                     as={"div"}
                     {...field}
                     onChange={handleSelectionChange}
-                    selectedKeys={value}
+                    selectedKeys={field.value ? [String(field.value)] : []}
                     selectionMode='single'
                     radius='md'
                     label="Author"

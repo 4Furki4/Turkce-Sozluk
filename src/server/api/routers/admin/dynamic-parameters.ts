@@ -318,7 +318,7 @@ export const dynamicParametersRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx: { db } }) => {
       const { id, ...data } = input;
-      return await db.update(roots).set(data).where(eq(roots.id, id));
+      return await db.update(roots).set({ root: data.root, languageId: data.language_id }).where(eq(roots.id, id));
     }),
 
   deleteRoot: adminProcedure

@@ -1,7 +1,8 @@
 "use client";
+import { useTaskDraft } from "@/src/hooks/use-task-draft";
 
 import { useEffect, useRef, useState } from "react";
-import { ModalHeader, ModalBody, ModalFooter, Button, AutocompleteItem } from "@heroui/react";
+import { Button, AutocompleteItem } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { api } from "@/src/trpc/react";
 import { toast } from "sonner";
@@ -10,10 +11,11 @@ import { CustomAutocomplete } from "@/src/components/customs/heroui/custom-autoc
 
 export interface DailyWordsManagementProps {
   onClose: () => void;
+    onSuccess?: () => void;
   initialData?: { id?: number; wordId: number; wordName?: string; date: string } | null;
 }
 
-export default function DailyWordsManagement({ onClose, initialData }: DailyWordsManagementProps) {
+export default function DailyWordsManagement({ onClose, onSuccess, initialData }: DailyWordsManagementProps) {
   const t = useTranslations("Dashboard.DailyWords");
   const [date, setDate] = useState(initialData?.date || "");
   const [selectedWordId, setSelectedWordId] = useState<string | null>(initialData?.wordId ? String(initialData.wordId) : null);
@@ -35,33 +37,36 @@ export default function DailyWordsManagement({ onClose, initialData }: DailyWord
     ? { id: initialData.wordId, word: initialData.wordName }
     : initialWord ? { id: initialWord.id, word: initialWord.name } : null;
   const items = [...(initialItem ? [initialItem] : []), ...(searchResults?.words ?? []).filter((item) => item.id !== initialItem?.id)];
+  const draft = useTaskDraft("daily-words:" + (initialData?.id ?? "new"), { date, selectedWordId, searchTerm }, (value) => { setDate(value.date); setSelectedWordId(value.selectedWordId); setSearchTerm(value.searchTerm); }, { date: initialData?.date || "", selectedWordId: initialData?.wordId ? String(initialData.wordId) : null, searchTerm: initialData?.wordName || "" });
   const createMutation = api.admin.dailyWords.addDailyWord.useMutation({
-    onSuccess: () => { toast.success(t("added")); onClose(); },
+    onSuccess: () => { toast.success(t("added")); (onSuccess ?? onClose)(); },
     onError: () => toast.error(t("saveFailed")),
   });
   const updateMutation = api.admin.dailyWords.updateDailyWord.useMutation({
-    onSuccess: () => { toast.success(t("updated")); onClose(); },
+    onSuccess: () => { toast.success(t("updated")); (onSuccess ?? onClose)(); },
     onError: () => toast.error(t("saveFailed")),
   });
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   return <form onSubmit={(event) => {
     event.preventDefault();
+    if (isPending) return;
     if (!date || !selectedWordId) { toast.error(t("required")); return; }
     const payload = { wordId: Number(selectedWordId), date };
     if (initialData?.id) updateMutation.mutate({ ...payload, id: initialData.id });
     else createMutation.mutate(payload);
   }}>
-    <ModalHeader>{initialData ? t("edit") : t("add")}</ModalHeader>
-    <ModalBody className="gap-4">
+
+    {draft.notice}
+    <div className="space-y-4">
       <CustomInput type="date" label={t("date")} value={date} onValueChange={setDate} isRequired />
       <CustomAutocomplete
-        label={t("word")} placeholder={t("searchWord")} selectedKey={selectedWordId}
+        size="lg" classNames={{ base: "sm:max-w-none" }} label={t("word")} placeholder={t("searchWord")} selectedKey={selectedWordId}
         inputValue={searchTerm} onInputChange={(value) => {
           hasTyped.current = true;
           setSearchTerm(value);
-          // With both values controlled, keyboard clearing must also clear the selection.
-          if (!value) setSelectedWordId(null);
+          // Changing the query invalidates the selected ID until an option is chosen.
+          if (value !== items.find(item => String(item.id) === selectedWordId)?.word) setSelectedWordId(null);
         }}
         onSelectionChange={(key) => {
           setSelectedWordId(key == null ? null : String(key));
@@ -72,10 +77,10 @@ export default function DailyWordsManagement({ onClose, initialData }: DailyWord
       >
         {items.map((item) => <AutocompleteItem key={String(item.id)} textValue={item.word}>{item.word}</AutocompleteItem>)}
       </CustomAutocomplete>
-    </ModalBody>
-    <ModalFooter>
+    </div>
+    <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-6">
       <Button variant="light" onPress={onClose}>{t("cancel")}</Button>
       <Button type="submit" color="primary" isLoading={isPending}>{t("save")}</Button>
-    </ModalFooter>
+    </div>
   </form>;
 }

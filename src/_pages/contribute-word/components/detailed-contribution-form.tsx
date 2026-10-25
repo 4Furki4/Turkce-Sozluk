@@ -1,4 +1,6 @@
 "use client";
+import { FormDraft, useTaskDraft } from "@/src/hooks/use-task-draft";
+import { TaskCancel, useTaskActions } from "@/src/components/task-pages/task-page";
 
 import React, { useState, useCallback } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -18,9 +20,9 @@ import WordBasicInfoSection from "./word-basic-info-section";
 import WordLanguageAndAttributesSection, { type Language, type WordAttribute } from "./word-language-and-attributes-section";
 import MeaningFormSection from "./meaning-form-section";
 import RelatedItemsSection from "./related-items-section";
-import NewWordAttributeRequestModal from "@/src/components/customs/edit-request-modal/word/new-word-attribute-request-modal";
-import NewMeaningAttributeRequestModal from "@/src/components/customs/edit-request-modal/meanings/new-meaning-attribute-request-modal";
-import NewAuthorRequestModal from "@/src/components/customs/edit-request-modal/meanings/new-author-request-modal";
+import NewWordAttributeRequestModal from "@/src/components/customs/edit-request-modal/word/new-word-attribute-request-inline";
+import NewMeaningAttributeRequestModal from "@/src/components/customs/edit-request-modal/meanings/new-meaning-attribute-request-inline";
+import NewAuthorRequestModal from "@/src/components/customs/edit-request-modal/meanings/new-author-request-inline";
 
 interface RelatedItem {
     id: number;
@@ -94,6 +96,7 @@ export default function DetailedContributionForm({
     isSubmitting,
     setIsSubmitting,
 }: DetailedContributionFormProps) {
+    const { complete } = useTaskActions();
     const t = useTranslations("ContributeWord");
     const tRequests = useTranslations("Requests");
     const tForms = useTranslations("Forms");
@@ -110,6 +113,8 @@ export default function DetailedContributionForm({
     // Related items state
     const [relatedWords, setRelatedWords] = useState<RelatedItem[]>([]);
     const [relatedPhrases, setRelatedPhrases] = useState<RelatedItem[]>([]);
+
+    const relatedDraft = useTaskDraft("word-detailed:related:" + (prefillWord ?? ""), { relatedWords, relatedPhrases, requestedAttributes, requestedMeaningAttributes, requestedAuthors }, value => { setRelatedWords(value.relatedWords); setRelatedPhrases(value.relatedPhrases); setRequestedAttributes(value.requestedAttributes); setRequestedMeaningAttributes(value.requestedMeaningAttributes); setRequestedAuthors(value.requestedAuthors); }, { relatedWords: [], relatedPhrases: [], requestedAttributes: [], requestedMeaningAttributes: [], requestedAuthors: [] });
 
     // API queries for existing data
     const { data: languages, isLoading: languagesIsLoading } = api.params.getLanguages.useQuery();
@@ -324,6 +329,7 @@ export default function DetailedContributionForm({
             await createFullWordRequest.mutateAsync(formattedData);
             toast.success(t("requestSubmitted"));
             detailedForm.reset();
+            complete();
             imagePreviewUrls.forEach((url) => { if (url) URL.revokeObjectURL(url); });
             setImagePreviewUrls([]);
             setRelatedWords([]);
@@ -357,6 +363,9 @@ export default function DetailedContributionForm({
                     </div>
 
                     <form onSubmit={detailedForm.handleSubmit(onSubmitDetailed)} className="space-y-6">
+                        <FormDraft identity={"word-detailed:new:" + (prefillWord ?? "")} control={detailedForm.control} reset={detailedForm.reset} baseline={detailedForm.formState.defaultValues as z.infer<typeof ClientCreateWordRequestSchema>} />
+                        {relatedDraft.notice}
+                        <TaskCancel />
                         {/* Word Basic Info */}
                         <WordBasicInfoSection
                             section="name"

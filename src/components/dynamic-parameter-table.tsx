@@ -6,9 +6,13 @@ import { Button } from "@heroui/react";
 import { useCallback, useState } from "react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/react";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownSection, DropdownItem } from "@heroui/react";
-import { Edit3, MoreVertical, Trash2 } from 'lucide-react';
+import { MoreVertical, Trash2 } from 'lucide-react';
 import { CustomPagination } from "@/src/components/customs/heroui/custom-pagination";
 import { Select, SelectItem } from "@heroui/select";
+
+import { useTaskMenuLinks, TaskButton } from "@/src/components/task-pages/task-link";
+import { useTranslations } from "next-intl";
+import { type ParameterType } from "@/src/components/task-pages/parameter-task";
 
 interface DynamicParameterTableProps {
   columns: { key: string; label: string }[];
@@ -17,8 +21,8 @@ interface DynamicParameterTableProps {
   setPageNumber: (page: number) => void;
   pageNumber: number;
   onSearch: (query: string) => void;
-  onAdd: () => void;
-  onEdit: (item: any) => void;
+  search: string;
+  taskType: ParameterType;
   onDelete: (item: any) => void;
   itemsPerPage: number;
   setItemsPerPage: (itemsPerPage: number) => void;
@@ -39,17 +43,20 @@ export default function DynamicParameterTable({
   setPageNumber,
   pageNumber,
   onSearch,
-  onAdd,
-  onEdit,
+  search,
+  taskType,
   onDelete,
   itemsPerPage,
   setItemsPerPage,
   isLoading
 }: DynamicParameterTableProps) {
+  const taskMenuLink = useTaskMenuLinks();
+  const t = useTranslations("TaskPage");
+  const d = useTranslations("Dashboard");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
 
-  const totalPages = Math.ceil(totalCount / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage));
 
   const handleDelete = (item: any) => {
     setItemToDelete(item);
@@ -72,26 +79,22 @@ export default function DynamicParameterTable({
         return (
           <Dropdown>
             <DropdownTrigger key={cellValue} className="flex justify-around items-center">
-              <button className="ml-auto">
+              <Button isIconOnly variant="light" className="ml-auto h-11 min-w-11" aria-label={d("Columns.Actions")}>
                 <MoreVertical aria-description="more action button" />
-              </button>
+              </Button>
             </DropdownTrigger>
             <DropdownMenu
               onAction={(key) => {
                 if (key === "Delete") {
                   handleDelete(item);
                 }
-                if (key === "Edit") {
-                  onEdit(item);
-                }
+
               }}
             >
-              <DropdownSection title="Actions">
-                <DropdownItem key="Edit" startContent={<Edit3 />} color="warning">
-                  Edit
-                </DropdownItem>
+              <DropdownSection title={d("Columns.Actions")}>
+                <DropdownItem key="Edit" textValue={d("Actions.Edit")} {...taskMenuLink({ pathname: `/dashboard/dynamic-parameters/${taskType}/[id]/edit`, params: { id: item.id } })}>{d("Actions.Edit")}</DropdownItem>
                 <DropdownItem key="Delete" startContent={<Trash2 />} color="danger">
-                  Delete
+                  {d("Actions.Delete")}
                 </DropdownItem>
               </DropdownSection>
             </DropdownMenu>
@@ -100,7 +103,7 @@ export default function DynamicParameterTable({
       default:
         return cellValue;
     }
-  }, []);
+  }, [taskType, taskMenuLink, d]);
 
   return (
     <div className="space-y-4">
@@ -109,19 +112,24 @@ export default function DynamicParameterTable({
       <div className="overflow-x-auto">
         <Table
           topContent={
-            <div className="grid grid-cols-2 items-center">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
               <Input
                 type="text"
-                placeholder="Search..."
+                aria-label={t("search")}
+                label={t("search")} labelPlacement="outside" variant="bordered" size="lg"
+                classNames={{ inputWrapper: "h-12 min-h-12" }}
+                value={search}
+                placeholder={t("search")}
                 onChange={(e) => onSearch(e.target.value)}
-                className="max-w-xs"
+                className="w-full sm:max-w-xs"
               />
-              <div className="flex gap-4 justify-end">
+              <div className="flex flex-wrap items-end gap-3 sm:ml-auto">
                 <Select
-                  label="Items per page"
-                  defaultSelectedKeys={["10"]}
-                  size="sm"
-                  className="max-w-xs"
+                  label={t("perPage")}
+                  selectedKeys={[String(itemsPerPage)]}
+                  labelPlacement="outside" variant="bordered" size="lg"
+                  classNames={{ trigger: "h-12 min-h-12" }}
+                  className="w-40"
                   onChange={(e) => setItemsPerPage(parseInt(e.target.value))}
                 >
                   {itemsPerPageOptions.map((option) => (
@@ -130,7 +138,7 @@ export default function DynamicParameterTable({
                     </SelectItem>
                   ))}
                 </Select>
-                <Button color="primary" onPress={onAdd}>Add New</Button>
+                <TaskButton size="lg" color="primary" href={`/dashboard/dynamic-parameters/${taskType}/new`}>{t("newParameter")}</TaskButton>
               </div>
             </div>
           }
@@ -187,7 +195,7 @@ export default function DynamicParameterTable({
                   Cancel
                 </Button>
                 <Button color="danger" onPress={confirmDelete}>
-                  Delete
+                  {d("Actions.Delete")}
                 </Button>
               </ModalFooter>
             </>

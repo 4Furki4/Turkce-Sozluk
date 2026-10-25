@@ -1,6 +1,7 @@
+import { taskPathnames } from "./task-pathnames";
 import { defineRouting } from 'next-intl/routing';
 import { createNavigation } from 'next-intl/navigation';
-import { locales, pathnames } from './pathnames';
+import { locales } from './pathnames';
 
 export const routing = defineRouting({
   locales: [...locales],
@@ -14,6 +15,7 @@ export const routing = defineRouting({
     },
   },
   pathnames: {
+    ...taskPathnames,
     // If all locales use the same pathname, a
     // single external path can be provided.
     "/": "/",
@@ -180,10 +182,6 @@ export const routing = defineRouting({
     "/dashboard/daily-words": {
       "en": "/dashboard/daily-words",
       "tr": "/panel/gundelik-kelimeler",
-    },
-    "/dashboard/daily-words/[id]/edit": {
-      "en": "/dashboard/daily-words/[id]/edit",
-      "tr": "/panel/gundelik-kelimeler/[id]/duzenle",
     },
     "/dashboard/badges": {
       "en": "/dashboard/badges",

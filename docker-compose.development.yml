@@ -1,5 +1,7 @@
 services:
   app-development:
+    # Coolify owns development. Enable only for an explicit legacy rollback.
+    profiles: [legacy-development]
     image: ${APP_IMAGE:-furki4/turkish-dictionary-app:development}
     container_name: turkish-dictionary-app-development
     restart: unless-stopped
@@ -16,7 +18,7 @@ services:
         max-size: "10m"
         max-file: "3"
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - com.centurylinklabs.watchtower.enable=false
     env_file:
       - path: .env.development.pi
         required: false

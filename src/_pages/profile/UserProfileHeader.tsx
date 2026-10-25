@@ -2,11 +2,11 @@
 
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Avatar, Button, CardBody } from '@heroui/react';
+import { Avatar, CardBody } from '@heroui/react';
 import Image from 'next/image';
 
 
-import EditProfileForm from './edit-profile-form';
+import { TaskButton } from "@/src/components/task-pages/task-link";
 import { type ProfileDataUser as ProfileData } from './user-profile-page-client';
 import { useSnapshot } from 'valtio';
 import { preferencesState } from '@/src/store/preferences';
@@ -63,16 +63,16 @@ export function UserProfileHeader({ profileData, locale, isOwnProfile, user, cla
 
             {isOwnProfile && (
               <div className="mt-4">
-                <Button color="primary" variant="solid" onPress={() => setIsModalOpen(true)}>
+                <TaskButton color="primary" href={{ pathname: "/profile/[id]/edit", params: { id: user?.id ?? "" } }}>
                   {t('editProfileButton')}
-                </Button>
+                </TaskButton>
               </div>
             )}
           </div>
         </CardBody>
       </CustomCard>
 
-      {isOwnProfile && user && <EditProfileForm isOpen={isModalOpen} onOpenChange={setIsModalOpen} user={user} />}
+
     </>
   );
 }

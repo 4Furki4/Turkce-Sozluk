@@ -1,7 +1,9 @@
 "use client";
+import { useTaskActions } from "@/src/components/task-pages/task-page";
+import { FormDraft } from "@/src/hooks/use-task-draft";
 
-import React, { useState, useRef, type ChangeEvent, useEffect } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Avatar } from '@heroui/react';
+import React, { useState, useRef, type ChangeEvent } from 'react';
+import { Button, Input, Avatar } from '@heroui/react';
 import Image from 'next/image';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,8 +25,6 @@ const profileFormSchema = z.object({
 type ProfileFormData = z.infer<typeof profileFormSchema>;
 
 interface EditProfileFormProps {
-  isOpen: boolean;
-  onOpenChange: (isOpen: boolean) => void;
   user: User
 }
 
@@ -32,7 +32,8 @@ const MAX_FILE_SIZE_MB = 1;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
-export default function EditProfileForm({ isOpen, onOpenChange, user }: EditProfileFormProps) {
+export default function EditProfileForm({ user }: EditProfileFormProps) {
+  const { complete, cancel } = useTaskActions();
   const t = useTranslations('ProfilePage.editProfileModal');
   const utils = api.useUtils();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -50,32 +51,12 @@ export default function EditProfileForm({ isOpen, onOpenChange, user }: EditProf
     },
   });
 
-  useEffect(() => {
-    if (isOpen) {
-      reset({
-        name: user.name || '',
-        username: user.username || '',
-      });
-      setSelectedFile(null);
-      setPreviewUrl(user.image || null); // Reset preview to current user image or null
-      setFileError(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    } else {
-      // Clear states when modal is closed, especially if not submitted
-      setSelectedFile(null);
-      setPreviewUrl(null);
-      setFileError(null);
-    }
-  }, [isOpen, user, reset]);
-
   const updateProfileMutation = api.profile.updateProfile.useMutation({
     onSuccess: async () => {
       toast.success(t('updateSuccess'));
       await utils.user.getPublicProfileData.invalidate({ userId: user.id! });
       // Session update will be handled by NextAuth's session management if image URL in session changes
-      onOpenChange(false);
+      complete();
     },
     onError: (error) => {
       toast.error(error.message || t('updateError'));
@@ -149,31 +130,10 @@ export default function EditProfileForm({ isOpen, onOpenChange, user }: EditProf
   const currentAvatarSrc = previewUrl || '/images/default-avatar.png';
 
   return (
-    <Modal motionProps={{
-      variants: {
-        enter: {
-          opacity: 1,
-          transition: {
-            duration: 0.1,
-            ease: 'easeInOut',
-          }
-        },
-        exit: {
-          opacity: 0,
-          transition: {
-            duration: 0.1,
-            ease: 'easeInOut',
-          }
-        },
-      }
-    }} classNames={{
-      base: "shadow-medium bg-background/40 backdrop-blur-md backdrop-saturate-150 transition-transform-background motion-reduce:transition-none border-2 border-border rounded-md p-2 w-full",
-    }} isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior="inside">
-      <ModalContent>
-        {(onClose) => (
           <form onSubmit={handleSubmit(onSubmit)}>
-            <ModalHeader>{t('title')}</ModalHeader>
-            <ModalBody className="space-y-6">
+            <FormDraft identity={"profile:" + user.id} control={control} reset={reset} baseline={{ name: user.name || "", username: user.username || "" }} />
+
+            <div className="space-y-6">
               <div className="flex flex-col items-center space-y-4">
                 <Avatar
                   src={currentAvatarSrc}
@@ -230,12 +190,9 @@ export default function EditProfileForm({ isOpen, onOpenChange, user }: EditProf
                   />
                 )}
               />
-            </ModalBody>
-            <ModalFooter>
-              <Button color="danger" variant="light" onPress={() => {
-                handleRemovePreview(); // Also clear any pending changes on explicit cancel
-                onClose();
-              }}>
+            </div>
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-6">
+              <Button color="danger" variant="light" onPress={cancel}>
                 {t('cancel')}
               </Button>
               <Button
@@ -245,10 +202,7 @@ export default function EditProfileForm({ isOpen, onOpenChange, user }: EditProf
               >
                 {isUploadingImage ? t('uploadingButton') : t('saveChanges')}
               </Button>
-            </ModalFooter>
+            </div>
           </form>
-        )}
-      </ModalContent>
-    </Modal>
   );
 }

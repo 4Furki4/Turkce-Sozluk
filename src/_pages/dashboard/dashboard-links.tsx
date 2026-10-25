@@ -176,7 +176,7 @@ export default function DashboardLinks({ showAdminTools = false }: { showAdminTo
 
   return (
     <nav aria-label={locale === "en" ? "Dashboard navigation" : "Panel navigasyonu"} className="mb-5 flex flex-wrap items-center gap-3 border-b border-border/70 pb-4">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2">
         {groups.map((group) => {
           const isActiveGroup = group.links.some((link) => link.href === pathname);
 
@@ -190,9 +190,9 @@ export default function DashboardLinks({ showAdminTools = false }: { showAdminTo
                   size="sm"
                   startContent={group.icon}
                   endContent={<ChevronDown className="h-4 w-4" />}
-                  className="border-primary/30 bg-background/40"
+                  className="min-w-0 max-w-full whitespace-normal h-auto min-h-8 py-1.5 border-primary/30 bg-background/40"
                 >
-                  {group.label}
+                  <span className="min-w-0 [overflow-wrap:anywhere]">{group.label}</span>
                 </Button>
               </DropdownTrigger>
               <DropdownMenu

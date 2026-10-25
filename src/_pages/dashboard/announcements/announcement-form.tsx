@@ -1,4 +1,6 @@
 "use client";
+import { TaskPage, useTaskActions } from "@/src/components/task-pages/task-page";
+import { FormDraft } from "@/src/hooks/use-task-draft";
 import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -70,7 +72,11 @@ interface AnnouncementFormProps {
   };
 }
 
-export default function AnnouncementForm({ initialData }: AnnouncementFormProps) {
+export default function AnnouncementTask({ initialData }: AnnouncementFormProps) {
+  const t = useTranslations("Dashboard.Announcements"); return <TaskPage title={t(initialData ? "edit" : "createNew")} parent="/dashboard/announcements" parentLabel={t("title")} capability="admin"><AnnouncementForm initialData={initialData} /></TaskPage>;
+}
+function AnnouncementForm({ initialData }: AnnouncementFormProps) {
+  const { complete, cancel } = useTaskActions();
   const t = useTranslations("Dashboard.Announcements");
   const router = useRouter();
   const [previewTab, setPreviewTab] = React.useState<"en" | "tr">("en");
@@ -102,6 +108,7 @@ export default function AnnouncementForm({ initialData }: AnnouncementFormProps)
   const {
     control,
     handleSubmit,
+    reset,
     watch,
     formState: { errors, isSubmitting },
   } = useForm<AnnouncementFormValues>({
@@ -117,7 +124,7 @@ export default function AnnouncementForm({ initialData }: AnnouncementFormProps)
   const { mutate: createAnnouncement } = api.admin.announcements.createAnnouncement.useMutation({
     onSuccess: () => {
       toast.success(t("createSuccess"));
-      router.push("/dashboard/announcements");
+      complete();
     },
     onError: (error) => {
       toast.error(t("createError", { error: t(error.message) }));
@@ -128,7 +135,7 @@ export default function AnnouncementForm({ initialData }: AnnouncementFormProps)
   const { mutate: updateAnnouncement } = api.admin.announcements.updateAnnouncement.useMutation({
     onSuccess: () => {
       toast.success(t("updateSuccess"));
-      router.push("/dashboard/announcements");
+      complete();
     },
     onError: (error) => {
       toast.error(t("updateError", { error: error.message }));
@@ -205,6 +212,7 @@ export default function AnnouncementForm({ initialData }: AnnouncementFormProps)
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <FormDraft identity={"announcement:" + (initialData?.id ?? "new")} control={control} reset={reset} baseline={defaultValues} recover={value => ({ ...value, publishedAt: value.publishedAt ? new CalendarDate(value.publishedAt.year, value.publishedAt.month, value.publishedAt.day) : null })} />
       <Card>
         <CardHeader>
           <h2 className="text-xl font-bold">{t("generalInfo")}</h2>
@@ -444,7 +452,7 @@ export default function AnnouncementForm({ initialData }: AnnouncementFormProps)
             <CardBody>
               {previewTab === "en" ? (
                 <div className="space-y-4">
-                  <h1 className="text-2xl font-bold">{watch("translations.en.title") || t("form.noTitle")}</h1>
+                  <h2 className="text-2xl font-bold">{watch("translations.en.title") || t("form.noTitle")}</h2>
                   {watch("translations.en.excerpt") && (
                     <p className="text-gray-600 dark:text-gray-400 italic">{watch("translations.en.excerpt")}</p>
                   )}
@@ -456,7 +464,7 @@ export default function AnnouncementForm({ initialData }: AnnouncementFormProps)
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <h1 className="text-2xl font-bold">{watch("translations.tr.title") || t("form.noTitle")}</h1>
+                  <h2 className="text-2xl font-bold">{watch("translations.tr.title") || t("form.noTitle")}</h2>
                   {watch("translations.tr.excerpt") && (
                     <p className="text-gray-600 dark:text-gray-400 italic">{watch("translations.tr.excerpt")}</p>
                   )}
@@ -475,7 +483,7 @@ export default function AnnouncementForm({ initialData }: AnnouncementFormProps)
       <div className="flex justify-end gap-2">
         <Button
           variant="flat"
-          onPress={() => router.push("/dashboard/announcements")}
+          onPress={cancel}
           disabled={isSubmitting}
         >
           {t("cancel")}

@@ -10,7 +10,18 @@ const mockUsers = Array.from({ length: 23 }, (_, index) => ({
 })) as SelectUser[];
 const mockFetchUsers = jest.fn(async ({ take, skip }) => mockUsers.slice(skip, skip + take));
 
-jest.mock('next-intl', () => ({ useTranslations: () => (key: string) => key === 'usersPerPage' ? 'Users per page' : 'Users' }));
+let mockQuery = '';
+const mockListeners = new Set<() => void>();
+const mockRouter = { replace: (href: string) => { mockQuery = href.split('?')[1] ?? ''; window.history.replaceState(null, '', '/?' + mockQuery); mockListeners.forEach(notify => notify()); } };
+jest.mock('@/src/hooks/use-progress-router', () => ({ useProgressRouter: () => mockRouter }));
+jest.mock('next/navigation', () => ({
+    usePathname: () => '/tr/panel/kullanicilar',
+    useSearchParams: () => {
+        const query = React.useSyncExternalStore((notify: () => void) => { mockListeners.add(notify); return () => mockListeners.delete(notify); }, () => mockQuery);
+        return React.useMemo(() => new URLSearchParams(query), [query]);
+    },
+}));
+jest.mock('next-intl', () => ({ useLocale: () => 'en', useTranslations: () => (key: string) => key === 'usersPerPage' ? 'Users per page' : 'Users' }));
 jest.mock('@/src/trpc/react', () => ({ api: { user: {
     getUserCount: { useQuery: (_: unknown, options: object) => useQuery({
         queryKey: ['userCount'], queryFn: async () => mockUsers.length, ...options,
@@ -19,10 +30,8 @@ jest.mock('@/src/trpc/react', () => ({ api: { user: {
         queryKey: ['users', input], queryFn: () => mockFetchUsers(input), ...options,
     }) },
 } } }));
-jest.mock('@/src/i18n/routing', () => ({ Link: ({ children }: any) => <>{children}</> }));
-jest.mock('../role-edit-modal', () => () => null);
+jest.mock('@/src/i18n/routing', () => ({ getPathname: ({ href }: any) => typeof href === 'string' ? href : href.pathname, Link: ({ children }: any) => <>{children}</> }));
 jest.mock('../user-delete-modal', () => () => null);
-jest.mock('../badge-assignment-modal', () => () => null);
 jest.mock('@heroui/react', () => ({
     useDisclosure: () => ({ isOpen: false, onOpen: jest.fn(), onOpenChange: jest.fn() }),
     Table: ({ topContent, bottomContent, children }: any) => <>{topContent}<table>{children}</table>{bottomContent}</>,
@@ -52,7 +61,7 @@ function setup() {
     return client;
 }
 
-beforeEach(() => mockFetchUsers.mockClear());
+beforeEach(() => { mockFetchUsers.mockClear(); mockQuery = ''; window.history.replaceState(null, '', '/'); });
 
 test('fetches the requested page instead of caching the server first page under every key', async () => {
     setup();

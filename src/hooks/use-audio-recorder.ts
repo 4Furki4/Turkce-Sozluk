@@ -1,56 +1,116 @@
-// src/hooks/use-audio-recorder.ts
-import { useState, useRef } from "react";
+"use client";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 export const useAudioRecorder = () => {
-    const [isRecording, setIsRecording] = useState(false);
-    const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-    const audioChunksRef = useRef<Blob[]>([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
+  const [recordingError, setRecordingError] = useState(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const recorder = useRef<MediaRecorder | null>(null);
+  const stream = useRef<MediaStream | null>(null);
+  const chunks = useRef<Blob[]>([]);
+  const mounted = useRef(false);
+  const generation = useRef(0);
+  const starting = useRef(false);
+  const release = useCallback(() => {
+    if (recorder.current) {
+      recorder.current.ondataavailable = null;
+      recorder.current.onstop = null;
+      if (recorder.current.state !== "inactive") recorder.current.stop();
+      recorder.current = null;
+    }
+    stream.current?.getTracks().forEach((track) => track.stop());
+    stream.current = null;
+    chunks.current = [];
+  }, []);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      generation.current++;
+      starting.current = false;
+      release();
+    };
+  }, [release]);
 
-    const startRecording = async () => {
-        // Ask for microphone permission
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorderRef.current = new MediaRecorder(stream);
-            audioChunksRef.current = [];
-
-            mediaRecorderRef.current.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    audioChunksRef.current.push(event.data);
-                }
-            };
-
-            mediaRecorderRef.current.onstop = () => {
-                const mimeType = MediaRecorder.isTypeSupported("audio/opus") ? "audio/opus" : "audio/aac";
-                const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
-                setAudioBlob(audioBlob);
-                // Stop all tracks on the stream to turn off the microphone indicator
-                stream.getTracks().forEach((track) => track.stop());
-            };
-
-            mediaRecorderRef.current.start();
-            setIsRecording(true);
-            setAudioBlob(null);
-        } catch (err) {
-            console.error("Error starting recording:", err);
-            // You should probably show a user-friendly error message here
-            // e.g., if the user denies microphone permission.
-            alert("Microphone access was denied. Please allow microphone access in your browser settings.");
+  const startRecording = async () => {
+    if (starting.current || recorder.current?.state === "recording") return;
+    const attempt = ++generation.current;
+    starting.current = true;
+    setIsStarting(true);
+    setRecordingError(false);
+    try {
+      const acquired = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+      if (!mounted.current || generation.current !== attempt) {
+        acquired.getTracks().forEach((track) => track.stop());
+        return;
+      }
+      release();
+      stream.current = acquired;
+      const mimeType = [
+        "audio/webm;codecs=opus",
+        "audio/mp4",
+        "audio/webm",
+        "audio/ogg;codecs=opus",
+      ].find((type) => MediaRecorder.isTypeSupported(type));
+      const active = new MediaRecorder(
+        acquired,
+        mimeType ? { mimeType } : undefined,
+      );
+      recorder.current = active;
+      active.ondataavailable = (event) => {
+        if (event.data.size > 0) chunks.current.push(event.data);
+      };
+      active.onstop = () => {
+        acquired.getTracks().forEach((track) => track.stop());
+        if (stream.current === acquired) stream.current = null;
+        if (mounted.current && generation.current === attempt) {
+          setAudioBlob(
+            new Blob(chunks.current, {
+              type: active.mimeType || chunks.current[0]?.type || "audio/webm",
+            }),
+          );
+          setIsRecording(false);
         }
-    };
-
-    const stopRecording = () => {
-        if (mediaRecorderRef.current && isRecording) {
-            mediaRecorderRef.current.stop();
-            setIsRecording(false);
-        }
-    };
-
-    const resetRecording = () => {
-        setAudioBlob(null);
-        setIsRecording(false);
-        audioChunksRef.current = [];
-    };
-
-    return { isRecording, audioBlob, startRecording, stopRecording, resetRecording };
+      };
+      active.start();
+      setAudioBlob(null);
+      setIsRecording(true);
+    } catch {
+      if (mounted.current && generation.current === attempt) {
+        release();
+        setRecordingError(true);
+      }
+    } finally {
+      if (mounted.current && generation.current === attempt) {
+        starting.current = false;
+        setIsStarting(false);
+      }
+    }
+  };
+  const stopRecording = () => {
+    if (recorder.current?.state === "recording") {
+      recorder.current.stop();
+    }
+  };
+  const resetRecording = () => {
+    generation.current++;
+    starting.current = false;
+    release();
+    setAudioBlob(null);
+    setIsRecording(false);
+    setIsStarting(false);
+    setRecordingError(false);
+  };
+  return {
+    isRecording,
+    isStarting,
+    recordingError,
+    audioBlob,
+    startRecording,
+    stopRecording,
+    resetRecording,
+  };
 };

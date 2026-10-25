@@ -1,5 +1,5 @@
 "use client"
-import AddWordAttributeModal from '@/src/components/customs/modals/add-word-attribute'
+import AddWordAttributeModal from '@/src/components/customs/modals/add-word-attribute-inline'
 import { api } from '@/src/trpc/react'
 import { WordForm } from '@/types'
 import { Button, Select, Selection, SelectItem, useDisclosure } from "@heroui/react"
@@ -22,7 +22,7 @@ export default function WordAttributesInput({
     const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedAttributes = e.target.value.split(",")
         setValues(() => new Set(selectedAttributes))
-        setFieldValue("attributes", selectedAttributes)
+        setFieldValue("attributes", selectedAttributes, { shouldDirty: true, shouldValidate: true })
     };
     const { isOpen, onOpenChange, onOpen, onClose } = useDisclosure()
     return (
@@ -42,7 +42,7 @@ export default function WordAttributesInput({
                         placeholder={t('SelectAttributes')}
                         label={t('Attributes')}
                         labelPlacement='outside'
-                        selectedKeys={values}
+                        selectedKeys={field.value ?? []}
                         isInvalid={error !== undefined} errorMessage={error?.message}
                         {...field}
                         onChange={handleSelectionChange}
@@ -53,7 +53,7 @@ export default function WordAttributesInput({
                                 color='danger'
                                 onPress={() => {
                                     setValues(new Set([]));
-                                    setFieldValue("attributes", [])
+                                    setFieldValue("attributes", [], { shouldDirty: true, shouldValidate: true })
                                 }}
                             >
                                 <X aria-description={t('ResetAllSelectedValuesButton')} />

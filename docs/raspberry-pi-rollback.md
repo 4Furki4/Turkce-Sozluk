@@ -1,8 +1,46 @@
 # Raspberry Pi Rollback Runbook
 
-Use this when a bad Docker image reaches the Pi through Watchtower or a manual
-deploy. The goal is to stop automatic replacement, pin the app to a known-good
-image, verify health, and only then resume normal updates.
+Development runs in Coolify; production remains in its original Compose stack.
+Watchtower is stopped globally and must stay stopped during recovery. App rollback
+does not undo schema or data changes. The legacy development commands below are
+an emergency fallback: stop the Coolify service and free port 3002 first.
+
+## Coolify Development Rollback
+
+Open Turkish Dictionary → development → dictionary-development in
+[Coolify](https://coolify.furkan-cengiz.com). Preserve its runtime environment and
+replace Compose using `developmentCompose` from `scripts/deploy/compose.mjs`, with
+the known-good digest and a fresh 64-character hex nonce. For example, from a
+checkout of this release:
+
+```bash
+node --input-type=module -e '
+import {randomBytes} from "node:crypto";
+import {developmentCompose} from "./scripts/deploy/compose.mjs";
+console.log(JSON.stringify(developmentCompose({digest:process.env.ROLLBACK_DIGEST,
+  nonce:randomBytes(32).toString("hex")}), null, 2));
+'
+```
+
+Set `ROLLBACK_DIGEST=sha256:<known-good-digest>` for this command. Paste its generated
+JSON (valid Compose YAML) into the service Compose editor, then redeploy. This
+keeps the health command's digest/nonce and its environment consistent. The
+generator contains no secrets. A later successful develop push will deploy the
+new branch head, so coordinate releases during recovery.
+
+The initial migration preserves digest
+`sha256:0a17cea9247e911b294c258f8bae604b749b82dc57a0a25734a1411a62ad8a5c`.
+Verify the newly created container image and health, plus local
+`http://127.0.0.1:3002/api/health`; the public domain retains Cloudflare Access.
+Cached Coolify status alone does not prove a new release.
+
+The original `turkish-dictionary-app-development` container remains stopped with
+restart `no`. Private snapshots are under
+`/data/coolify/migration-backups/development/` on the Pi and contain secrets;
+never print or commit them. If Coolify is unavailable, stop its app container,
+verify port 3002 is free, then `sudo docker start turkish-dictionary-app-development`.
+After recovery, stop the legacy app before restarting Coolify. If intentionally
+keeping the legacy app through a Pi reboot, explicitly restore its restart policy.
 
 ## Quick Reference
 
@@ -28,7 +66,7 @@ cd ~/development/Turkce-Sozluk
 sudo docker stop watchtower-1
 
 sudo env APP_IMAGE=furki4/turkish-dictionary-app:<known-good-tag> \
-  docker compose --env-file .env.development.pi -f docker-compose.development.yml up -d app-development
+  docker compose --env-file .env.development.pi -f docker-compose.development.yml --profile legacy-development up -d --no-deps app-development
 
 curl http://127.0.0.1:3002/api/health
 curl -I https://development.turkce-sozluk.com/tr
@@ -132,7 +170,7 @@ sudo docker compose --env-file .env.production.pi -f docker-compose.production.y
 cd ~/development/Turkce-Sozluk
 
 sudo env APP_IMAGE=furki4/turkish-dictionary-app:<known-good-development-tag> \
-  docker compose --env-file .env.development.pi -f docker-compose.development.yml up -d app-development
+  docker compose --env-file .env.development.pi -f docker-compose.development.yml --profile legacy-development up -d --no-deps app-development
 ```
 
 Verify:
@@ -143,22 +181,11 @@ curl -I https://development.turkce-sozluk.com/tr
 sudo docker compose --env-file .env.development.pi -f docker-compose.development.yml logs --tail=100 app-development
 ```
 
-## Resume Normal Auto-Deploy
+## Resume Normal Development Releases
 
-Only resume Watchtower after the bad tag has been fixed or moved away from the
-bad image.
-
-For production, make sure `latest` points to a good image again. Then:
-
-```bash
-cd ~/development/Turkce-Sozluk
-
-sudo docker compose --env-file .env.production.pi -f docker-compose.production.yml up -d watchtower
-sudo docker logs --tail=100 watchtower-1
-```
-
-If you are intentionally staying pinned to a rollback digest for a while, keep
-Watchtower stopped. Otherwise Watchtower may pull the floating tag again.
+Keep Watchtower stopped. Push a fix to `develop`; after the workflow is merged,
+successful CI publishes and deploys the exact new digest through Coolify.
+Production and portfolio releases remain manual until separately migrated.
 
 ## Database Rollback
 
@@ -192,8 +219,8 @@ sudo env APP_IMAGE=furki4/turkish-dictionary-app:main-<previous-git-sha> \
 
 After rollback, decide whether to:
 
-- push a fix to `main`/`develop`, letting Watchtower deploy it, or
-- retag the known-good image as `latest`/`development`.
+- push a fix to `develop`, letting the gated Coolify workflow deploy it, or
+- intentionally redeploy the affected production app with the chosen digest.
 
 ## Incident Checklist
 
@@ -205,4 +232,4 @@ After rollback, decide whether to:
 - Verify Cloudflare hostname.
 - Check Dozzle/app logs.
 - Check Netdata CPU/RAM/disk.
-- Leave Watchtower stopped until the floating tag is safe again.
+- Leave Watchtower stopped globally.

@@ -5,7 +5,7 @@ import { Button, Card, CardBody, Accordion, AccordionItem } from "@heroui/react"
 import { Plus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import AddRelatedItemModal from "./add-related-item-modal";
+import AddRelatedItemModal from "./add-related-item-inline";
 
 interface RelatedItem {
   id: number;

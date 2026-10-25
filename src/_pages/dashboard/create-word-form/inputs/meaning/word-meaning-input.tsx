@@ -1,4 +1,5 @@
 "use client"
+import { meaningInputClasses } from "./field-styles";
 import { WordForm } from '@/types'
 import { Input } from "@heroui/react"
 import React from 'react'
@@ -28,7 +29,9 @@ export default function WordMeaningInput({
                     {...field}
                     radius='md'
                     label={t('Meaning')}
-                    labelPlacement='outside'
+                    labelPlacement='outside-top'
+                    size='lg'
+                    classNames={meaningInputClasses}
                     description={t('Forms.Meanings.Required')}
                     isRequired
                     errorMessage={error?.message}

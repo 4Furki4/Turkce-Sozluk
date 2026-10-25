@@ -1,6 +1,7 @@
 "use client"
 import React, { useCallback } from 'react'
 import {
+    Button,
     Table,
     TableHeader,
     TableColumn,
@@ -19,16 +20,16 @@ import {
     DropdownItem,
     Link as NextUILink
 } from "@heroui/react";
-import { Edit3, MoreVertical, Trash2 } from 'lucide-react';
+import { MoreVertical, Trash2 } from 'lucide-react';
 import { api } from '@/src/trpc/react';
 import { CustomPagination } from "@/src/components/customs/heroui/custom-pagination";
 import { Select, SelectItem } from "@heroui/select";
 import { rolesEnum, SelectUser } from '@/db/schema/users';
 import { Link } from '@/src/i18n/routing';
-import RoleEditModal from './role-edit-modal';
+import { useTaskMenuLinks } from "@/src/components/task-pages/task-link";
+import { useListState } from "@/src/hooks/use-list-state";
 import UserDeleteModal from './user-delete-modal';
-import BadgeAssignmentModal from './badge-assignment-modal';
-import { Award } from 'lucide-react';
+
 import { keepPreviousData } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
@@ -61,17 +62,19 @@ export default function UserList(
             userCount: number | undefined
         }
 ) {
+    const taskMenuLink = useTaskMenuLinks();
     const t = useTranslations('Dashboard.UserList');
+    const actionsT = useTranslations('Dashboard.Columns');
     const { isOpen: isDeleteModalOpen, onOpen: onDeleteModalOpen, onOpenChange: onDeleteModalChange } = useDisclosure();
-    const { isOpen: isEditModalOpen, onOpen: onEditModalOpen, onOpenChange: onEditModalChange } = useDisclosure();
-    const { isOpen: isBadgeModalOpen, onOpen: onBadgeModalOpen, onOpenChange: onBadgeModalChange } = useDisclosure();
     const [selectedUser, setSelectedUser] = React.useState<{
         userId?: string | null;
         name?: string | null;
         role?: typeof roles[number];
     }>({ userId: "", name: "", role: undefined });
-    const [pageNumber, setPageNumber] = React.useState<number>(1);
-    const [usersPerPage, setUsersPerPage] = React.useState<number>(10);
+    const [list, setList] = useListState({ page: 1, size: 10 });
+    const pageNumber = list.page; const usersPerPage = list.size;
+    const setPageNumber = (page: number) => setList(old => ({ ...old, page }));
+    const setUsersPerPage = (size: number) => setList(old => ({ ...old, page: 1, size }));
     const usersCountQuery = api.user.getUserCount.useQuery(undefined, {
         initialData: userCount,
     });
@@ -125,9 +128,9 @@ export default function UserList(
                 return (
                     <Dropdown>
                         <DropdownTrigger key={cellValue} className="flex justify-around items-center">
-                            <button className="ml-auto">
+                            <Button isIconOnly variant="light" className="ml-auto h-11 min-w-11" aria-label={actionsT("Actions")}>
                                 <MoreVertical aria-description="more action button" />
-                            </button>
+                            </Button>
                         </DropdownTrigger>
                         <DropdownMenu
                             onAction={(key) => {
@@ -139,22 +142,8 @@ export default function UserList(
                                     });
                                     onDeleteModalOpen();
                                 }
-                                if (key === "Edit") {
-                                    setSelectedUser({
-                                        userId: item.key,
-                                        name: item.name,
-                                        role: item.role
-                                    });
-                                    onEditModalOpen();
-                                }
-                                if (key === "AssignBadge") {
-                                    setSelectedUser({
-                                        userId: item.key,
-                                        name: item.name,
-                                        role: item.role
-                                    });
-                                    onBadgeModalOpen();
-                                }
+
+
                             }}
                         >
                             <DropdownSection title={"Actions"}>
@@ -165,12 +154,8 @@ export default function UserList(
                                 >
                                     Delete
                                 </DropdownItem>
-                                <DropdownItem key={'Edit'} startContent={<Edit3 />} color={"warning"}>
-                                    Edit Role
-                                </DropdownItem>
-                                <DropdownItem key={'AssignBadge'} startContent={<Award className="w-4 h-4" />} color={"primary"}>
-                                    Assign Badge
-                                </DropdownItem>
+                                <DropdownItem key="Edit" textValue="Edit Role" {...taskMenuLink({ pathname: "/dashboard/user-list/[userId]/role", params: { userId: item.key } })}> Edit Role</DropdownItem>
+                                <DropdownItem key="AssignBadge" textValue="Assign Badge" {...taskMenuLink({ pathname: "/dashboard/user-list/[userId]/badges", params: { userId: item.key } })}> Assign Badge</DropdownItem>
                             </DropdownSection>
                         </DropdownMenu>
                     </Dropdown>
@@ -191,7 +176,7 @@ export default function UserList(
             default:
                 return cellValue;
         }
-    }, []);
+    }, [taskMenuLink, onDeleteModalOpen, actionsT]);
     return (
         <>
             <Table topContent={
@@ -205,7 +190,6 @@ export default function UserList(
                             const nextPageSize = Number(e.target.value);
                             if (!userPerPageOptions.some((option) => Number(option.key) === nextPageSize)) return;
                             setUsersPerPage(nextPageSize);
-                            setPageNumber(1);
                         }}>
                         {userPerPageOptions.map((pageCount) => (
                             <SelectItem key={pageCount.key}>
@@ -244,20 +228,11 @@ export default function UserList(
                     )}
                 </TableBody>
             </Table>
-            {isEditModalOpen ?
-                <RoleEditModal key={selectedUser.userId} isOpen={isEditModalOpen} onOpenChange={onEditModalChange} userId={selectedUser.userId} selectedUserRole={selectedUser.role} skip={skip} take={usersPerPage} /> : null
-            }
+
             {
                 isDeleteModalOpen ? <UserDeleteModal isOpen={isDeleteModalOpen} name={selectedUser.name!} onOpen={onDeleteModalOpen} onOpenChange={onDeleteModalChange} skip={skip} take={usersPerPage} userId={selectedUser.userId!} /> : null
             }
-            {isBadgeModalOpen ?
-                <BadgeAssignmentModal
-                    isOpen={isBadgeModalOpen}
-                    onOpenChange={onBadgeModalChange}
-                    userId={selectedUser.userId!}
-                    userName={selectedUser.name!}
-                /> : null
-            }
+
         </>
     )
 }

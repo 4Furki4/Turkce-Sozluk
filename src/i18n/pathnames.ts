@@ -1,7 +1,9 @@
+import { taskPathnames } from "./task-pathnames";
 export const locales = ["en", "tr"] as const;
 export const localePrefix = "as-needed";
 
 export const pathnames = {
+    ...taskPathnames,
   "/": "/",
     "/ui-stress/requests": "/ui-stress/requests",
   "/signin": {
