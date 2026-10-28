@@ -30,6 +30,7 @@ for (const locale of ["tr", "en"] as const) {
       const email = `${identity}@example.invalid`;
       const password = "ci-only-attention-test-password";
       const signup = await page.request.post("/api/auth/sign-up/email", {
+        maxRetries: 2,
         headers: { origin: "http://localhost:3100" },
         data: { email, name: "Attention Test", username: identity, password },
       });

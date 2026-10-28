@@ -2,21 +2,22 @@
 
 Development runs as the `dictionary-development` Compose service in
 [Coolify](https://coolify.furkan-cengiz.com), under Turkish Dictionary → development.
-Production and portfolio apps retain their existing stacks. Watchtower is stopped
+Production retains its Compose stack and releases through CI; portfolio apps retain their existing stacks. Watchtower is stopped
 globally with restart disabled; those apps keep their current images until an
 explicit deployment.
 
 ## Channels
 
-- Production: `main` branch -> `furki4/turkish-dictionary-app:latest`
-- Development: `develop` branch -> CI-gated ARM64 image -> Coolify, pinned by digest
+- Production: `main` branch -> CI-gated ARM64 image -> verified backup/migrations -> Compose, pinned by digest
+- Development: `develop` branch -> CI-gated ARM64 image -> migrations -> Coolify, pinned by digest
 
 After this workflow change reaches `develop`, a same-repository push must pass
 lint, unit tests, production build and browser tests before image publication and
 deployment. The final build job sends the published digest to Coolify and waits
 for fresh application/database health evidence. Runs superseded before dispatch
-skip deployment; dispatched releases always finish health verification. Main and
-pull request runs do not trigger the development deployment hook.
+skip deployment; dispatched releases always finish health verification. Main runs release production after migration checks; pull request runs do not
+change live environments. See [CI release setup](raspberry-pi-database-migrations.md#automatic-ci-releases)
+for required private-connectivity settings.
 
 Readiness requires two fresh successful probes observed separately, at least
 eight seconds apart. Repeated markers survive ordinary log bursts; proof expires
@@ -158,8 +159,9 @@ monitor setup.
 Watchtower is stopped across the Pi with restart policy `no`. Its Compose service
 has profile `legacy-watchtower` and restart `no`, so normal Compose startup does
 not resume it. Do not start it during normal releases or recovery: it also updates
-production and portfolio apps. Publishing `latest` alone no longer deploys
-production; intentionally recreate only the affected app for a manual release.
+production and portfolio apps. CI releases production using the published immutable digest after checking the
+migration ledger and creating a verified backup when needed. Publishing a tag
+outside CI alone does not deploy production.
 
 ## Rollback
 

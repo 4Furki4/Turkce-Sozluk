@@ -133,7 +133,7 @@ for (const locale of ["tr", "en"] as const) test(`${locale}: real admin mutation
     expect((await page.request.get("/api/trpc/admin.history.list")).status()).toBe(401);
     const identity = "audit_" + randomUUID().replaceAll("-", "");
     const email = identity + "@example.invalid", password = "ci-only-audit-password";
-    const signup = await page.request.post("/api/auth/sign-up/email", { headers: { origin: "http://localhost:3100" }, data: { email, name: "Audit Reviewer", username: identity, password } });
+    const signup = await page.request.post("/api/auth/sign-up/email", { maxRetries: 2, headers: { origin: "http://localhost:3100" }, data: { email, name: "Audit Reviewer", username: identity, password } });
     expect(signup.ok(), await signup.text()).toBe(true); actorId = (await signup.json()).user.id;
     await rpc(page.request, "admin.dynamicParameters.createAuthor", { name }, 401);
     await sql`UPDATE users SET role = 'admin' WHERE id = ${actorId!}`;

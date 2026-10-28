@@ -38,6 +38,7 @@ test.beforeAll(async ({ playwright }, worker) => {
     },
   });
   const response = await api.post("/api/auth/sign-up/email", {
+    maxRetries: 2,
     headers: { origin: "http://localhost:3100" },
     data: {
       email: `${identity}@example.invalid`,

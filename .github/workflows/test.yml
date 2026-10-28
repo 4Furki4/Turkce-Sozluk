@@ -6,6 +6,11 @@ on:
   push:
     branches: [main, develop]
   workflow_dispatch:
+    inputs:
+      check_pi:
+        description: "Check private Pi access without migrating or deploying"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -19,8 +24,45 @@ env:
   NEXT_TELEMETRY_DISABLED: "1"
 
 jobs:
+  pi_connectivity:
+    name: Check Pi access (${{ matrix.target }})
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.check_pi && github.repository == '4Furki4/Turkce-Sozluk' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [development, production]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.2"
+      - run: bun install --frozen-lockfile
+      - uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.PI_TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.PI_TS_OAUTH_SECRET }}
+          tags: tag:dictionary-ci
+      - name: Configure verified SSH identity
+        env:
+          SSH_KEY: ${{ secrets.PI_RELEASE_SSH_KEY }}
+          KNOWN_HOSTS: ${{ vars.PI_RELEASE_KNOWN_HOSTS }}
+        run: |
+          test -n "$SSH_KEY" && test -n "$KNOWN_HOSTS"
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Check database and application without changes
+        env:
+          PI_SSH_HOST: ${{ vars.PI_RELEASE_SSH_HOST }}
+          PI_CHECK_TARGET: ${{ matrix.target }}
+        run: node scripts/deploy/pi-release.mjs --check
+
   lint:
-    name: Lint
+    if: ${{ !inputs.check_pi }}
+    name: ${{ inputs.check_pi && 'Connectivity dispatch - Lint skipped' || 'Lint' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -56,7 +98,8 @@ jobs:
         run: bun run lint
 
   unit:
-    name: Unit tests
+    if: ${{ !inputs.check_pi }}
+    name: ${{ inputs.check_pi && 'Connectivity dispatch - Unit tests skipped' || 'Unit tests' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -113,7 +156,8 @@ jobs:
           retention-days: 7
 
   build_browser:
-    name: Production build and browser tests
+    if: ${{ !inputs.check_pi }}
+    name: ${{ inputs.check_pi && 'Connectivity dispatch - Production build and browser tests skipped' || 'Production build and browser tests' }}
     runs-on: ubuntu-24.04
     # Includes three repetitions of each desktop/mobile journey.
     timeout-minutes: 45
@@ -187,9 +231,9 @@ jobs:
           retention-days: 7
 
   ci_passed:
-    name: CI passed
+    name: ${{ inputs.check_pi && 'Connectivity dispatch - CI passed skipped' || 'CI passed' }}
     needs: [lint, unit, build_browser]
-    if: always()
+    if: ${{ always() && !inputs.check_pi }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -206,7 +250,7 @@ jobs:
           test "$BUILD_BROWSER_RESULT" = success
 
   build:
-    name: Build and push ARM64 image
+    name: ${{ inputs.check_pi && 'Connectivity dispatch - Build and push ARM64 image skipped' || 'Build and push ARM64 image' }}
     needs: ci_passed
     if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-24.04-arm
@@ -308,6 +352,43 @@ jobs:
             NEXT_PUBLIC_R2_CUSTOM_URL=https://data.turkce-sozluk.com
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Connect release runner to Pi tailnet
+        if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && github.repository == '4Furki4/Turkce-Sozluk' && steps.publication.outputs.current == 'true' && steps.published.outcome == 'success' }}
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.PI_TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.PI_TS_OAUTH_SECRET }}
+          tags: tag:dictionary-ci
+
+      - name: Configure private release SSH
+        if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && github.repository == '4Furki4/Turkce-Sozluk' && steps.publication.outputs.current == 'true' && steps.published.outcome == 'success' }}
+        env:
+          SSH_KEY: ${{ secrets.PI_RELEASE_SSH_KEY }}
+          KNOWN_HOSTS: ${{ vars.PI_RELEASE_KNOWN_HOSTS }}
+        run: |
+          test -n "$SSH_KEY" && test -n "$KNOWN_HOSTS"
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Set up release Bun
+        if: ${{ github.event_name == 'push' && steps.publication.outputs.current == 'true' && steps.published.outcome == 'success' }}
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.2"
+
+      - name: Install release dependencies
+        if: ${{ github.event_name == 'push' && steps.publication.outputs.current == 'true' && steps.published.outcome == 'success' }}
+        run: bun install --frozen-lockfile
+
+      - name: Migrate Pi database and release production
+        if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && github.repository == '4Furki4/Turkce-Sozluk' && steps.publication.outputs.current == 'true' && steps.published.outcome == 'success' }}
+        env:
+          PI_SSH_HOST: ${{ vars.PI_RELEASE_SSH_HOST }}
+          PUBLISHED_IMAGE_DIGEST: ${{ steps.published.outputs.digest }}
+        run: node scripts/deploy/pi-release.mjs
 
       - name: Deploy development through Coolify
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' && github.repository == '4Furki4/Turkce-Sozluk' && steps.publication.outputs.current == 'true' && steps.image.outputs.push == 'true' && steps.published.outcome == 'success' }}
