@@ -8,7 +8,7 @@ export default defineConfig({
     dialect: "postgresql",
     dbCredentials: {
         url: process.env.DATABASE_URL!,
-        ssl: true,
+        ssl: new URL(process.env.DATABASE_URL!).searchParams.get("sslmode") === "disable" ? false : true,
     },
     verbose: true,
     strict: true,
