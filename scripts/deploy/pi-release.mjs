@@ -7,6 +7,10 @@ import postgres from "postgres";
 
 export class ReleaseError extends Error {}
 
+// pg_restore reads only the TOC for --list. Drain stdin after it exits so the
+// backup producer does not get SIGPIPE under pipefail; retain restore failure.
+export const ARCHIVE_VERIFY_COMMAND = 'pg_restore --list >/dev/null; result=$?; cat >/dev/null; exit "$result"';
+
 // This branch-only migration was applied to development before release history
 // diverged. Preserve its schema/data and account for its exact original SQL;
 // it must never become a migration to execute on production.
@@ -104,7 +108,7 @@ export async function main(env = process.env, { checkOnly = false } = {}) {
       });
       if (verifyLedger(developmentRows, entries, hash, DEVELOPMENT_HISTORY).length) throw new ReleaseError("Production migrations must be applied to development first");
       console.log("Development migration history verified; creating production backup");
-      ssh(`set -eu; set -o pipefail; backup=/srv/backups/pre-restic/turkish-dictionary/postgres/production_ci_${env.GITHUB_SHA}_$(date -u +%Y%m%dT%H%M%SZ).dump; sudo -n mkdir -p /srv/backups/pre-restic/turkish-dictionary/postgres; sudo -n docker exec ${container} sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" pg_dump -h 127.0.0.1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc --no-owner --no-privileges' | sudo -n tee "$backup" >/dev/null; sudo -n test -s "$backup"; sudo -n cat "$backup" | sudo -n docker exec -i ${container} pg_restore --list >/dev/null`);
+      ssh(`set -eu; set -o pipefail; backup=/srv/backups/pre-restic/turkish-dictionary/postgres/production_ci_${env.GITHUB_SHA}_$(date -u +%Y%m%dT%H%M%SZ).dump; sudo -n mkdir -p /srv/backups/pre-restic/turkish-dictionary/postgres; sudo -n docker exec ${container} sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" pg_dump -h 127.0.0.1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc --no-owner --no-privileges' | sudo -n tee "$backup" >/dev/null; sudo -n test -s "$backup"; sudo -n cat "$backup" | sudo -n docker exec -i ${container} sh -c '${ARCHIVE_VERIFY_COMMAND}'`);
       console.log("Production backup created and archive verified");
     }
     if (pending.length) {
