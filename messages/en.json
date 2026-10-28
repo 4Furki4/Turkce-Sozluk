@@ -1681,6 +1681,7 @@
       "sortAZ": "Alphabetical: A–Z",
       "sortZA": "Alphabetical: Z–A",
       "wordsPerPage": "Words per page",
+      "perPage": "Per page",
       "selectWords": "Select words",
       "finishSelection": "Done selecting",
       "selectAll": "Select all words on this page",
