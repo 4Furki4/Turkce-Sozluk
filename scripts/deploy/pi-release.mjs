@@ -16,11 +16,20 @@ export function verifyLedger(rows, entries, hash) {
   return entries.slice(rows.length);
 }
 
-export async function main(env = process.env) {
-  const production = env.GITHUB_REF === "refs/heads/main";
+export function assertContext(env, checkOnly = false) {
+  if (env.GITHUB_REPOSITORY?.toLowerCase() !== "4furki4/turkce-sozluk") throw new Error("Foreign repository refused");
+  if (checkOnly) {
+    if (env.GITHUB_EVENT_NAME !== "workflow_dispatch" || !["production", "development"].includes(env.PI_CHECK_TARGET)) throw new Error("Connectivity checks require a manual dispatch and explicit target");
+  } else if (env.GITHUB_EVENT_NAME !== "push" || !["refs/heads/main", "refs/heads/develop"].includes(env.GITHUB_REF)) {
+    throw new Error("Release requires a source repository branch push");
+  }
+  if (!/^[a-f0-9]{40}$/.test(env.GITHUB_SHA || "") || (!checkOnly && !/^sha256:[a-f0-9]{64}$/.test(env.PUBLISHED_IMAGE_DIGEST || ""))) throw new Error("Invalid release identity");
+}
+
+export async function main(env = process.env, { checkOnly = false } = {}) {
+  assertContext(env, checkOnly);
+  const production = checkOnly ? env.PI_CHECK_TARGET === "production" : env.GITHUB_REF === "refs/heads/main";
   const target = production ? "production" : "development";
-  if (env.GITHUB_EVENT_NAME !== "push" || !["refs/heads/main", "refs/heads/develop"].includes(env.GITHUB_REF) || env.GITHUB_REPOSITORY?.toLowerCase() !== "4furki4/turkce-sozluk") throw new Error("Release requires a source repository branch push");
-  if (!/^[a-f0-9]{40}$/.test(env.GITHUB_SHA || "") || !/^sha256:[a-f0-9]{64}$/.test(env.PUBLISHED_IMAGE_DIGEST || "")) throw new Error("Invalid release identity");
   const host = env.PI_SSH_HOST;
   if (!/^[a-zA-Z0-9_.@-]+$/.test(host || "") || host.startsWith("-")) throw new Error("Invalid SSH destination");
   const sshArgs = ["-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "ConnectTimeout=15"];
@@ -54,12 +63,18 @@ export async function main(env = process.env) {
       try { await sql`SELECT 1`; connected = true; break; } catch { await delay(500); }
     }
     if (!connected) throw new Error("Database tunnel unavailable");
-    await sql`SELECT pg_advisory_lock(7192170055)`;
+    if (!checkOnly) await sql`SELECT pg_advisory_lock(7192170055)`;
     const entries = JSON.parse(readFileSync("drizzle/migrations/meta/_journal.json", "utf8")).entries;
     const hash = tag => createHash("sha256").update(readFileSync(`drizzle/migrations/${tag}.sql`)).digest("hex");
     const ledger = () => sql`SELECT hash, created_at FROM drizzle.__drizzle_migrations ORDER BY created_at, id`;
     const pending = verifyLedger(await ledger(), entries, hash);
     console.log(`${target}: ${pending.length} pending migrations`);
+    if (checkOnly) {
+      const health = JSON.parse(ssh(`curl -fsS http://127.0.0.1:${production ? 3000 : 3002}/api/health`));
+      if (health.status !== "ok" || health.checks?.app !== "ok" || health.checks?.database !== "ok") throw new Error("Application/database health check failed");
+      console.log(`${target}: SSH, direct database tunnel, migration ledger and application health verified; no migrations or deployments performed`);
+      return;
+    }
     current();
     if (production && pending.length) {
       const developmentLedger = ssh(`sudo -n docker exec turkish-dictionary-db-development sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" psql -h 127.0.0.1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Atc "SELECT hash || chr(124) || created_at FROM drizzle.__drizzle_migrations ORDER BY created_at,id"'`);
@@ -102,5 +117,5 @@ export async function main(env = process.env) {
   }
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  main().catch(() => { console.error("Pi release failed. Check private host state and migration ledger before retrying; credentials and database errors are suppressed."); process.exitCode = 1; });
+  main(process.env, { checkOnly: process.argv.includes("--check") }).catch(() => { console.error("Pi release failed. Check private host state and migration ledger before retrying; credentials and database errors are suppressed."); process.exitCode = 1; });
 }

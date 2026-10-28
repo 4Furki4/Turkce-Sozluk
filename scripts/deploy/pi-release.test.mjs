@@ -23,3 +23,14 @@ test("non-push events, foreign repositories and invalid releases cannot access S
     await expect(main({ ...env, ...override })).rejects.toThrow();
   }
 });
+
+test("manual connectivity checks require the source repo and explicit database target", async () => {
+  const { assertContext } = await import("./pi-release.mjs");
+  const env = { GITHUB_EVENT_NAME: "workflow_dispatch", GITHUB_REF: "refs/heads/feature", GITHUB_REPOSITORY: "4Furki4/Turkce-Sozluk", GITHUB_SHA: "a".repeat(40), PI_CHECK_TARGET: "production" };
+  expect(() => assertContext(env, true)).not.toThrow();
+  expect(() => assertContext({ ...env, PI_CHECK_TARGET: "development" }, true)).not.toThrow();
+  for (const override of [{ GITHUB_EVENT_NAME: "push" }, { GITHUB_EVENT_NAME: "pull_request" }, { GITHUB_REPOSITORY: "fork/repo" }, { PI_CHECK_TARGET: "" }, { PI_CHECK_TARGET: "other" }]) {
+    expect(() => assertContext({ ...env, ...override }, true)).toThrow();
+  }
+  expect(() => assertContext(env)).toThrow();
+});

@@ -6,6 +6,11 @@ on:
   push:
     branches: [main, develop]
   workflow_dispatch:
+    inputs:
+      check_pi:
+        description: "Check private Pi access without migrating or deploying"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -19,7 +24,44 @@ env:
   NEXT_TELEMETRY_DISABLED: "1"
 
 jobs:
+  pi_connectivity:
+    name: Check Pi access (${{ matrix.target }})
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.check_pi && github.repository == '4Furki4/Turkce-Sozluk' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [development, production]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.2"
+      - run: bun install --frozen-lockfile
+      - uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.PI_TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.PI_TS_OAUTH_SECRET }}
+          tags: tag:dictionary-ci
+      - name: Configure verified SSH identity
+        env:
+          SSH_KEY: ${{ secrets.PI_RELEASE_SSH_KEY }}
+          KNOWN_HOSTS: ${{ vars.PI_RELEASE_KNOWN_HOSTS }}
+        run: |
+          test -n "$SSH_KEY" && test -n "$KNOWN_HOSTS"
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Check database and application without changes
+        env:
+          PI_SSH_HOST: ${{ vars.PI_RELEASE_SSH_HOST }}
+          PI_CHECK_TARGET: ${{ matrix.target }}
+        run: node scripts/deploy/pi-release.mjs --check
+
   lint:
+    if: ${{ !inputs.check_pi }}
     name: Lint
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -56,6 +98,7 @@ jobs:
         run: bun run lint
 
   unit:
+    if: ${{ !inputs.check_pi }}
     name: Unit tests
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -113,6 +156,7 @@ jobs:
           retention-days: 7
 
   build_browser:
+    if: ${{ !inputs.check_pi }}
     name: Production build and browser tests
     runs-on: ubuntu-24.04
     # Includes three repetitions of each desktop/mobile journey.
@@ -189,7 +233,7 @@ jobs:
   ci_passed:
     name: CI passed
     needs: [lint, unit, build_browser]
-    if: always()
+    if: ${{ always() && !inputs.check_pi }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
