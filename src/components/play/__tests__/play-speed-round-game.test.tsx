@@ -3,6 +3,18 @@ import type { ReactNode } from "react";
 
 jest.mock("@/src/trpc/react", () => ({
     api: {
+        useUtils: jest.fn(() => ({
+            user: {
+                getSavedWords: { invalidate: jest.fn() },
+                getSavedWordCount: { invalidate: jest.fn() },
+                getSavedWordCollections: { invalidate: jest.fn() },
+                getWordSaveStatus: { invalidate: jest.fn() },
+            },
+            game: {
+                getFlashcardReviewSummary: { invalidate: jest.fn() },
+                getDueFlashcardReviews: { invalidate: jest.fn() },
+            },
+        })),
         game: {
             getWordsForSpeedRound: { useQuery: jest.fn() },
             startSpeedRoundSession: { useMutation: jest.fn() },

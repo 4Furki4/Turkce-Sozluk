@@ -1,5 +1,5 @@
-import NavigationLoading from "@/src/components/customs/navigation-loading";
+import SavedWordLibraryLoading from "@/src/components/customs/saved-word-library-loading";
 
 export default function Loading() {
-  return <NavigationLoading route="/saved-words" />;
+  return <SavedWordLibraryLoading />;
 }

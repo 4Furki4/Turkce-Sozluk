@@ -13,6 +13,7 @@ jest.mock("@/src/trpc/server", () => ({
             getRandomWordsForFlashcards: { prefetch: jest.fn() },
             getFlashcardReviewSummary: { prefetch: jest.fn() },
         },
+        user: { getSavedWordCollections: { prefetch: jest.fn() } },
     },
     HydrateClient: ({ children }: { children: React.ReactNode }) => children,
 }));
@@ -27,6 +28,7 @@ const { api: mockApi } = jest.requireMock("@/src/trpc/server") as {
             getRandomWordsForFlashcards: { prefetch: jest.Mock };
             getFlashcardReviewSummary: { prefetch: jest.Mock };
         };
+        user: { getSavedWordCollections: { prefetch: jest.Mock } };
     };
 };
 const { headers: mockHeaders } = jest.requireMock("next/headers") as { headers: jest.Mock };
@@ -42,6 +44,8 @@ describe("PlayFlashcardRoute", () => {
         mockHeaders.mockResolvedValue(new Headers());
         mockGetSession.mockResolvedValue({ user: { id: "learner-1" } });
         mockPracticePrefetch.mockResolvedValue(undefined);
+        mockReviewSummaryPrefetch.mockResolvedValue(undefined);
+        mockApi.user.getSavedWordCollections.prefetch.mockResolvedValue(undefined);
     });
 
     it("settles the signed-in review prefetch before hydrating the client", async () => {
@@ -60,5 +64,35 @@ describe("PlayFlashcardRoute", () => {
 
         settleReviewPrefetch?.();
         await expect(route).resolves.toBeDefined();
+    });
+
+    it("prefetches the same saved collection scope passed to the client", async () => {
+        const collectionId = "50000000-0000-4000-8000-000000000001";
+        const route = await PlayFlashcardRoute({
+            params: Promise.resolve({ locale: "en" }),
+            searchParams: Promise.resolve({ source: "saved", collectionId }),
+        });
+        expect(mockPracticePrefetch).toHaveBeenCalledWith({ count: 10, source: "saved", collectionId });
+        expect(mockReviewSummaryPrefetch).toHaveBeenCalledWith({ source: "saved", collectionId });
+        expect(mockApi.user.getSavedWordCollections.prefetch).toHaveBeenCalledTimes(1);
+        const game = route.props.children[1];
+        expect(game.props).toMatchObject({ initialSource: "saved", initialCollectionId: collectionId, initialCollectionInvalid: false });
+    });
+
+    it("never prefetches a broader deck for an invalid collection link", async () => {
+        const route = await PlayFlashcardRoute({
+            params: Promise.resolve({ locale: "tr" }),
+            searchParams: Promise.resolve({ collectionId: "invalid" }),
+        });
+        expect(mockPracticePrefetch).not.toHaveBeenCalled();
+        expect(mockReviewSummaryPrefetch).not.toHaveBeenCalled();
+        expect(route.props.children[1].props).toMatchObject({ initialSource: "saved", initialCollectionInvalid: true });
+    });
+
+    it("does not prefetch private saved decks for guests", async () => {
+        mockGetSession.mockResolvedValue(null);
+        await PlayFlashcardRoute({ params: Promise.resolve({ locale: "en" }), searchParams: Promise.resolve({ source: "saved" }) });
+        expect(mockPracticePrefetch).not.toHaveBeenCalled();
+        expect(mockReviewSummaryPrefetch).not.toHaveBeenCalled();
     });
 });

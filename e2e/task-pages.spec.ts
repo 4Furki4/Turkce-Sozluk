@@ -173,15 +173,52 @@ for (const locale of ["en", "tr"] as const) {
     await page.getByRole("option", { name: wordName, exact: true }).first().click();
     await input.press("Tab");
     await expect(input).toHaveValue(wordName);
+    await expect(input).toHaveAttribute("aria-expanded", "false");
+    await expect(page.getByRole("listbox")).toHaveCount(0);
     await input.fill(replacementName.slice(0, -6));
     await expect(page.locator('main a[id^="task-link-"]')).toHaveCount(0);
     await page.getByRole("option", { name: replacementName, exact: true }).click();
     await input.press("Tab");
     await expect(input).toHaveValue(replacementName);
+    await expect(input).toHaveAttribute("aria-expanded", "false");
+    await expect(page.getByRole("listbox")).toHaveCount(0);
     await page.getByRole("link", { name: messages.TaskPage.pronunciation, exact: true }).last().click();
     await expect(page).toHaveURL(new RegExp(`${contribution}/\\d+/${locale === "en" ? "pronunciations/new" : "telaffuzlar/yeni"}\\?`));
     await expect(page.getByRole("button", { name: messages.TaskPage.discard, exact: true })).toHaveCount(0);
     await expect(page.locator("[data-task-back]")).toHaveAttribute("href", chooser);
+  });
+
+  test(`${locale}: committing a word removes its popup before Save`, async ({ page }, testInfo) => {
+    const path = locale === "en" ? "dashboard/daily-words" : "panel/gundelik-kelimeler";
+    try {
+      await page.goto(`/${locale}/${path}/${dailyId}/${editSuffix}`);
+      const input = page.getByRole("combobox", { name: messages.Dashboard.DailyWords.word + "*", exact: true });
+      await expect(input).toHaveValue(wordName);
+      await input.fill(replacementName.slice(0, -6));
+      const option = page.getByRole("option", { name: replacementName, exact: true });
+      await expect(option).toBeVisible();
+      if (testInfo.project.name === "mobile") {
+        const session = await page.context().newCDPSession(page);
+        await session.send("Emulation.setCPUThrottlingRate", { rate: 4 });
+        await option.tap();
+      } else {
+        await input.press("ArrowDown");
+        await expect(input).toHaveAttribute("aria-activedescendant", (await option.getAttribute("id"))!);
+        await input.press("Enter");
+      }
+      await expect(input).toHaveValue(replacementName);
+      await expect(input).toHaveAttribute("aria-expanded", "false");
+      // A collapsed input must not leave a portal intercepting the next action.
+      await expect(page.getByRole("listbox")).toHaveCount(0);
+
+      const save = page.getByRole("button", { name: messages.Dashboard.DailyWords.save, exact: true });
+      await save.scrollIntoViewIfNeeded();
+      if (testInfo.repeatEachIndex === 0) await page.screenshot({ path: testInfo.outputPath("picker-committed.png") });
+      await save.click();
+      await expect.poll(async () => (await db.query("SELECT word_id FROM daily_words WHERE id=$1", [dailyId])).rows[0]?.word_id).toBe(replacementWordId);
+    } finally {
+      await db.query("UPDATE daily_words SET word_id=$1 WHERE id=$2", [wordId, dailyId]);
+    }
   });
 
   for (const family of ["daily-words", "misspellings", "galatimeshur"] as const) {
@@ -207,6 +244,8 @@ for (const locale of ["en", "tr"] as const) {
       await page.getByRole("option", { name: replacementName, exact: true }).click();
       await input.press("Tab");
       await expect(input).toHaveValue(replacementName);
+      await expect(input).toHaveAttribute("aria-expanded", "false");
+      await expect(page.getByRole("listbox")).toHaveCount(0);
       await page.getByRole("button", { name: config.save, exact: true }).click();
       await expect.poll(async () => (await db.query(`SELECT ${config.column} AS id FROM ${config.table} WHERE id=$1`, [config.id])).rows[0]?.id).toBe(replacementWordId);
       expect(mutations).toHaveLength(1);

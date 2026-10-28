@@ -120,11 +120,22 @@ function ChoiceButton({
 
 function ReviewItem({ question, result, session }: { question: Question; result: AnswerResult | undefined; session: Session | null }) {
     const play = useTranslations("Play.speedRound");
+    const utils = api.useUtils();
     const [isSaved, setIsSaved] = useState(false);
     const saveWordMutation = api.user.saveWord.useMutation({
         onMutate: () => setIsSaved((current) => !current),
         onError: () => setIsSaved((current) => !current),
-        onSuccess: (saved) => setIsSaved(saved),
+        onSuccess: (saved, { wordId }) => {
+            setIsSaved(saved);
+            return Promise.all([
+                utils.user.getSavedWords.invalidate(),
+                utils.user.getSavedWordCount.invalidate(),
+                utils.user.getSavedWordCollections.invalidate(),
+                utils.user.getWordSaveStatus.invalidate(wordId),
+                utils.game.getFlashcardReviewSummary.invalidate(),
+                utils.game.getDueFlashcardReviews.invalidate(),
+            ]);
+        },
     });
 
     return (

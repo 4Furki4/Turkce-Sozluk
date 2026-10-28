@@ -132,6 +132,13 @@ function ReviewPairItem({ pair, session }: { pair: ReviewPair; session: Session 
         },
         onSuccess: (saved, { wordId }) => {
             utils.user.getWordSaveStatus.setData(wordId, saved);
+            return Promise.all([
+                utils.user.getSavedWords.invalidate(),
+                utils.user.getSavedWordCount.invalidate(),
+                utils.user.getSavedWordCollections.invalidate(),
+                utils.game.getFlashcardReviewSummary.invalidate(),
+                utils.game.getDueFlashcardReviews.invalidate(),
+            ]);
         },
         onSettled: (_saved, _error, { wordId }) => {
             setIsSaveRequested(false);

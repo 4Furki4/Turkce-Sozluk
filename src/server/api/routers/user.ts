@@ -1,8 +1,11 @@
-import { count, eq, sql, desc } from "drizzle-orm";
+import { count, eq, sql, desc, inArray, ilike, exists } from "drizzle-orm";
 import { adminProcedure, createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod";
 import { SavedWordsResult } from "@/types";
 import { savedWords } from "@/db/schema/saved_words";
+import { savedWordCollections, savedWordCollectionMembers } from "@/db/schema/saved_word_collections";
+import { roots } from "@/db/schema/roots";
+import { languages } from "@/db/schema/languages";
 import { rolesEnum, users } from "@/db/schema/users";
 import { TRPCError } from "@trpc/server";
 import { userSearchHistory } from "@/db/schema/user_search_history";
@@ -50,102 +53,158 @@ export const userRouter = createTRPCRouter({
             }
         }),
     getSavedWords: protectedProcedure.input(z.object({
-        search: z.string().optional().default(""),
+        search: z.string().max(255).optional().default(""),
         sortAlphabet: z.enum(["az", "za"]).default("az"),
         sortDate: z.enum(["dateAsc", "dateDesc"]).default("dateAsc"),
         sortBy: z.enum(["alphabet", "date"]).default("date"),
-        take: z.number().optional().default(10),
-        skip: z.number().optional().default(0),
-    })).query(async ({ ctx: { session, db }, input: { search, sortAlphabet, sortDate, sortBy, take, skip } }) => {
-        const alphabetOrder =
-            sortAlphabet === "az"
-                ? sql`w.name ASC`
-                : sortAlphabet === "za"
-                    ? sql`w.name DESC`
-                    : sql``;
-        const dateOrder =
-            sortDate === "dateAsc"
-                ? sql`sw."createdAt" ASC`
-                : sortDate === "dateDesc"
-                    ? sql`sw."createdAt" DESC`
-                    : sql``;
-        const primaryOrder = sortBy === "alphabet" ? alphabetOrder : dateOrder;
-        const secondaryOrder = sortBy === "alphabet" ? dateOrder : alphabetOrder;
-        const searchClause = search ? sql`AND w.name ILIKE ${'%' + search + '%'}` : sql``;
-        const userWithSavedWords = (await db.execute(sql`
-    SELECT
-    JSON_BUILD_OBJECT(
-      'word_id',
-      w.id,
-      'word_name',
-      w.name,
-      'saved_at',
-      sw."createdAt",
-      'attributes',
-      (
-        SELECT
-          JSON_AGG(
-            JSON_BUILD_OBJECT(
-              'attribute_id',
-              w_a.id,
-              'attribute',
-              w_a.attribute
-            )
-          )
-        FROM
-          words_attributes ws_a
-          JOIN word_attributes w_a ON ws_a.attribute_id = w_a.id
-        WHERE
-          ws_a.word_id = w.id
-      ),
-      'root',
-      JSON_BUILD_OBJECT('root', r.root, 'language', l.language_en),
-      'meaning',
-      (
-        SELECT m.meaning
-        FROM meanings m
-        WHERE m.word_id = w.id
-        ORDER BY m."order" ASC
-        LIMIT 1
-      )
-    ) AS word_data
-  FROM
-    users u
-    INNER JOIN saved_words sw ON u.id = sw.user_id
-    LEFT JOIN words w ON sw.word_id = w.id
-    LEFT JOIN roots r ON r.word_id = w.id
-    LEFT JOIN languages l ON r.language_id::integer = l.id
-  WHERE
-    u.id = ${session.user.id} 
-    ${searchClause}
-    GROUP BY
-    w.id,
-    w.name,
-    r.root,
-    l.language_en,
-    sw."createdAt" 
-    ORDER BY
-    ${primaryOrder},
-    ${secondaryOrder}
-    LIMIT ${take}
-    OFFSET ${skip};
-    `)) as SavedWordsResult[];
-
-        return userWithSavedWords.length > 0 ? userWithSavedWords : [];
+        take: z.number().int().min(1).max(100).optional().default(10),
+        skip: z.number().int().nonnegative().optional().default(0),
+        collectionId: z.string().uuid().optional(),
+    })).query(async ({ ctx: { session, db }, input }) => {
+        const { search, sortAlphabet, sortDate, sortBy, take, skip, collectionId } = input;
+        const alphabetOrder = sortAlphabet === "az" ? asc(words.name) : desc(words.name);
+        const dateOrder = sortDate === "dateAsc" ? asc(savedWords.createdAt) : desc(savedWords.createdAt);
+        const collectionFilter = collectionId ? exists(db.select({ id: savedWordCollectionMembers.wordId })
+            .from(savedWordCollectionMembers)
+            .where(and(
+                eq(savedWordCollectionMembers.collectionId, collectionId),
+                eq(savedWordCollectionMembers.userId, session.user.id),
+                eq(savedWordCollectionMembers.wordId, savedWords.wordId),
+            ))) : undefined;
+        // Correlated projections keep one row per saved word, even when a word
+        // has several roots, meanings, attributes, or collection memberships.
+        return db.select({
+            word_data: sql<SavedWordsResult["word_data"] & { collections: { id: string; name: string }[] }>`json_build_object(
+                'word_id', ${words.id},
+                'word_name', ${words.name},
+                'saved_at', ${savedWords.createdAt},
+                'attributes', (SELECT json_agg(json_build_object('attribute_id', wa.id, 'attribute', wa.attribute))
+                    FROM words_attributes wsa JOIN word_attributes wa ON wsa.attribute_id = wa.id WHERE wsa.word_id = ${words.id}),
+                'root', COALESCE((SELECT json_build_object('root', ${roots.root}, 'language', ${languages.language_en})
+                    FROM ${roots} LEFT JOIN ${languages} ON ${roots.languageId} = ${languages.id}
+                    WHERE ${roots.wordId} = ${words.id} ORDER BY ${roots.id} LIMIT 1), '{"root":null,"language":null}'::json),
+                'meaning', (SELECT meaning FROM ${meanings} WHERE ${meanings.wordId} = ${words.id} ORDER BY ${meanings.order}, ${meanings.id} LIMIT 1),
+                'collections', COALESCE((SELECT json_agg(json_build_object('id', c.id, 'name', c.name) ORDER BY c.name, c.id)
+                    FROM saved_word_collection_members cm JOIN saved_word_collections c ON c.id = cm.collection_id AND c.user_id = cm.user_id
+                    WHERE cm.user_id = ${session.user.id} AND cm.word_id = ${words.id}), '[]'::json)
+            )`,
+        }).from(savedWords).innerJoin(words, eq(savedWords.wordId, words.id))
+            .where(and(eq(savedWords.userId, session.user.id), search ? ilike(words.name, `%${search}%`) : undefined, collectionFilter))
+            .orderBy(...(sortBy === "alphabet" ? [alphabetOrder, dateOrder] : [dateOrder, alphabetOrder]), asc(words.id))
+            .limit(take).offset(skip);
     }),
     getSavedWordCount: protectedProcedure.input(z.object({
-        search: z.string().optional().default(""),
-    })).query(async ({ ctx: { session, db }, input: { search } }) => {
-        const searchClause = search ? sql`AND w.name ILIKE ${'%' + search + '%'}` : sql``;
-        const result = await db.execute(sql`
-      SELECT COUNT(*) AS count
-      FROM saved_words sw
-      JOIN words w ON sw.word_id = w.id
-      WHERE sw.user_id = ${session.user.id}
-      ${searchClause};
-    `) as { count: number }[];
-        return Number(result[0]?.count ?? 0);
+        search: z.string().max(255).optional().default(""),
+        collectionId: z.string().uuid().optional(),
+    })).query(async ({ ctx: { session, db }, input: { search, collectionId } }) => {
+        const collectionFilter = collectionId ? exists(db.select({ id: savedWordCollectionMembers.wordId })
+            .from(savedWordCollectionMembers).where(and(
+                eq(savedWordCollectionMembers.collectionId, collectionId),
+                eq(savedWordCollectionMembers.userId, session.user.id),
+                eq(savedWordCollectionMembers.wordId, savedWords.wordId),
+            ))) : undefined;
+        const [result] = await db.select({ count: count() }).from(savedWords)
+            .innerJoin(words, eq(savedWords.wordId, words.id))
+            .where(and(eq(savedWords.userId, session.user.id), search ? ilike(words.name, `%${search}%`) : undefined, collectionFilter));
+        return result?.count ?? 0;
     }),
+    getSavedWordCollections: protectedProcedure.query(async ({ ctx: { session, db } }) => {
+        return db.select({ id: savedWordCollections.id, name: savedWordCollections.name, wordCount: count(savedWordCollectionMembers.wordId) })
+            .from(savedWordCollections)
+            .leftJoin(savedWordCollectionMembers, and(
+                eq(savedWordCollectionMembers.collectionId, savedWordCollections.id),
+                eq(savedWordCollectionMembers.userId, session.user.id),
+            ))
+            .where(eq(savedWordCollections.userId, session.user.id))
+            .groupBy(savedWordCollections.id)
+            .orderBy(asc(savedWordCollections.name), asc(savedWordCollections.id));
+    }),
+    createSavedWordCollection: protectedProcedure.input(z.object({ name: z.string().trim().min(1).max(80) }))
+        .mutation(async ({ ctx: { session, db }, input }) => {
+            const [collection] = await db.insert(savedWordCollections).values({ userId: session.user.id, name: input.name })
+                .onConflictDoNothing().returning({ id: savedWordCollections.id, name: savedWordCollections.name });
+            if (!collection) throw new TRPCError({ code: "CONFLICT", message: "A collection with this name already exists." });
+            return collection;
+        }),
+    renameSavedWordCollection: protectedProcedure.input(z.object({ collectionId: z.string().uuid(), name: z.string().trim().min(1).max(80) }))
+        .mutation(async ({ ctx: { session, db }, input }) => {
+            try {
+                const [collection] = await db.update(savedWordCollections).set({ name: input.name })
+                    .where(and(eq(savedWordCollections.id, input.collectionId), eq(savedWordCollections.userId, session.user.id)))
+                    .returning({ id: savedWordCollections.id, name: savedWordCollections.name });
+                if (!collection) throw new TRPCError({ code: "NOT_FOUND", message: "Collection not found." });
+                return collection;
+            } catch (error) {
+                if (error && typeof error === "object" && ("code" in error && error.code === "23505" || "cause" in error && typeof error.cause === "object" && error.cause && "code" in error.cause && error.cause.code === "23505")) {
+                    throw new TRPCError({ code: "CONFLICT", message: "A collection with this name already exists." });
+                }
+                throw error;
+            }
+        }),
+    deleteSavedWordCollection: protectedProcedure.input(z.object({ collectionId: z.string().uuid() }))
+        .mutation(async ({ ctx: { session, db }, input }) => {
+            const removed = await db.delete(savedWordCollections)
+                .where(and(eq(savedWordCollections.id, input.collectionId), eq(savedWordCollections.userId, session.user.id)))
+                .returning({ id: savedWordCollections.id });
+            if (!removed.length) throw new TRPCError({ code: "NOT_FOUND", message: "Collection not found." });
+            return { success: true };
+        }),
+    updateSavedWordCollection: protectedProcedure.input(z.object({
+        collectionId: z.string().uuid(),
+        wordIds: z.array(z.number().int().positive()).min(1).max(100),
+        action: z.enum(["add", "remove"]),
+    })).mutation(async ({ ctx: { session, db }, input }) => db.transaction(async (tx) => {
+        const [collection] = await tx.select({ id: savedWordCollections.id }).from(savedWordCollections)
+            .where(and(eq(savedWordCollections.id, input.collectionId), eq(savedWordCollections.userId, session.user.id)))
+            .for("update");
+        if (!collection) throw new TRPCError({ code: "NOT_FOUND", message: "Collection not found." });
+        const wordIds = [...new Set(input.wordIds)];
+        let changed: { wordId: number }[];
+        if (input.action === "remove") {
+            changed = await tx.delete(savedWordCollectionMembers).where(and(
+                eq(savedWordCollectionMembers.collectionId, input.collectionId), eq(savedWordCollectionMembers.userId, session.user.id),
+                inArray(savedWordCollectionMembers.wordId, wordIds),
+            )).returning({ wordId: savedWordCollectionMembers.wordId });
+        } else {
+            const ownedWords = await tx.select({ wordId: savedWords.wordId }).from(savedWords)
+                .where(and(eq(savedWords.userId, session.user.id), inArray(savedWords.wordId, wordIds))).for("key share");
+            if (ownedWords.length !== wordIds.length) throw new TRPCError({ code: "BAD_REQUEST", message: "Only saved words can be added to a collection." });
+            changed = await tx.insert(savedWordCollectionMembers).values(wordIds.map((wordId) => ({ collectionId: input.collectionId, userId: session.user.id, wordId })))
+                .onConflictDoNothing().returning({ wordId: savedWordCollectionMembers.wordId });
+        }
+        return { success: true, wordIds: changed.map((member) => member.wordId) };
+    })),
+    setWordSaved: protectedProcedure.input(z.object({ wordId: z.number().int().positive(), saved: z.boolean() }))
+        .mutation(async ({ ctx: { session, db }, input }) => db.transaction(async (tx) => {
+            if (input.saved) {
+                await tx.insert(savedWords).values({ userId: session.user.id, wordId: input.wordId }).onConflictDoNothing();
+                return { saved: true, snapshot: undefined };
+            }
+            const [saved] = await tx.select({ savedAt: savedWords.createdAt }).from(savedWords)
+                .where(and(eq(savedWords.userId, session.user.id), eq(savedWords.wordId, input.wordId))).for("update");
+            if (!saved) return { saved: false, snapshot: undefined };
+            const memberships = await tx.select({ collectionId: savedWordCollectionMembers.collectionId }).from(savedWordCollectionMembers)
+                .where(and(eq(savedWordCollectionMembers.userId, session.user.id), eq(savedWordCollectionMembers.wordId, input.wordId)));
+            await tx.delete(savedWords).where(and(eq(savedWords.userId, session.user.id), eq(savedWords.wordId, input.wordId)));
+            return { saved: false, snapshot: { savedAt: saved.savedAt, collectionIds: memberships.map((member) => member.collectionId) } };
+        })),
+    restoreSavedWord: protectedProcedure.input(z.object({
+        wordId: z.number().int().positive(),
+        savedAt: z.string().max(64).refine((value) => Number.isFinite(Date.parse(value)), "Invalid saved date."),
+        collectionIds: z.array(z.string().uuid()),
+    })).mutation(async ({ ctx: { session, db }, input }) => db.transaction(async (tx) => {
+        const collectionIds = [...new Set(input.collectionIds)];
+        // Lock surviving owned collections so a concurrent deletion cannot race
+        // membership restoration. Deleted or foreign collections are ignored.
+        const ownedCollections = collectionIds.length ? await tx.select({ id: savedWordCollections.id }).from(savedWordCollections)
+            .where(and(eq(savedWordCollections.userId, session.user.id), inArray(savedWordCollections.id, collectionIds))).for("key share") : [];
+        await tx.insert(savedWords).values({ userId: session.user.id, wordId: input.wordId, createdAt: input.savedAt }).onConflictDoNothing();
+        if (ownedCollections.length) {
+            await tx.insert(savedWordCollectionMembers).values(ownedCollections.map(({ id }) => ({ collectionId: id, userId: session.user.id, wordId: input.wordId })))
+                .onConflictDoNothing();
+        }
+        return { saved: true };
+    })),
     getWordSaveStatus: protectedProcedure
         .input(z.number())
         .query(async ({ input, ctx: { session, db } }) => {
@@ -169,23 +228,14 @@ export const userRouter = createTRPCRouter({
      * Save a word to user's saved word list
      */
     saveWord: protectedProcedure
-        .input(
-            z.object({
-                wordId: z.number(),
-            })
-        )
-        .mutation(async ({ input, ctx: { session, db } }) => {
-            try {
-                const savedWord = await db.insert(savedWords).values({
-                    userId: session.user.id,
-                    wordId: input.wordId,
-                }).returning().execute()
-            } catch (error) {
-                await db.delete(savedWords).where(sql`user_id = ${session.user.id} AND word_id = ${input.wordId}`).execute()
-                return false
-            }
-            return true
-        }),
+        .input(z.object({ wordId: z.number().int().positive() }))
+        .mutation(async ({ input, ctx: { session, db } }) => db.transaction(async (tx) => {
+            const inserted = await tx.insert(savedWords).values({ userId: session.user.id, wordId: input.wordId })
+                .onConflictDoNothing().returning({ wordId: savedWords.wordId });
+            if (inserted.length) return true;
+            await tx.delete(savedWords).where(and(eq(savedWords.userId, session.user.id), eq(savedWords.wordId, input.wordId)));
+            return false;
+        })),
     getUsers: adminProcedure.input(
         z.object({
             take: z.number().optional().default(5),

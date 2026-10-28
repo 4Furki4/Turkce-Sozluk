@@ -26,6 +26,7 @@ import { languages } from "@/db/schema/languages";
 import { wordAttributes } from "@/db/schema/word_attributes";
 import { readPublicDictionary } from "@/src/server/dictionary-cache";
 import { readWord } from "@/src/server/word-cache";
+import { findWordDataById } from "@/src/server/word-queries";
 import { scheduleSearchLog } from "@/src/server/search-logging";
 
 export const wordRouter = createTRPCRouter({
@@ -216,12 +217,15 @@ export const wordRouter = createTRPCRouter({
           required_error: "Word is required to get a word",
         }),
         skipLogging: z.boolean().optional().default(false),
+        wordId: z.number().int().positive().optional(),
       })
     )
     .query(async ({ input, ctx: { db, session } }) => {
       const purifiedName = DOMPurify.sanitize(input.name);
 
-      const result = await readWord(db, purifiedName);
+      const result = input.wordId === undefined
+        ? await readWord(db, purifiedName)
+        : await findWordDataById(db, input.wordId);
       const wordId = result[0]?.word_data?.word_id;
       if (!input.skipLogging && wordId) {
         scheduleSearchLog({ wordId, userId: session?.user?.id ?? null });

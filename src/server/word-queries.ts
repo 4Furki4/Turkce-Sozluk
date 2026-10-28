@@ -1,13 +1,22 @@
-import { sql } from "drizzle-orm";
+import { sql, type SQL } from "drizzle-orm";
 import type { db as database } from "@/db";
 import type { WordSearchResult } from "@/types";
 import { NAVIGATION_MEANING_LIKE_PATTERN } from "@/src/lib/word-indexability";
 
 /** Pure public read; request/session effects are handled by the caller. */
 export async function findWordDataByName(db: typeof database, purifiedName: string): Promise<WordSearchResult[]> {
+  return findWordData(db, sql`name ILIKE ${purifiedName}`, purifiedName);
+}
+
+/** Exact identity for previews of homographs; never substitute a different variant. */
+export async function findWordDataById(db: typeof database, wordId: number): Promise<WordSearchResult[]> {
+  return findWordData(db, sql`id = ${wordId}`, "");
+}
+
+async function findWordData(db: typeof database, candidateFilter: SQL, purifiedName: string): Promise<WordSearchResult[]> {
       const result = await db.execute(sql`
         WITH candidates AS MATERIALIZED (
-          SELECT * FROM words WHERE name ILIKE ${purifiedName}
+          SELECT * FROM words WHERE ${candidateFilter}
         ), base_word AS (
           SELECT w.id, w.name, w.phonetic, w.prefix, w.suffix, w.view_count, w.updated_at
           FROM candidates w

@@ -12,6 +12,7 @@ import { searchGapReviews } from "./schema/search_gap_reviews";
 import { adminAuditEvents, adminAuditCoverage } from "./schema/admin_audit";
 import { roots, rootsRelations } from "./schema/roots";
 import { savedWords } from "./schema/saved_words";
+import { savedWordCollections, savedWordCollectionMembers } from "./schema/saved_word_collections";
 import { meanings, meaningsRelations } from "./schema/meanings";
 import { examples, examplesRelations } from "./schema/examples";
 import { authors, authorsRelations } from "./schema/authors";
@@ -73,6 +74,8 @@ export const schema = {
   roots,
   rootsRelations,
   savedWords,
+  savedWordCollections,
+  savedWordCollectionMembers,
   meanings,
   meaningsRelations,
   examples,

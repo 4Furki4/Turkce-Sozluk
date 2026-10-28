@@ -2,6 +2,7 @@
 
 import type { Session } from "@/src/lib/auth-client";
 import { shuffleArray } from "@/src/lib/game";
+import { Link } from "@/src/i18n/routing";
 import { api } from "@/src/trpc/react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Check, ChevronLeft, ChevronRight, Clock3, RotateCcw, Shuffle, Sparkles } from "lucide-react";
@@ -12,6 +13,9 @@ import styles from "./play-flashcard-game.module.css";
 interface PlayFlashcardGameProps {
     session: Session | null;
     locale: "en" | "tr";
+    initialSource?: "all" | "saved";
+    initialCollectionId?: string;
+    initialCollectionInvalid?: boolean;
 }
 
 type FlashcardDirection = "word" | "meaning";
@@ -66,13 +70,19 @@ async function retryIdempotentAction<T>(request: () => Promise<T>): Promise<T> {
     }
 }
 
-export default function PlayFlashcardGame({ session, locale }: PlayFlashcardGameProps) {
+export default function PlayFlashcardGame({
+    session, locale, initialSource = "all", initialCollectionId, initialCollectionInvalid = false,
+}: PlayFlashcardGameProps) {
     const t = useTranslations("FlashcardGame");
     const play = useTranslations("Play.flashcards");
     const shouldReduceMotion = useReducedMotion();
     const utils = api.useUtils();
+    const [ready, setReady] = useState(false);
+    useEffect(() => { setReady(true); }, []);
     const [cardCount, setCardCount] = useState(10);
-    const [source, setSource] = useState<"all" | "saved">("all");
+    const [source, setSource] = useState<"all" | "saved">(initialCollectionId || initialCollectionInvalid ? "saved" : initialSource);
+    const [collectionId, setCollectionId] = useState(initialCollectionId);
+    const [collectionInvalid, setCollectionInvalid] = useState(initialCollectionInvalid);
     const [defaultSide, setDefaultSide] = useState<FlashcardDirection>("word");
     const [gameState, setGameState] = useState<GameState>("setup");
     const [deckMode, setDeckMode] = useState<DeckMode>("practice");
@@ -91,19 +101,59 @@ export default function PlayFlashcardGame({ session, locale }: PlayFlashcardGame
     const roundGenerationRef = useRef(0);
 
     const isSignedIn = Boolean(session?.user?.id);
+    const collections = api.user.getSavedWordCollections.useQuery(undefined, {
+        enabled: isSignedIn && Boolean(collectionId),
+        retry: false,
+    });
+    const activeCollection = collections.data?.find((collection) => collection.id === collectionId);
+    const collectionLoading = Boolean(collectionId) && collections.isLoading;
+    const collectionUnavailable = collectionInvalid || Boolean(collectionId && (
+        !isSignedIn || collections.isError || (!collections.isLoading && !activeCollection)
+    ));
+    const validPracticeScope = !collectionLoading && !collectionUnavailable && (source !== "saved" || isSignedIn);
+    const canPractice = ready && validPracticeScope;
+    const reviewInput = source === "saved" ? { source: "saved" as const, collectionId } : undefined;
     const { refetch: loadPracticeDeck } = api.game.getRandomWordsForFlashcards.useQuery(
-        { count: cardCount, source },
+        { count: cardCount, source, collectionId },
         { enabled: false },
     );
-    const reviewSummary = api.game.getFlashcardReviewSummary.useQuery(undefined, {
-        enabled: isSignedIn,
+    const reviewSummary = api.game.getFlashcardReviewSummary.useQuery(reviewInput, {
+        enabled: isSignedIn && !collectionUnavailable && !collectionLoading,
         retry: false,
     });
     const { refetch: loadDueDeck } = api.game.getDueFlashcardReviews.useQuery(
-        { limit: cardCount },
+        { limit: cardCount, ...reviewInput },
         { enabled: false },
     );
     const rateReview = api.game.rateFlashcardReview.useMutation();
+    const showLibraryContext = initialSource === "saved" || Boolean(initialCollectionId) || initialCollectionInvalid;
+    const libraryReturnLink = showLibraryContext ? (
+        <Link
+            locale={locale}
+            href={{ pathname: "/saved-words", query: collectionId ? { collectionId } : undefined }}
+            aria-disabled={isRatingPending || Boolean(pendingRating)}
+            onClick={(event) => { if (isRatingPending || pendingRating) event.preventDefault(); }}
+        >
+            <ChevronLeft aria-hidden="true" /> {play("backToSavedWords")}
+        </Link>
+    ) : null;
+    const libraryContext = showLibraryContext ? (
+        <div className={styles.scopeContext}>
+            {libraryReturnLink}
+            {activeCollection ? <p>{play("collectionScope", { name: activeCollection.name })}</p> : null}
+        </div>
+    ) : null;
+
+    const changeSource = (nextSource: "all" | "saved") => {
+        setSource(nextSource);
+        setCollectionId(undefined);
+        setCollectionInvalid(false);
+        setLoadError(null);
+        const query = new URLSearchParams(window.location.search);
+        query.set("source", nextSource);
+        query.delete("collectionId");
+        window.history.replaceState(null, "", `${window.location.pathname}?${query}`);
+    };
 
     const getCardDirection = useCallback((card: FlashcardWord): FlashcardDirection => (
         deckMode === "due" ? card.direction ?? defaultSide : defaultSide
@@ -133,6 +183,7 @@ export default function PlayFlashcardGame({ session, locale }: PlayFlashcardGame
     }, [defaultSide]);
 
     const startPracticeDeck = useCallback(async () => {
+        if (!canPractice) return;
         resetDeck();
         const generation = roundGenerationRef.current;
         setDeckMode("practice");
@@ -142,23 +193,29 @@ export default function PlayFlashcardGame({ session, locale }: PlayFlashcardGame
         try {
             const result = await loadPracticeDeck();
             if (generation !== roundGenerationRef.current) return;
+            if (result.error) {
+                setLoadError(collectionId && result.error.data?.code === "NOT_FOUND" ? play("collectionUnavailable") : t("noWords"));
+                setGameState("setup");
+                return;
+            }
             const nextWords = result.data?.words as FlashcardWord[] | undefined;
             if (nextWords?.length) {
                 openDeck(nextWords, "practice");
                 return;
             }
 
-            setLoadError(result.data?.error === "noSavedWords" ? play("noSavedWords") : t("noWords"));
+            setLoadError(result.data?.error === "noCollectionWords" ? play("noCollectionWords")
+                : result.data?.error === "noSavedWords" ? play("noSavedWords") : t("noWords"));
         } catch {
             if (generation !== roundGenerationRef.current) return;
             setLoadError(t("noWords"));
         }
 
         if (generation === roundGenerationRef.current) setGameState("setup");
-    }, [loadPracticeDeck, openDeck, play, resetDeck, t]);
+    }, [canPractice, collectionId, loadPracticeDeck, openDeck, play, resetDeck, t]);
 
     const startDueDeck = useCallback(async () => {
-        if (!isSignedIn) return;
+        if (!isSignedIn || !canPractice) return;
 
         resetDeck();
         const generation = roundGenerationRef.current;
@@ -188,7 +245,7 @@ export default function PlayFlashcardGame({ session, locale }: PlayFlashcardGame
         }
 
         if (generation === roundGenerationRef.current) setGameState("setup");
-    }, [isSignedIn, loadDueDeck, openDeck, play, resetDeck, reviewSummary]);
+    }, [canPractice, isSignedIn, loadDueDeck, openDeck, play, resetDeck, reviewSummary]);
 
     const restartSetup = useCallback(() => {
         // Do not discard an unresolved idempotent action: its retry is the
@@ -363,20 +420,35 @@ export default function PlayFlashcardGame({ session, locale }: PlayFlashcardGame
     }, [flipCard, gameState, goNext, goPrevious]);
 
     if (gameState === "setup") {
-        const hasDueReviews = (reviewSummary.data?.dueCount ?? 0) > 0;
+        const hasDueReviews = validPracticeScope && (reviewSummary.data?.dueCount ?? 0) > 0;
         const hasStartedReviews = (reviewSummary.data?.totalCount ?? 0) > 0;
 
         return (
-            <section className={styles.page} aria-labelledby="flashcard-title">
+            <section className={styles.page} aria-labelledby="flashcard-title" data-practice-ready={ready}>
                 <header className={styles.intro}>
                     <p className={styles.kicker}><Sparkles aria-hidden="true" /> {play("roundKicker")}</p>
                     <h1 id="flashcard-title">{t("title")}</h1>
                     <p>{play("setupDescription")}</p>
                 </header>
 
+                {showLibraryContext ? (
+                    <div className={styles.scopeContext}>
+                        {libraryReturnLink}
+                        {collectionLoading ? <p role="status">{t("loading")}</p> : null}
+                        {activeCollection ? <p>{play("collectionScope", { name: activeCollection.name })}</p> : null}
+                        {collectionUnavailable ? <p role="alert">{play("collectionUnavailable")}</p> : null}
+                        {collectionId && collections.isError ? (
+                            <button type="button" disabled={!ready} onClick={() => void collections.refetch()}>{play("retryCollection")}</button>
+                        ) : null}
+                        {collectionId || collectionInvalid ? (
+                            <button type="button" disabled={!ready} onClick={() => changeSource("saved")}>{play("clearCollection")}</button>
+                        ) : null}
+                    </div>
+                ) : null}
+
                 <div className={styles.setupLayout}>
                     <form className={styles.setupPanel} onSubmit={(event) => { event.preventDefault(); void startPracticeDeck(); }}>
-                        <fieldset>
+                        <fieldset disabled={!ready}>
                             <legend>{t("cardCount")}</legend>
                             <div className={styles.choiceGrid}>
                                 {[10, 20, 30, 50].map((count) => (
@@ -387,16 +459,16 @@ export default function PlayFlashcardGame({ session, locale }: PlayFlashcardGame
                             </div>
                         </fieldset>
 
-                        <fieldset>
+                        <fieldset disabled={!ready}>
                             <legend>{t("source")}</legend>
                             <div className={styles.choiceGrid}>
-                                <ControlButton className={source === "all" ? styles.selected : ""} aria-pressed={source === "all"} onClick={() => setSource("all")}>{t("sourceAll")}</ControlButton>
-                                <ControlButton className={source === "saved" ? styles.selected : ""} aria-pressed={source === "saved"} disabled={!session} onClick={() => setSource("saved")}>{t("sourceSaved")}</ControlButton>
+                                <ControlButton className={source === "all" ? styles.selected : ""} aria-pressed={source === "all"} onClick={() => changeSource("all")}>{t("sourceAll")}</ControlButton>
+                                <ControlButton className={source === "saved" ? styles.selected : ""} aria-pressed={source === "saved"} disabled={!session} onClick={() => { if (source !== "saved") changeSource("saved"); }}>{t("sourceSaved")}</ControlButton>
                             </div>
                             {!session && <p className={styles.hint}>{t("signInForSaved")}</p>}
                         </fieldset>
 
-                        <fieldset>
+                        <fieldset disabled={!ready}>
                             <legend>{t("defaultSide")}</legend>
                             <div className={styles.choiceGrid}>
                                 <ControlButton className={defaultSide === "word" ? styles.selected : ""} aria-pressed={defaultSide === "word"} onClick={() => setDefaultSide("word")}>{t("showWordFirst")}</ControlButton>
@@ -404,7 +476,7 @@ export default function PlayFlashcardGame({ session, locale }: PlayFlashcardGame
                             </div>
                         </fieldset>
 
-                        {isSignedIn ? (
+                        {isSignedIn && !collectionUnavailable && !collectionLoading ? (
                             <section className={styles.reviewEntry} aria-live="polite">
                                 <p className={styles.reviewEntryTitle}><Clock3 aria-hidden="true" /> {play("reviewQueue")}</p>
                                 {reviewSummary.isLoading ? <p>{play("reviewLoading")}</p> : null}
@@ -414,17 +486,17 @@ export default function PlayFlashcardGame({ session, locale }: PlayFlashcardGame
                                     <p>{play("caughtUp", { due: reviewSummary.data?.nextDueAt ? formatDueDate(reviewSummary.data.nextDueAt) : "" })}</p>
                                 ) : null}
                                 {hasDueReviews ? (
-                                    <button type="button" className={styles.dueAction} onClick={() => void startDueDeck()}>
+                                    <button type="button" className={styles.dueAction} disabled={!ready} onClick={() => void startDueDeck()}>
                                         <Clock3 aria-hidden="true" /> {play("reviewDue", { count: reviewSummary.data?.dueCount ?? 0 })}
                                     </button>
                                 ) : null}
                             </section>
-                        ) : (
+                        ) : !isSignedIn ? (
                             <p className={styles.practiceHint}>{play("untrackedPractice")}</p>
-                        )}
+                        ) : null}
 
                         {loadError && <p className={styles.errorHint} role="alert">{loadError}</p>}
-                        <button className={styles.primaryAction} type="submit">{t("startGame")} <ChevronRight aria-hidden="true" /></button>
+                        <button className={styles.primaryAction} type="submit" disabled={!canPractice}>{t("startGame")} <ChevronRight aria-hidden="true" /></button>
                     </form>
 
                     <aside className={styles.instructions} aria-label={play("howToPlay")}>
@@ -450,6 +522,8 @@ export default function PlayFlashcardGame({ session, locale }: PlayFlashcardGame
                     </div>
                     <p className={styles.progressText}>{t("loading")}</p>
                 </header>
+
+                {libraryContext}
 
                 <div className={`${styles.progressTrack} ${styles.loadingProgressTrack}`} aria-hidden="true"><span /></div>
 
@@ -479,6 +553,7 @@ export default function PlayFlashcardGame({ session, locale }: PlayFlashcardGame
                 <p className={styles.kicker}><Sparkles aria-hidden="true" /> {play("roundCompleteKicker")}</p>
                 <h1 id="finished-title">{deckMode === "due" ? play("dueQueueCompleteTitle") : play("roundCompleteTitle")}</h1>
                 <p>{deckMode === "due" ? play("dueQueueCompleteDescription", { count: words.length }) : play("roundCompleteDescription", { count: words.length })}</p>
+                {libraryContext}
                 <div className={styles.finishedActions}>
                     {deckMode === "due" && hasMoreDueReviews ? (
                         <button type="button" className={styles.primaryAction} onClick={() => void startDueDeck()}>{play("reviewDue", { count: reviewSummary.data?.dueCount ?? 0 })} <Clock3 aria-hidden="true" /></button>
@@ -507,6 +582,8 @@ export default function PlayFlashcardGame({ session, locale }: PlayFlashcardGame
                 </div>
                 <p className={styles.progressText}>{t("progress", { current: currentIndex + 1, total: words.length })}</p>
             </header>
+
+            {libraryContext}
 
             <div className={styles.progressTrack} aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>
 
