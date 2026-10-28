@@ -306,7 +306,8 @@ gh workflow run test.yml --repo 4Furki4/Turkce-Sozluk \
 This runs only the two Pi connectivity checks. Each verifies SSH, a direct
 loopback database tunnel, journal/hash consistency and application/database
 health. Pending migrations are reported, never applied. Regular CI and image
-publication are skipped for this check. After the feature is merged, select
+publication are skipped for this check. Skipped jobs use distinct check names so
+a successful connectivity dispatch cannot satisfy the regular CI gate. After the feature is merged, select
 `develop` or `main` instead of the implementation branch.
 
 ### Preserved development migration history

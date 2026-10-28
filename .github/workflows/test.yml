@@ -62,7 +62,7 @@ jobs:
 
   lint:
     if: ${{ !inputs.check_pi }}
-    name: Lint
+    name: ${{ inputs.check_pi && 'Connectivity dispatch - Lint skipped' || 'Lint' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -99,7 +99,7 @@ jobs:
 
   unit:
     if: ${{ !inputs.check_pi }}
-    name: Unit tests
+    name: ${{ inputs.check_pi && 'Connectivity dispatch - Unit tests skipped' || 'Unit tests' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -157,7 +157,7 @@ jobs:
 
   build_browser:
     if: ${{ !inputs.check_pi }}
-    name: Production build and browser tests
+    name: ${{ inputs.check_pi && 'Connectivity dispatch - Production build and browser tests skipped' || 'Production build and browser tests' }}
     runs-on: ubuntu-24.04
     # Includes three repetitions of each desktop/mobile journey.
     timeout-minutes: 45
@@ -231,7 +231,7 @@ jobs:
           retention-days: 7
 
   ci_passed:
-    name: CI passed
+    name: ${{ inputs.check_pi && 'Connectivity dispatch - CI passed skipped' || 'CI passed' }}
     needs: [lint, unit, build_browser]
     if: ${{ always() && !inputs.check_pi }}
     runs-on: ubuntu-24.04
@@ -250,7 +250,7 @@ jobs:
           test "$BUILD_BROWSER_RESULT" = success
 
   build:
-    name: Build and push ARM64 image
+    name: ${{ inputs.check_pi && 'Connectivity dispatch - Build and push ARM64 image skipped' || 'Build and push ARM64 image' }}
     needs: ci_passed
     if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-24.04-arm
