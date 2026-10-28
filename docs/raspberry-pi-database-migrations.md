@@ -308,3 +308,16 @@ loopback database tunnel, journal/hash consistency and application/database
 health. Pending migrations are reported, never applied. Regular CI and image
 publication are skipped for this check. After the feature is merged, select
 `develop` or `main` instead of the implementation branch.
+
+### Preserved development migration history
+
+Development has an additive etymology migration, `0047_warm_squirrel_girl`, from
+commit `2ca2f7b371d976bbf2f8490bb08a7f474b5c522e`, timestamp `1790641088949`.
+Its original SQL is archived verbatim under `scripts/deploy/history/` for audit;
+that directory is never passed to Drizzle's migrator. Its SHA-256 is
+`38cfd247d6a5154335c23a09ae9dcb4dda033493c7df2d321b65563fa3a5e7b3`.
+The CI ledger check accounts for this exact record only in development, then
+validates the full release history normally. Changed, duplicate and unknown
+records still fail. Production does not permit this record. This preserves
+existing development etymology tables and data without editing either database's
+ledger or replaying the historical SQL on production.

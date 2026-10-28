@@ -34,3 +34,14 @@ test("manual connectivity checks require the source repo and explicit database t
   }
   expect(() => assertContext(env)).toThrow();
 });
+
+test("only the exact archived development history is accepted without changing pending migrations", async () => {
+  const { DEVELOPMENT_HISTORY } = await import("./pi-release.mjs");
+  const legacy = { created_at: String(DEVELOPMENT_HISTORY[0].when), hash: DEVELOPMENT_HISTORY[0].hash };
+  expect(legacy.hash).toBe("38cfd247d6a5154335c23a09ae9dcb4dda033493c7df2d321b65563fa3a5e7b3");
+  expect(verifyLedger([first, legacy], entries, hash, DEVELOPMENT_HISTORY)).toEqual([entries[1]]);
+  expect(() => verifyLedger([first, legacy], entries, hash)).toThrow();
+  expect(() => verifyLedger([first, { ...legacy, hash: "modified" }], entries, hash, DEVELOPMENT_HISTORY)).toThrow();
+  expect(() => verifyLedger([first, { ...legacy, created_at: "999" }], entries, hash, DEVELOPMENT_HISTORY)).toThrow();
+  expect(() => verifyLedger([first, legacy, legacy], entries, hash, DEVELOPMENT_HISTORY)).toThrow("Duplicate");
+});
