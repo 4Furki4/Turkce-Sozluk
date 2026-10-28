@@ -48,6 +48,7 @@ for (const locale of ["tr", "en"] as const) {
     await page.context().setExtraHTTPHeaders({ "x-forwarded-for": ip });
     // Real Better Auth session creation; no mocked auth cookies or tRPC responses.
     const signup = await page.request.post("/api/auth/sign-up/email", {
+      maxRetries: 2,
       headers: { origin: "http://localhost:3100", "x-forwarded-for": ip },
       data: {
         email: `${identity}@example.invalid`,

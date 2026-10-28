@@ -33,6 +33,7 @@ for (const locale of ["tr", "en"] as const) {
       const email = `${identity}@example.invalid`;
       const password = "ci-only-analytics-password";
       const signup = await page.request.post("/api/auth/sign-up/email", {
+        maxRetries: 2,
         headers: { origin: "http://localhost:3100" }, data: { email, name: "Analytics Test", username: identity, password },
       });
       expect(signup.ok(), await signup.text()).toBe(true);

@@ -14,7 +14,7 @@ test("audited word edits keep shared attributes and foreign meanings on their ow
   let actorId: string | undefined;
   try {
     const email = prefix + "@example.invalid", password = "ci-only-integrity-password";
-    const signup = await request.post("/api/auth/sign-up/email", { headers: { origin: "http://localhost:3100" }, data: { email, name: "Integrity fixture", username: prefix, password } });
+    const signup = await request.post("/api/auth/sign-up/email", { maxRetries: 2, headers: { origin: "http://localhost:3100" }, data: { email, name: "Integrity fixture", username: prefix, password } });
     expect(signup.ok(), await signup.text()).toBe(true); actorId = (await signup.json()).user.id;
     await sql`UPDATE users SET role = 'admin' WHERE id = ${actorId!}`;
     await request.post("/api/auth/sign-out", { headers: { origin: "http://localhost:3100" } });

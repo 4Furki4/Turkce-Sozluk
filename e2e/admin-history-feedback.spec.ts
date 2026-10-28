@@ -17,7 +17,7 @@ test("feedback status, type and deletion share their audit transaction", async (
   });
   try {
     const email = prefix + "@example.invalid", password = "ci-only-feedback-password";
-    const signup = await request.post("/api/auth/sign-up/email", { headers, data: { email, name: "Feedback fixture", username: prefix, password } });
+    const signup = await request.post("/api/auth/sign-up/email", { maxRetries: 2, headers, data: { email, name: "Feedback fixture", username: prefix, password } });
     expect(signup.ok(), await signup.text()).toBe(true); actorId = (await signup.json()).user.id;
     const title = "DO_NOT_RETAIN_TITLE_" + prefix, description = "DO_NOT_RETAIN_DESCRIPTION_" + prefix;
     const [feedback] = await sql`INSERT INTO feedbacks (user_id, type, title, description) VALUES (${actorId!}, 'bug', ${title}, ${description}) RETURNING id`;

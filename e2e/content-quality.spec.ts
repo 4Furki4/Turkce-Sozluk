@@ -116,7 +116,7 @@ for (const locale of ["tr", "en"] as const) test(`${locale}: quality filters, de
     const identity = "quality_" + randomUUID().replaceAll("-", "");
     const email = identity + "@example.invalid";
     const password = "ci-only-quality-password";
-    const signup = await page.request.post("/api/auth/sign-up/email", { headers: { origin: "http://localhost:3100" }, data: { email, name: "Quality Reviewer", username: identity, password } });
+    const signup = await page.request.post("/api/auth/sign-up/email", { maxRetries: 2, headers: { origin: "http://localhost:3100" }, data: { email, name: "Quality Reviewer", username: identity, password } });
     expect(signup.ok(), await signup.text()).toBe(true);
     actor = (await signup.json()).user.id;
     await sql`UPDATE users SET role = 'admin' WHERE id = ${actor!}`;
