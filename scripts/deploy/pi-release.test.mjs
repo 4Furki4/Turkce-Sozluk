@@ -45,3 +45,22 @@ test("only the exact archived development history is accepted without changing p
   expect(() => verifyLedger([first, { ...legacy, created_at: "999" }], entries, hash, DEVELOPMENT_HISTORY)).toThrow();
   expect(() => verifyLedger([first, legacy, legacy], entries, hash, DEVELOPMENT_HISTORY)).toThrow("Duplicate");
 });
+
+test("archive verification drains large streams and preserves verification failure under pipefail", async () => {
+  const { ARCHIVE_VERIFY_COMMAND } = await import("./pi-release.mjs");
+  const { mkdtempSync, writeFileSync, rmSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const { spawnSync } = await import("node:child_process");
+  const directory = mkdtempSync(join(tmpdir(), "archive-verification-"));
+  try {
+    // Model pg_restore --list finishing after the header of a much larger dump.
+    writeFileSync(join(directory, "pg_restore"), '#!/bin/sh\nhead -c 32 >/dev/null\nexit "$VERIFY_EXIT"\n', { mode: 0o700 });
+    const run = (command, status) => spawnSync("bash", ["-c", 'set -o pipefail; head -c 8388608 /dev/zero | sh -c "$VERIFY_COMMAND"'], {
+      env: { ...process.env, PATH: `${directory}:${process.env.PATH}`, VERIFY_COMMAND: command, VERIFY_EXIT: String(status) },
+    }).status;
+    expect(run("pg_restore --list >/dev/null", 0)).toBe(141);
+    expect(run(ARCHIVE_VERIFY_COMMAND, 0)).toBe(0);
+    expect(run(ARCHIVE_VERIFY_COMMAND, 42)).toBe(42);
+  } finally { rmSync(directory, { recursive: true, force: true }); }
+});
