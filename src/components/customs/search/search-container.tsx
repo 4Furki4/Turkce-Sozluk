@@ -1,14 +1,16 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { Search as SearchIcon, PuzzleIcon, KeyboardIcon, TrendingUpIcon, BookOpenIcon, TypeIcon, LoaderCircleIcon } from "lucide-react";
+import { Search as SearchIcon, PuzzleIcon, KeyboardIcon, TrendingUpIcon, BookOpenIcon, TypeIcon, ChevronDownIcon, LoaderCircleIcon } from "lucide-react";
 import { Input } from "@heroui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Button, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@heroui/react";
+import { Button, DropdownItem, DropdownMenu, DropdownTrigger, Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useLocalSearchSuggestions } from "@/src/hooks/use-local-search-suggestions";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import CustomDropdown from "@/src/components/customs/heroui/custom-dropdown";
 import { TurkishKeyboard } from "@/src/components/customs/utils/TurkishKeyboard";
 import { getWordByNameOffline } from "@/src/lib/offline-db";
 import { useTypewriter } from "@/src/hooks/use-typewriter";
@@ -289,42 +291,86 @@ export default function SearchContainer({
 
                     <Input radius="md"
                         endContent={
-                            <div className="flex items-center gap-1">
-                                <Popover placement="bottom" classNames={{ content: "bg-background" }}>
-                                    <PopoverTrigger>
-                                        <Button
-                                            aria-label={t("hero.patternSearchTooltip")}
-                                            className="bg-transparent"
-                                            isIconOnly
-                                            variant="flat"
-                                            radius="none"
+                            <TooltipProvider delayDuration={500} skipDelayDuration={0}>
+                                <div className="flex shrink-0 items-center gap-0.5">
+                                    <CustomDropdown placement="bottom-end">
+                                        <Tooltip>
+                                            <DropdownTrigger>
+                                                <TooltipTrigger asChild>
+                                                    <button
+                                                        type="button"
+                                                        aria-label={t("hero.searchModeTooltip", { mode: t(searchMode === "word" ? "hero.searchByWord" : "hero.searchByMeaning") })}
+                                                        className="inline-flex h-11 min-w-0 shrink-0 items-center justify-center gap-1 rounded-sm px-2 text-primary-text transition-colors hover:bg-muted/60 sm:gap-1.5 sm:px-3"
+                                                    >
+                                                        {searchMode === "word" ? <TypeIcon aria-hidden="true" className="h-4 w-4" /> : <BookOpenIcon aria-hidden="true" className="h-4 w-4" />}
+                                                        <span className="hidden text-sm font-medium sm:inline">{t(searchMode === "word" ? "hero.searchByWord" : "hero.searchByMeaning")}</span>
+                                                        <ChevronDownIcon aria-hidden="true" className="h-3.5 w-3.5" />
+                                                    </button>
+                                                </TooltipTrigger>
+                                            </DropdownTrigger>
+                                            <TooltipContent side="bottom" sideOffset={8} collisionPadding={8} className="max-w-64 rounded-md bg-background px-3 py-3 text-sm text-foreground shadow-md">{t("hero.searchMode")}</TooltipContent>
+                                        </Tooltip>
+                                        <DropdownMenu
+                                            aria-label={t("hero.searchMode")}
+                                            selectionMode="single"
+                                            disallowEmptySelection
+                                            selectedKeys={new Set([searchMode])}
+                                            disabledKeys={isOnline ? [] : ["meaning"]}
+                                            onAction={(key) => {
+                                                if (key !== "word" && key !== "meaning") return;
+                                                if (key === "meaning" && !isOnline) return;
+                                                isSelecting.current = true;
+                                                setSearchMode(key);
+                                                setShowRecommendations(false);
+                                                setMeaningResults([]);
+                                                setSelectedIndex(-1);
+                                            }}
+                                            itemClasses={{ base: "min-h-11" }}
                                         >
-                                            <PuzzleIcon className="w-5 h-5 text-default-400 cursor-pointer hover:text-primary transition-colors" />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent>
-                                        <div className="px-1 py-2 max-w-[250px]">
-                                            <div className="text-small">{t("hero.patternSearchTooltip")}</div>
-                                        </div>
-                                    </PopoverContent>
-                                </Popover>
-                                <Popover placement="bottom-end" classNames={{ content: "bg-background" }}>
-                                    <PopoverTrigger>
-                                        <Button className="bg-transparent" isIconOnly variant="flat" radius="none" aria-label={t("hero.turkishLetters")}>
-                                            <Tooltip content={t("hero.turkishLetters")}>
-                                                <KeyboardIcon className="text-default-400 hover:text-primary transition-colors" />
-                                            </Tooltip>
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="grid grid-cols-3 gap-1">
-                                        <TurkishKeyboard className="bg-background/50 border border-border" onCharClick={(char) => setWordInput((prev) => prev + char)} />
-                                    </PopoverContent>
-                                </Popover>
-                            </div>
+                                            <DropdownItem key="word" startContent={<TypeIcon aria-hidden="true" className="h-4 w-4" />}>
+                                                {t("hero.searchByWord")}
+                                            </DropdownItem>
+                                            <DropdownItem key="meaning" startContent={<BookOpenIcon aria-hidden="true" className="h-4 w-4" />} description={!isOnline ? t("hero.meaningSearchOffline") : undefined}>
+                                                {t("hero.searchByMeaning")}
+                                            </DropdownItem>
+                                        </DropdownMenu>
+                                    </CustomDropdown>
+                                    <span aria-hidden="true" className="mx-0.5 h-5 w-px shrink-0 bg-border" />
+                                    <Popover placement="bottom" offset={8} classNames={{ content: "rounded-md bg-background" }}>
+                                        <PopoverTrigger>
+                                            <Button
+                                                type="button"
+                                                aria-label={t("hero.patternSearchTooltip")}
+                                                className="h-11 w-11 min-w-11 text-muted-foreground hover:text-foreground"
+                                                isIconOnly
+                                                variant="light"
+                                                radius="sm"
+                                            >
+                                                <PuzzleIcon aria-hidden="true" className="h-5 w-5" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent>
+                                            <div className="max-w-[250px] px-1 py-2">
+                                                <div className="text-small">{t("hero.patternSearchTooltip")}</div>
+                                            </div>
+                                        </PopoverContent>
+                                    </Popover>
+                                    <Popover placement="bottom-end" offset={8} classNames={{ content: "rounded-md bg-background" }}>
+                                        <PopoverTrigger>
+                                            <Button type="button" className="h-11 w-11 min-w-11 text-muted-foreground hover:text-foreground" isIconOnly variant="light" radius="sm" aria-label={t("hero.turkishLetters")}>
+                                                <KeyboardIcon aria-hidden="true" className="h-5 w-5" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="grid grid-cols-3 gap-1">
+                                            <TurkishKeyboard className="bg-background/50 border border-border" onCharClick={(char) => setWordInput((prev) => prev + char)} />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                            </TooltipProvider>
                         }
                         classNames={{
                             inputWrapper: cn(
-                                "h-14",
+                                "h-14 px-1.5 sm:px-3",
                                 "bg-background/50",
                                 "backdrop-blur-md",
                                 "border border-primary/60",
@@ -337,16 +383,24 @@ export default function SearchContainer({
                                 "!cursor-text",
                                 inputWrapperClassName
                             ),
+                            innerWrapper: "min-w-0 gap-1",
                             input: [
-                                "text-lg",
+                                "min-w-0 text-base sm:text-lg",
                                 "text-foreground",
                                 "placeholder:text-muted-foreground",
                             ]
                         }}
                         startContent={
-                            <button type="submit" className="grid h-11 w-11 shrink-0 place-items-center hover:bg-muted/60 rounded-md transition-colors mr-2" aria-label={t("hero.searchAction")}>
-                                <SearchIcon className="w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                            </button>
+                            <TooltipProvider delayDuration={300}>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <button type="submit" className="grid h-11 w-11 shrink-0 place-items-center hover:bg-muted/60 rounded-md transition-colors sm:mr-1" aria-label={t("hero.searchAction")}>
+                                            <SearchIcon className="w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom" sideOffset={8} collisionPadding={8} className="rounded-md bg-zinc-800 text-white">{t("hero.searchAction")}</TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         }
                         aria-required
                         autoFocus={autoFocus}
@@ -446,82 +500,36 @@ export default function SearchContainer({
                 </div>
             </form>
 
-            {/* Search Mode Toggle */}
-            <div className="flex justify-center mt-3">
-                <div role="group" aria-label={t("hero.searchMode")} className="inline-flex items-center rounded-md bg-background/50 border border-border p-0.5 gap-0.5">
-                    <button
-                        type="button"
-                        aria-pressed={searchMode === "word"}
-                        onClick={() => {
-                            isSelecting.current = true;
-                            setSearchMode("word");
-                            setShowRecommendations(false);
-                            setMeaningResults([]);
-                            setSelectedIndex(-1);
-                        }}
-                        className={cn(
-                            "flex min-h-11 items-center gap-1.5 px-3 py-2 rounded-sm text-sm font-medium transition-colors duration-200",
-                            searchMode === "word"
-                                ? "bg-primary/15 text-primary shadow-sm"
-                                : "text-muted-foreground hover:text-foreground"
-                        )}
-                    >
-                        <TypeIcon className="w-3.5 h-3.5" />
-                        {t("hero.searchByWord")}
-                    </button>
-                    <button
-                        type="button"
-                        aria-pressed={searchMode === "meaning"}
-                        onClick={() => {
-                            if (!isOnline) return;
-                            isSelecting.current = true;
-                            setSearchMode("meaning");
-                            setShowRecommendations(false);
-                            setSelectedIndex(-1);
-                        }}
-                        disabled={!isOnline}
-                        className={cn(
-                            "flex min-h-11 items-center gap-1.5 px-3 py-2 rounded-sm text-sm font-medium transition-colors duration-200",
-                            searchMode === "meaning"
-                                ? "bg-primary/15 text-primary shadow-sm"
-                                : "text-muted-foreground hover:text-foreground",
-                            !isOnline && "cursor-not-allowed opacity-50 hover:text-zinc-500"
-                        )}
-                    >
-                        <BookOpenIcon className="w-3.5 h-3.5" />
-                        {t("hero.searchByMeaning")}
-                    </button>
-                </div>
-            </div>
-
             {/* Trending Tags */}
-            {showTrending && (
-                <div className="mt-6 flex flex-wrap justify-center items-center gap-2 min-h-[32px]">
-                    <span className="flex items-center gap-2 text-xs font-mono text-zinc-500 uppercase tracking-widest mr-2">
-                        <TrendingUpIcon className="w-4 h-4" /> {t("Trending")}:
+            {showTrending && (isTrendingLoading || Boolean(trendingWords?.length)) && (
+                <div className="mt-4 flex min-h-11 flex-col items-center gap-2.5 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-2">
+                    <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-foreground/70 sm:mr-1">
+                        <TrendingUpIcon aria-hidden="true" className="h-4 w-4" /> {t("hero.popularSearches")}
                     </span>
-                    {isTrendingLoading ? (
-                        <>
-                            {Array.from({ length: 4 }).map((_, i) => (
-                                <div key={i} className="h-8 w-24 bg-zinc-800/50 rounded-md animate-pulse border border-zinc-800/50" />
-                            ))}
-                        </>
-                    ) : (
-                        trendingWords?.map((tag: any) => (
-                            <Link
-                                key={tag.id}
-                                href={{
-                                    pathname: "/search/[word]",
-                                    params: { word: tag.name },
-                                }}
-                                onClick={onSearchComplete}
-                                title={tag.name}
-                                className="inline-flex min-h-11 max-w-full min-w-0 items-center px-4 py-1.5 rounded-md bg-background shadow-sm border border-border text-sm cursor-pointer hover:text-primary transition-all duration-200"
-                            >
-                                <span className="min-w-0 truncate">{tag.name}</span>
-                            </Link>
-                        ))
-                    )}
+                    <div className="flex min-w-0 max-w-full flex-wrap justify-center gap-2">
+                        {isTrendingLoading ? (
+                            <>
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                    <div key={i} aria-hidden="true" className="h-11 w-20 rounded-md border border-border/60 bg-background/40 motion-safe:animate-pulse" />
+                                ))}
+                            </>
+                        ) : (
+                            trendingWords?.map((tag: any) => (
+                                <Link
+                                    key={tag.id}
+                                    href={{
+                                        pathname: "/search/[word]",
+                                        params: { word: tag.name },
+                                    }}
+                                    onClick={onSearchComplete}
+                                    title={tag.name}
+                                    className="inline-flex min-h-11 min-w-0 max-w-full items-center rounded-md border border-border/60 bg-background/40 px-3 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/30 hover:bg-background/70 hover:text-primary-text motion-reduce:transition-none"
+                                >
+                                    <span className="min-w-0 whitespace-normal break-words text-center [overflow-wrap:anywhere]">{tag.name}</span>
+                                </Link>
+                            ))
+                        )}
+                    </div>
                 </div>
             )}
         </div>
