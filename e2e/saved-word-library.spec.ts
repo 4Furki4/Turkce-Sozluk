@@ -96,7 +96,8 @@ for (const locale of ["tr", "en"] as const) {
         await page.keyboard.press("Escape");
         await expect(page.getByRole("button", { name: previewName, exact: true })).toBeFocused();
       }
-      const pageSizeLabel = (await page.getByText(copy.wordsPerPage, { exact: true }).boundingBox())!;
+      await expect(page.getByRole("button", { name: new RegExp(copy.wordsPerPage) })).toBeVisible();
+      const pageSizeLabel = (await page.getByText(copy.perPage, { exact: true }).boundingBox())!;
       const libraryRow = (await page.getByRole("button", { name: previewName, exact: true }).locator("..").boundingBox())!;
       expect(pageSizeLabel.y).toBeGreaterThanOrEqual(libraryRow.y + libraryRow.height);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

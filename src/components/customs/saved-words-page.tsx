@@ -182,7 +182,7 @@ export default function SavedWordsPage({ locale, initialState }: SavedWordsPageP
           <Button variant="bordered" className="min-h-12" isDisabled={busy || !selectedIds.length || !targetCollection || list.isPlaceholderData} onPress={() => void updateMembership("remove")}>{t("removeFromCollection")}</Button>
         </> : <p className="min-w-0 flex-1 text-sm leading-relaxed text-muted-foreground">{t("noCollectionsHint")}</p>}
       </div>}
-      <div className="grid min-w-0 items-start gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+      <div className="@container/library grid min-w-0 items-start gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
         <div className="min-w-0 space-y-4">
           <div className="overflow-hidden rounded-xl border border-border bg-background/40" aria-busy={list.isFetching}>
             {failed ? <div role="alert" className="space-y-3 p-6"><p className="text-sm">{t("loadFailed")}</p><Button variant="bordered" className="min-h-11" onPress={() => { void list.refetch(); void count.refetch(); void allCount.refetch(); }}>{t("retry")}</Button></div>
@@ -197,17 +197,17 @@ export default function SavedWordsPage({ locale, initialState }: SavedWordsPageP
                   onSelect={() => setSelection((current) => { const next = new Set(current); if (next.has(word.word_id)) next.delete(word.word_id); else next.add(word.word_id); return next; })}
                   onPreview={() => { previewTrigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; setActiveWord(word); }} onUnsave={() => void removeWord(word)} />)}</ul>}
           </div>
-          {!failed && !list.isLoading && (count.data ?? 0) > 0 && <div className="flex min-w-0 flex-wrap items-end justify-between gap-3">
-            <div className="w-44 max-w-full space-y-2">
-              <p id="saved-library-page-size" className="text-sm">{t("wordsPerPage")}</p>
-              <CustomSelect aria-labelledby="saved-library-page-size" size="lg" disallowEmptySelection selectedKeys={[String(state.perPage)]}
-                onChange={(event) => { const perPage = Number(event.target.value); if (perPage !== state.perPage) commit({ ...state, perPage, page: 1 }); }}
-                options={{ "6": "6", "12": "12", "24": "24", "48": "48" }} classNames={{ trigger: "h-12 min-h-12 border border-border shadow-none" }} />
-            </div>
-            {totalPages > 1 && <CustomPagination total={totalPages} page={state.page} initialPage={state.page} onChange={(page) => commit({ ...state, page })} />}
-          </div>}
         </div>
         <aside className="hidden min-w-0 overflow-y-auto rounded-xl border border-border bg-background/40 lg:sticky lg:top-24 lg:block lg:max-h-[calc(100dvh-8rem)]" aria-label={t("previewTitle")}>{desktop && preview}</aside>
+        {!failed && !list.isLoading && (count.data ?? 0) > 0 && <div className="col-span-full grid min-w-0 items-center gap-3 @min-[43rem]/library:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+          {totalPages > 1 && <CustomPagination siblings={0} className="mx-0 justify-self-center @min-[43rem]/library:col-start-2 @min-[43rem]/library:row-start-1" total={totalPages} page={state.page} initialPage={state.page} onChange={(page) => commit({ ...state, page })} />}
+          <div className="flex max-w-full items-center justify-self-center gap-2 @min-[43rem]/library:col-start-3 @min-[43rem]/library:row-start-1 @min-[43rem]/library:justify-self-end">
+            <span id="saved-library-page-size" className="whitespace-nowrap text-sm text-muted-foreground">{t("perPage")}</span>
+            <CustomSelect aria-label={t("wordsPerPage")} size="md" className="w-20 shrink-0" disallowEmptySelection selectedKeys={[String(state.perPage)]}
+              onChange={(event) => { const perPage = Number(event.target.value); if (perPage !== state.perPage) commit({ ...state, perPage, page: 1 }); }}
+              options={{ "6": "6", "12": "12", "24": "24", "48": "48" }} classNames={{ trigger: "h-11 min-h-11 border border-border px-3 shadow-none", value: "text-sm tabular-nums" }} />
+          </div>
+        </div>}
       </div>
     </>}
     {!desktop && <CustomModal aria-label={t("previewTitle")} isOpen={Boolean(activeWord)} onOpenChange={(open) => { if (!open) closePreview(); }} size="full" scrollBehavior="inside" classNames={{ base: "h-dvh max-h-dvh rounded-none", body: "p-0", wrapper: "items-stretch" }}>
