@@ -25,6 +25,7 @@ import PWAServiceWorker from "@/src/components/pwa-service-worker";
 import OnlineStatusBridge from "@/src/components/online-status-bridge";
 import { AutocompleteSync } from "@/src/components/customs/complete-sync";
 import WebMcpRegistrar from "@/src/components/webmcp/webmcp-registrar";
+import { HOME_INTRO_BOOTSTRAP } from "@/src/lib/home-intro";
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -181,6 +182,7 @@ export default async function RootLayout({
   return (
     <html suppressHydrationWarning lang={locale}>
       <head>
+        <script id="home-intro-session" dangerouslySetInnerHTML={{ __html: HOME_INTRO_BOOTSTRAP }} />
         <IOSPWAMeta />
       </head>
 
