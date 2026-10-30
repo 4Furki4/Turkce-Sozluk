@@ -74,6 +74,7 @@ export function BentoCommonMistake({
   const [offset, setOffset] = useState(0);
   const [direction, setDirection] = useState<PageDirection>(1);
   const isOnline = useOnlineStatus();
+  const utils = api.useUtils();
   const { data, isLoading, isFetching, isPlaceholderData } = api.extras.getMisspellings.useQuery(
     { limit: 1, offset },
     {
@@ -84,17 +85,25 @@ export function BentoCommonMistake({
     },
   );
 
+  const canNavigateTo = (target: number) => {
+    if (target < 0 || target >= (data?.total ?? 0) || (isOnline && isPlaceholderData)) return false;
+    if (isOnline) return true;
+    const cached = utils.extras.getMisspellings.getData({ limit: 1, offset: target })
+      ?? (target === 0 ? initialData : undefined);
+    return Boolean(cached?.data.length);
+  };
+
   const handleNext = () => {
-    if (!isPlaceholderData && data?.total && offset < data.total - 1) {
+    if (canNavigateTo(offset + 1)) {
       setDirection(1);
-      setOffset((prev) => Math.min(prev + 1, data.total - 1));
+      setOffset(offset + 1);
     }
   };
 
   const handlePrev = () => {
-    if (!isPlaceholderData && offset > 0) {
+    if (canNavigateTo(offset - 1)) {
       setDirection(-1);
-      setOffset((prev) => Math.max(0, prev - 1));
+      setOffset(offset - 1);
     }
   };
 
@@ -153,7 +162,7 @@ export function BentoCommonMistake({
               aria-label={t("HomeExtras.previous")}
               className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
               onPress={handlePrev}
-              isDisabled={isPlaceholderData || offset === 0}
+              isDisabled={!canNavigateTo(offset - 1)}
             >
               <ArrowRight className="w-4 h-4 rotate-180" />
             </Button>
@@ -164,7 +173,7 @@ export function BentoCommonMistake({
               aria-label={t("HomeExtras.next")}
               className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
               onPress={handleNext}
-              isDisabled={isPlaceholderData || !data?.total || offset >= data.total - 1}
+              isDisabled={!canNavigateTo(offset + 1)}
             >
               <ArrowRight className="w-4 h-4" />
             </Button>
@@ -187,6 +196,7 @@ export function BentoGalatiMeshur({
   const [offset, setOffset] = useState(0);
   const [direction, setDirection] = useState<PageDirection>(1);
   const isOnline = useOnlineStatus();
+  const utils = api.useUtils();
   const { data, isLoading, isFetching, isPlaceholderData } = api.extras.getGalatiMeshur.useQuery(
     { limit: 1, offset },
     {
@@ -197,17 +207,25 @@ export function BentoGalatiMeshur({
     },
   );
 
+  const canNavigateTo = (target: number) => {
+    if (target < 0 || target >= (data?.total ?? 0) || (isOnline && isPlaceholderData)) return false;
+    if (isOnline) return true;
+    const cached = utils.extras.getGalatiMeshur.getData({ limit: 1, offset: target })
+      ?? (target === 0 ? initialData : undefined);
+    return Boolean(cached?.data.length);
+  };
+
   const handleNext = () => {
-    if (!isPlaceholderData && data?.total && offset < data.total - 1) {
+    if (canNavigateTo(offset + 1)) {
       setDirection(1);
-      setOffset((prev) => Math.min(prev + 1, data.total - 1));
+      setOffset(offset + 1);
     }
   };
 
   const handlePrev = () => {
-    if (!isPlaceholderData && offset > 0) {
+    if (canNavigateTo(offset - 1)) {
       setDirection(-1);
-      setOffset((prev) => Math.max(0, prev - 1));
+      setOffset(offset - 1);
     }
   };
 
@@ -274,7 +292,7 @@ export function BentoGalatiMeshur({
               aria-label={t("HomeExtras.previous")}
               className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
               onPress={handlePrev}
-              isDisabled={isPlaceholderData || offset === 0}
+              isDisabled={!canNavigateTo(offset - 1)}
             >
               <ArrowRight className="w-4 h-4 rotate-180" />
             </Button>
@@ -285,7 +303,7 @@ export function BentoGalatiMeshur({
               aria-label={t("HomeExtras.next")}
               className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
               onPress={handleNext}
-              isDisabled={isPlaceholderData || !data?.total || offset >= data.total - 1}
+              isDisabled={!canNavigateTo(offset + 1)}
             >
               <ArrowRight className="w-4 h-4" />
             </Button>
