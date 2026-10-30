@@ -38,7 +38,7 @@ export default async function Footer({ session }: { session: Session | null }) {
 
     return (
         <footer className="mt-auto bg-background/50 backdrop-blur-md border-t border-border px-2 pb-24 md:pb-2">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+            <div data-home-enter="footer" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
                     {/* Brand Section */}
                     <div className="lg:col-span-4 space-y-4">

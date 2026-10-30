@@ -3,7 +3,9 @@
 import { Button, CardBody, CardFooter, CardHeader } from "@heroui/react";
 import { ArrowRight, BookOpen, CheckCircle2, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { forwardRef, useState, type ReactNode } from "react";
+import { keepPreviousData } from "@tanstack/react-query";
+import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "framer-motion";
 
 import CustomCard from "@/src/components/customs/heroui/custom-card";
 import { Link } from "@/src/i18n/routing";
@@ -16,6 +18,53 @@ type GalatiMeshurData = RouterOutputs["extras"]["getGalatiMeshur"];
 
 const HERO_CLIENT_STALE_TIME = 24 * 60 * 60 * 1000;
 
+type PageDirection = 1 | -1;
+
+const EntryFrame = forwardRef<HTMLDivElement, { children: ReactNode; direction: PageDirection }>(
+  function EntryFrame({ children, direction }, ref) {
+    const isPresent = useIsPresent();
+    const reducedMotion = useReducedMotion();
+    return (
+      <motion.div
+        ref={ref}
+        className="hero-carousel-entry w-full min-w-0"
+        aria-hidden={!isPresent || undefined}
+        data-carousel-direction={direction === 1 ? "next" : "previous"}
+        custom={direction}
+        initial="enter"
+        animate="visible"
+        exit="exit"
+        variants={{
+          enter: (travel: PageDirection) => ({ opacity: 0, x: reducedMotion ? 0 : travel * 36 }),
+          visible: { opacity: 1, x: 0 },
+          exit: (travel: PageDirection) => ({
+            opacity: 0,
+            x: reducedMotion ? 0 : travel * -24,
+            transition: { duration: reducedMotion ? 0.1 : 0.18 },
+          }),
+        }}
+        transition={{ duration: reducedMotion ? 0.12 : 0.34, ease: [0.16, 1, 0.3, 1] }}
+      >
+        {children}
+      </motion.div>
+    );
+  },
+);
+
+function EntryTransition({ children, entryId, direction }: {
+  children: ReactNode;
+  entryId: number;
+  direction: PageDirection;
+}) {
+  return (
+    <div className="relative w-full min-w-0 overflow-hidden" aria-live="polite" aria-atomic="true">
+      <AnimatePresence initial={false} mode="popLayout" custom={direction}>
+        <EntryFrame key={entryId} direction={direction}>{children}</EntryFrame>
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export function BentoCommonMistake({
   initialData,
 }: {
@@ -23,29 +72,43 @@ export function BentoCommonMistake({
 }) {
   const t = useTranslations("Home");
   const [offset, setOffset] = useState(0);
+  const [direction, setDirection] = useState<PageDirection>(1);
   const isOnline = useOnlineStatus();
-  const { data, isLoading } = api.extras.getMisspellings.useQuery(
+  const utils = api.useUtils();
+  const { data, isLoading, isFetching, isPlaceholderData } = api.extras.getMisspellings.useQuery(
     { limit: 1, offset },
     {
       enabled: isOnline,
       initialData: offset === 0 ? initialData : undefined,
       staleTime: HERO_CLIENT_STALE_TIME,
+      placeholderData: keepPreviousData,
     },
   );
 
+  const canNavigateTo = (target: number) => {
+    if (target < 0 || target >= (data?.total ?? 0) || (isOnline && isPlaceholderData)) return false;
+    if (isOnline) return true;
+    const cached = utils.extras.getMisspellings.getData({ limit: 1, offset: target })
+      ?? (target === 0 ? initialData : undefined);
+    return Boolean(cached?.data.length);
+  };
+
   const handleNext = () => {
-    if (data?.total && offset < data.total - 1) {
-      setOffset((prev) => prev + 1);
+    if (canNavigateTo(offset + 1)) {
+      setDirection(1);
+      setOffset(offset + 1);
     }
   };
 
   const handlePrev = () => {
-    if (offset > 0) {
-      setOffset((prev) => prev - 1);
+    if (canNavigateTo(offset - 1)) {
+      setDirection(-1);
+      setOffset(offset - 1);
     }
   };
 
   const item = data?.data[0];
+  const displayedOffset = isPlaceholderData ? offset - direction : offset;
 
   return (
     <CustomCard className="min-h-52 min-w-0 bg-background/40 flex flex-col">
@@ -59,27 +122,29 @@ export function BentoCommonMistake({
         </Link>
       </CardHeader>
 
-      <CardBody className="flex min-w-0 flex-1 justify-center px-5 py-4 sm:px-6" aria-busy={isLoading}>
+      <CardBody className="flex min-w-0 flex-1 justify-center px-5 py-4 sm:px-6" aria-busy={isFetching}>
         {isLoading ? (
           <div className="grid w-full grid-cols-2 gap-4" aria-hidden>
             <div className="mx-auto h-8 w-full max-w-24 rounded bg-muted motion-safe:animate-pulse" />
             <div className="mx-auto h-8 w-full max-w-24 rounded bg-muted motion-safe:animate-pulse" />
           </div>
         ) : item ? (
-          <div className="grid min-w-0 grid-cols-2 divide-x divide-border">
-            <div className="flex min-w-0 flex-col items-center gap-2 pr-4">
-              <span lang="tr" className="dictionary-prose text-center font-serif text-2xl leading-tight text-muted-foreground line-through decoration-danger/70 decoration-2">
-                {item.wrong}
-              </span>
-              <XCircle aria-hidden className="h-4 w-4 shrink-0 text-danger" />
+          <EntryTransition entryId={item.id} direction={direction}>
+            <div className="grid min-w-0 grid-cols-2 divide-x divide-border">
+              <div className="flex min-w-0 flex-col items-center gap-2 pr-4">
+                <span lang="tr" className="dictionary-prose text-center font-serif text-2xl leading-tight text-muted-foreground line-through decoration-danger/70 decoration-2">
+                  {item.wrong}
+                </span>
+                <XCircle aria-hidden className="h-4 w-4 shrink-0 text-danger" />
+              </div>
+              <div className="flex min-w-0 flex-col items-center gap-2 pl-4">
+                <span lang="tr" className="dictionary-prose text-center font-serif text-2xl font-semibold leading-tight text-foreground">
+                  {item.correct}
+                </span>
+                <CheckCircle2 aria-hidden className="h-4 w-4 shrink-0 text-success" />
+              </div>
             </div>
-            <div className="flex min-w-0 flex-col items-center gap-2 pl-4">
-              <span lang="tr" className="dictionary-prose text-center font-serif text-2xl font-semibold leading-tight text-foreground">
-                {item.correct}
-              </span>
-              <CheckCircle2 aria-hidden className="h-4 w-4 shrink-0 text-success" />
-            </div>
-          </div>
+          </EntryTransition>
         ) : (
           <p className="text-sm text-muted-foreground">
             {t("HomeExtras.noMisspellingsFound")}
@@ -97,7 +162,7 @@ export function BentoCommonMistake({
               aria-label={t("HomeExtras.previous")}
               className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
               onPress={handlePrev}
-              isDisabled={offset === 0}
+              isDisabled={!canNavigateTo(offset - 1)}
             >
               <ArrowRight className="w-4 h-4 rotate-180" />
             </Button>
@@ -108,13 +173,13 @@ export function BentoCommonMistake({
               aria-label={t("HomeExtras.next")}
               className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
               onPress={handleNext}
-              isDisabled={!data?.total || offset >= data.total - 1}
+              isDisabled={!canNavigateTo(offset + 1)}
             >
               <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
           <span className="pr-2 text-xs tabular-nums text-muted-foreground">
-            {offset + 1} / {data?.total}
+            {displayedOffset + 1} / {data?.total}
           </span>
         </CardFooter>
       ) : null}
@@ -129,29 +194,43 @@ export function BentoGalatiMeshur({
 }) {
   const t = useTranslations("Home");
   const [offset, setOffset] = useState(0);
+  const [direction, setDirection] = useState<PageDirection>(1);
   const isOnline = useOnlineStatus();
-  const { data, isLoading } = api.extras.getGalatiMeshur.useQuery(
+  const utils = api.useUtils();
+  const { data, isLoading, isFetching, isPlaceholderData } = api.extras.getGalatiMeshur.useQuery(
     { limit: 1, offset },
     {
       enabled: isOnline,
       initialData: offset === 0 ? initialData : undefined,
       staleTime: HERO_CLIENT_STALE_TIME,
+      placeholderData: keepPreviousData,
     },
   );
 
+  const canNavigateTo = (target: number) => {
+    if (target < 0 || target >= (data?.total ?? 0) || (isOnline && isPlaceholderData)) return false;
+    if (isOnline) return true;
+    const cached = utils.extras.getGalatiMeshur.getData({ limit: 1, offset: target })
+      ?? (target === 0 ? initialData : undefined);
+    return Boolean(cached?.data.length);
+  };
+
   const handleNext = () => {
-    if (data?.total && offset < data.total - 1) {
-      setOffset((prev) => prev + 1);
+    if (canNavigateTo(offset + 1)) {
+      setDirection(1);
+      setOffset(offset + 1);
     }
   };
 
   const handlePrev = () => {
-    if (offset > 0) {
-      setOffset((prev) => prev - 1);
+    if (canNavigateTo(offset - 1)) {
+      setDirection(-1);
+      setOffset(offset - 1);
     }
   };
 
   const item = data?.data[0];
+  const displayedOffset = isPlaceholderData ? offset - direction : offset;
   const explanationPreview = item?.explanation
     ? item.explanation.length > 120
       ? `${item.explanation.slice(0, 120).trimEnd()}...`
@@ -170,7 +249,7 @@ export function BentoGalatiMeshur({
         </Link>
       </CardHeader>
 
-      <CardBody className="min-w-0 px-5 py-3 sm:px-6 flex-1 flex flex-col justify-center" aria-busy={isLoading}>
+      <CardBody className="min-w-0 px-5 py-3 sm:px-6 flex-1 flex flex-col justify-center" aria-busy={isFetching}>
         {isLoading ? (
           <div className="flex flex-col gap-4" aria-hidden>
             <div className="flex w-full items-center gap-2">
@@ -183,17 +262,19 @@ export function BentoGalatiMeshur({
             </div>
           </div>
         ) : item ? (
-          <div className="min-w-0 space-y-2">
-            <p lang="tr" className="dictionary-prose text-2xl font-serif font-semibold leading-tight text-foreground">
-              {item.word}
-            </p>
-            <p className="text-xs font-medium text-amber-700 dark:text-amber-500">
-              {t("HomeExtras.explanation")}
-            </p>
-            <p lang="tr" className="dictionary-prose text-sm leading-relaxed text-muted-foreground line-clamp-2">
-              {explanationPreview}
-            </p>
-          </div>
+          <EntryTransition entryId={item.id} direction={direction}>
+            <div className="min-w-0 space-y-2">
+              <p lang="tr" className="dictionary-prose text-2xl font-serif font-semibold leading-tight text-foreground">
+                {item.word}
+              </p>
+              <p className="text-xs font-medium text-amber-700 dark:text-amber-500">
+                {t("HomeExtras.explanation")}
+              </p>
+              <p lang="tr" className="dictionary-prose text-sm leading-relaxed text-muted-foreground line-clamp-2">
+                {explanationPreview}
+              </p>
+            </div>
+          </EntryTransition>
         ) : (
           <div className="text-muted-foreground text-sm">
             {t("HomeExtras.noGalatiMeshurFound")}
@@ -211,7 +292,7 @@ export function BentoGalatiMeshur({
               aria-label={t("HomeExtras.previous")}
               className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
               onPress={handlePrev}
-              isDisabled={offset === 0}
+              isDisabled={!canNavigateTo(offset - 1)}
             >
               <ArrowRight className="w-4 h-4 rotate-180" />
             </Button>
@@ -222,14 +303,14 @@ export function BentoGalatiMeshur({
               aria-label={t("HomeExtras.next")}
               className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
               onPress={handleNext}
-              isDisabled={!data?.total || offset >= data.total - 1}
+              isDisabled={!canNavigateTo(offset + 1)}
             >
               <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
 
           <span className="text-xs tabular-nums text-muted-foreground">
-            {data?.total ? `${offset + 1} / ${data.total}` : "0 / 0"}
+            {data?.total ? `${displayedOffset + 1} / ${data.total}` : "0 / 0"}
           </span>
 
           <Link

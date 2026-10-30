@@ -40,6 +40,13 @@ export default function PageTransition({ children }: { children: ReactNode }) {
     const element = elementRef.current;
     if (!element || typeof element.animate !== "function") return;
 
+    // The homepage owns its first-visit entrance; return visits stay immediate.
+    if (element.querySelector("[data-home-page]")) {
+      animationRef.current?.cancel();
+      animationRef.current = null;
+      return;
+    }
+
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const styles = getComputedStyle(element);
     const interrupted = animationRef.current?.playState === "running";

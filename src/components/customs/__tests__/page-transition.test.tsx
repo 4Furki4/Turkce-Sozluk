@@ -110,3 +110,12 @@ it("leaves navigation functional when the animation API is unavailable", () => {
   rerender(<PageTransition>Words</PageTransition>);
   expect(screen.getByText("Words")).toBeVisible();
 });
+
+it("leaves the homepage immediate instead of adding another route entrance", () => {
+  pathname.mockReturnValue("/tr/kelime-listesi");
+  const { rerender } = render(<PageTransition>Words</PageTransition>);
+  pathname.mockReturnValue("/tr");
+  rerender(<PageTransition><div data-home-page>Home</div></PageTransition>);
+  expect(animate).not.toHaveBeenCalled();
+  expect(screen.getByText("Home")).toBeVisible();
+});
