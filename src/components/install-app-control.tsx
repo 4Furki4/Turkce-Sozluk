@@ -54,7 +54,7 @@ export default function InstallAppControl() {
   };
 
   return <>
-    <Button variant="light" color="primary" className="min-h-11 justify-start px-0 font-semibold" onPress={install} isLoading={isPrompting} isDisabled={installed} startContent={<Download className="h-4 w-4" aria-hidden />}>
+    <Button variant="light" color="primary" className="min-h-11 justify-start px-4 font-semibold" onPress={install} isLoading={isPrompting} isDisabled={installed} startContent={<Download className="h-4 w-4" aria-hidden />}>
       {installed ? t("installed") : t("action")}
     </Button>
     <CustomModal isOpen={isOpen} onOpenChange={onOpenChange}>
