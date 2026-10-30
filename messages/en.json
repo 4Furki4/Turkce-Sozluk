@@ -1620,16 +1620,66 @@
     "advancedFilters": {
       "show": "Advanced filters",
       "hide": "Hide advanced filters",
-      "selectedCount": "{count} active filters"
+      "selectedCount": "{count} active filters",
+      "short": "Filters"
     },
     "pagination": {
       "summary": "Showing {from}-{to} of {total} words",
       "jumpTo": "Page",
-      "go": "Go"
+      "go": "Go",
+      "label": "Word list pages",
+      "previous": "Previous page",
+      "next": "Next page",
+      "more": "Skip pages",
+      "page": "Page {page}",
+      "perPage": "page",
+      "previousShort": "Previous",
+      "nextShort": "Next",
+      "position": "Page {page} of {total}",
+      "mobileSummary": "{from}–{to} of {total} words"
     },
     "seoIndexTitle": "Letter-by-letter word index",
     "seoIndexDescription": "Open the server-rendered word directory built for crawlers and visitors browsing without JavaScript.",
-    "seoIndexCta": "Go to word index"
+    "seoIndexCta": "Go to word index",
+    "indexLink": "Word index",
+    "view": {
+      "label": "Display words",
+      "list": "List view",
+      "grid": "Grid view"
+    },
+    "alphabet": {
+      "label": "Browse by first letter",
+      "all": "All",
+      "show": "Browse by letter",
+      "hide": "Hide letters",
+      "startsWith": "Words starting with {letter}"
+    },
+    "activeFilters": {
+      "label": "Active filters",
+      "search": "Search: {value}",
+      "letter": "Starts with: {value}",
+      "remove": "Remove {label}",
+      "clear": "Clear filters"
+    },
+    "results": {
+      "count": "{count} words",
+      "loading": "Loading words…",
+      "updating": "Updating…",
+      "countUnavailable": "Word count unavailable",
+      "tableLabel": "Words and meanings",
+      "emptyTitle": "No words found",
+      "emptyFiltered": "Try a different search or clear your filters to explore all words.",
+      "emptyDescription": "There are no words to display right now.",
+      "errorTitle": "Could not update the word list",
+      "errorDescription": "Your search and filters are saved. Try loading the results again.",
+      "retry": "Try again"
+    },
+    "entry": {
+      "turkishEquivalent": "Turkish equivalent:",
+      "seeAlso": "See also:",
+      "noMeaning": "No meaning available.",
+      "viewDetails": "View word"
+    }
   },
   "WordsHub": {
     "metaTitle": "Turkish Dictionary Word Index",

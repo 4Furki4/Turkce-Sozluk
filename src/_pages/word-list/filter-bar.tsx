@@ -47,9 +47,16 @@ export function FilterBar({
         attrOptions[attr.id.toString()] = attr.attribute;
     });
 
+    const classNames = {
+        trigger: 'h-11 min-h-11 rounded-lg border border-border bg-background/40 shadow-none',
+        label: 'text-sm text-foreground/75',
+    };
+
     return (
-        <div className={cn("grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 w-full", className)}>
+        <div className={cn("grid grid-cols-1 sm:grid-cols-3 gap-3 w-full", className)}>
             <CustomMultiSelect
+                labelPlacement="outside"
+                classNames={classNames}
                 isLoading={isLoading}
                 size="md"
                 options={posOptions}
@@ -60,6 +67,8 @@ export function FilterBar({
                 onClear={() => onPosChange([])}
             />
             <CustomMultiSelect
+                labelPlacement="outside"
+                classNames={classNames}
                 isLoading={isLoading}
                 options={langOptions}
                 size="md"
@@ -70,6 +79,8 @@ export function FilterBar({
                 onClear={() => onLangChange([])}
             />
             <CustomMultiSelect
+                labelPlacement="outside"
+                classNames={classNames}
                 isLoading={isLoading}
                 size="md"
                 options={attrOptions}

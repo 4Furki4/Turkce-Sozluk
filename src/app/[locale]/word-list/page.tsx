@@ -101,28 +101,17 @@ export default async function WordListPage({ params, searchParams }: Props) {
     const errors = await getTranslations({ locale, namespace: "Errors" });
 
     return (
-        <main className="max-w-7xl w-full mx-auto p-4">
+        <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:py-8">
             {rateLimited ? <RateLimitNotification key={JSON.stringify(queryInput)} retryAt={Math.max(wordsResult.retryAt ?? 0, countResult.retryAt ?? 0)} /> : null}
-            <section className="mb-6 rounded-md border border-border bg-background/40 p-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <h2 className="text-base font-semibold text-foreground">{t("seoIndexTitle")}</h2>
-                        <p className="mt-1 text-sm text-muted-foreground">{t("seoIndexDescription")}</p>
-                    </div>
-                    <Link
-                        className="inline-flex w-fit items-center justify-center rounded-md border border-primary/60 bg-background/40 px-3 py-2 text-sm font-medium text-primary hover:bg-primary hover:text-primary-foreground"
-                        href="/words"
-                    >
-                        {t("seoIndexCta")}
-                    </Link>
-                </div>
-            </section>
             <NoScriptNotice>
                 {locale === "en"
                     ? "JavaScript is disabled, so live filters are unavailable. Use the form and pagination links below for the server-rendered word list."
                     : "JavaScript kapalı olduğu için canlı filtreler kullanılamıyor. Sunucuda oluşturulan kelime listesi için aşağıdaki formu ve sayfa bağlantılarını kullanın."}
             </NoScriptNotice>
             <noscript>
+                <style>{`.word-list-enhanced { display: none; }`}</style>
+                <h1 className="mb-4 text-2xl font-semibold">{t("title")}</h1>
+                <Link className="mb-4 inline-block text-primary underline" href="/words">{t("indexLink")}</Link>
                 <section className="mb-6 rounded-md border border-border bg-background/40 p-4">
                     <form method="get" action={locale === "en" ? "/en/word-list" : "/tr/kelime-listesi"} className="grid gap-3 sm:grid-cols-4">
                         <input
