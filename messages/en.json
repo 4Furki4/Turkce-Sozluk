@@ -503,7 +503,7 @@
       "searchPlaceholder": "Search for a word...",
       "searchPlaceholderPhrase": "Search for a phrase...",
       "searchPlaceholderProverb": "Search for a proverb...",
-      "popularSearches": "Popular Searches",
+      "popularSearches": "Popular searches",
       "searchError": "Please enter a word to search",
       "turkishLetters": "Turkish letters",
       "patternSearchTooltip": "Pattern Search: Use '_' for unknown letters. Ex: 'k_l_m' -> 'kalem'",
@@ -557,7 +557,9 @@
         "example": "Example word"
       },
       "searchAction": "Search",
-      "searchMode": "Search mode"
+      "searchMode": "Search mode",
+      "searchModeTooltip": "Search mode: {mode}. Change mode",
+      "meaningSearchOffline": "Meaning search requires an internet connection"
     },
     "HomeExtras": {
       "galatiMeshurTitle": "Galat-ı Meşhur",

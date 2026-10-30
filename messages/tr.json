@@ -504,7 +504,7 @@
       "searchPlaceholder": "Kelime ara...",
       "searchPlaceholderPhrase": "Deyim ara...",
       "searchPlaceholderProverb": "Atasözü ara...",
-      "popularSearches": "Popüler Aramalar",
+      "popularSearches": "Çok arananlar",
       "searchError": "Lütfen aramak için bir kelime girin",
       "patternSearchTooltip": "Desen Arama: Bilinmeyen harfler için '_' kullanın. Örn: 'k_l_m' -> 'kalem'",
       "searchByWord": "Kelime",
@@ -557,7 +557,9 @@
         "example": "Örnek kelime"
       },
       "searchAction": "Ara",
-      "searchMode": "Arama türü"
+      "searchMode": "Arama türü",
+      "searchModeTooltip": "Arama türü: {mode}. Değiştir",
+      "meaningSearchOffline": "Anlam ile arama için internet bağlantısı gerekir"
     },
     "HomeExtras": {
       "galatiMeshurTitle": "Galat-ı Meşhur",
