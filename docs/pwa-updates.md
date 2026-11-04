@@ -13,8 +13,8 @@ external worker's lifecycle events.
 **Update now** activates the downloaded worker and reloads the current URL,
 including its query and hash, once the replacement controls this tab. Users should
 save unfinished forms first. Other open tabs keep their page and offer their own
-explicit reload. **Later** hides the current release until the component is
-remounted or a distinct release becomes available. Updates require connectivity.
+explicit reload. **Later** hides that release for the current page, including
+component remounts. A distinct release can still be offered. Updates require connectivity.
 An activation that does not complete within 30 seconds shows a retry action.
 
 Release detection uses the generated service worker bytes, rather than the
@@ -26,6 +26,12 @@ Activation deletes only older `document-pages`, `pages`, `pages-rsc` and
 `pages-rsc-prefetch` cache families and their Serwist expiration records. Offline
 dictionary IndexedDB data, local preferences and unrelated asset caches remain.
 The dictionary and games root layouts both register the update component.
+
+`/sw.js` is served with `Cache-Control: no-store`. Keep this exact path out of
+any Cloudflare Cache Rule that overrides origin cache headers. After deploying
+the header change, purge the existing `/sw.js` URL from Cloudflare for each
+public hostname and verify that subsequent requests return the current script
+without a cache hit.
 
 The first deployment of this feature cannot add a prompt to JavaScript already
 running from an older release. Those clients acquire update notifications after

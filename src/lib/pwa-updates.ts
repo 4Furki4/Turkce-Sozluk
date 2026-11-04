@@ -20,11 +20,12 @@ type UpdateEnvironment = {
 };
 
 // The injected Serwist instance survives component remounts. Register it once,
-// and remember which worker belongs to the JavaScript currently on this page.
+// and keep the page's original controller and update decisions across remounts.
 const sessions = new WeakMap<SerwistClient, {
   registration: Promise<ServiceWorkerRegistration | undefined> | null;
   lastRegistrationAttempt: number;
   pageController: ServiceWorker | null;
+  dismissedWorkers: WeakSet<ServiceWorker>;
 }>();
 
 export function createPwaUpdateManager(
@@ -36,7 +37,6 @@ export function createPwaUpdateManager(
   let disposed = false;
   let registration: ServiceWorkerRegistration | undefined;
   let candidate: ServiceWorker | null = null;
-  let dismissed: ServiceWorker | null = null;
   let acceptedWorker: ServiceWorker | null = null;
   let skipWaitingWorker: ServiceWorker | null = null;
   let reloadRequested = false;
@@ -49,11 +49,21 @@ export function createPwaUpdateManager(
   const installingListeners = new Map<ServiceWorker, () => void>();
   let session = sessions.get(client);
   const hadSession = Boolean(session);
+  if (!session) {
+    session = {
+      pageController: container.controller,
+      registration: null,
+      lastRegistrationAttempt: -Infinity,
+      dismissedWorkers: new WeakSet(),
+    };
+    sessions.set(client, session);
+  }
+  const { dismissedWorkers } = session;
 
   const publish = () => {
     if (disposed) return;
     onState({
-      available: Boolean(candidate && candidate !== dismissed) || error || reloadRequested,
+      available: Boolean(candidate && !dismissedWorkers.has(candidate)) || error || reloadRequested,
       updating: reloadRequested,
       error,
       online: isOnline(),
@@ -89,16 +99,15 @@ export function createPwaUpdateManager(
     const onStateChange = () => {
       if (worker.state !== "redundant" || candidate !== worker) return;
       setCandidate(null);
-      // A failed or superseded download is retryable. An old controller
-      // becoming redundant is never watched as the candidate here.
-      fail();
+      if (reloadRequested) fail();
+      else publish();
     };
     worker.addEventListener("statechange", onStateChange);
     removeWorkerListener = () => worker.removeEventListener("statechange", onStateChange);
   };
 
   const detectController = () => {
-    if (disposed || !session || !container.controller) return;
+    if (disposed || !container.controller) return;
     if (!session.pageController) {
       // First installation may claim the current page. It is not an update.
       session.pageController = container.controller;
@@ -127,7 +136,7 @@ export function createPwaUpdateManager(
     if (disposed || !event.sw || event.sw.state !== "installed") return;
     // Already-waiting events can omit isUpdate, and later updates can be
     // marked external by Serwist. The existing controller is the evidence.
-    if (!session?.pageController && !container.controller) return;
+    if (!session.pageController && !container.controller) return;
     setCandidate(event.sw);
     error = false;
     publish();
@@ -204,16 +213,8 @@ export function createPwaUpdateManager(
   document.addEventListener("visibilitychange", onResume);
   const checkTimer = browserWindow.setInterval(onResume, UPDATE_CHECK_INTERVAL_MS);
 
-  if (!session) {
-    session = {
-      pageController: container.controller,
-      registration: null,
-      lastRegistrationAttempt: -Infinity,
-    };
-    sessions.set(client, session);
-  }
   const ensureRegistration = async (initial = false) => {
-    if (disposed || registration || !session) return;
+    if (disposed || registration) return;
     const currentSession = session;
     if (!currentSession.registration) {
       if (!initial && (!isOnline() || document.visibilityState !== "visible" ||
@@ -246,13 +247,13 @@ export function createPwaUpdateManager(
   return {
     applyUpdate() {
       if (disposed || reloaded || reloadRequested || !isOnline()) return;
-      dismissed = null;
+      if (candidate) dismissedWorkers.delete(candidate);
       error = false;
       reloadRequested = true;
       acceptedWorker = registration?.waiting ?? null;
       skipWaitingWorker = null;
       publish();
-      if (!registration?.waiting && container.controller && container.controller !== session?.pageController) {
+      if (!registration?.waiting && container.controller && container.controller !== session.pageController) {
         reloadOnce();
         return;
       }
@@ -262,7 +263,7 @@ export function createPwaUpdateManager(
     },
     dismiss() {
       if (disposed || reloadRequested) return;
-      dismissed = candidate;
+      if (candidate) dismissedWorkers.add(candidate);
       error = false;
       publish();
     },
