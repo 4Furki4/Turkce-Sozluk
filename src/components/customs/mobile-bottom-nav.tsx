@@ -58,7 +58,7 @@ export default function MobileBottomNav({
     return (
         <>
             <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-t border-border pb-[env(safe-area-inset-bottom)]">
-                <div className="grid grid-cols-5 items-center h-16 px-2">
+                <div data-home-enter="mobile-navigation" className="grid grid-cols-5 items-center h-16 px-2">
                     {navItems.map((item, index) => {
                         const Icon = item.icon;
 

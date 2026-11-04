@@ -9,5 +9,5 @@ export default async function Page({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  return <Hero />;
+  return <Hero animateHome />;
 }

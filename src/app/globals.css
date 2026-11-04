@@ -197,6 +197,254 @@
   opacity: 0.6;
 }
 
+/* Kinetic typesetting: letters find their baseline, then ink leads into search.
+   All content is visible without animation support or JavaScript. */
+[data-home-page] .home-composition {
+  position: relative;
+  isolation: isolate;
+}
+
+.home-headline {
+  display: block;
+  overflow: clip;
+  overflow-clip-margin: 0.12em;
+}
+
+.home-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.home-glyph {
+  display: inline-block;
+  transform-origin: 50% 80%;
+}
+
+.home-ink-trail,
+.home-search-stroke {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  fill: none;
+  stroke: hsl(var(--primary-text));
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.home-ink-trail {
+  inset: 0 0 auto;
+  width: 100%;
+  height: calc(100% - 9rem);
+  overflow: visible;
+  z-index: -1;
+  stroke-width: 1.5px;
+}
+
+.home-search-stroke {
+  inset: 0 0 auto;
+  width: 100%;
+  height: 3.5rem;
+  z-index: 2;
+  stroke-width: 2px;
+}
+
+:is(.home-ink-trail, .home-search-stroke) > * {
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+}
+
+@keyframes home-glyph-compose {
+  from {
+    opacity: 0.12;
+    filter: blur(3px);
+    transform: perspective(650px) translate3d(calc(var(--glyph-x) * var(--glyph-travel, 1)), calc(var(--glyph-y) * var(--glyph-travel, 1)), var(--glyph-depth)) rotateX(50deg) rotateZ(var(--glyph-turn)) scale(1.18);
+  }
+  72% { opacity: 1; filter: blur(0); }
+  to { opacity: 1; filter: blur(0); transform: none; }
+}
+
+@keyframes home-ink-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes home-ink-pass {
+  0%, 100% { opacity: 0; }
+  12%, 62% { opacity: 0.7; }
+}
+
+@keyframes home-line-typeset {
+  from { opacity: 0.3; clip-path: inset(0 0 100% 0); transform: translateY(15px); }
+  to { opacity: 1; clip-path: inset(0); transform: none; }
+}
+
+@keyframes home-search-unfold {
+  from { opacity: 0.35; transform: perspective(900px) translateY(24px) rotateX(-20deg) scaleX(0.88); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes home-panel-compose {
+  from { opacity: 0.25; clip-path: inset(0 0 70% 0 round 8px); transform: translateY(32px) scale(0.96); }
+  to { opacity: 1; clip-path: inset(0 round 8px); transform: none; }
+}
+
+@keyframes home-nav-compose {
+  from { opacity: 0.25; transform: perspective(600px) translateY(-14px) rotateX(35deg); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes home-logo-compose {
+  from { transform: rotate(-35deg) scale(0.7); }
+  to { transform: none; }
+}
+
+@keyframes home-footer-typeset {
+  from { opacity: 0.4; clip-path: inset(0 100% 0 0); }
+  to { opacity: 1; clip-path: inset(0); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .home-glyph {
+    translate: 0 var(--glyph-lift, 0px);
+    rotate: var(--glyph-lean, 0deg);
+    transition: translate 240ms var(--ease-content-out), rotate 240ms var(--ease-content-out);
+  }
+
+  html[data-home-intro="play"] .home-glyph {
+    animation: home-glyph-compose 920ms cubic-bezier(0.22, 0.8, 0.2, 1) var(--glyph-delay) backwards;
+  }
+
+  html[data-home-intro="play"] .home-ink-trail {
+    animation: home-ink-pass 1600ms ease-out 180ms backwards;
+  }
+
+  html[data-home-intro="play"] .home-ink-trail path {
+    animation: home-ink-draw 1250ms cubic-bezier(0.45, 0, 0.2, 1) 180ms backwards;
+  }
+
+  html[data-home-intro="play"] .home-search-stroke {
+    animation: home-ink-pass 1200ms ease-out 650ms backwards;
+  }
+
+  html[data-home-intro="play"] .home-search-stroke rect {
+    animation: home-ink-draw 900ms var(--ease-content-out) 650ms backwards;
+  }
+
+  html[data-home-intro="play"] body:has([data-home-page]) [data-home-enter="brand"] {
+    animation: home-line-typeset 720ms var(--ease-content-out) 80ms backwards;
+  }
+
+  html[data-home-intro="play"] body:has([data-home-page]) [data-home-enter="brand"] img {
+    animation: home-logo-compose 850ms var(--ease-content-out) 80ms backwards;
+  }
+
+  html[data-home-intro="play"] body:has([data-home-page]) [data-home-enter="navigation"] > li {
+    animation: home-nav-compose 620ms var(--ease-content-out) calc(200ms + var(--nav-order, 0) * 65ms) backwards;
+  }
+
+  html[data-home-intro="play"] body:has([data-home-page]) [data-home-enter="navigation"] > li:nth-child(2) { --nav-order: 1; }
+  html[data-home-intro="play"] body:has([data-home-page]) [data-home-enter="navigation"] > li:nth-child(3) { --nav-order: 2; }
+  html[data-home-intro="play"] body:has([data-home-page]) [data-home-enter="navigation"] > li:nth-child(4) { --nav-order: 3; }
+  html[data-home-intro="play"] body:has([data-home-page]) [data-home-enter="navigation"] > li:nth-child(5) { --nav-order: 4; }
+
+  html[data-home-intro="play"] [data-home-page] [data-home-enter="motto"] {
+    animation: home-line-typeset 650ms var(--ease-content-out) 480ms backwards;
+  }
+
+  html[data-home-intro="play"] [data-home-page] [data-home-enter="search"] {
+    transform-origin: 50% 0;
+    animation: home-search-unfold 780ms var(--ease-content-out) 620ms backwards;
+  }
+
+  html[data-home-intro="play"] [data-home-page] :is([data-home-enter="content"], [data-home-enter="word"]) {
+    animation: home-panel-compose 740ms var(--ease-content-out) 780ms backwards;
+  }
+
+  html[data-home-intro="play"] [data-home-page] [data-home-enter="extras"] > :first-child {
+    animation: home-panel-compose 700ms var(--ease-content-out) 860ms backwards;
+  }
+
+  html[data-home-intro="play"] [data-home-page] [data-home-enter="extras"] > :last-child {
+    animation: home-panel-compose 700ms var(--ease-content-out) 940ms backwards;
+  }
+
+  html[data-home-intro="play"] [data-home-page] [data-home-enter="features"][data-home-visible] {
+    animation: home-panel-compose 760ms var(--ease-content-out) backwards;
+  }
+
+  html[data-home-intro="play"] body:has([data-home-page]) [data-home-enter="footer"][data-home-visible] {
+    animation: home-footer-typeset 850ms var(--ease-content-out) backwards;
+  }
+
+  html[data-home-intro="play"] body:has([data-home-page]) [data-home-enter="mobile-navigation"] > * {
+    animation: home-nav-compose 600ms var(--ease-content-out) calc(160ms + var(--nav-order, 0) * 55ms) backwards;
+  }
+
+  html[data-home-intro="play"] body:has([data-home-page]) [data-home-enter="mobile-navigation"] > :nth-child(2) { --nav-order: 1; }
+  html[data-home-intro="play"] body:has([data-home-page]) [data-home-enter="mobile-navigation"] > :nth-child(3) { --nav-order: 2; }
+  html[data-home-intro="play"] body:has([data-home-page]) [data-home-enter="mobile-navigation"] > :nth-child(4) { --nav-order: 3; }
+  html[data-home-intro="play"] body:has([data-home-page]) [data-home-enter="mobile-navigation"] > :nth-child(5) { --nav-order: 4; }
+
+  /* Focus interrupts movement without restarting the timeline on blur. */
+  body:has([data-home-page]) :is([data-home-enter], [data-home-enter] > li, [data-home-enter="extras"] > *):focus-within {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+
+  [data-home-page] a svg,
+  [data-home-page] button,
+  body:has([data-home-page]) [data-home-enter="mobile-navigation"] svg {
+    transition: translate 160ms var(--ease-content-out), scale 120ms ease-out, color 120ms ease-out;
+  }
+
+  [data-home-page] a:is(:hover, :focus-visible) > .lucide-arrow-right {
+    translate: 5px 0;
+  }
+
+  [data-home-page] button:not(:disabled):active {
+    scale: 0.96;
+  }
+
+  body:has([data-home-page]) [data-home-enter="mobile-navigation"] :is(a, button):is(:hover, :focus-visible) svg {
+    translate: 0 -3px;
+  }
+
+  @media (max-width: 639px) {
+    .home-glyph { --glyph-travel: 0.6; }
+    .home-ink-trail { stroke-width: 1px; }
+  }
+}
+
+/* Color feedback stays available with reduced motion and touch input. */
+body:has([data-home-page]) :is([data-home-enter="navigation"], [data-home-enter="footer"]) a {
+  text-decoration-color: transparent;
+  text-underline-offset: 0.3em;
+  transition: color 150ms ease-out, text-decoration-color 150ms ease-out;
+}
+
+body:has([data-home-page]) :is([data-home-enter="navigation"], [data-home-enter="footer"]) a:is(:hover, :focus-visible) {
+  text-decoration-line: underline;
+  text-decoration-color: currentColor;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-carousel-entry {
+    transform: none !important;
+  }
+
+  /* Keep the mobile search button's feedback stationary as well. */
+  body:has([data-home-page]) [data-home-enter="mobile-navigation"] button > div {
+    transform: none;
+    scale: none;
+    transition: background-color 100ms ease-out;
+  }
+
+  body:has([data-home-page]) [data-home-enter="navigation"] svg {
+    transition: none;
+  }
+}
+
 /* The default state stays visible, including before hydration. */
 .search-word-results-arrival {
   animation: search-word-results-arrive 240ms var(--ease-content-out);

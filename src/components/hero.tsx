@@ -10,6 +10,7 @@ import { api } from "@/src/trpc/server";
 import type { RouterOutputs } from "@/src/trpc/shared";
 import InstallAppControl from "./install-app-control";
 import { getHeadwordProps } from "@/src/lib/headword-presentation";
+import KineticHeadline from "./kinetic-headline";
 
 type PopularWords = RouterOutputs["word"]["getPopularWords"];
 type WordOfTheDay = RouterOutputs["word"]["getWordOfTheDay"];
@@ -104,8 +105,10 @@ async function getHeroData() {
 
 export default async function Hero({
   children,
+  animateHome = false,
 }: {
   children?: React.ReactNode;
+  animateHome?: boolean;
 }) {
   const t = await getTranslations("Home");
   const {
@@ -162,7 +165,7 @@ export default async function Hero({
   ];
 
   return (
-    <div className="relative isolate min-h-[calc(100vh-var(--navbar-height))] flex flex-col justify-center">
+    <div data-home-page={animateHome ? "" : undefined} className="relative isolate min-h-[calc(100vh-var(--navbar-height))] flex flex-col justify-center">
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[500px] pointer-events-none -z-10"
         style={{
@@ -173,19 +176,34 @@ export default async function Hero({
       <div className="absolute inset-0 -z-20 h-full w-full bg-[radial-gradient(#e5e7eb_2px,transparent_2px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)] pointer-events-none opacity-35" />
 
       <div className="mx-auto max-w-7xl px-4 pb-12 pt-8 sm:pt-12 sm:pb-16 lg:px-8 w-full">
-        <div className="mx-auto mb-10 space-y-6 text-center sm:mb-12 sm:space-y-8">
+        <div className="home-composition mx-auto mb-10 space-y-6 text-center sm:mb-12 sm:space-y-8">
+          {animateHome ? (
+            <svg className="home-ink-trail" viewBox="0 0 1000 310" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+              <path pathLength="1" d="M96 72C40 8 800 -18 908 72C1020 164 866 251 662 251H536Q500 251 500 310" />
+            </svg>
+          ) : null}
           <div className="mx-auto max-w-3xl space-y-4">
-            <h1 className="text-balance font-bold tracking-tight text-fs-4 sm:text-fs-6 leading-[1.1] text-foreground">
-              {t.rich("hero.title", {
-                red: (chunks) => <span className="text-primary">{chunks}</span>,
-              })}
+            <h1 data-home-enter="title" className="text-balance font-bold tracking-tight text-fs-4 sm:text-fs-6 leading-[1.1] text-foreground">
+              {animateHome ? (
+                <>
+                  <span className="sr-only">{t.rich("hero.title", { red: (chunks) => chunks })}</span>
+                  <KineticHeadline>
+                    {t.rich("hero.title", { red: (chunks) => <span className="text-primary">{chunks}</span> })}
+                  </KineticHeadline>
+                </>
+              ) : t.rich("hero.title", { red: (chunks) => <span className="text-primary">{chunks}</span> })}
             </h1>
-            <p className="text-fs-0 sm:text-fs-1 leading-relaxed text-muted-foreground font-sans text-balance">
+            <p data-home-enter="motto" className="text-fs-0 sm:text-fs-1 leading-relaxed text-muted-foreground font-sans text-balance">
               {t("hero.motto")}
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto w-full">
+          <div data-home-enter="search" className="relative max-w-4xl mx-auto w-full">
+            {animateHome ? (
+              <svg className="home-search-stroke" viewBox="0 0 1000 56" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <rect x="1" y="1" width="998" height="54" rx="8" pathLength="1" />
+              </svg>
+            ) : null}
             <SearchContainer
               className="w-full"
               initialTrendingWords={initialPopularWords}
@@ -193,22 +211,22 @@ export default async function Hero({
           </div>
         </div>
 
-        {children ? <div className="mb-10 sm:mb-12">{children}</div> : null}
+        {children ? <div data-home-enter="content" className="mb-10 sm:mb-12">{children}</div> : null}
 
         <div className="grid min-w-0 grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12">
-          <div className="min-w-0 lg:col-span-7">
+          <div data-home-enter="word" className="min-w-0 lg:col-span-7">
             <BentoWordOfTheDay
               initialWordOfTheDay={initialWordOfTheDay}
               labels={wordOfTheDayLabels}
             />
           </div>
 
-          <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:col-span-5 lg:grid-cols-1">
+          <div data-home-enter="extras" className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:col-span-5 lg:grid-cols-1">
             <BentoCommonMistake initialData={initialMisspellings} />
             <BentoGalatiMeshur initialData={initialGalatiMeshur} />
           </div>
 
-          <div className="min-w-0 mt-2 sm:mt-4 lg:col-span-12">
+          <div data-home-enter="features" className="min-w-0 mt-2 sm:mt-4 lg:col-span-12">
             <BentoFeatures features={features} />
           </div>
         </div>
