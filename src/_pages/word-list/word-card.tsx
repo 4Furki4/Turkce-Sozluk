@@ -3,6 +3,7 @@
 import React from "react";
 import { Card, CardHeader, CardBody, CardFooter, Chip } from "@heroui/react";
 import { Link } from "@/src/i18n/routing";
+import { useTranslations } from "next-intl";
 import { ArrowRight } from "lucide-react";
 import { getHeadwordProps } from "@/src/lib/headword-presentation";
 
@@ -17,19 +18,16 @@ interface WordCardProps {
 }
 
 export function WordCard({ id, name, meanings, partOfSpeech, origin, relatedWord, relationType }: WordCardProps) {
+    const t = useTranslations("WordList.entry");
     return (
         <Link prefetch={false} href={{
             pathname: '/search/[word]',
-            params: { word: encodeURIComponent(name) }
-        }} className="block h-full">
+            params: { word: name }
+        }} className="block h-full rounded-xl outline-offset-4 focus-visible:outline-2 focus-visible:outline-primary">
             <Card
-                className="feature-card-shine group relative w-full h-full border border-white/10 bg-background/50  overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:border-primary/30"
-                isPressable
+                className="group h-full w-full rounded-xl border border-border bg-background/40 shadow-none transition-colors hover:border-primary/40 motion-reduce:transition-none"
             >
-                {/* Subtle primary accent on the left */}
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/0 group-hover:bg-primary transition-colors duration-300" />
-
-                <CardHeader className="dictionary-headword-container flex flex-col items-start gap-1 px-6 pt-6 pb-2">
+                <CardHeader className="dictionary-headword-container flex flex-col items-start gap-1 px-5 pt-5 pb-2">
                     <div className="flex w-full justify-between items-start">
                         <h3 {...getHeadwordProps(name)} lang="tr" className="dictionary-headword [--headword-max:1.5rem] text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
                             {name}
@@ -54,30 +52,30 @@ export function WordCard({ id, name, meanings, partOfSpeech, origin, relatedWord
                     )}
                 </CardHeader>
 
-                <CardBody className="px-6 py-2">
+                <CardBody className="px-5 py-2">
                     <div className="flex flex-col gap-2">
                         {meanings.length > 0 ? (
                             meanings.slice(0, 2).map((m, idx) => (
-                                <p lang="tr" key={m.id} className="dictionary-prose text-base text-muted-foreground line-clamp-2 leading-relaxed">
+                                <p lang="tr" key={m.id} className="dictionary-prose text-base text-foreground/80 line-clamp-3 leading-relaxed">
                                     <span className="font-semibold text-primary/70 mr-2">{idx + 1}.</span>
                                     {m.meaning}
                                 </p>
                             ))
                         ) : relatedWord ? (
                             <p className="text-sm text-muted-foreground italic">
-                                {relationType === 'turkish_equivalent' ? 'Türkçe karşılığı:' : 'Bakınız:'} <span className="font-semibold text-primary">{relatedWord}</span>
+                                {t(relationType === 'turkish_equivalent' ? 'turkishEquivalent' : 'seeAlso')} <span className="font-semibold text-primary">{relatedWord}</span>
                             </p>
                         ) : (
                             <p className="text-sm text-muted-foreground italic">
-                                Anlam bulunamadı.
+                                {t('noMeaning')}
                             </p>
                         )}
                     </div>
                 </CardBody>
 
-                <CardFooter className="px-6 pb-6 pt-4 flex justify-end">
-                    <div className="flex items-center gap-2 text-sm font-medium text-primary opacity-100 translate-x-0 md:opacity-0 md:-translate-x-2 md:group-hover:opacity-100 md:group-hover:translate-x-0 transition-all duration-300">
-                        View Details
+                <CardFooter className="px-5 pb-5 pt-3 flex justify-end">
+                    <div className="flex items-center gap-2 text-sm font-medium text-primary ">
+                        {t('viewDetails')}
                         <ArrowRight size={16} />
                     </div>
                 </CardFooter>
