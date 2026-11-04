@@ -1609,16 +1609,66 @@
     "advancedFilters": {
       "show": "Gelişmiş filtreler",
       "hide": "Gelişmiş filtreleri gizle",
-      "selectedCount": "{count} aktif filtre"
+      "selectedCount": "{count} aktif filtre",
+      "short": "Filtreler"
     },
     "pagination": {
       "summary": "{from}-{to} / {total} kelime gösteriliyor",
       "jumpTo": "Sayfa",
-      "go": "Git"
+      "go": "Git",
+      "label": "Kelime listesi sayfaları",
+      "previous": "Önceki sayfa",
+      "next": "Sonraki sayfa",
+      "more": "Sayfaları atla",
+      "page": "{page}. sayfa",
+      "perPage": "sayfa",
+      "previousShort": "Önceki",
+      "nextShort": "Sonraki",
+      "position": "{total} sayfadan {page}. sayfa",
+      "mobileSummary": "{from}–{to} / {total} kelime"
     },
     "seoIndexTitle": "Harf harf kelime dizini",
     "seoIndexDescription": "Arama motorları ve JavaScript kullanmayan ziyaretçiler için hazırlanmış, sunucuda oluşturulan kelime dizinini açın.",
-    "seoIndexCta": "Kelime dizinine git"
+    "seoIndexCta": "Kelime dizinine git",
+    "indexLink": "Kelime dizini",
+    "view": {
+      "label": "Kelime görünümü",
+      "list": "Liste görünümü",
+      "grid": "Kart görünümü"
+    },
+    "alphabet": {
+      "label": "Baş harfe göre göz at",
+      "all": "Tümü",
+      "show": "Harfe göre göz at",
+      "hide": "Harfleri gizle",
+      "startsWith": "{letter} harfiyle başlayan kelimeler"
+    },
+    "activeFilters": {
+      "label": "Etkin filtreler",
+      "search": "Arama: {value}",
+      "letter": "Baş harf: {value}",
+      "remove": "{label} filtresini kaldır",
+      "clear": "Filtreleri temizle"
+    },
+    "results": {
+      "count": "{count} kelime",
+      "loading": "Kelimeler yükleniyor…",
+      "updating": "Güncelleniyor…",
+      "countUnavailable": "Kelime sayısı alınamadı",
+      "tableLabel": "Kelimeler ve anlamları",
+      "emptyTitle": "Kelime bulunamadı",
+      "emptyFiltered": "Farklı bir arama deneyin veya tüm kelimeleri görmek için filtreleri temizleyin.",
+      "emptyDescription": "Şu anda gösterilecek kelime yok.",
+      "errorTitle": "Kelime listesi güncellenemedi",
+      "errorDescription": "Aramanız ve filtreleriniz korundu. Sonuçları yeniden yüklemeyi deneyin.",
+      "retry": "Yeniden dene"
+    },
+    "entry": {
+      "turkishEquivalent": "Türkçe karşılığı:",
+      "seeAlso": "Bakınız:",
+      "noMeaning": "Anlam bulunamadı.",
+      "viewDetails": "Kelimeyi incele"
+    }
   },
   "WordsHub": {
     "metaTitle": "Türkçe Sözlük Kelime Dizini",
