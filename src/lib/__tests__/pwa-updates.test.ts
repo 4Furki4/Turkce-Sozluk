@@ -130,6 +130,36 @@ describe("PWA release update lifecycle", () => {
     app.manager.dispose();
   });
 
+  it("keeps a dismissed release hidden when the component remounts", async () => {
+    const app = setup();
+    await flush();
+    app.wait();
+    app.manager.dismiss();
+    app.manager.dispose();
+
+    const onState = jest.fn();
+    const remount = createPwaUpdateManager(app.client, onState, app.environment);
+    await flush();
+    expect(onState).not.toHaveBeenCalledWith(expect.objectContaining({ available: true }));
+
+    app.control();
+    expect(onState).toHaveBeenLastCalledWith(expect.objectContaining({ available: false }));
+    remount.dispose();
+  });
+
+  it("does not resurface a dismissed download when it becomes redundant", async () => {
+    const app = setup();
+    await flush();
+    app.wait();
+    app.manager.dismiss();
+
+    Object.defineProperty(app.next, "state", { value: "redundant" });
+    Object.defineProperty(app.registration, "waiting", { value: null });
+    app.next.dispatchEvent(new Event("statechange"));
+    expect(app.state()).toMatchObject({ available: false, error: false });
+    app.manager.dispose();
+  });
+
   it("accepts the newest waiting release after another tab activated an earlier update", async () => {
     const app = setup();
     await flush();

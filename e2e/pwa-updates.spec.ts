@@ -8,6 +8,12 @@ import { DB_NAME, DB_VERSION, METADATA_STORE } from "../src/lib/db-config";
 test.use({ serviceWorkers: "allow" });
 test.setTimeout(90_000);
 
+test("serves the update script without HTTP caching", async ({ request }) => {
+  const response = await request.get("/sw.js", { headers: { "Service-Worker": "script" } });
+  expect(response.ok()).toBe(true);
+  expect(response.headers()["cache-control"]).toBe("no-store");
+});
+
 // Serve real production pages and the compiled worker on an isolated origin.
 // Only the build revision and a test HTML marker change between releases;
 // generated files on disk are never modified.
