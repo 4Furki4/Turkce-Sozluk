@@ -42,7 +42,7 @@ export function MisspellingsList({ entries }: { entries: Misspelling[] }) {
                     size="md"
                     className="w-full sm:max-w-sm"
                     classNames={{
-                        inputWrapper: "h-11 border border-foreground/20 bg-background/40 shadow-none backdrop-blur-none group-data-[hover=true]:border-foreground/40",
+                        inputWrapper: "h-11 border border-foreground/20 bg-background/40 shadow-none backdrop-blur-none group-data-[hover=true]:border-foreground/40 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-offset-2 data-[focus-visible=true]:outline-ring",
                         input: "placeholder:text-foreground/70",
                     }}
                     startContent={<Search aria-hidden="true" className="size-4 shrink-0 text-foreground/65" />}
