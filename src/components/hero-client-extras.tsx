@@ -1,10 +1,9 @@
 "use client";
 
 import { Button, CardBody, CardFooter, CardHeader } from "@heroui/react";
-import { ArrowRight, BookOpen, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle2, Dice5, RotateCw, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { forwardRef, useState, type ReactNode } from "react";
-import { keepPreviousData } from "@tanstack/react-query";
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "framer-motion";
 
 import CustomCard from "@/src/components/customs/heroui/custom-card";
@@ -19,6 +18,203 @@ type GalatiMeshurData = RouterOutputs["extras"]["getGalatiMeshur"];
 const HERO_CLIENT_STALE_TIME = 24 * 60 * 60 * 1000;
 
 type PageDirection = 1 | -1;
+
+type ExamplePage = { data: { id: number }[]; total: number };
+const CAROUSEL_BUTTON_CLASS =
+  "h-11 min-w-11 text-muted-foreground hover:text-foreground aria-disabled:opacity-50 aria-disabled:hover:text-muted-foreground";
+
+function randomOffset(offset: number, total: number, sample: number, previousOffset?: number) {
+  if (total > 2 && previousOffset !== undefined && previousOffset !== offset && previousOffset < total) {
+    // The continuation can sample among offsets that neither response has shown.
+    const first = Math.min(offset, previousOffset);
+    const second = Math.max(offset, previousOffset);
+    let target = Math.floor(sample * (total - 2));
+    if (target >= first) target++;
+    if (target >= second) target++;
+    return target;
+  }
+  const steps = 1 + Math.floor(sample * (total - 1));
+  return (offset + steps) % total;
+}
+
+function useCarouselPosition<Page extends ExamplePage>() {
+  const [position, setPosition] = useState<{
+    offset: number;
+    previousPage?: { offset: number; data: Page | undefined };
+    previousCount?: { total: number; updatedAt: number };
+    direction?: PageDirection;
+    randomSample?: number;
+    continuedRoll?: boolean;
+    recovering?: boolean;
+    revalidate?: boolean;
+  }>({ offset: 0 });
+  const { offset, previousPage, previousCount, direction = 1, randomSample, continuedRoll, recovering, revalidate } =
+    position;
+
+  function getNavigation(
+    query: {
+      data: Page | undefined;
+      dataUpdatedAt: number;
+      isFetchedAfterMount: boolean;
+      isError: boolean;
+      isPending: boolean;
+      isFetching: boolean;
+      refetch: () => Promise<unknown>;
+    },
+    isOnline: boolean,
+    getCachedPage: (offset: number) => Page | undefined,
+  ) {
+    const previousUpdate = previousCount?.updatedAt ?? 0;
+    const isFresh = query.isFetchedAfterMount && !query.isFetching && !query.isError &&
+      query.dataUpdatedAt >= previousUpdate;
+    // An older cached page must not restore a count that a newer response superseded.
+    const count = query.data && (!previousCount || isFresh || query.dataUpdatedAt > previousUpdate)
+      ? { total: query.data.total, updatedAt: query.dataUpdatedAt }
+      : previousCount;
+    const total = count?.total ?? 0;
+    const candidate = query.data?.data[0];
+    const repeatsRoll = randomSample !== undefined && total > 1 && !(recovering && continuedRoll) &&
+      candidate?.id === previousPage?.data?.data[0]?.id;
+    const hasValidEntry = candidate && !repeatsRoll && (isFresh || (!recovering && (!revalidate || !isOnline)));
+    const displayedPage = hasValidEntry || !previousPage ? { offset, data: query.data } : previousPage;
+    const countShrank = previousCount && total < previousCount.total;
+    if (randomSample !== undefined && repeatsRoll && isFresh && !continuedRoll && offset < total) {
+      // Continue once. A service-worker fallback can return the same ID at both offsets.
+      const target = randomOffset(offset, total, randomSample, previousPage?.offset);
+      const visiblePage = displayedPage.offset < total ? displayedPage : { offset, data: query.data };
+      setPosition({
+        offset: target,
+        previousPage: visiblePage,
+        previousCount: count,
+        direction: target >= visiblePage.offset ? 1 : -1,
+        randomSample,
+        continuedRoll: true,
+        revalidate: true,
+      });
+    } else if (query.data && total > 0 && (offset >= total || (!recovering && !hasValidEntry && countShrank))) {
+      // Reload the visible position when an empty response makes its entry uncertain.
+      const target = Math.min(displayedPage.offset, total - 1);
+      setPosition({
+        offset: target,
+        previousPage: displayedPage,
+        previousCount: count,
+        direction: target >= displayedPage.offset ? 1 : -1,
+        randomSample,
+        continuedRoll,
+        recovering: true,
+      });
+    } else if (hasValidEntry && (isOnline || !revalidate) && (
+      recovering || revalidate || randomSample !== undefined ||
+      previousPage?.offset !== offset || previousPage.data !== query.data ||
+      previousCount?.updatedAt !== count?.updatedAt
+    )) {
+      setPosition({ offset, previousPage: displayedPage, previousCount: count, direction });
+    }
+    const needsRecovery = Boolean(recovering && !hasValidEntry && total > 0);
+    const isNavigating = !hasValidEntry && (displayedPage.offset !== offset || needsRecovery) &&
+      (query.isPending || query.isFetching);
+
+    // While offline, the arrow opposite the pending jump returns to the visible page.
+    const prevTarget = isNavigating && direction === 1 ? displayedPage.offset : displayedPage.offset - 1;
+    const nextTarget = isNavigating && direction === -1 ? displayedPage.offset : displayedPage.offset + 1;
+
+    const canNavigateTo = (target: number) => {
+      if (needsRecovery) return false;
+      if (isNavigating) return !isOnline && target === displayedPage.offset;
+      if (target < 0 || target >= total) return false;
+      return isOnline || Boolean(getCachedPage(target)?.data.length);
+    };
+
+    const navigateTo = (target: number, randomSample?: number) => {
+      if (!canNavigateTo(target)) return;
+      const cached = getCachedPage(target);
+      setPosition({
+        offset: target,
+        previousPage: displayedPage,
+        previousCount: count,
+        direction: target >= displayedPage.offset ? 1 : -1,
+        randomSample,
+        revalidate: Boolean(cached && (
+          cached.total !== total ||
+          (randomSample !== undefined && cached.data[0]?.id === displayedPage.data?.data[0]?.id)
+        )),
+      });
+      if (target === offset && isOnline) void query.refetch();
+    };
+
+    return {
+      data: total > 0 ? displayedPage.data : undefined,
+      displayedOffset: displayedPage.offset,
+      total,
+      direction,
+      isNavigating,
+      needsRecovery,
+      retry: () => { void query.refetch(); },
+      prevTarget,
+      nextTarget,
+      canNavigateTo,
+      navigateTo,
+    };
+  }
+
+  return { offset, getNavigation, staleTime: recovering || revalidate ? 0 : HERO_CLIENT_STALE_TIME };
+}
+
+function RandomEntryButton({ offset, total, isDisabled, onSelect, retry }: {
+  offset: number;
+  total: number;
+  isDisabled: boolean;
+  onSelect: (target: number, sample: number) => void;
+  retry?: () => void;
+}) {
+  const t = useTranslations("Home");
+  const label = retry ? t("HomeExtras.retry") : t("HomeExtras.random");
+
+  return (
+    <Button
+      isIconOnly
+      size="sm"
+      variant="light"
+      aria-label={label}
+      title={label}
+      className={`${CAROUSEL_BUTTON_CLASS} shrink-0`}
+      aria-disabled={isDisabled}
+      onPress={() => {
+        if (isDisabled) return;
+        if (retry) {
+          retry();
+          return;
+        }
+        const sample = Math.random();
+        onSelect(randomOffset(offset, total, sample), sample);
+      }}
+    >
+      {retry ? <RotateCw aria-hidden className="h-4 w-4" /> : <Dice5 aria-hidden className="h-4 w-4" />}
+    </Button>
+  );
+}
+
+function CarouselArrow({ previous = false, disabled, onPress }: {
+  previous?: boolean;
+  disabled: boolean;
+  onPress: () => void;
+}) {
+  const t = useTranslations("Home");
+
+  return (
+    <Button
+      isIconOnly
+      size="sm"
+      variant="light"
+      aria-label={t(previous ? "HomeExtras.previous" : "HomeExtras.next")}
+      aria-disabled={disabled}
+      className={CAROUSEL_BUTTON_CLASS}
+      onPress={onPress}
+    >
+      <ArrowRight aria-hidden className={previous ? "h-4 w-4 rotate-180" : "h-4 w-4"} />
+    </Button>
+  );
+}
 
 const EntryFrame = forwardRef<HTMLDivElement, { children: ReactNode; direction: PageDirection }>(
   function EntryFrame({ children, direction }, ref) {
@@ -71,48 +267,27 @@ export function BentoCommonMistake({
   initialData?: MisspellingsData;
 }) {
   const t = useTranslations("Home");
-  const [offset, setOffset] = useState(0);
-  const [direction, setDirection] = useState<PageDirection>(1);
+  const { offset, getNavigation, staleTime } = useCarouselPosition<MisspellingsData>();
   const isOnline = useOnlineStatus();
   const utils = api.useUtils();
-  const { data, isLoading, isFetching, isPlaceholderData } = api.extras.getMisspellings.useQuery(
+  const query = api.extras.getMisspellings.useQuery(
     { limit: 1, offset },
     {
       enabled: isOnline,
-      initialData: offset === 0 ? initialData : undefined,
-      staleTime: HERO_CLIENT_STALE_TIME,
-      placeholderData: keepPreviousData,
+      initialData: offset === 0 && staleTime > 0 ? initialData : undefined,
+      staleTime,
     },
   );
-
-  const canNavigateTo = (target: number) => {
-    if (target < 0 || target >= (data?.total ?? 0) || (isOnline && isPlaceholderData)) return false;
-    if (isOnline) return true;
-    const cached = utils.extras.getMisspellings.getData({ limit: 1, offset: target })
-      ?? (target === 0 ? initialData : undefined);
-    return Boolean(cached?.data.length);
-  };
-
-  const handleNext = () => {
-    if (canNavigateTo(offset + 1)) {
-      setDirection(1);
-      setOffset(offset + 1);
-    }
-  };
-
-  const handlePrev = () => {
-    if (canNavigateTo(offset - 1)) {
-      setDirection(-1);
-      setOffset(offset - 1);
-    }
-  };
-
+  const { data, total, displayedOffset, direction, isNavigating, needsRecovery, retry, prevTarget, nextTarget, canNavigateTo, navigateTo } =
+    getNavigation(query, isOnline, (target) =>
+      utils.extras.getMisspellings.getData({ limit: 1, offset: target })
+        ?? (target === 0 ? initialData : undefined),
+    );
   const item = data?.data[0];
-  const displayedOffset = isPlaceholderData ? offset - direction : offset;
 
   return (
     <CustomCard className="min-h-52 min-w-0 bg-background/40 flex flex-col">
-      <CardHeader className="px-5 pt-2 pb-0 sm:px-6">
+      <CardHeader className="justify-between gap-2 px-5 pt-2 pb-0 sm:px-6">
         <Link
           href="/sik-yapilan-yanlislar"
           className="inline-flex min-h-11 min-w-0 items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide hover:text-foreground transition-colors"
@@ -120,10 +295,19 @@ export function BentoCommonMistake({
           <span aria-hidden className="h-2 w-2 shrink-0 rounded-full bg-orange-500" />
           {t("HomeExtras.misspellingsTitle")}
         </Link>
+        {item && (total > 1 || needsRecovery) ? (
+          <RandomEntryButton
+            offset={displayedOffset}
+            total={total}
+            isDisabled={!isOnline || isNavigating}
+            onSelect={navigateTo}
+            retry={needsRecovery ? retry : undefined}
+          />
+        ) : null}
       </CardHeader>
 
-      <CardBody className="flex min-w-0 flex-1 justify-center px-5 py-4 sm:px-6" aria-busy={isFetching}>
-        {isLoading ? (
+      <CardBody className="flex min-w-0 flex-1 justify-center px-5 py-4 sm:px-6" aria-busy={query.isFetching}>
+        {query.isLoading && !item ? (
           <div className="grid w-full grid-cols-2 gap-4" aria-hidden>
             <div className="mx-auto h-8 w-full max-w-24 rounded bg-muted motion-safe:animate-pulse" />
             <div className="mx-auto h-8 w-full max-w-24 rounded bg-muted motion-safe:animate-pulse" />
@@ -152,34 +336,14 @@ export function BentoCommonMistake({
         )}
       </CardBody>
 
-      {item && (data?.total ?? 0) > 1 ? (
+      {item && (total > 1 || needsRecovery) ? (
         <CardFooter className="flex items-center justify-between gap-3 px-3 pb-2 pt-0 sm:px-4">
           <div className="flex items-center">
-            <Button
-              isIconOnly
-              size="sm"
-              variant="light"
-              aria-label={t("HomeExtras.previous")}
-              className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
-              onPress={handlePrev}
-              isDisabled={!canNavigateTo(offset - 1)}
-            >
-              <ArrowRight className="w-4 h-4 rotate-180" />
-            </Button>
-            <Button
-              isIconOnly
-              size="sm"
-              variant="light"
-              aria-label={t("HomeExtras.next")}
-              className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
-              onPress={handleNext}
-              isDisabled={!canNavigateTo(offset + 1)}
-            >
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+            <CarouselArrow previous disabled={!canNavigateTo(prevTarget)} onPress={() => navigateTo(prevTarget)} />
+            <CarouselArrow disabled={!canNavigateTo(nextTarget)} onPress={() => navigateTo(nextTarget)} />
           </div>
           <span className="pr-2 text-xs tabular-nums text-muted-foreground">
-            {displayedOffset + 1} / {data?.total}
+            {!needsRecovery ? `${displayedOffset + 1} / ${total}` : null}
           </span>
         </CardFooter>
       ) : null}
@@ -193,44 +357,23 @@ export function BentoGalatiMeshur({
   initialData?: GalatiMeshurData;
 }) {
   const t = useTranslations("Home");
-  const [offset, setOffset] = useState(0);
-  const [direction, setDirection] = useState<PageDirection>(1);
+  const { offset, getNavigation, staleTime } = useCarouselPosition<GalatiMeshurData>();
   const isOnline = useOnlineStatus();
   const utils = api.useUtils();
-  const { data, isLoading, isFetching, isPlaceholderData } = api.extras.getGalatiMeshur.useQuery(
+  const query = api.extras.getGalatiMeshur.useQuery(
     { limit: 1, offset },
     {
       enabled: isOnline,
-      initialData: offset === 0 ? initialData : undefined,
-      staleTime: HERO_CLIENT_STALE_TIME,
-      placeholderData: keepPreviousData,
+      initialData: offset === 0 && staleTime > 0 ? initialData : undefined,
+      staleTime,
     },
   );
-
-  const canNavigateTo = (target: number) => {
-    if (target < 0 || target >= (data?.total ?? 0) || (isOnline && isPlaceholderData)) return false;
-    if (isOnline) return true;
-    const cached = utils.extras.getGalatiMeshur.getData({ limit: 1, offset: target })
-      ?? (target === 0 ? initialData : undefined);
-    return Boolean(cached?.data.length);
-  };
-
-  const handleNext = () => {
-    if (canNavigateTo(offset + 1)) {
-      setDirection(1);
-      setOffset(offset + 1);
-    }
-  };
-
-  const handlePrev = () => {
-    if (canNavigateTo(offset - 1)) {
-      setDirection(-1);
-      setOffset(offset - 1);
-    }
-  };
-
+  const { data, total, displayedOffset, direction, isNavigating, needsRecovery, retry, prevTarget, nextTarget, canNavigateTo, navigateTo } =
+    getNavigation(query, isOnline, (target) =>
+      utils.extras.getGalatiMeshur.getData({ limit: 1, offset: target })
+        ?? (target === 0 ? initialData : undefined),
+    );
   const item = data?.data[0];
-  const displayedOffset = isPlaceholderData ? offset - direction : offset;
   const explanationPreview = item?.explanation
     ? item.explanation.length > 120
       ? `${item.explanation.slice(0, 120).trimEnd()}...`
@@ -239,7 +382,7 @@ export function BentoGalatiMeshur({
 
   return (
     <CustomCard className="min-h-60 min-w-0 bg-background/40 flex flex-col">
-      <CardHeader className="px-5 pt-2 pb-0 sm:px-6">
+      <CardHeader className="justify-between gap-2 px-5 pt-2 pb-0 sm:px-6">
         <Link
           href="/galati-meshur"
           className="inline-flex min-h-11 min-w-0 items-center gap-2 text-xs font-semibold text-amber-700 dark:text-amber-500 uppercase tracking-wide hover:text-amber-800 dark:hover:text-amber-400 transition-colors"
@@ -247,10 +390,19 @@ export function BentoGalatiMeshur({
           <BookOpen aria-hidden className="h-4 w-4 shrink-0" />
           {t("HomeExtras.galatiMeshurTitle")}
         </Link>
+        {item && (total > 1 || needsRecovery) ? (
+          <RandomEntryButton
+            offset={displayedOffset}
+            total={total}
+            isDisabled={!isOnline || isNavigating}
+            onSelect={navigateTo}
+            retry={needsRecovery ? retry : undefined}
+          />
+        ) : null}
       </CardHeader>
 
-      <CardBody className="min-w-0 px-5 py-3 sm:px-6 flex-1 flex flex-col justify-center" aria-busy={isFetching}>
-        {isLoading ? (
+      <CardBody className="min-w-0 px-5 py-3 sm:px-6 flex-1 flex flex-col justify-center" aria-busy={query.isFetching}>
+        {query.isLoading && !item ? (
           <div className="flex flex-col gap-4" aria-hidden>
             <div className="flex w-full items-center gap-2">
               <div className="h-6 w-3/4 rounded bg-muted motion-safe:animate-pulse" />
@@ -285,43 +437,25 @@ export function BentoGalatiMeshur({
       {item ? (
         <CardFooter className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-3 pb-2 pt-0 sm:px-4">
           <div className="flex items-center">
-            <Button
-              isIconOnly
-              size="sm"
-              variant="light"
-              aria-label={t("HomeExtras.previous")}
-              className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
-              onPress={handlePrev}
-              isDisabled={!canNavigateTo(offset - 1)}
-            >
-              <ArrowRight className="w-4 h-4 rotate-180" />
-            </Button>
-            <Button
-              isIconOnly
-              size="sm"
-              variant="light"
-              aria-label={t("HomeExtras.next")}
-              className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
-              onPress={handleNext}
-              isDisabled={!canNavigateTo(offset + 1)}
-            >
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+            <CarouselArrow previous disabled={!canNavigateTo(prevTarget)} onPress={() => navigateTo(prevTarget)} />
+            <CarouselArrow disabled={!canNavigateTo(nextTarget)} onPress={() => navigateTo(nextTarget)} />
           </div>
 
           <span className="text-xs tabular-nums text-muted-foreground">
-            {data?.total ? `${displayedOffset + 1} / ${data.total}` : "0 / 0"}
+            {!needsRecovery ? `${displayedOffset + 1} / ${total}` : null}
           </span>
 
-          <Link
-            href={{
-              pathname: "/galati-meshur/[id]",
-              params: { id: item.id.toString() },
-            }}
-            className="inline-flex min-h-11 items-center px-2 text-sm font-medium text-amber-700 dark:text-amber-500 hover:text-amber-800 dark:hover:text-amber-400 transition-colors"
-          >
-            {t("HomeExtras.readMore")}
-          </Link>
+          {!needsRecovery ? (
+            <Link
+              href={{
+                pathname: "/galati-meshur/[id]",
+                params: { id: item.id.toString() },
+              }}
+              className="inline-flex min-h-11 items-center px-2 text-sm font-medium text-amber-700 dark:text-amber-500 hover:text-amber-800 dark:hover:text-amber-400 transition-colors"
+            >
+              {t("HomeExtras.readMore")}
+            </Link>
+          ) : null}
         </CardFooter>
       ) : null}
     </CustomCard>
