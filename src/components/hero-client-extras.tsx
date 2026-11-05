@@ -81,11 +81,12 @@ function useCarouselPosition<Page extends ExamplePage>() {
     if (randomSample !== undefined && repeatsRoll && isFresh && !continuedRoll && offset < total) {
       // Continue once. A service-worker fallback can return the same ID at both offsets.
       const target = randomOffset(offset, total, randomSample, previousPage?.offset);
+      const visiblePage = displayedPage.offset < total ? displayedPage : { offset, data: query.data };
       setPosition({
         offset: target,
-        previousPage: { offset, data: query.data },
+        previousPage: visiblePage,
         previousCount: count,
-        direction: target >= offset ? 1 : -1,
+        direction: target >= visiblePage.offset ? 1 : -1,
         randomSample,
         continuedRoll: true,
         revalidate: true,
