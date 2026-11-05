@@ -161,3 +161,44 @@ test.each(["misspellings", "galati"] as const)("%s retains the current page whil
   unmount();
   client.clear();
 });
+
+test.each(["misspellings", "galati"] as const)("%s rolls a different entry and keeps the displayed number while loading", async (kind) => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
+  const firstMistake = { data: [{ id: 1, wrong: "şöför", correct: "şoför" }], total: 3 };
+  const lastMistake = { data: [{ id: 3, wrong: "herkez", correct: "herkes" }], total: 3 };
+  const firstGalati = { data: [{ id: 1, word: "vasat", explanation: "Orta, ortalama.", correctUsage: null }], total: 3 };
+  const lastGalati = { data: [{ id: 3, word: "mütevazı", explanation: "Alçak gönüllü.", correctUsage: null }], total: 3 };
+  let finishRequest!: (value: unknown) => void;
+  mockFetch.mockImplementation(() => new Promise(resolve => { finishRequest = resolve; }));
+  const { unmount } = render(
+    <QueryClientProvider client={client}>
+      {kind === "misspellings" ? <BentoCommonMistake initialData={firstMistake} /> : <BentoGalatiMeshur initialData={firstGalati} />}
+    </QueryClientProvider>,
+  );
+  const dice = screen.getByRole("button", { name: "HomeExtras.random" });
+  const random = jest.spyOn(Math, "random").mockReturnValue(0.75);
+  try {
+    fireEvent.click(dice);
+    await waitFor(() => expect(mockFetch).toHaveBeenCalledWith(2));
+    expect(screen.getByText("1 / 3")).toBeVisible();
+    expect(dice).toBeDisabled();
+
+    await act(async () => { finishRequest(kind === "misspellings" ? lastMistake : lastGalati); });
+    await waitFor(() => expect(screen.getByText(kind === "misspellings" ? "herkes" : "mütevazı")).toBeVisible());
+    expect(screen.getByText("3 / 3")).toBeVisible();
+    expect(screen.getByRole("button", { name: "HomeExtras.previous" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "HomeExtras.next" })).toBeDisabled();
+    if (kind === "galati") {
+      expect(screen.getByRole("link", { name: "HomeExtras.readMore" })).toHaveAttribute("href", "/galati-meshur/3");
+    }
+
+    random.mockReturnValue(0);
+    fireEvent.click(dice);
+    expect(await screen.findByText("1 / 3")).toBeVisible();
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  } finally {
+    random.mockRestore();
+    unmount();
+    client.clear();
+  }
+});

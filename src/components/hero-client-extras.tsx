@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, CardBody, CardFooter, CardHeader } from "@heroui/react";
-import { ArrowRight, BookOpen, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle2, Dice5, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { forwardRef, useState, type ReactNode } from "react";
 import { keepPreviousData } from "@tanstack/react-query";
@@ -19,6 +19,52 @@ type GalatiMeshurData = RouterOutputs["extras"]["getGalatiMeshur"];
 const HERO_CLIENT_STALE_TIME = 24 * 60 * 60 * 1000;
 
 type PageDirection = 1 | -1;
+
+function useCarouselPosition() {
+  const [position, setPosition] = useState({
+    offset: 0,
+    previousOffset: 0,
+    direction: 1 as PageDirection,
+  });
+
+  const navigateTo = (target: number, displayedOffset: number) => {
+    setPosition({
+      offset: target,
+      previousOffset: displayedOffset,
+      direction: target >= displayedOffset ? 1 : -1,
+    });
+  };
+
+  return { ...position, navigateTo };
+}
+
+function RandomEntryButton({ offset, total, isDisabled, onSelect }: {
+  offset: number;
+  total: number;
+  isDisabled: boolean;
+  onSelect: (target: number) => void;
+}) {
+  const t = useTranslations("Home");
+  const label = t("HomeExtras.random");
+
+  return (
+    <Button
+      isIconOnly
+      size="sm"
+      variant="light"
+      aria-label={label}
+      title={label}
+      className="h-11 min-w-11 shrink-0 text-muted-foreground hover:text-foreground"
+      isDisabled={isDisabled}
+      onPress={() => {
+        const steps = 1 + Math.floor(Math.random() * (total - 1));
+        onSelect((offset + steps) % total);
+      }}
+    >
+      <Dice5 aria-hidden className="h-4 w-4" />
+    </Button>
+  );
+}
 
 const EntryFrame = forwardRef<HTMLDivElement, { children: ReactNode; direction: PageDirection }>(
   function EntryFrame({ children, direction }, ref) {
@@ -71,8 +117,7 @@ export function BentoCommonMistake({
   initialData?: MisspellingsData;
 }) {
   const t = useTranslations("Home");
-  const [offset, setOffset] = useState(0);
-  const [direction, setDirection] = useState<PageDirection>(1);
+  const { offset, previousOffset, direction, navigateTo } = useCarouselPosition();
   const isOnline = useOnlineStatus();
   const utils = api.useUtils();
   const { data, isLoading, isFetching, isPlaceholderData } = api.extras.getMisspellings.useQuery(
@@ -93,26 +138,15 @@ export function BentoCommonMistake({
     return Boolean(cached?.data.length);
   };
 
-  const handleNext = () => {
-    if (canNavigateTo(offset + 1)) {
-      setDirection(1);
-      setOffset(offset + 1);
-    }
-  };
-
-  const handlePrev = () => {
-    if (canNavigateTo(offset - 1)) {
-      setDirection(-1);
-      setOffset(offset - 1);
-    }
-  };
-
   const item = data?.data[0];
-  const displayedOffset = isPlaceholderData ? offset - direction : offset;
+  const total = data?.total ?? 0;
+  const displayedOffset = isPlaceholderData ? previousOffset : offset;
+  const prevTarget = isPlaceholderData && direction === 1 ? displayedOffset : offset - 1;
+  const nextTarget = isPlaceholderData && direction === -1 ? displayedOffset : offset + 1;
 
   return (
     <CustomCard className="min-h-52 min-w-0 bg-background/40 flex flex-col">
-      <CardHeader className="px-5 pt-2 pb-0 sm:px-6">
+      <CardHeader className="justify-between gap-2 px-5 pt-2 pb-0 sm:px-6">
         <Link
           href="/sik-yapilan-yanlislar"
           className="inline-flex min-h-11 min-w-0 items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide hover:text-foreground transition-colors"
@@ -120,6 +154,14 @@ export function BentoCommonMistake({
           <span aria-hidden className="h-2 w-2 shrink-0 rounded-full bg-orange-500" />
           {t("HomeExtras.misspellingsTitle")}
         </Link>
+        {item && total > 1 ? (
+          <RandomEntryButton
+            offset={displayedOffset}
+            total={total}
+            isDisabled={!isOnline || isPlaceholderData}
+            onSelect={(target) => navigateTo(target, displayedOffset)}
+          />
+        ) : null}
       </CardHeader>
 
       <CardBody className="flex min-w-0 flex-1 justify-center px-5 py-4 sm:px-6" aria-busy={isFetching}>
@@ -152,7 +194,7 @@ export function BentoCommonMistake({
         )}
       </CardBody>
 
-      {item && (data?.total ?? 0) > 1 ? (
+      {item && total > 1 ? (
         <CardFooter className="flex items-center justify-between gap-3 px-3 pb-2 pt-0 sm:px-4">
           <div className="flex items-center">
             <Button
@@ -161,8 +203,8 @@ export function BentoCommonMistake({
               variant="light"
               aria-label={t("HomeExtras.previous")}
               className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
-              onPress={handlePrev}
-              isDisabled={!canNavigateTo(offset - 1)}
+              onPress={() => navigateTo(prevTarget, displayedOffset)}
+              isDisabled={!canNavigateTo(prevTarget)}
             >
               <ArrowRight className="w-4 h-4 rotate-180" />
             </Button>
@@ -172,14 +214,14 @@ export function BentoCommonMistake({
               variant="light"
               aria-label={t("HomeExtras.next")}
               className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
-              onPress={handleNext}
-              isDisabled={!canNavigateTo(offset + 1)}
+              onPress={() => navigateTo(nextTarget, displayedOffset)}
+              isDisabled={!canNavigateTo(nextTarget)}
             >
               <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
           <span className="pr-2 text-xs tabular-nums text-muted-foreground">
-            {displayedOffset + 1} / {data?.total}
+            {displayedOffset + 1} / {total}
           </span>
         </CardFooter>
       ) : null}
@@ -193,8 +235,7 @@ export function BentoGalatiMeshur({
   initialData?: GalatiMeshurData;
 }) {
   const t = useTranslations("Home");
-  const [offset, setOffset] = useState(0);
-  const [direction, setDirection] = useState<PageDirection>(1);
+  const { offset, previousOffset, direction, navigateTo } = useCarouselPosition();
   const isOnline = useOnlineStatus();
   const utils = api.useUtils();
   const { data, isLoading, isFetching, isPlaceholderData } = api.extras.getGalatiMeshur.useQuery(
@@ -215,22 +256,11 @@ export function BentoGalatiMeshur({
     return Boolean(cached?.data.length);
   };
 
-  const handleNext = () => {
-    if (canNavigateTo(offset + 1)) {
-      setDirection(1);
-      setOffset(offset + 1);
-    }
-  };
-
-  const handlePrev = () => {
-    if (canNavigateTo(offset - 1)) {
-      setDirection(-1);
-      setOffset(offset - 1);
-    }
-  };
-
   const item = data?.data[0];
-  const displayedOffset = isPlaceholderData ? offset - direction : offset;
+  const total = data?.total ?? 0;
+  const displayedOffset = isPlaceholderData ? previousOffset : offset;
+  const prevTarget = isPlaceholderData && direction === 1 ? displayedOffset : offset - 1;
+  const nextTarget = isPlaceholderData && direction === -1 ? displayedOffset : offset + 1;
   const explanationPreview = item?.explanation
     ? item.explanation.length > 120
       ? `${item.explanation.slice(0, 120).trimEnd()}...`
@@ -239,7 +269,7 @@ export function BentoGalatiMeshur({
 
   return (
     <CustomCard className="min-h-60 min-w-0 bg-background/40 flex flex-col">
-      <CardHeader className="px-5 pt-2 pb-0 sm:px-6">
+      <CardHeader className="justify-between gap-2 px-5 pt-2 pb-0 sm:px-6">
         <Link
           href="/galati-meshur"
           className="inline-flex min-h-11 min-w-0 items-center gap-2 text-xs font-semibold text-amber-700 dark:text-amber-500 uppercase tracking-wide hover:text-amber-800 dark:hover:text-amber-400 transition-colors"
@@ -247,6 +277,14 @@ export function BentoGalatiMeshur({
           <BookOpen aria-hidden className="h-4 w-4 shrink-0" />
           {t("HomeExtras.galatiMeshurTitle")}
         </Link>
+        {item && total > 1 ? (
+          <RandomEntryButton
+            offset={displayedOffset}
+            total={total}
+            isDisabled={!isOnline || isPlaceholderData}
+            onSelect={(target) => navigateTo(target, displayedOffset)}
+          />
+        ) : null}
       </CardHeader>
 
       <CardBody className="min-w-0 px-5 py-3 sm:px-6 flex-1 flex flex-col justify-center" aria-busy={isFetching}>
@@ -291,8 +329,8 @@ export function BentoGalatiMeshur({
               variant="light"
               aria-label={t("HomeExtras.previous")}
               className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
-              onPress={handlePrev}
-              isDisabled={!canNavigateTo(offset - 1)}
+              onPress={() => navigateTo(prevTarget, displayedOffset)}
+              isDisabled={!canNavigateTo(prevTarget)}
             >
               <ArrowRight className="w-4 h-4 rotate-180" />
             </Button>
@@ -302,15 +340,15 @@ export function BentoGalatiMeshur({
               variant="light"
               aria-label={t("HomeExtras.next")}
               className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
-              onPress={handleNext}
-              isDisabled={!canNavigateTo(offset + 1)}
+              onPress={() => navigateTo(nextTarget, displayedOffset)}
+              isDisabled={!canNavigateTo(nextTarget)}
             >
               <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
 
           <span className="text-xs tabular-nums text-muted-foreground">
-            {data?.total ? `${displayedOffset + 1} / ${data.total}` : "0 / 0"}
+            {total ? `${displayedOffset + 1} / ${total}` : "0 / 0"}
           </span>
 
           <Link
