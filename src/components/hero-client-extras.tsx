@@ -20,17 +20,24 @@ const HERO_CLIENT_STALE_TIME = 24 * 60 * 60 * 1000;
 type PageDirection = 1 | -1;
 
 type ExamplePage = { data: { id: number }[]; total: number };
+const CAROUSEL_BUTTON_CLASS =
+  "h-11 min-w-11 text-muted-foreground hover:text-foreground aria-disabled:opacity-50 aria-disabled:hover:text-muted-foreground";
+
+function randomOffset(offset: number, total: number, sample: number) {
+  const steps = 1 + Math.floor(sample * (total - 1));
+  return (offset + steps) % total;
+}
 
 function useCarouselPosition<Page extends ExamplePage>() {
   const [position, setPosition] = useState<{
     offset: number;
     previousPage?: { offset: number; data: Page | undefined };
     previousCount?: { total: number; updatedAt: number };
-    random?: boolean;
+    randomSample?: number;
     recovering?: boolean;
     revalidate?: boolean;
   }>({ offset: 0 });
-  const { offset, previousPage, previousCount, random, recovering } = position;
+  const { offset, previousPage, previousCount, randomSample, recovering, revalidate } = position;
 
   function getNavigation(
     query: {
@@ -51,12 +58,20 @@ function useCarouselPosition<Page extends ExamplePage>() {
       : previousCount;
     const total = count?.total ?? 0;
     const candidate = query.data?.data[0];
-    const repeatsEntry = random && candidate?.id === previousPage?.data?.data[0]?.id;
-    const previousUpdate = previousCount?.updatedAt ?? 0;
-    const isFresh = query.dataUpdatedAt > previousUpdate ||
-      (query.dataUpdatedAt === previousUpdate && query.isFetchedAfterMount && !query.isError);
-    // A fresh response can confirm that the visible ID moved to this offset.
-    const hasValidEntry = candidate && (isFresh || (!recovering && !repeatsEntry));
+    const repeatsEntry = Boolean(candidate && candidate.id === previousPage?.data?.data[0]?.id);
+    const isFresh = query.isFetchedAfterMount && !query.isError &&
+      query.dataUpdatedAt >= (previousCount?.updatedAt ?? 0);
+    if (randomSample !== undefined && repeatsEntry && isFresh && total > 1 && offset < total) {
+      // The visible ID moved. Continue this roll using its confirmed position.
+      setPosition({
+        offset: randomOffset(offset, total, randomSample),
+        previousPage: { offset, data: query.data },
+        previousCount: count,
+        randomSample,
+        revalidate: true,
+      });
+    }
+    const hasValidEntry = candidate && (isFresh || (!recovering && !revalidate));
     const displayedPage = hasValidEntry || !previousPage ? { offset, data: query.data } : previousPage;
     const countShrank = previousCount && total < previousCount.total;
     if (query.data && total > 0 && (offset >= total || (!recovering && !hasValidEntry && countShrank))) {
@@ -65,6 +80,7 @@ function useCarouselPosition<Page extends ExamplePage>() {
         offset: Math.min(displayedPage.offset, total - 1),
         previousPage: displayedPage,
         previousCount: count,
+        randomSample,
         recovering: true,
       });
     }
@@ -84,15 +100,18 @@ function useCarouselPosition<Page extends ExamplePage>() {
       return isOnline || Boolean(getCachedPage(target)?.data.length);
     };
 
-    const navigateTo = (target: number, random = false) => {
+    const navigateTo = (target: number, randomSample?: number) => {
       if (!canNavigateTo(target)) return;
-      const cachedEntry = random ? getCachedPage(target)?.data[0] : undefined;
+      const cached = getCachedPage(target);
       setPosition({
         offset: target,
         previousPage: displayedPage,
         previousCount: count,
-        random,
-        revalidate: Boolean(cachedEntry && cachedEntry.id === displayedPage.data?.data[0]?.id),
+        randomSample,
+        revalidate: isOnline && Boolean(cached && (
+          cached.total !== total ||
+          (randomSample !== undefined && cached.data[0]?.id === displayedPage.data?.data[0]?.id)
+        )),
       });
       if (target === offset && isOnline) void query.refetch();
     };
@@ -112,14 +131,14 @@ function useCarouselPosition<Page extends ExamplePage>() {
     };
   }
 
-  return { offset, getNavigation, recovering, staleTime: recovering || position.revalidate ? 0 : HERO_CLIENT_STALE_TIME };
+  return { offset, getNavigation, staleTime: recovering || revalidate ? 0 : HERO_CLIENT_STALE_TIME };
 }
 
 function RandomEntryButton({ offset, total, isDisabled, onSelect, retry }: {
   offset: number;
   total: number;
   isDisabled: boolean;
-  onSelect: (target: number) => void;
+  onSelect: (target: number, sample: number) => void;
   retry?: () => void;
 }) {
   const t = useTranslations("Home");
@@ -132,7 +151,7 @@ function RandomEntryButton({ offset, total, isDisabled, onSelect, retry }: {
       variant="light"
       aria-label={label}
       title={label}
-      className="h-11 min-w-11 shrink-0 text-muted-foreground hover:text-foreground aria-disabled:opacity-50 aria-disabled:hover:text-muted-foreground"
+      className={`${CAROUSEL_BUTTON_CLASS} shrink-0`}
       aria-disabled={isDisabled}
       onPress={() => {
         if (isDisabled) return;
@@ -140,11 +159,33 @@ function RandomEntryButton({ offset, total, isDisabled, onSelect, retry }: {
           retry();
           return;
         }
-        const steps = 1 + Math.floor(Math.random() * (total - 1));
-        onSelect((offset + steps) % total);
+        const sample = Math.random();
+        onSelect(randomOffset(offset, total, sample), sample);
       }}
     >
       {retry ? <RotateCw aria-hidden className="h-4 w-4" /> : <Dice5 aria-hidden className="h-4 w-4" />}
+    </Button>
+  );
+}
+
+function CarouselArrow({ previous = false, disabled, onPress }: {
+  previous?: boolean;
+  disabled: boolean;
+  onPress: () => void;
+}) {
+  const t = useTranslations("Home");
+
+  return (
+    <Button
+      isIconOnly
+      size="sm"
+      variant="light"
+      aria-label={t(previous ? "HomeExtras.previous" : "HomeExtras.next")}
+      aria-disabled={disabled}
+      className={CAROUSEL_BUTTON_CLASS}
+      onPress={onPress}
+    >
+      <ArrowRight aria-hidden className={previous ? "h-4 w-4 rotate-180" : "h-4 w-4"} />
     </Button>
   );
 }
@@ -200,14 +241,14 @@ export function BentoCommonMistake({
   initialData?: MisspellingsData;
 }) {
   const t = useTranslations("Home");
-  const { offset, getNavigation, recovering, staleTime } = useCarouselPosition<MisspellingsData>();
+  const { offset, getNavigation, staleTime } = useCarouselPosition<MisspellingsData>();
   const isOnline = useOnlineStatus();
   const utils = api.useUtils();
   const query = api.extras.getMisspellings.useQuery(
     { limit: 1, offset },
     {
       enabled: isOnline,
-      initialData: offset === 0 && !recovering ? initialData : undefined,
+      initialData: offset === 0 && staleTime > 0 ? initialData : undefined,
       staleTime,
     },
   );
@@ -233,7 +274,7 @@ export function BentoCommonMistake({
             offset={displayedOffset}
             total={total}
             isDisabled={!isOnline || isNavigating}
-            onSelect={(target) => navigateTo(target, true)}
+            onSelect={navigateTo}
             retry={needsRecovery ? retry : undefined}
           />
         ) : null}
@@ -269,34 +310,14 @@ export function BentoCommonMistake({
         )}
       </CardBody>
 
-      {item && total > 1 && !needsRecovery ? (
+      {item && (total > 1 || needsRecovery) ? (
         <CardFooter className="flex items-center justify-between gap-3 px-3 pb-2 pt-0 sm:px-4">
           <div className="flex items-center">
-            <Button
-              isIconOnly
-              size="sm"
-              variant="light"
-              aria-label={t("HomeExtras.previous")}
-              className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
-              onPress={() => navigateTo(prevTarget)}
-              isDisabled={!canNavigateTo(prevTarget)}
-            >
-              <ArrowRight className="w-4 h-4 rotate-180" />
-            </Button>
-            <Button
-              isIconOnly
-              size="sm"
-              variant="light"
-              aria-label={t("HomeExtras.next")}
-              className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
-              onPress={() => navigateTo(nextTarget)}
-              isDisabled={!canNavigateTo(nextTarget)}
-            >
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+            <CarouselArrow previous disabled={!canNavigateTo(prevTarget)} onPress={() => navigateTo(prevTarget)} />
+            <CarouselArrow disabled={!canNavigateTo(nextTarget)} onPress={() => navigateTo(nextTarget)} />
           </div>
           <span className="pr-2 text-xs tabular-nums text-muted-foreground">
-            {displayedOffset + 1} / {total}
+            {!needsRecovery ? `${displayedOffset + 1} / ${total}` : null}
           </span>
         </CardFooter>
       ) : null}
@@ -310,14 +331,14 @@ export function BentoGalatiMeshur({
   initialData?: GalatiMeshurData;
 }) {
   const t = useTranslations("Home");
-  const { offset, getNavigation, recovering, staleTime } = useCarouselPosition<GalatiMeshurData>();
+  const { offset, getNavigation, staleTime } = useCarouselPosition<GalatiMeshurData>();
   const isOnline = useOnlineStatus();
   const utils = api.useUtils();
   const query = api.extras.getGalatiMeshur.useQuery(
     { limit: 1, offset },
     {
       enabled: isOnline,
-      initialData: offset === 0 && !recovering ? initialData : undefined,
+      initialData: offset === 0 && staleTime > 0 ? initialData : undefined,
       staleTime,
     },
   );
@@ -348,7 +369,7 @@ export function BentoGalatiMeshur({
             offset={displayedOffset}
             total={total}
             isDisabled={!isOnline || isNavigating}
-            onSelect={(target) => navigateTo(target, true)}
+            onSelect={navigateTo}
             retry={needsRecovery ? retry : undefined}
           />
         ) : null}
@@ -387,46 +408,28 @@ export function BentoGalatiMeshur({
         )}
       </CardBody>
 
-      {item && !needsRecovery ? (
+      {item ? (
         <CardFooter className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-3 pb-2 pt-0 sm:px-4">
           <div className="flex items-center">
-            <Button
-              isIconOnly
-              size="sm"
-              variant="light"
-              aria-label={t("HomeExtras.previous")}
-              className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
-              onPress={() => navigateTo(prevTarget)}
-              isDisabled={!canNavigateTo(prevTarget)}
-            >
-              <ArrowRight className="w-4 h-4 rotate-180" />
-            </Button>
-            <Button
-              isIconOnly
-              size="sm"
-              variant="light"
-              aria-label={t("HomeExtras.next")}
-              className="h-11 min-w-11 text-muted-foreground hover:text-foreground"
-              onPress={() => navigateTo(nextTarget)}
-              isDisabled={!canNavigateTo(nextTarget)}
-            >
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+            <CarouselArrow previous disabled={!canNavigateTo(prevTarget)} onPress={() => navigateTo(prevTarget)} />
+            <CarouselArrow disabled={!canNavigateTo(nextTarget)} onPress={() => navigateTo(nextTarget)} />
           </div>
 
           <span className="text-xs tabular-nums text-muted-foreground">
-            {total ? `${displayedOffset + 1} / ${total}` : "0 / 0"}
+            {!needsRecovery ? `${displayedOffset + 1} / ${total}` : null}
           </span>
 
-          <Link
-            href={{
-              pathname: "/galati-meshur/[id]",
-              params: { id: item.id.toString() },
-            }}
-            className="inline-flex min-h-11 items-center px-2 text-sm font-medium text-amber-700 dark:text-amber-500 hover:text-amber-800 dark:hover:text-amber-400 transition-colors"
-          >
-            {t("HomeExtras.readMore")}
-          </Link>
+          {!needsRecovery ? (
+            <Link
+              href={{
+                pathname: "/galati-meshur/[id]",
+                params: { id: item.id.toString() },
+              }}
+              className="inline-flex min-h-11 items-center px-2 text-sm font-medium text-amber-700 dark:text-amber-500 hover:text-amber-800 dark:hover:text-amber-400 transition-colors"
+            >
+              {t("HomeExtras.readMore")}
+            </Link>
+          ) : null}
         </CardFooter>
       ) : null}
     </CustomCard>

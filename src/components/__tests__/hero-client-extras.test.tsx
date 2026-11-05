@@ -75,14 +75,14 @@ test.each(["misspellings", "galati"] as const)("%s allows cached pages offline w
   await waitFor(() => expect(screen.queryByText(firstWord)).not.toBeInTheDocument());
   mockIsOnline = false;
   rerender(content());
-  expect(next).toBeDisabled();
-  expect(previous).toBeEnabled();
+  expect(next).toHaveAttribute("aria-disabled", "true");
+  expect(previous).toHaveAttribute("aria-disabled", "false");
   fireEvent.click(next);
   expect(screen.getByText("2 / 3")).toBeVisible();
   fireEvent.click(previous);
   await waitFor(() => expect(screen.getByText(firstWord)).toBeVisible());
   expect(screen.getByText("1 / 3")).toBeVisible();
-  expect(next).toBeEnabled();
+  expect(next).toHaveAttribute("aria-disabled", "false");
   await waitFor(() => expect(screen.queryByText(secondWord)).not.toBeInTheDocument());
   fireEvent.click(next);
   await waitFor(() => expect(screen.getByText(secondWord)).toBeVisible());
@@ -108,11 +108,11 @@ test.each(["misspellings", "galati"] as const)("%s can return to the current ent
   await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1));
   mockIsOnline = false;
   rerender(content());
-  expect(previous).toBeEnabled();
+  expect(previous).toHaveAttribute("aria-disabled", "false");
   fireEvent.click(previous);
   expect(screen.getByText("1 / 2")).toBeVisible();
   expect(screen.getByText(kind === "misspellings" ? "şoför" : "vasat")).toBeVisible();
-  expect(previous).toBeDisabled();
+  expect(previous).toHaveAttribute("aria-disabled", "true");
   unmount();
   client.clear();
 });
@@ -134,14 +134,14 @@ test.each(["misspellings", "galati"] as const)("%s retains the current page whil
   );
   const previous = screen.getByRole("button", { name: "HomeExtras.previous" });
   const next = screen.getByRole("button", { name: "HomeExtras.next" });
-  expect(previous).toBeDisabled();
+  expect(previous).toHaveAttribute("aria-disabled", "true");
   expect(screen.getByText("1 / 2")).toBeVisible();
   fireEvent.click(next);
   await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1));
   expect(screen.getByText(firstWord)).toBeVisible();
   expect(screen.getByText("1 / 2")).toBeVisible();
-  expect(previous).toBeDisabled();
-  expect(next).toBeDisabled();
+  expect(previous).toHaveAttribute("aria-disabled", "true");
+  expect(next).toHaveAttribute("aria-disabled", "true");
   fireEvent.click(next);
   expect(mockFetch).toHaveBeenCalledTimes(1);
 
@@ -149,15 +149,15 @@ test.each(["misspellings", "galati"] as const)("%s retains the current page whil
   await waitFor(() => expect(screen.getByText(secondWord)).toBeVisible());
   expect(screen.getByText("2 / 2")).toBeVisible();
   expect(screen.getByRole("button", { name: "HomeExtras.previous" })).toBe(previous);
-  expect(previous).toBeEnabled();
-  expect(next).toBeDisabled();
+  expect(previous).toHaveAttribute("aria-disabled", "false");
+  expect(next).toHaveAttribute("aria-disabled", "true");
   await waitFor(() => expect(screen.queryByText(firstWord)).not.toBeInTheDocument());
 
   fireEvent.click(previous);
   await waitFor(() => expect(screen.getByText(firstWord)).toBeVisible());
   expect(screen.getByText("1 / 2")).toBeVisible();
-  expect(previous).toBeDisabled();
-  expect(next).toBeEnabled();
+  expect(previous).toHaveAttribute("aria-disabled", "true");
+  expect(next).toHaveAttribute("aria-disabled", "false");
   expect(mockFetch).toHaveBeenCalledTimes(1);
   if (kind === "galati") {
     expect(screen.getByRole("link", { name: "HomeExtras.readMore" })).toHaveAttribute("href", "/galati-meshur/1");
@@ -186,15 +186,15 @@ test.each(["misspellings", "galati"] as const)("%s rolls a different entry and k
     await waitFor(() => expect(mockFetch).toHaveBeenCalledWith(2));
     expect(screen.getByText("1 / 3")).toBeVisible();
     expect(dice).toHaveAttribute("aria-disabled", "true");
-    expect(dice).toBeEnabled();
+    expect(dice).toBeEnabled(); // Pending rolls retain the native focus target.
     fireEvent.click(dice);
     expect(mockFetch).toHaveBeenCalledTimes(1);
 
     await act(async () => { finishRequest(kind === "misspellings" ? lastMistake : lastGalati); });
     await waitFor(() => expect(screen.getByText(kind === "misspellings" ? "herkes" : "mütevazı")).toBeVisible());
     expect(screen.getByText("3 / 3")).toBeVisible();
-    expect(screen.getByRole("button", { name: "HomeExtras.previous" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "HomeExtras.next" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "HomeExtras.previous" })).toHaveAttribute("aria-disabled", "false");
+    expect(screen.getByRole("button", { name: "HomeExtras.next" })).toHaveAttribute("aria-disabled", "true");
     if (kind === "galati") {
       expect(screen.getByRole("link", { name: "HomeExtras.readMore" })).toHaveAttribute("href", "/galati-meshur/3");
     }
@@ -258,7 +258,8 @@ test("a roll that finds an empty collection clears the card", async () => {
   client.clear();
 });
 
-test("a deleted visible entry is revalidated after the collection shrinks, with a retry on failure", async () => {
+test.each(["HomeExtras.random", "HomeExtras.next"])(
+  "%s stays focused while a deleted entry is revalidated and can be retried after failure", async (label) => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const first = { data: [{ id: 1, word: "vasat", explanation: "Orta, ortalama.", correctUsage: null }], total: 2 };
   mockFetch
@@ -273,12 +274,11 @@ test("a deleted visible entry is revalidated after the collection shrinks, with 
       <BentoGalatiMeshur initialData={first} />
     </QueryClientProvider>,
   );
-  const dice = screen.getByRole("button", { name: "HomeExtras.random" });
-  act(() => dice.focus());
-  fireEvent.click(dice);
+  const trigger = screen.getByRole("button", { name: label });
+  act(() => trigger.focus());
+  fireEvent.click(trigger);
   const retry = await screen.findByRole("button", { name: "HomeExtras.retry" });
-  expect(retry).toBe(dice);
-  expect(retry).toHaveFocus();
+  expect(trigger).toHaveFocus();
   await waitFor(() => expect(retry).toHaveAttribute("aria-disabled", "false"));
   expect(screen.getByText("vasat")).toBeVisible();
   expect(screen.queryByRole("link", { name: "HomeExtras.readMore" })).not.toBeInTheDocument();
@@ -310,8 +310,6 @@ test("a roll can reach another example after the visible ID moves to a different
     fireEvent.click(screen.getByRole("button", { name: "HomeExtras.next" }));
     await waitFor(() => expect(screen.getByText("2 / 3")).toBeVisible());
     client.removeQueries({ queryKey: ["hero-entry", 0], exact: true });
-    fireEvent.click(dice);
-    await waitFor(() => expect(screen.getByText("1 / 2")).toBeVisible());
     fireEvent.click(dice);
     await waitFor(() => expect(screen.getByText("yalnız")).toBeVisible());
     expect(screen.getByText("2 / 2")).toBeVisible();
@@ -351,6 +349,39 @@ test("a roll recovers when the displayed position no longer exists", async () =>
   }
 });
 
+test("a roll revalidates a cached example from before a known deletion", async () => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const first = { id: 1, wrong: "şöför", correct: "şoför" };
+  const deleted = { id: 2, wrong: "herkez", correct: "herkes" };
+  const third = { id: 3, wrong: "yanlız", correct: "yalnız" };
+  const last = { id: 4, wrong: "yanlışlıklaa", correct: "yanlışlıkla" };
+  client.setQueryData(["hero-entry", 1], { data: [deleted], total: 4 }, { updatedAt: Date.now() - 1000 });
+  mockFetch
+    .mockResolvedValueOnce({ data: [], total: 3 })
+    .mockResolvedValueOnce({ data: [first], total: 3 })
+    .mockResolvedValueOnce({ data: [last], total: 3 })
+    .mockResolvedValueOnce({ data: [third], total: 3 });
+  const { unmount } = render(
+    <QueryClientProvider client={client}>
+      <BentoCommonMistake initialData={{ data: [first], total: 4 }} />
+    </QueryClientProvider>,
+  );
+  const dice = screen.getByRole("button", { name: "HomeExtras.random" });
+  const random = jest.spyOn(Math, "random").mockReturnValue(0.9);
+  try {
+    fireEvent.click(dice);
+    await waitFor(() => expect(screen.getByText("3 / 3")).toBeVisible());
+    fireEvent.click(dice);
+    await waitFor(() => expect(screen.getByText("yalnız")).toBeVisible());
+    expect(screen.queryByText("herkes")).not.toBeInTheDocument();
+    expect(mockFetch.mock.calls).toEqual([[3], [0], [2], [1]]);
+  } finally {
+    random.mockRestore();
+    unmount();
+    client.clear();
+  }
+});
+
 test.each(["misspellings", "galati"] as const)("%s can cancel a pending roll offline without jumping to a cached non-neighbor", async (kind) => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
   const firstMistake = { data: [{ id: 1, wrong: "şöför", correct: "şoför" }], total: 4 };
@@ -373,10 +404,10 @@ test.each(["misspellings", "galati"] as const)("%s can cancel a pending roll off
     await waitFor(() => expect(mockFetch).toHaveBeenCalledWith(2));
     mockIsOnline = false;
     rerender(content());
-    expect(screen.getByRole("button", { name: "HomeExtras.next" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "HomeExtras.next" })).toHaveAttribute("aria-disabled", "true");
     fireEvent.click(screen.getByRole("button", { name: "HomeExtras.previous" }));
     expect(screen.getByText("1 / 4")).toBeVisible();
-    expect(screen.getByRole("button", { name: "HomeExtras.previous" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "HomeExtras.previous" })).toHaveAttribute("aria-disabled", "true");
   } finally {
     random.mockRestore();
     unmount();
