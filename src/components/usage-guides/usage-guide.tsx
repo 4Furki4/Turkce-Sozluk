@@ -55,7 +55,7 @@ export async function UsageGuide({
                             key={href}
                             href={href}
                             aria-current={href === current ? "page" : undefined}
-                            className="-mb-px inline-flex min-h-11 items-center border-b-2 border-transparent py-2 text-sm font-semibold text-foreground/75 hover:text-primary aria-[current=page]:border-current aria-[current=page]:text-primary sm:text-base"
+                            className="-mb-px inline-flex min-h-11 items-center border-b-2 border-transparent py-2 text-sm font-semibold text-foreground/75 hover:text-primary aria-[current=page]:border-current aria-[current=page]:text-primary sm:text-base forced-colors:border-b-0 forced-colors:aria-[current=page]:underline forced-colors:aria-[current=page]:underline-offset-4"
                         >
                             {t(title)}
                         </Link>
