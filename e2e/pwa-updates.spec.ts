@@ -23,11 +23,16 @@ async function releaseFixture(upstream: string) {
   const revision = rootEntry?.match(/["']?revision["']?\s*:\s*["']([^"']+)["']/)?.[1];
   if (!revision) throw new Error("Production worker has no /tr build revision");
   let release = "A";
+  let failingPath: string | undefined;
   const server = createServer(async (request, response) => {
     // An in-flight response belongs to the release that accepted the request,
     // even if deploy() runs while the upstream page is rendering.
     const requestedRelease = release;
     try {
+      if (request.url === failingPath) {
+        request.socket.destroy();
+        return;
+      }
       if (request.url === "/sw.js") {
         response.writeHead(200, { "content-type": "application/javascript", "cache-control": "no-store" });
         response.end(worker.replaceAll(revision, `${revision}-${requestedRelease}`));
@@ -69,6 +74,7 @@ async function releaseFixture(upstream: string) {
   return {
     origin: `http://127.0.0.1:${address.port}`,
     deploy: (nextRelease = "B") => { release = nextRelease; },
+    failRequest: (path: string) => { failingPath = path; },
     close: () => new Promise<void>((resolve, reject) => {
       server.close(error => error ? reject(error) : resolve());
       server.closeAllConnections();
@@ -165,10 +171,15 @@ for (const locale of ["tr", "en"] as const) {
 
       await prompt.getByRole("button", { name: messages.PwaUpdate.later }).click();
       await expect(prompt).toBeHidden();
+      await expect.poll(() => page.evaluate(() => localStorage.getItem("pwa-deferred-release"))).toMatch(/-B$/);
       expect(await page.evaluate(async () => (await navigator.serviceWorker.getRegistration())?.waiting?.state)).toBe("installed");
       await page.reload();
+      await expect(marker).toHaveAttribute("content", "B");
+      await expect(prompt).toBeHidden();
+
+      fixture.deploy("B2");
+      await page.evaluate(async () => { await (await navigator.serviceWorker.getRegistration())!.update(); });
       await expect(prompt).toBeVisible();
-      await expect(marker).toHaveAttribute("content", "A");
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       await page.screenshot({ path: testInfo.outputPath("update-prompt.png") });
 
@@ -180,7 +191,7 @@ for (const locale of ["tr", "en"] as const) {
       await update.focus();
       await expect(update).toBeFocused();
       await update.press("Enter");
-      await expect(marker).toHaveAttribute("content", "B");
+      await expect(marker).toHaveAttribute("content", "B2");
       await expect(prompt).toBeHidden();
       await expect(page).toHaveURL(url);
       expect(navigations).toBe(1);
@@ -285,3 +296,33 @@ for (const locale of ["tr", "en"] as const) {
     }
   });
 }
+
+test("online reload fetches the current homepage even at the exact precached URL", async ({ page, context, baseURL }) => {
+  const fixture = await releaseFixture(baseURL!);
+  try {
+    await context.route(/^https:\/\//, route => route.abort());
+    expect((await page.goto(`${fixture.origin}/tr`))?.ok()).toBe(true);
+    await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+    const marker = page.locator('meta[name="pwa-test-release"]');
+    await expect(marker).toHaveAttribute("content", "A");
+
+    fixture.deploy();
+    await page.reload();
+    await expect(marker).toHaveAttribute("content", "B");
+
+    // Finish the worker transition before cutting connectivity so this
+    // exercises the current release's offline fallback.
+    const prompt = page.getByRole("complementary", { name: trMessages.PwaUpdate.title });
+    await prompt.getByRole("button", { name: trMessages.PwaUpdate.update, exact: true }).click();
+    await expect(prompt).toBeHidden();
+    await expect(marker).toHaveAttribute("content", "B");
+    // Simulate a failed origin connection without blocking service worker
+    // navigations in Playwright WebKit's offline emulation.
+    const unavailablePath = "/tr?offline=1";
+    fixture.failRequest(unavailablePath);
+    await page.goto(fixture.origin + unavailablePath);
+    await expect(marker).toHaveAttribute("content", "B");
+  } finally {
+    await fixture.close();
+  }
+});
