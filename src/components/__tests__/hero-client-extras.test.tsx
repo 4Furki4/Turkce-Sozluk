@@ -287,6 +287,10 @@ test.each(["HomeExtras.random", "HomeExtras.next"])(
   await waitFor(() => expect(screen.getByText("mütevazı")).toBeVisible());
   expect(screen.getByRole("link", { name: "HomeExtras.readMore" })).toHaveAttribute("href", "/galati-meshur/2");
   expect(mockFetch.mock.calls).toEqual([[1], [0], [0]]);
+  mockFetch.mockRejectedValueOnce(new Error("Background refresh failed"));
+  await act(async () => { await client.refetchQueries({ queryKey: ["hero-entry", 0], exact: true }); });
+  expect(screen.getByText("mütevazı")).toBeVisible();
+  expect(screen.queryByRole("button", { name: "HomeExtras.retry" })).not.toBeInTheDocument();
   unmount();
   client.clear();
 });
@@ -375,6 +379,46 @@ test("a roll revalidates a cached example from before a known deletion", async (
     await waitFor(() => expect(screen.getByText("yalnız")).toBeVisible());
     expect(screen.queryByText("herkes")).not.toBeInTheDocument();
     expect(mockFetch.mock.calls).toEqual([[3], [0], [2], [1]]);
+  } finally {
+    random.mockRestore();
+    unmount();
+    client.clear();
+  }
+});
+
+test("a superseded cached page is revalidated after reconnecting", async () => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const first = { id: 1, wrong: "şöför", correct: "şoför" };
+  const deleted = { id: 2, wrong: "herkez", correct: "herkes" };
+  const third = { id: 3, wrong: "yanlız", correct: "yalnız" };
+  const last = { id: 4, wrong: "yanlışlıklaa", correct: "yanlışlıkla" };
+  const initialData = { data: [first], total: 4 };
+  client.setQueryData(["hero-entry", 1], { data: [deleted], total: 4 }, { updatedAt: Date.now() - 1000 });
+  mockFetch
+    .mockResolvedValueOnce({ data: [last], total: 3 })
+    .mockResolvedValueOnce({ data: [third], total: 3 });
+  const content = () => (
+    <QueryClientProvider client={client}>
+      <BentoCommonMistake initialData={initialData} />
+    </QueryClientProvider>
+  );
+  const { rerender, unmount } = render(content());
+  const dice = screen.getByRole("button", { name: "HomeExtras.random" });
+  const random = jest.spyOn(Math, "random").mockReturnValue(0.5);
+  try {
+    fireEvent.click(dice);
+    await waitFor(() => expect(screen.getByText("3 / 3")).toBeVisible());
+    mockIsOnline = false;
+    rerender(content());
+    fireEvent.click(screen.getByRole("button", { name: "HomeExtras.previous" }));
+    await waitFor(() => expect(screen.getByText("herkes")).toBeVisible());
+    expect(mockFetch.mock.calls).toEqual([[2]]);
+
+    mockIsOnline = true;
+    rerender(content());
+    await waitFor(() => expect(screen.getByText("yalnız")).toBeVisible());
+    expect(screen.getByText("2 / 3")).toBeVisible();
+    expect(mockFetch.mock.calls).toEqual([[2], [1]]);
   } finally {
     random.mockRestore();
     unmount();

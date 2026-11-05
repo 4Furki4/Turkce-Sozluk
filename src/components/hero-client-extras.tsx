@@ -33,11 +33,12 @@ function useCarouselPosition<Page extends ExamplePage>() {
     offset: number;
     previousPage?: { offset: number; data: Page | undefined };
     previousCount?: { total: number; updatedAt: number };
+    direction?: PageDirection;
     randomSample?: number;
     recovering?: boolean;
     revalidate?: boolean;
   }>({ offset: 0 });
-  const { offset, previousPage, previousCount, randomSample, recovering, revalidate } = position;
+  const { offset, previousPage, previousCount, direction = 1, randomSample, recovering, revalidate } = position;
 
   function getNavigation(
     query: {
@@ -52,42 +53,50 @@ function useCarouselPosition<Page extends ExamplePage>() {
     isOnline: boolean,
     getCachedPage: (offset: number) => Page | undefined,
   ) {
+    const previousUpdate = previousCount?.updatedAt ?? 0;
+    const isFresh = query.isFetchedAfterMount && !query.isError && query.dataUpdatedAt >= previousUpdate;
     // An older cached page must not restore a count that a newer response superseded.
-    const count = query.data && query.dataUpdatedAt >= (previousCount?.updatedAt ?? 0)
+    const count = query.data && (!previousCount || isFresh || query.dataUpdatedAt > previousUpdate)
       ? { total: query.data.total, updatedAt: query.dataUpdatedAt }
       : previousCount;
     const total = count?.total ?? 0;
     const candidate = query.data?.data[0];
     const repeatsEntry = Boolean(candidate && candidate.id === previousPage?.data?.data[0]?.id);
-    const isFresh = query.isFetchedAfterMount && !query.isError &&
-      query.dataUpdatedAt >= (previousCount?.updatedAt ?? 0);
+    const hasValidEntry = candidate && (isFresh || (!recovering && (!revalidate || !isOnline)));
+    const displayedPage = hasValidEntry || !previousPage ? { offset, data: query.data } : previousPage;
+    const countShrank = previousCount && total < previousCount.total;
     if (randomSample !== undefined && repeatsEntry && isFresh && total > 1 && offset < total) {
       // The visible ID moved. Continue this roll using its confirmed position.
+      const target = randomOffset(offset, total, randomSample);
       setPosition({
-        offset: randomOffset(offset, total, randomSample),
+        offset: target,
         previousPage: { offset, data: query.data },
         previousCount: count,
+        direction: target >= offset ? 1 : -1,
         randomSample,
         revalidate: true,
       });
-    }
-    const hasValidEntry = candidate && (isFresh || (!recovering && !revalidate));
-    const displayedPage = hasValidEntry || !previousPage ? { offset, data: query.data } : previousPage;
-    const countShrank = previousCount && total < previousCount.total;
-    if (query.data && total > 0 && (offset >= total || (!recovering && !hasValidEntry && countShrank))) {
+    } else if (query.data && total > 0 && (offset >= total || (!recovering && !hasValidEntry && countShrank))) {
       // Reload the visible position when an empty response makes its entry uncertain.
+      const target = Math.min(displayedPage.offset, total - 1);
       setPosition({
-        offset: Math.min(displayedPage.offset, total - 1),
+        offset: target,
         previousPage: displayedPage,
         previousCount: count,
+        direction: target >= displayedPage.offset ? 1 : -1,
         randomSample,
         recovering: true,
       });
+    } else if (hasValidEntry && (isOnline || !revalidate) && (
+      recovering || revalidate || randomSample !== undefined ||
+      previousPage?.offset !== offset || previousPage.data !== query.data ||
+      previousCount?.updatedAt !== count?.updatedAt
+    )) {
+      setPosition({ offset, previousPage: displayedPage, previousCount: count, direction });
     }
     const needsRecovery = Boolean(recovering && !hasValidEntry && total > 0);
     const isNavigating = !hasValidEntry && (displayedPage.offset !== offset || needsRecovery) &&
       (query.isPending || query.isFetching);
-    const direction: PageDirection = offset >= (previousPage?.offset ?? 0) ? 1 : -1;
 
     // While offline, the arrow opposite the pending jump returns to the visible page.
     const prevTarget = isNavigating && direction === 1 ? displayedPage.offset : displayedPage.offset - 1;
@@ -107,8 +116,9 @@ function useCarouselPosition<Page extends ExamplePage>() {
         offset: target,
         previousPage: displayedPage,
         previousCount: count,
+        direction: target >= displayedPage.offset ? 1 : -1,
         randomSample,
-        revalidate: isOnline && Boolean(cached && (
+        revalidate: Boolean(cached && (
           cached.total !== total ||
           (randomSample !== undefined && cached.data[0]?.id === displayedPage.data?.data[0]?.id)
         )),
