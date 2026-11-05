@@ -37,6 +37,9 @@ export function MisspellingsList({ entries }: { entries: Misspelling[] }) {
                     ref={inputRef}
                     aria-label={t("filterSpellings")}
                     placeholder={t("filterSpellings")}
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
                     value={query}
                     onValueChange={setQuery}
                     size="md"
