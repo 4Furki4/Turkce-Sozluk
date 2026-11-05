@@ -133,6 +133,10 @@ export default function HeroDotField() {
       schedule();
     }
 
+    const dismissOnTouch = (event: PointerEvent) => {
+      if (event.pointerType === "touch") leave();
+    };
+
     const showStaticPattern = () => {
       context = null;
       canvas.width = canvas.height = 0;
@@ -160,6 +164,7 @@ export default function HeroDotField() {
     hero.addEventListener("pointerleave", leave);
     hero.addEventListener("pointercancel", leave);
     window.addEventListener("blur", leave);
+    window.addEventListener("pointerdown", dismissOnTouch, { passive: true, capture: true });
     window.addEventListener("scroll", scroll, { passive: true, capture: true });
     hover.addEventListener("change", reset);
 
@@ -169,6 +174,7 @@ export default function HeroDotField() {
       hero.removeEventListener("pointerleave", leave);
       hero.removeEventListener("pointercancel", leave);
       window.removeEventListener("blur", leave);
+      window.removeEventListener("pointerdown", dismissOnTouch, true);
       window.removeEventListener("scroll", scroll, true);
       hover.removeEventListener("change", reset);
       reset();
