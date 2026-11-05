@@ -577,7 +577,7 @@
       "correctUsage": "Doğru kullanım",
       "usageCount": "{count, number} madde",
       "usageDetails": "Ayrıntıyı oku",
-      "usageDetailsFor": "{word} maddesinin ayrıntısını oku",
+      "usageDetailsFor": "Ayrıntıyı oku ({word})",
       "correct": "Doğru",
       "wrong": "Yanlış",
       "seeDetails": "Kelimeye Git",
