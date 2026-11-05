@@ -21,9 +21,13 @@ jest.mock("@heroui/react", () => ({
   CardBody: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => <div {...props}>{children}</div>,
   CardHeader: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => <div {...props}>{children}</div>,
   CardFooter: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => <div {...props}>{children}</div>,
-  Button: ({ children, isDisabled, onPress, "aria-label": label }: {
-    children: React.ReactNode; isDisabled: boolean; onPress: () => void; "aria-label": string;
-  }) => <button disabled={isDisabled} onClick={onPress} aria-label={label}>{children}</button>,
+  Button: ({ children, isDisabled, onPress, "aria-label": label, "aria-disabled": ariaDisabled }: {
+    children: React.ReactNode;
+    isDisabled?: boolean;
+    onPress: () => void;
+    "aria-label": string;
+    "aria-disabled"?: boolean;
+  }) => <button disabled={isDisabled} onClick={onPress} aria-label={label} aria-disabled={ariaDisabled}>{children}</button>,
 }));
 jest.mock("@/src/trpc/react", () => {
   const { useQuery, useQueryClient } = jest.requireActual("@tanstack/react-query");
@@ -181,7 +185,10 @@ test.each(["misspellings", "galati"] as const)("%s rolls a different entry and k
     fireEvent.click(dice);
     await waitFor(() => expect(mockFetch).toHaveBeenCalledWith(2));
     expect(screen.getByText("1 / 3")).toBeVisible();
-    expect(dice).toBeDisabled();
+    expect(dice).toHaveAttribute("aria-disabled", "true");
+    expect(dice).toBeEnabled();
+    fireEvent.click(dice);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
 
     await act(async () => { finishRequest(kind === "misspellings" ? lastMistake : lastGalati); });
     await waitFor(() => expect(screen.getByText(kind === "misspellings" ? "herkes" : "mütevazı")).toBeVisible());
@@ -196,6 +203,72 @@ test.each(["misspellings", "galati"] as const)("%s rolls a different entry and k
     fireEvent.click(dice);
     expect(await screen.findByText("1 / 3")).toBeVisible();
     expect(mockFetch).toHaveBeenCalledTimes(1);
+  } finally {
+    random.mockRestore();
+    unmount();
+    client.clear();
+  }
+});
+
+test.each(["misspellings", "galati"] as const)("%s can retry failed, empty, or repeated rolls", async (kind) => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
+  const firstMistake = { data: [{ id: 1, wrong: "şöför", correct: "şoför" }], total: 2 };
+  const firstGalati = { data: [{ id: 1, word: "vasat", explanation: "Orta, ortalama.", correctUsage: null }], total: 2 };
+  const initialPage = kind === "misspellings" ? firstMistake : firstGalati;
+  mockFetch
+    .mockRejectedValueOnce(new Error("Unavailable"))
+    .mockResolvedValueOnce({ data: [], total: 1 })
+    .mockResolvedValueOnce(initialPage)
+    .mockResolvedValueOnce({
+      data: [{ id: 2, wrong: "herkez", correct: "herkes", word: "mütevazı" }],
+      total: 2,
+    });
+  const { unmount } = render(
+    <QueryClientProvider client={client}>
+      {kind === "misspellings" ? <BentoCommonMistake initialData={firstMistake} /> : <BentoGalatiMeshur initialData={firstGalati} />}
+    </QueryClientProvider>,
+  );
+  const dice = screen.getByRole("button", { name: "HomeExtras.random" });
+  for (const attempt of [1, 2, 3]) {
+    fireEvent.click(dice);
+    await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(attempt));
+    await waitFor(() => expect(dice).toHaveAttribute("aria-disabled", "false"));
+    expect(screen.getByText("1 / 2")).toBeVisible();
+    expect(screen.getByText(kind === "misspellings" ? "şoför" : "vasat")).toBeVisible();
+  }
+  fireEvent.click(dice);
+  await waitFor(() => expect(screen.getByText("2 / 2")).toBeVisible());
+  expect(mockFetch.mock.calls).toEqual([[1], [1], [1], [1]]);
+  unmount();
+  client.clear();
+});
+
+test.each(["misspellings", "galati"] as const)("%s can cancel a pending roll offline without jumping to a cached non-neighbor", async (kind) => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
+  const firstMistake = { data: [{ id: 1, wrong: "şöför", correct: "şoför" }], total: 4 };
+  const firstGalati = { data: [{ id: 1, word: "vasat", explanation: "Orta, ortalama.", correctUsage: null }], total: 4 };
+  client.setQueryData(["hero-entry", 3], {
+    data: [{ id: 4, wrong: "herkez", correct: "herkes", word: "mütevazı" }],
+    total: 4,
+  });
+  mockFetch.mockImplementation(() => new Promise(() => {}));
+  const content = () => (
+    <QueryClientProvider client={client}>
+      {kind === "misspellings" ? <BentoCommonMistake initialData={firstMistake} /> : <BentoGalatiMeshur initialData={firstGalati} />}
+    </QueryClientProvider>
+  );
+  const { rerender, unmount } = render(content());
+  const dice = screen.getByRole("button", { name: "HomeExtras.random" });
+  const random = jest.spyOn(Math, "random").mockReturnValue(0.5);
+  try {
+    fireEvent.click(dice);
+    await waitFor(() => expect(mockFetch).toHaveBeenCalledWith(2));
+    mockIsOnline = false;
+    rerender(content());
+    expect(screen.getByRole("button", { name: "HomeExtras.next" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "HomeExtras.previous" }));
+    expect(screen.getByText("1 / 4")).toBeVisible();
+    expect(screen.getByRole("button", { name: "HomeExtras.previous" })).toBeDisabled();
   } finally {
     random.mockRestore();
     unmount();
