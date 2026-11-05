@@ -236,25 +236,12 @@ const handleNavigationRequest = async ({
     const isShellNavigation =
         isAppShellNavigationPath(url.pathname) && !isSearchQueryNavigation(url);
     const skipRequestMatch = Boolean(isDynamicSearchPath(url.pathname));
-    const shouldServeShellFirst =
-        isShellNavigation &&
-        (!self.navigator.onLine || !isDynamicSearchPath(url.pathname));
-
-    if (shouldServeShellFirst) {
+    if (isShellNavigation && !self.navigator.onLine) {
         const cachedShell = await getCachedNavigationResponse(request, fallbackUrl, {
             skipRequestMatch,
         });
 
         if (cachedShell) {
-            if (self.navigator.onLine) {
-                event.waitUntil(
-                    cacheNavigationResponse(
-                        request,
-                        fetch(request),
-                    ),
-                );
-            }
-
             return cachedShell;
         }
     }
@@ -325,11 +312,19 @@ self.addEventListener("activate", (event) => {
     );
 });
 
-serwist.registerRoute(
+// Serwist registers its precache route first. Handle documents before it so an
+// online WebKit reload can get fresh HTML even when the URL was precached.
+serwist.routes.get("GET")!.unshift(
     new NavigationRoute(handleNavigationRequest, {
         denylist: NAVIGATION_DENYLIST,
     }),
 );
+
+self.addEventListener("message", (event) => {
+    if (event.data?.type === "GET_PWA_RELEASE") {
+        event.ports[0]?.postMessage(RELEASE_REVISION);
+    }
+});
 
 for (const cacheEntry of RUNTIME_CACHING) {
     serwist.registerCapture(cacheEntry.matcher, cacheEntry.handler, cacheEntry.method);

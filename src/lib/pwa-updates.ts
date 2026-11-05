@@ -10,6 +10,8 @@ export type PwaUpdateState = {
 export const UPDATE_CHECK_INTERVAL_MS = 10 * 60 * 1000;
 export const UPDATE_CHECK_THROTTLE_MS = 60 * 1000;
 export const UPDATE_ACTIVATION_TIMEOUT_MS = 30 * 1000;
+const DEFERRED_RELEASE_KEY = "pwa-deferred-release";
+const RELEASE_RESPONSE_TIMEOUT_MS = 1000;
 
 type UpdateEnvironment = {
   container: ServiceWorkerContainer;
@@ -28,6 +30,26 @@ const sessions = new WeakMap<SerwistClient, {
   dismissedWorkers: WeakSet<ServiceWorker>;
 }>();
 
+function getWorkerRelease(worker: ServiceWorker, browserWindow: Window): Promise<string | null> {
+  if (typeof MessageChannel !== "function") return Promise.resolve(null);
+  return new Promise((resolve) => {
+    const channel = new MessageChannel();
+    const finish = (revision: string | null) => {
+      browserWindow.clearTimeout(timer);
+      channel.port1.close();
+      resolve(revision);
+    };
+    const timer = browserWindow.setTimeout(() => finish(null), RELEASE_RESPONSE_TIMEOUT_MS);
+    channel.port1.onmessage = ({ data }) => finish(typeof data === "string" ? data : null);
+    try {
+      worker.postMessage({ type: "GET_PWA_RELEASE" }, [channel.port2]);
+    } catch {
+      channel.port2.close();
+      finish(null);
+    }
+  });
+}
+
 export function createPwaUpdateManager(
   client: SerwistClient,
   onState: (state: PwaUpdateState) => void,
@@ -37,6 +59,8 @@ export function createPwaUpdateManager(
   let disposed = false;
   let registration: ServiceWorkerRegistration | undefined;
   let candidate: ServiceWorker | null = null;
+  let candidateRelease: string | null | undefined;
+  let deferredRelease: string | null = null;
   let acceptedWorker: ServiceWorker | null = null;
   let skipWaitingWorker: ServiceWorker | null = null;
   let reloadRequested = false;
@@ -59,11 +83,27 @@ export function createPwaUpdateManager(
     sessions.set(client, session);
   }
   const { dismissedWorkers } = session;
+  try {
+    deferredRelease = browserWindow.localStorage.getItem(DEFERRED_RELEASE_KEY);
+  } catch {
+    // In-memory deferral still works when browser storage is unavailable.
+  }
+
+  const rememberDeferral = (release: string) => {
+    deferredRelease = release;
+    try {
+      browserWindow.localStorage.setItem(DEFERRED_RELEASE_KEY, release);
+    } catch {
+      // Continue to defer the release for this document.
+    }
+  };
 
   const publish = () => {
     if (disposed) return;
+    const deferred = deferredRelease !== null &&
+      (candidateRelease === undefined || candidateRelease === deferredRelease);
     onState({
-      available: Boolean(candidate && !dismissedWorkers.has(candidate)) || error || reloadRequested,
+      available: Boolean(candidate && !dismissedWorkers.has(candidate) && !deferred) || error || reloadRequested,
       updating: reloadRequested,
       error,
       online: isOnline(),
@@ -95,7 +135,14 @@ export function createPwaUpdateManager(
     removeWorkerListener?.();
     removeWorkerListener = undefined;
     candidate = worker;
+    candidateRelease = undefined;
     if (!worker) return;
+    void getWorkerRelease(worker, browserWindow).then((release) => {
+      if (disposed || candidate !== worker) return;
+      candidateRelease = release;
+      if (release && dismissedWorkers.has(worker)) rememberDeferral(release);
+      publish();
+    });
     const onStateChange = () => {
       if (worker.state !== "redundant" || candidate !== worker) return;
       setCandidate(null);
@@ -264,6 +311,7 @@ export function createPwaUpdateManager(
     dismiss() {
       if (disposed || reloadRequested) return;
       if (candidate) dismissedWorkers.add(candidate);
+      if (candidateRelease) rememberDeferral(candidateRelease);
       error = false;
       publish();
     },

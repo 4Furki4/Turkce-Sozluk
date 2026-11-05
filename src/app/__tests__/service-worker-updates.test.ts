@@ -3,7 +3,11 @@
 const mockOptions = jest.fn();
 const mockCapture = jest.fn();
 const mockDeleteMetadata = jest.fn().mockResolvedValue(undefined);
-const mockListeners = new Map<string, (event: { waitUntil: (promise: Promise<unknown>) => void }) => void>();
+const mockListeners = new Map<string, (event: {
+  waitUntil: (promise: Promise<unknown>) => void;
+  data?: { type: string };
+  ports?: { postMessage: (revision: string) => void }[];
+}) => void>();
 const mockBaseCacheNames = ["pages-rsc-prefetch", "pages-rsc", "pages", "next-static-js-assets"];
 const mockHandlers = mockBaseCacheNames.map((cacheName) => ({ cacheName, plugins: [{ expiration: true }] }));
 
@@ -13,8 +17,8 @@ jest.mock("@serwist/next/worker", () => ({
 }));
 jest.mock("serwist", () => ({
   Serwist: class {
+    routes = new Map([["GET", []]]);
     constructor(options: unknown) { mockOptions(options); }
-    registerRoute() {}
     registerCapture(...args: unknown[]) { mockCapture(...args); }
     addEventListeners() {}
   },
@@ -79,6 +83,13 @@ describe("release-scoped page cache activation", () => {
       skipWaiting: false,
       clientsClaim: true,
     }));
+    const postMessage = jest.fn();
+    mockListeners.get("message")!({
+      waitUntil: jest.fn(),
+      data: { type: "GET_PWA_RELEASE" },
+      ports: [{ postMessage }],
+    });
+    expect(postMessage).toHaveBeenCalledWith(revision);
     expect(mockHandlers.map((handler) => handler.cacheName)).toEqual([
       `pages-rsc-prefetch-${revision}`, `pages-rsc-${revision}`, `pages-${revision}`, "next-static-js-assets",
     ]);

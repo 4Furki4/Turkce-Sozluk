@@ -27,9 +27,9 @@ describe("service worker navigation fallbacks", () => {
     expect(source).toContain("!isSearchQueryNavigation(url)");
   });
 
-  it("keeps dynamic word pages network-first while online for no-JS SSR refreshes", () => {
-    expect(source).toContain("shouldServeShellFirst");
-    expect(source).toContain("!self.navigator.onLine || !isDynamicSearchPath(url.pathname)");
+  it("only checks app shell caches first when offline", () => {
+    expect(source).toContain("if (isShellNavigation && !self.navigator.onLine)");
+    expect(source).toContain('serwist.routes.get("GET")!.unshift(');
   });
 
   it("preserves server 404 responses instead of replacing them with the offline fallback", () => {

@@ -13,8 +13,10 @@ external worker's lifecycle events.
 **Update now** activates the downloaded worker and reloads the current URL,
 including its query and hash, once the replacement controls this tab. Users should
 save unfinished forms first. Other open tabs keep their page and offer their own
-explicit reload. **Later** hides that release for the current page, including
-component remounts. A distinct release can still be offered. Updates require connectivity.
+explicit reload. **Later** remembers the deferred release across reloads and
+reopens when browser storage is available. A distinct release can still be
+offered. Older workers that cannot report a release ID are deferred for the
+current page. Updates require connectivity.
 An activation that does not complete within 30 seconds shows a retry action.
 
 Release detection uses the generated service worker bytes, rather than the
@@ -22,6 +24,8 @@ package version or a manually maintained release number. Each production build
 injects a new revision for the `/tr` precache entry. The document cache includes
 that revision. The default HTML, RSC and RSC-prefetch page caches use the same
 revision, so an accepted update cannot reuse old page payloads while offline.
+Online document navigations fetch current HTML before consulting cached pages,
+including reloads that WebKit presents to the worker as ordinary navigations.
 Activation deletes only older `document-pages`, `pages`, `pages-rsc` and
 `pages-rsc-prefetch` cache families and their Serwist expiration records. Offline
 dictionary IndexedDB data, local preferences and unrelated asset caches remain.
