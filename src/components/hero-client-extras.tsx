@@ -73,7 +73,7 @@ function useCarouselPosition<Page extends ExamplePage>() {
       : previousCount;
     const total = count?.total ?? 0;
     const candidate = query.data?.data[0];
-    const repeatsRoll = randomSample !== undefined && total > 1 &&
+    const repeatsRoll = randomSample !== undefined && total > 1 && !(recovering && continuedRoll) &&
       candidate?.id === previousPage?.data?.data[0]?.id;
     const hasValidEntry = candidate && !repeatsRoll && (isFresh || (!recovering && (!revalidate || !isOnline)));
     const displayedPage = hasValidEntry || !previousPage ? { offset, data: query.data } : previousPage;

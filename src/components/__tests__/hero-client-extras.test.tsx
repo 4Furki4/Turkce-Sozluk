@@ -423,6 +423,37 @@ test("a roll revalidates a cached example from before a known deletion", async (
   }
 });
 
+test("recovery can confirm the current example after the roll continuation is exhausted", async () => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const first = { id: 1, wrong: "şöför", correct: "şoför" };
+  const second = { id: 2, wrong: "herkez", correct: "herkes" };
+  mockFetch
+    .mockResolvedValueOnce({ data: [first], total: 4 })
+    .mockResolvedValueOnce({ data: [], total: 2 })
+    .mockResolvedValueOnce({ data: [first], total: 2 })
+    .mockResolvedValueOnce({ data: [second], total: 2 });
+  const { unmount } = render(
+    <QueryClientProvider client={client}>
+      <BentoCommonMistake initialData={{ data: [first], total: 4 }} />
+    </QueryClientProvider>,
+  );
+  const dice = screen.getByRole("button", { name: "HomeExtras.random" });
+  const random = jest.spyOn(Math, "random").mockReturnValue(0.9);
+  try {
+    fireEvent.click(dice);
+    await waitFor(() => expect(screen.getByText("1 / 2")).toBeVisible());
+    expect(screen.queryByRole("button", { name: "HomeExtras.retry" })).not.toBeInTheDocument();
+    expect(dice).toHaveAttribute("aria-disabled", "false");
+    fireEvent.click(dice);
+    await waitFor(() => expect(screen.getByText("herkes")).toBeVisible());
+    expect(mockFetch.mock.calls).toEqual([[3], [2], [0], [1]]);
+  } finally {
+    random.mockRestore();
+    unmount();
+    client.clear();
+  }
+});
+
 test("a superseded cached page is revalidated after reconnecting", async () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const first = { id: 1, wrong: "şöför", correct: "şoför" };
