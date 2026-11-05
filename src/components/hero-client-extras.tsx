@@ -35,10 +35,12 @@ function useCarouselPosition<Page extends ExamplePage>() {
     previousCount?: { total: number; updatedAt: number };
     direction?: PageDirection;
     randomSample?: number;
+    continuedRoll?: boolean;
     recovering?: boolean;
     revalidate?: boolean;
   }>({ offset: 0 });
-  const { offset, previousPage, previousCount, direction = 1, randomSample, recovering, revalidate } = position;
+  const { offset, previousPage, previousCount, direction = 1, randomSample, continuedRoll, recovering, revalidate } =
+    position;
 
   function getNavigation(
     query: {
@@ -54,19 +56,21 @@ function useCarouselPosition<Page extends ExamplePage>() {
     getCachedPage: (offset: number) => Page | undefined,
   ) {
     const previousUpdate = previousCount?.updatedAt ?? 0;
-    const isFresh = query.isFetchedAfterMount && !query.isError && query.dataUpdatedAt >= previousUpdate;
+    const isFresh = query.isFetchedAfterMount && !query.isFetching && !query.isError &&
+      query.dataUpdatedAt >= previousUpdate;
     // An older cached page must not restore a count that a newer response superseded.
     const count = query.data && (!previousCount || isFresh || query.dataUpdatedAt > previousUpdate)
       ? { total: query.data.total, updatedAt: query.dataUpdatedAt }
       : previousCount;
     const total = count?.total ?? 0;
     const candidate = query.data?.data[0];
-    const repeatsEntry = Boolean(candidate && candidate.id === previousPage?.data?.data[0]?.id);
-    const hasValidEntry = candidate && (isFresh || (!recovering && (!revalidate || !isOnline)));
+    const repeatsRoll = randomSample !== undefined && total > 1 &&
+      candidate?.id === previousPage?.data?.data[0]?.id;
+    const hasValidEntry = candidate && !repeatsRoll && (isFresh || (!recovering && (!revalidate || !isOnline)));
     const displayedPage = hasValidEntry || !previousPage ? { offset, data: query.data } : previousPage;
     const countShrank = previousCount && total < previousCount.total;
-    if (randomSample !== undefined && repeatsEntry && isFresh && total > 1 && offset < total) {
-      // The visible ID moved. Continue this roll using its confirmed position.
+    if (randomSample !== undefined && repeatsRoll && isFresh && !continuedRoll && offset < total) {
+      // Continue once. A service-worker fallback can return the same ID at both offsets.
       const target = randomOffset(offset, total, randomSample);
       setPosition({
         offset: target,
@@ -74,6 +78,7 @@ function useCarouselPosition<Page extends ExamplePage>() {
         previousCount: count,
         direction: target >= offset ? 1 : -1,
         randomSample,
+        continuedRoll: true,
         revalidate: true,
       });
     } else if (query.data && total > 0 && (offset >= total || (!recovering && !hasValidEntry && countShrank))) {
@@ -85,6 +90,7 @@ function useCarouselPosition<Page extends ExamplePage>() {
         previousCount: count,
         direction: target >= displayedPage.offset ? 1 : -1,
         randomSample,
+        continuedRoll,
         recovering: true,
       });
     } else if (hasValidEntry && (isOnline || !revalidate) && (

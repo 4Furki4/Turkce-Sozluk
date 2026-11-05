@@ -353,6 +353,41 @@ test("a roll recovers when the displayed position no longer exists", async () =>
   }
 });
 
+test("a roll stops when cached responses repeat the same ID at both offsets", async () => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const first = { id: 1, wrong: "şöför", correct: "şoför" };
+  const second = { id: 2, wrong: "herkez", correct: "herkes" };
+  const third = { id: 3, wrong: "yanlız", correct: "yalnız" };
+  client.setQueryData(["hero-entry", 1], { data: [second], total: 4 });
+  mockFetch
+    .mockResolvedValueOnce({ data: [second], total: 4 })
+    .mockResolvedValueOnce({ data: [second], total: 4 })
+    .mockResolvedValueOnce({ data: [third], total: 4 });
+  const { unmount } = render(
+    <QueryClientProvider client={client}>
+      <BentoCommonMistake initialData={{ data: [first], total: 4 }} />
+    </QueryClientProvider>,
+  );
+  const dice = screen.getByRole("button", { name: "HomeExtras.random" });
+  const random = jest.spyOn(Math, "random").mockReturnValue(0.4);
+  try {
+    fireEvent.click(screen.getByRole("button", { name: "HomeExtras.next" }));
+    await waitFor(() => expect(screen.getByText("2 / 4")).toBeVisible());
+    fireEvent.click(dice);
+    await waitFor(() => expect(mockFetch.mock.calls).toEqual([[3], [1]]));
+    await waitFor(() => expect(dice).toHaveAttribute("aria-disabled", "false"));
+    expect(screen.getByText("herkes")).toBeVisible();
+
+    fireEvent.click(dice);
+    await waitFor(() => expect(screen.getByText("yalnız")).toBeVisible());
+    expect(mockFetch.mock.calls).toEqual([[3], [1], [1]]);
+  } finally {
+    random.mockRestore();
+    unmount();
+    client.clear();
+  }
+});
+
 test("a roll revalidates a cached example from before a known deletion", async () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const first = { id: 1, wrong: "şöför", correct: "şoför" };
