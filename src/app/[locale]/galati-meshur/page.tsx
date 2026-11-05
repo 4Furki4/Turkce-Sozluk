@@ -1,7 +1,7 @@
-import CustomCard from "@/src/components/customs/heroui/custom-card";
+import { UsageGuide } from "@/src/components/usage-guides/usage-guide";
 import { Link } from "@/src/i18n/routing";
 import { api } from "@/src/trpc/server";
-import { BookOpen, CheckCircle2, ChevronLeft, XCircle } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 type Props = {
@@ -12,73 +12,60 @@ export default async function GalatiMeshurListPage({ params }: Props) {
     const { locale } = await params;
     setRequestLocale(locale);
 
-    const t = await getTranslations("Home.HomeExtras");
-    const firstPage = await api.extras.getGalatiMeshur({ limit: 1, offset: 0 });
-    const galatiMeshurResponse =
-        firstPage.total > 0
-            ? await api.extras.getGalatiMeshur({ limit: firstPage.total, offset: 0 })
-            : firstPage;
+    const [t, firstPage] = await Promise.all([
+        getTranslations("Home.HomeExtras"),
+        api.extras.getGalatiMeshur({ limit: 1, offset: 0 }),
+    ]);
+    const { data } = firstPage.total > 1
+        ? await api.extras.getGalatiMeshur({ limit: firstPage.total, offset: 0 })
+        : firstPage;
 
     return (
-        <main className="container w-full mx-auto px-4 py-10">
-            <div className="mb-8">
-                <Link
-                    href="/"
-                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                    <ChevronLeft className="w-4 h-4" />
-                    {t("backToHome")}
-                </Link>
-                <h1 className="text-3xl sm:text-4xl font-bold mt-3 flex items-center gap-3">
-                    <BookOpen className="w-7 h-7 text-amber-600 dark:text-amber-500" />
-                    {t("galatiMeshurTitle")}
-                </h1>
-            </div>
+        <UsageGuide current="/galati-meshur">
+            <div className="mt-6 sm:mt-8">
+                {data.length === 0 ? (
+                    <p className="text-foreground/75">{t("noGalatiMeshurFound")}</p>
+                ) : (
+                    <>
+                        <p className="mb-4 text-sm text-foreground/75 tabular-nums">
+                            {t("usageCount", { count: data.length })}
+                        </p>
+                        <ul role="list" className="divide-y divide-foreground/15 rounded-xl border border-foreground/15 bg-background/40">
+                            {data.map(({ id, word, explanation, correctUsage }) => (
+                                <li key={id} className="px-4 py-5 sm:p-6 md:px-8 md:py-7">
+                                    <article className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:gap-8">
+                                        <div>
+                                            <h2 lang="tr" className="dictionary-prose text-2xl font-semibold tracking-tight sm:text-3xl">
+                                                {word}
+                                            </h2>
+                                            {correctUsage?.trim() && (
+                                                <dl className="mt-3">
+                                                    <dt className="text-sm text-foreground/75">{t("correctUsage")}</dt>
+                                                    <dd lang="tr" className="dictionary-prose mt-0.5 font-semibold">{correctUsage}</dd>
+                                                </dl>
+                                            )}
+                                        </div>
 
-            <div className="grid grid-cols-1 gap-4">
-                {galatiMeshurResponse.data.map((item) => (
-                    <CustomCard key={item.id} className="p-0">
-                        <div className="px-5 pt-5 pb-2">
-                            <h2 className="text-xl font-semibold">{item.word}</h2>
-                        </div>
-
-                        <div className="px-5 py-2 space-y-3">
-                            <div className="flex items-start gap-2 text-default-500">
-                                <XCircle className="w-4 h-4 mt-1 text-danger shrink-0" />
-                                <p className="line-through decoration-danger/60">
-                                    {item.explanation}
-                                </p>
-                            </div>
-                            <div className="flex items-start gap-2">
-                                <CheckCircle2 className="w-4 h-4 mt-1 text-success shrink-0" />
-                                <p className="font-medium text-foreground">
-                                    {item.correctUsage || item.word}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="px-5 pb-5 pt-1">
-                            <Link
-                                href={{
-                                    pathname: "/galati-meshur/[id]",
-                                    params: { id: item.id.toString() },
-                                }}
-                                className="inline-flex items-center rounded-medium bg-warning-500/15 hover:bg-warning-500/25 text-warning-700 dark:text-warning-400 px-3 py-1.5 text-sm font-medium transition-colors"
-                            >
-                                {t("seeDetails")}
-                            </Link>
-                        </div>
-                    </CustomCard>
-                ))}
-
-                {galatiMeshurResponse.data.length === 0 && (
-                    <CustomCard>
-                        <div className="p-6 text-sm text-muted-foreground">
-                            {t("noGalatiMeshurFound")}
-                        </div>
-                    </CustomCard>
+                                        <div>
+                                            <p lang="tr" className="dictionary-prose max-w-prose whitespace-pre-line leading-relaxed text-foreground/85">
+                                                {explanation}
+                                            </p>
+                                            <Link
+                                                href={{ pathname: "/galati-meshur/[id]", params: { id: String(id) } }}
+                                                aria-label={t("usageDetailsFor", { word })}
+                                                className="mt-2 inline-flex min-h-11 max-w-full items-center gap-2 rounded-sm text-sm font-semibold text-primary underline decoration-current/45 underline-offset-4 hover:decoration-current"
+                                            >
+                                                {t("usageDetails")}
+                                                <ArrowRight aria-hidden="true" className="size-4 shrink-0" />
+                                            </Link>
+                                        </div>
+                                    </article>
+                                </li>
+                            ))}
+                        </ul>
+                    </>
                 )}
             </div>
-        </main>
+        </UsageGuide>
     );
 }
