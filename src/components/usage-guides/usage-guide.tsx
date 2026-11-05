@@ -29,7 +29,7 @@ export async function UsageGuide({
     const guide = current === "/galati-meshur" ? guides[1] : guides[0];
 
     return (
-        <div className="mx-auto w-full max-w-4xl px-4 pt-5 pb-12 sm:px-8 sm:pt-9 sm:pb-16">
+        <div className="mx-auto w-full max-w-4xl px-4 pt-5 pb-12 sm:px-8 sm:pt-9 sm:pb-16 forced-colors:[&_a:focus-visible]:outline-2">
             <header>
                 <Link
                     href="/"

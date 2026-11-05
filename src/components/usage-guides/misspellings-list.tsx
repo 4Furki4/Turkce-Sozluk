@@ -39,7 +39,7 @@ export function MisspellingsList({ entries }: { entries: Misspelling[] }) {
                     placeholder={t("filterSpellings")}
                     autoCapitalize="none"
                     autoCorrect="off"
-                    spellCheck={false}
+                    spellCheck="false"
                     value={query}
                     onValueChange={setQuery}
                     size="md"
@@ -53,7 +53,7 @@ export function MisspellingsList({ entries }: { entries: Misspelling[] }) {
                         <button
                             type="button"
                             aria-label={t("clearSpellingFilter")}
-                            className="-me-2 grid size-10 shrink-0 place-items-center rounded-md text-foreground/75 hover:text-primary"
+                            className="-me-2 grid size-10 shrink-0 place-items-center rounded-md text-foreground/75 hover:text-primary forced-colors:focus-visible:outline-2"
                             onClick={() => {
                                 setQuery("");
                                 inputRef.current?.focus();
