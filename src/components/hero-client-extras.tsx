@@ -23,7 +23,16 @@ type ExamplePage = { data: { id: number }[]; total: number };
 const CAROUSEL_BUTTON_CLASS =
   "h-11 min-w-11 text-muted-foreground hover:text-foreground aria-disabled:opacity-50 aria-disabled:hover:text-muted-foreground";
 
-function randomOffset(offset: number, total: number, sample: number) {
+function randomOffset(offset: number, total: number, sample: number, previousOffset?: number) {
+  if (total > 2 && previousOffset !== undefined && previousOffset !== offset && previousOffset < total) {
+    // The continuation can sample among offsets that neither response has shown.
+    const first = Math.min(offset, previousOffset);
+    const second = Math.max(offset, previousOffset);
+    let target = Math.floor(sample * (total - 2));
+    if (target >= first) target++;
+    if (target >= second) target++;
+    return target;
+  }
   const steps = 1 + Math.floor(sample * (total - 1));
   return (offset + steps) % total;
 }
@@ -71,7 +80,7 @@ function useCarouselPosition<Page extends ExamplePage>() {
     const countShrank = previousCount && total < previousCount.total;
     if (randomSample !== undefined && repeatsRoll && isFresh && !continuedRoll && offset < total) {
       // Continue once. A service-worker fallback can return the same ID at both offsets.
-      const target = randomOffset(offset, total, randomSample);
+      const target = randomOffset(offset, total, randomSample, previousPage?.offset);
       setPosition({
         offset: target,
         previousPage: { offset, data: query.data },

@@ -374,13 +374,13 @@ test("a roll stops when cached responses repeat the same ID at both offsets", as
     fireEvent.click(screen.getByRole("button", { name: "HomeExtras.next" }));
     await waitFor(() => expect(screen.getByText("2 / 4")).toBeVisible());
     fireEvent.click(dice);
-    await waitFor(() => expect(mockFetch.mock.calls).toEqual([[3], [1]]));
+    await waitFor(() => expect(mockFetch.mock.calls).toEqual([[3], [0]]));
     await waitFor(() => expect(dice).toHaveAttribute("aria-disabled", "false"));
     expect(screen.getByText("herkes")).toBeVisible();
 
     fireEvent.click(dice);
     await waitFor(() => expect(screen.getByText("yalnız")).toBeVisible());
-    expect(mockFetch.mock.calls).toEqual([[3], [1], [1]]);
+    expect(mockFetch.mock.calls).toEqual([[3], [0], [1]]);
   } finally {
     random.mockRestore();
     unmount();
