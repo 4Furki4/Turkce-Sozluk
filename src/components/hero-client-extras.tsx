@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, CardBody, CardFooter, CardHeader } from "@heroui/react";
-import { ArrowRight, BookOpen, CheckCircle2, Dice5, XCircle } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle2, Dice5, RotateCw, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { forwardRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "framer-motion";
@@ -28,13 +28,16 @@ function useCarouselPosition<Page extends ExamplePage>() {
     previousCount?: { total: number; updatedAt: number };
     random?: boolean;
     recovering?: boolean;
+    revalidate?: boolean;
   }>({ offset: 0 });
-  const { offset, previousPage, previousCount, random } = position;
+  const { offset, previousPage, previousCount, random, recovering } = position;
 
   function getNavigation(
     query: {
       data: Page | undefined;
       dataUpdatedAt: number;
+      isFetchedAfterMount: boolean;
+      isError: boolean;
       isPending: boolean;
       isFetching: boolean;
       refetch: () => Promise<unknown>;
@@ -49,13 +52,25 @@ function useCarouselPosition<Page extends ExamplePage>() {
     const total = count?.total ?? 0;
     const candidate = query.data?.data[0];
     const repeatsEntry = random && candidate?.id === previousPage?.data?.data[0]?.id;
-    const hasValidEntry = candidate && (!repeatsEntry || (previousPage?.offset ?? 0) >= total);
+    const previousUpdate = previousCount?.updatedAt ?? 0;
+    const isFresh = query.dataUpdatedAt > previousUpdate ||
+      (query.dataUpdatedAt === previousUpdate && query.isFetchedAfterMount && !query.isError);
+    // A fresh response can confirm that the visible ID moved to this offset.
+    const hasValidEntry = candidate && (isFresh || (!recovering && !repeatsEntry));
     const displayedPage = hasValidEntry || !previousPage ? { offset, data: query.data } : previousPage;
-    if (query.data && total > 0 && displayedPage.offset >= total) {
-      // The list shrank past the visible position. Reload the new last page.
-      setPosition({ offset: total - 1, previousCount: count, recovering: true });
+    const countShrank = previousCount && total < previousCount.total;
+    if (query.data && total > 0 && (offset >= total || (!recovering && !hasValidEntry && countShrank))) {
+      // Reload the visible position when an empty response makes its entry uncertain.
+      setPosition({
+        offset: Math.min(displayedPage.offset, total - 1),
+        previousPage: displayedPage,
+        previousCount: count,
+        recovering: true,
+      });
     }
-    const isNavigating = displayedPage.offset !== offset && (query.isPending || query.isFetching);
+    const needsRecovery = Boolean(recovering && !hasValidEntry && total > 0);
+    const isNavigating = !hasValidEntry && (displayedPage.offset !== offset || needsRecovery) &&
+      (query.isPending || query.isFetching);
     const direction: PageDirection = offset >= (previousPage?.offset ?? 0) ? 1 : -1;
 
     // While offline, the arrow opposite the pending jump returns to the visible page.
@@ -63,6 +78,7 @@ function useCarouselPosition<Page extends ExamplePage>() {
     const nextTarget = isNavigating && direction === -1 ? displayedPage.offset : displayedPage.offset + 1;
 
     const canNavigateTo = (target: number) => {
+      if (needsRecovery) return false;
       if (isNavigating) return !isOnline && target === displayedPage.offset;
       if (target < 0 || target >= total) return false;
       return isOnline || Boolean(getCachedPage(target)?.data.length);
@@ -70,7 +86,14 @@ function useCarouselPosition<Page extends ExamplePage>() {
 
     const navigateTo = (target: number, random = false) => {
       if (!canNavigateTo(target)) return;
-      setPosition({ offset: target, previousPage: displayedPage, previousCount: count, random });
+      const cachedEntry = random ? getCachedPage(target)?.data[0] : undefined;
+      setPosition({
+        offset: target,
+        previousPage: displayedPage,
+        previousCount: count,
+        random,
+        revalidate: Boolean(cachedEntry && cachedEntry.id === displayedPage.data?.data[0]?.id),
+      });
       if (target === offset && isOnline) void query.refetch();
     };
 
@@ -80,6 +103,8 @@ function useCarouselPosition<Page extends ExamplePage>() {
       total,
       direction,
       isNavigating,
+      needsRecovery,
+      retry: () => { void query.refetch(); },
       prevTarget,
       nextTarget,
       canNavigateTo,
@@ -87,17 +112,18 @@ function useCarouselPosition<Page extends ExamplePage>() {
     };
   }
 
-  return { offset, getNavigation, staleTime: position.recovering ? 0 : HERO_CLIENT_STALE_TIME };
+  return { offset, getNavigation, recovering, staleTime: recovering || position.revalidate ? 0 : HERO_CLIENT_STALE_TIME };
 }
 
-function RandomEntryButton({ offset, total, isDisabled, onSelect }: {
+function RandomEntryButton({ offset, total, isDisabled, onSelect, retry }: {
   offset: number;
   total: number;
   isDisabled: boolean;
   onSelect: (target: number) => void;
+  retry?: () => void;
 }) {
   const t = useTranslations("Home");
-  const label = t("HomeExtras.random");
+  const label = retry ? t("HomeExtras.retry") : t("HomeExtras.random");
 
   return (
     <Button
@@ -110,11 +136,15 @@ function RandomEntryButton({ offset, total, isDisabled, onSelect }: {
       aria-disabled={isDisabled}
       onPress={() => {
         if (isDisabled) return;
+        if (retry) {
+          retry();
+          return;
+        }
         const steps = 1 + Math.floor(Math.random() * (total - 1));
         onSelect((offset + steps) % total);
       }}
     >
-      <Dice5 aria-hidden className="h-4 w-4" />
+      {retry ? <RotateCw aria-hidden className="h-4 w-4" /> : <Dice5 aria-hidden className="h-4 w-4" />}
     </Button>
   );
 }
@@ -170,18 +200,18 @@ export function BentoCommonMistake({
   initialData?: MisspellingsData;
 }) {
   const t = useTranslations("Home");
-  const { offset, getNavigation, staleTime } = useCarouselPosition<MisspellingsData>();
+  const { offset, getNavigation, recovering, staleTime } = useCarouselPosition<MisspellingsData>();
   const isOnline = useOnlineStatus();
   const utils = api.useUtils();
   const query = api.extras.getMisspellings.useQuery(
     { limit: 1, offset },
     {
       enabled: isOnline,
-      initialData: offset === 0 ? initialData : undefined,
+      initialData: offset === 0 && !recovering ? initialData : undefined,
       staleTime,
     },
   );
-  const { data, total, displayedOffset, direction, isNavigating, prevTarget, nextTarget, canNavigateTo, navigateTo } =
+  const { data, total, displayedOffset, direction, isNavigating, needsRecovery, retry, prevTarget, nextTarget, canNavigateTo, navigateTo } =
     getNavigation(query, isOnline, (target) =>
       utils.extras.getMisspellings.getData({ limit: 1, offset: target })
         ?? (target === 0 ? initialData : undefined),
@@ -198,12 +228,13 @@ export function BentoCommonMistake({
           <span aria-hidden className="h-2 w-2 shrink-0 rounded-full bg-orange-500" />
           {t("HomeExtras.misspellingsTitle")}
         </Link>
-        {item && total > 1 ? (
+        {item && (total > 1 || needsRecovery) ? (
           <RandomEntryButton
             offset={displayedOffset}
             total={total}
             isDisabled={!isOnline || isNavigating}
             onSelect={(target) => navigateTo(target, true)}
+            retry={needsRecovery ? retry : undefined}
           />
         ) : null}
       </CardHeader>
@@ -238,7 +269,7 @@ export function BentoCommonMistake({
         )}
       </CardBody>
 
-      {item && total > 1 ? (
+      {item && total > 1 && !needsRecovery ? (
         <CardFooter className="flex items-center justify-between gap-3 px-3 pb-2 pt-0 sm:px-4">
           <div className="flex items-center">
             <Button
@@ -279,18 +310,18 @@ export function BentoGalatiMeshur({
   initialData?: GalatiMeshurData;
 }) {
   const t = useTranslations("Home");
-  const { offset, getNavigation, staleTime } = useCarouselPosition<GalatiMeshurData>();
+  const { offset, getNavigation, recovering, staleTime } = useCarouselPosition<GalatiMeshurData>();
   const isOnline = useOnlineStatus();
   const utils = api.useUtils();
   const query = api.extras.getGalatiMeshur.useQuery(
     { limit: 1, offset },
     {
       enabled: isOnline,
-      initialData: offset === 0 ? initialData : undefined,
+      initialData: offset === 0 && !recovering ? initialData : undefined,
       staleTime,
     },
   );
-  const { data, total, displayedOffset, direction, isNavigating, prevTarget, nextTarget, canNavigateTo, navigateTo } =
+  const { data, total, displayedOffset, direction, isNavigating, needsRecovery, retry, prevTarget, nextTarget, canNavigateTo, navigateTo } =
     getNavigation(query, isOnline, (target) =>
       utils.extras.getGalatiMeshur.getData({ limit: 1, offset: target })
         ?? (target === 0 ? initialData : undefined),
@@ -312,12 +343,13 @@ export function BentoGalatiMeshur({
           <BookOpen aria-hidden className="h-4 w-4 shrink-0" />
           {t("HomeExtras.galatiMeshurTitle")}
         </Link>
-        {item && total > 1 ? (
+        {item && (total > 1 || needsRecovery) ? (
           <RandomEntryButton
             offset={displayedOffset}
             total={total}
             isDisabled={!isOnline || isNavigating}
             onSelect={(target) => navigateTo(target, true)}
+            retry={needsRecovery ? retry : undefined}
           />
         ) : null}
       </CardHeader>
@@ -355,7 +387,7 @@ export function BentoGalatiMeshur({
         )}
       </CardBody>
 
-      {item ? (
+      {item && !needsRecovery ? (
         <CardFooter className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-3 pb-2 pt-0 sm:px-4">
           <div className="flex items-center">
             <Button

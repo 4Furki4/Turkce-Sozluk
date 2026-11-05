@@ -210,15 +210,13 @@ test.each(["misspellings", "galati"] as const)("%s rolls a different entry and k
   }
 });
 
-test.each(["misspellings", "galati"] as const)("%s can retry failed, empty, or repeated rolls", async (kind) => {
+test.each(["misspellings", "galati"] as const)("%s can retry failed or empty rolls", async (kind) => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
   const firstMistake = { data: [{ id: 1, wrong: "şöför", correct: "şoför" }], total: 2 };
   const firstGalati = { data: [{ id: 1, word: "vasat", explanation: "Orta, ortalama.", correctUsage: null }], total: 2 };
-  const initialPage = kind === "misspellings" ? firstMistake : firstGalati;
   mockFetch
     .mockRejectedValueOnce(new Error("Unavailable"))
     .mockResolvedValueOnce({ data: [], total: 2 })
-    .mockResolvedValueOnce(initialPage)
     .mockResolvedValueOnce({
       data: [{ id: 2, wrong: "herkez", correct: "herkes", word: "mütevazı" }],
       total: 2,
@@ -229,7 +227,7 @@ test.each(["misspellings", "galati"] as const)("%s can retry failed, empty, or r
     </QueryClientProvider>,
   );
   const dice = screen.getByRole("button", { name: "HomeExtras.random" });
-  for (const attempt of [1, 2, 3]) {
+  for (const attempt of [1, 2]) {
     fireEvent.click(dice);
     await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(attempt));
     await waitFor(() => expect(dice).toHaveAttribute("aria-disabled", "false"));
@@ -238,15 +236,15 @@ test.each(["misspellings", "galati"] as const)("%s can retry failed, empty, or r
   }
   fireEvent.click(dice);
   await waitFor(() => expect(screen.getByText("2 / 2")).toBeVisible());
-  expect(mockFetch.mock.calls).toEqual([[1], [1], [1], [1]]);
+  expect(mockFetch.mock.calls).toEqual([[1], [1], [1]]);
   unmount();
   client.clear();
 });
 
-test.each([0, 1])("a roll with a new total of %i hides controls for missing entries", async (total) => {
+test("a roll that finds an empty collection clears the card", async () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const first = { data: [{ id: 1, wrong: "şöför", correct: "şoför" }], total: 2 };
-  mockFetch.mockResolvedValueOnce({ data: [], total });
+  mockFetch.mockResolvedValueOnce({ data: [], total: 0 });
   const { unmount } = render(
     <QueryClientProvider client={client}>
       <BentoCommonMistake initialData={first} />
@@ -255,13 +253,74 @@ test.each([0, 1])("a roll with a new total of %i hides controls for missing entr
   fireEvent.click(screen.getByRole("button", { name: "HomeExtras.random" }));
   await waitFor(() => expect(screen.queryByRole("button", { name: "HomeExtras.random" })).not.toBeInTheDocument());
   expect(screen.queryByText("1 / 2")).not.toBeInTheDocument();
-  if (total === 1) {
-    expect(screen.getByText("şoför")).toBeVisible();
-  } else {
-    expect(screen.getByText("HomeExtras.noMisspellingsFound")).toBeVisible();
-  }
+  expect(screen.getByText("HomeExtras.noMisspellingsFound")).toBeVisible();
   unmount();
   client.clear();
+});
+
+test("a deleted visible entry is revalidated after the collection shrinks, with a retry on failure", async () => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const first = { data: [{ id: 1, word: "vasat", explanation: "Orta, ortalama.", correctUsage: null }], total: 2 };
+  mockFetch
+    .mockResolvedValueOnce({ data: [], total: 1 })
+    .mockRejectedValueOnce(new Error("Unavailable"))
+    .mockResolvedValueOnce({
+      data: [{ id: 2, word: "mütevazı", explanation: "Alçak gönüllü.", correctUsage: null }],
+      total: 1,
+    });
+  const { unmount } = render(
+    <QueryClientProvider client={client}>
+      <BentoGalatiMeshur initialData={first} />
+    </QueryClientProvider>,
+  );
+  const dice = screen.getByRole("button", { name: "HomeExtras.random" });
+  act(() => dice.focus());
+  fireEvent.click(dice);
+  const retry = await screen.findByRole("button", { name: "HomeExtras.retry" });
+  expect(retry).toBe(dice);
+  expect(retry).toHaveFocus();
+  await waitFor(() => expect(retry).toHaveAttribute("aria-disabled", "false"));
+  expect(screen.getByText("vasat")).toBeVisible();
+  expect(screen.queryByRole("link", { name: "HomeExtras.readMore" })).not.toBeInTheDocument();
+
+  fireEvent.click(retry);
+  await waitFor(() => expect(screen.getByText("mütevazı")).toBeVisible());
+  expect(screen.getByRole("link", { name: "HomeExtras.readMore" })).toHaveAttribute("href", "/galati-meshur/2");
+  expect(mockFetch.mock.calls).toEqual([[1], [0], [0]]);
+  unmount();
+  client.clear();
+});
+
+test("a roll can reach another example after the visible ID moves to a different offset", async () => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const first = { id: 1, wrong: "şöför", correct: "şoför" };
+  const second = { id: 2, wrong: "herkez", correct: "herkes" };
+  const third = { id: 3, wrong: "yanlız", correct: "yalnız" };
+  client.setQueryData(["hero-entry", 0], { data: [first], total: 3 }, { updatedAt: Date.now() - 1000 });
+  client.setQueryData(["hero-entry", 1], { data: [second], total: 3 }, { updatedAt: Date.now() - 1000 });
+  mockFetch.mockResolvedValueOnce({ data: [second], total: 2 }).mockResolvedValueOnce({ data: [third], total: 2 });
+  const { unmount } = render(
+    <QueryClientProvider client={client}>
+      <BentoCommonMistake />
+    </QueryClientProvider>,
+  );
+  const dice = screen.getByRole("button", { name: "HomeExtras.random" });
+  const random = jest.spyOn(Math, "random").mockReturnValue(0.9);
+  try {
+    fireEvent.click(screen.getByRole("button", { name: "HomeExtras.next" }));
+    await waitFor(() => expect(screen.getByText("2 / 3")).toBeVisible());
+    client.removeQueries({ queryKey: ["hero-entry", 0], exact: true });
+    fireEvent.click(dice);
+    await waitFor(() => expect(screen.getByText("1 / 2")).toBeVisible());
+    fireEvent.click(dice);
+    await waitFor(() => expect(screen.getByText("yalnız")).toBeVisible());
+    expect(screen.getByText("2 / 2")).toBeVisible();
+    expect(mockFetch.mock.calls).toEqual([[0], [1]]);
+  } finally {
+    random.mockRestore();
+    unmount();
+    client.clear();
+  }
 });
 
 test("a roll recovers when the displayed position no longer exists", async () => {

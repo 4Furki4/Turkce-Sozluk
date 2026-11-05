@@ -599,6 +599,7 @@
       "previous": "Önceki öge",
       "next": "Sonraki öge",
       "random": "Rastgele örnek göster",
+      "retry": "Örneği yeniden yükle",
       "noMisspellingsFound": "Henüz sık yapılan yanlış bulunmuyor.",
       "noGalatiMeshurFound": "Henüz Galat-ı Meşhur kaydı bulunmuyor."
     }
