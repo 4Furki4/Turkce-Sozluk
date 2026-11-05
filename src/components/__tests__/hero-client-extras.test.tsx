@@ -217,7 +217,7 @@ test.each(["misspellings", "galati"] as const)("%s can retry failed, empty, or r
   const initialPage = kind === "misspellings" ? firstMistake : firstGalati;
   mockFetch
     .mockRejectedValueOnce(new Error("Unavailable"))
-    .mockResolvedValueOnce({ data: [], total: 1 })
+    .mockResolvedValueOnce({ data: [], total: 2 })
     .mockResolvedValueOnce(initialPage)
     .mockResolvedValueOnce({
       data: [{ id: 2, wrong: "herkez", correct: "herkes", word: "mütevazı" }],
@@ -241,6 +241,55 @@ test.each(["misspellings", "galati"] as const)("%s can retry failed, empty, or r
   expect(mockFetch.mock.calls).toEqual([[1], [1], [1], [1]]);
   unmount();
   client.clear();
+});
+
+test.each([0, 1])("a roll with a new total of %i hides controls for missing entries", async (total) => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const first = { data: [{ id: 1, wrong: "şöför", correct: "şoför" }], total: 2 };
+  mockFetch.mockResolvedValueOnce({ data: [], total });
+  const { unmount } = render(
+    <QueryClientProvider client={client}>
+      <BentoCommonMistake initialData={first} />
+    </QueryClientProvider>,
+  );
+  fireEvent.click(screen.getByRole("button", { name: "HomeExtras.random" }));
+  await waitFor(() => expect(screen.queryByRole("button", { name: "HomeExtras.random" })).not.toBeInTheDocument());
+  expect(screen.queryByText("1 / 2")).not.toBeInTheDocument();
+  if (total === 1) {
+    expect(screen.getByText("şoför")).toBeVisible();
+  } else {
+    expect(screen.getByText("HomeExtras.noMisspellingsFound")).toBeVisible();
+  }
+  unmount();
+  client.clear();
+});
+
+test("a roll recovers when the displayed position no longer exists", async () => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const first = { data: [{ id: 1, wrong: "şöför", correct: "şoför" }], total: 4 };
+  client.setQueryData(["hero-entry", 3], { data: [{ id: 4, wrong: "herkez", correct: "herkes" }], total: 4 });
+  mockFetch
+    .mockResolvedValueOnce({ data: [], total: 2 })
+    .mockResolvedValueOnce({ data: [{ id: 2, wrong: "yanlız", correct: "yalnız" }], total: 2 });
+  const { unmount } = render(
+    <QueryClientProvider client={client}>
+      <BentoCommonMistake initialData={first} />
+    </QueryClientProvider>,
+  );
+  const dice = screen.getByRole("button", { name: "HomeExtras.random" });
+  const random = jest.spyOn(Math, "random").mockReturnValue(0.9);
+  try {
+    fireEvent.click(dice);
+    await waitFor(() => expect(screen.getByText("4 / 4")).toBeVisible());
+    fireEvent.click(dice);
+    await waitFor(() => expect(screen.getByText("2 / 2")).toBeVisible());
+    expect(mockFetch.mock.calls).toEqual([[2], [1]]);
+    await waitFor(() => expect(screen.getByText("yalnız")).toBeVisible());
+  } finally {
+    random.mockRestore();
+    unmount();
+    client.clear();
+  }
 });
 
 test.each(["misspellings", "galati"] as const)("%s can cancel a pending roll offline without jumping to a cached non-neighbor", async (kind) => {

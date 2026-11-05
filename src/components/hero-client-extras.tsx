@@ -25,22 +25,38 @@ function useCarouselPosition<Page extends ExamplePage>() {
   const [position, setPosition] = useState<{
     offset: number;
     previousPage?: { offset: number; data: Page | undefined };
+    previousCount?: { total: number; updatedAt: number };
     random?: boolean;
+    recovering?: boolean;
   }>({ offset: 0 });
-  const { offset, previousPage, random } = position;
+  const { offset, previousPage, previousCount, random } = position;
 
   function getNavigation(
-    query: { data: Page | undefined; isPending: boolean; isFetching: boolean; refetch: () => Promise<unknown> },
+    query: {
+      data: Page | undefined;
+      dataUpdatedAt: number;
+      isPending: boolean;
+      isFetching: boolean;
+      refetch: () => Promise<unknown>;
+    },
     isOnline: boolean,
     getCachedPage: (offset: number) => Page | undefined,
   ) {
+    // An older cached page must not restore a count that a newer response superseded.
+    const count = query.data && query.dataUpdatedAt >= (previousCount?.updatedAt ?? 0)
+      ? { total: query.data.total, updatedAt: query.dataUpdatedAt }
+      : previousCount;
+    const total = count?.total ?? 0;
     const candidate = query.data?.data[0];
     const repeatsEntry = random && candidate?.id === previousPage?.data?.data[0]?.id;
-    const hasNewEntry = Boolean(candidate && !repeatsEntry);
-    const displayedPage = hasNewEntry || !previousPage ? { offset, data: query.data } : previousPage;
+    const hasValidEntry = candidate && (!repeatsEntry || (previousPage?.offset ?? 0) >= total);
+    const displayedPage = hasValidEntry || !previousPage ? { offset, data: query.data } : previousPage;
+    if (query.data && total > 0 && displayedPage.offset >= total) {
+      // The list shrank past the visible position. Reload the new last page.
+      setPosition({ offset: total - 1, previousCount: count, recovering: true });
+    }
     const isNavigating = displayedPage.offset !== offset && (query.isPending || query.isFetching);
     const direction: PageDirection = offset >= (previousPage?.offset ?? 0) ? 1 : -1;
-    const total = displayedPage.data?.total ?? 0;
 
     // While offline, the arrow opposite the pending jump returns to the visible page.
     const prevTarget = isNavigating && direction === 1 ? displayedPage.offset : displayedPage.offset - 1;
@@ -54,12 +70,12 @@ function useCarouselPosition<Page extends ExamplePage>() {
 
     const navigateTo = (target: number, random = false) => {
       if (!canNavigateTo(target)) return;
-      setPosition({ offset: target, previousPage: displayedPage, random });
+      setPosition({ offset: target, previousPage: displayedPage, previousCount: count, random });
       if (target === offset && isOnline) void query.refetch();
     };
 
     return {
-      data: displayedPage.data,
+      data: total > 0 ? displayedPage.data : undefined,
       displayedOffset: displayedPage.offset,
       total,
       direction,
@@ -71,7 +87,7 @@ function useCarouselPosition<Page extends ExamplePage>() {
     };
   }
 
-  return { offset, getNavigation };
+  return { offset, getNavigation, staleTime: position.recovering ? 0 : HERO_CLIENT_STALE_TIME };
 }
 
 function RandomEntryButton({ offset, total, isDisabled, onSelect }: {
@@ -154,7 +170,7 @@ export function BentoCommonMistake({
   initialData?: MisspellingsData;
 }) {
   const t = useTranslations("Home");
-  const { offset, getNavigation } = useCarouselPosition<MisspellingsData>();
+  const { offset, getNavigation, staleTime } = useCarouselPosition<MisspellingsData>();
   const isOnline = useOnlineStatus();
   const utils = api.useUtils();
   const query = api.extras.getMisspellings.useQuery(
@@ -162,7 +178,7 @@ export function BentoCommonMistake({
     {
       enabled: isOnline,
       initialData: offset === 0 ? initialData : undefined,
-      staleTime: HERO_CLIENT_STALE_TIME,
+      staleTime,
     },
   );
   const { data, total, displayedOffset, direction, isNavigating, prevTarget, nextTarget, canNavigateTo, navigateTo } =
@@ -263,7 +279,7 @@ export function BentoGalatiMeshur({
   initialData?: GalatiMeshurData;
 }) {
   const t = useTranslations("Home");
-  const { offset, getNavigation } = useCarouselPosition<GalatiMeshurData>();
+  const { offset, getNavigation, staleTime } = useCarouselPosition<GalatiMeshurData>();
   const isOnline = useOnlineStatus();
   const utils = api.useUtils();
   const query = api.extras.getGalatiMeshur.useQuery(
@@ -271,7 +287,7 @@ export function BentoGalatiMeshur({
     {
       enabled: isOnline,
       initialData: offset === 0 ? initialData : undefined,
-      staleTime: HERO_CLIENT_STALE_TIME,
+      staleTime,
     },
   );
   const { data, total, displayedOffset, direction, isNavigating, prevTarget, nextTarget, canNavigateTo, navigateTo } =
