@@ -3,7 +3,7 @@
 
 import { api } from "@/src/trpc/react";
 import CustomCard from "@/src/components/customs/heroui/custom-card";
-import { CardHeader, CardBody, CardFooter, Button, Skeleton, Tooltip } from "@heroui/react";
+import { CardHeader, CardBody, CardFooter, Button, Skeleton } from "@heroui/react";
 import { Link } from "@/src/i18n/routing";
 import NextLink from "next/link";
 import { useLocale, useTranslations } from "next-intl";
@@ -104,7 +104,7 @@ export function WordOfTheDayCard() {
                 )}
             </CardBody>
 
-            <CardFooter className="flex justify-center gap-3 pt-0 pb-6">
+            <CardFooter className="flex flex-wrap justify-center gap-3 pt-0 pb-6">
                 <Button
                     as={NextLink}
                     href={getWordCanonicalPath(word.name, locale === "en" ? "en" : "tr")}
@@ -115,16 +115,16 @@ export function WordOfTheDayCard() {
                 >
                     {t("details")}
                 </Button>
-                <Tooltip content={t("embedComingSoon")}>
-                    <Button
-                        variant="light"
-                        color="default"
-                        size="sm"
-                        className="text-default-500 hover:text-foreground"
-                    >
-                        {t("addToYourSite")}
-                    </Button>
-                </Tooltip>
+                <Button
+                    title={t("embedComingSoon")}
+                    aria-disabled="true"
+                    variant="light"
+                    color="default"
+                    size="sm"
+                    className="text-default-500"
+                >
+                    {t("addToYourSite")}
+                </Button>
             </CardFooter>
         </CustomCard>
     );
