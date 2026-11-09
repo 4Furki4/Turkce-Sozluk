@@ -3,7 +3,7 @@
 
 import { api } from "@/src/trpc/react";
 import CustomCard from "@/src/components/customs/heroui/custom-card";
-import { CardHeader, CardBody, CardFooter, Button, Skeleton, Tooltip } from "@heroui/react";
+import { CardHeader, CardBody, CardFooter, Button, Skeleton } from "@heroui/react";
 import { Link } from "@/src/i18n/routing";
 import NextLink from "next/link";
 import { useLocale, useTranslations } from "next-intl";
@@ -115,16 +115,16 @@ export function WordOfTheDayCard() {
                 >
                     {t("details")}
                 </Button>
-                <Tooltip content={t("embedComingSoon")}>
-                    <Button
-                        variant="light"
-                        color="default"
-                        size="sm"
-                        className="text-default-500 hover:text-foreground"
-                    >
-                        {t("addToYourSite")}
-                    </Button>
-                </Tooltip>
+                <Button
+                    title={t("embedComingSoon")}
+                    aria-description={t("embedComingSoon")}
+                    variant="light"
+                    color="default"
+                    size="sm"
+                    className="text-default-500 hover:text-foreground"
+                >
+                    {t("addToYourSite")}
+                </Button>
             </CardFooter>
         </CustomCard>
     );

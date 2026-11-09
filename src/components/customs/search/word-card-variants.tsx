@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, Button, Chip, Popover, PopoverContent, PopoverTrigger, Tooltip } from "@heroui/react";
+import { Avatar, Button, Chip, Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
 import {
   BookOpen,
   Blocks,
@@ -901,17 +901,16 @@ function WordUtilityActions({
         <Camera className={iconClassName} />
       </Button>
 
-      <Tooltip content={t("CopyLink")}>
       <Button
         disableRipple
         isIconOnly
         className={actionButtonClassName}
         onPress={onShare}
+        title={t("CopyLink")}
         aria-label={t("CopyLink")}
       >
         <LinkIcon className={iconClassName} aria-hidden />
       </Button>
-      </Tooltip>
     </div>
   );
 }

@@ -11,8 +11,8 @@ import {
     ModalFooter,
     ModalHeader,
     useDisclosure,
-    Tooltip,
 } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -34,6 +34,7 @@ type BadgeFormData = {
 };
 
 export default function BadgeManagement() {
+    const tActions = useTranslations("Dashboard.Actions");
     const [selectedBadge, setSelectedBadge] = useState<BadgeFormData | null>(null);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
@@ -98,14 +99,24 @@ export default function BadgeManagement() {
             case "actions":
                 return (
                     <div className="flex gap-2">
-                        <Tooltip content="Edit">
-                            <TaskButton isIconOnly variant="light" aria-label="Edit" href={{ pathname: "/dashboard/badges/[slug]/edit", params: { slug: badge.slug } }}><Pencil size={16} /></TaskButton>
-                        </Tooltip>
-                        <Tooltip color="danger" content="Delete">
-                            <span className="text-lg text-danger cursor-pointer active:opacity-50" onClick={() => handleDelete(badge.slug)}>
-                                <Trash2 size={16} />
-                            </span>
-                        </Tooltip>
+                        <TaskButton
+                            isIconOnly
+                            variant="light"
+                            title={tActions("Edit")}
+                            aria-label={tActions("Edit")}
+                            href={{ pathname: "/dashboard/badges/[slug]/edit", params: { slug: badge.slug } }}
+                        >
+                            <Pencil size={16} aria-hidden />
+                        </TaskButton>
+                        <button
+                            type="button"
+                            title={tActions("Delete")}
+                            aria-label={tActions("Delete")}
+                            className="cursor-pointer text-danger active:opacity-50"
+                            onClick={() => handleDelete(badge.slug)}
+                        >
+                            <Trash2 size={16} aria-hidden />
+                        </button>
                     </div>
                 );
             default:

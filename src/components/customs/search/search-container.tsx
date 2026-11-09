@@ -9,7 +9,6 @@ import { useDebounce } from "@uidotdev/usehooks";
 import { useLocalSearchSuggestions } from "@/src/hooks/use-local-search-suggestions";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import CustomDropdown from "@/src/components/customs/heroui/custom-dropdown";
 import { TurkishKeyboard } from "@/src/components/customs/utils/TurkishKeyboard";
 import { getWordByNameOffline } from "@/src/lib/offline-db";
@@ -291,82 +290,76 @@ export default function SearchContainer({
 
                     <Input radius="md"
                         endContent={
-                            <TooltipProvider delayDuration={500} skipDelayDuration={0}>
-                                <div className="flex shrink-0 items-center gap-0.5">
-                                    <CustomDropdown placement="bottom-end">
-                                        <Tooltip>
-                                            <DropdownTrigger>
-                                                <TooltipTrigger asChild>
-                                                    <button
-                                                        type="button"
-                                                        aria-label={t("hero.searchModeTooltip", { mode: t(searchMode === "word" ? "hero.searchByWord" : "hero.searchByMeaning") })}
-                                                        className="inline-flex h-11 min-w-0 shrink-0 items-center justify-center gap-1 rounded-sm px-2 text-primary-text transition-colors hover:bg-muted/60 sm:gap-1.5 sm:px-3"
-                                                    >
-                                                        {searchMode === "word" ? <TypeIcon aria-hidden="true" className="h-4 w-4" /> : <BookOpenIcon aria-hidden="true" className="h-4 w-4" />}
-                                                        <span className="hidden text-sm font-medium sm:inline">{t(searchMode === "word" ? "hero.searchByWord" : "hero.searchByMeaning")}</span>
-                                                        <ChevronDownIcon aria-hidden="true" className="h-3.5 w-3.5" />
-                                                    </button>
-                                                </TooltipTrigger>
-                                            </DropdownTrigger>
-                                            <TooltipContent side="bottom" sideOffset={8} collisionPadding={8} className="max-w-64 rounded-md bg-background px-3 py-3 text-sm text-foreground shadow-md">{t("hero.searchMode")}</TooltipContent>
-                                        </Tooltip>
-                                        <DropdownMenu
-                                            aria-label={t("hero.searchMode")}
-                                            selectionMode="single"
-                                            disallowEmptySelection
-                                            selectedKeys={new Set([searchMode])}
-                                            disabledKeys={isOnline ? [] : ["meaning"]}
-                                            onAction={(key) => {
-                                                if (key !== "word" && key !== "meaning") return;
-                                                if (key === "meaning" && !isOnline) return;
-                                                isSelecting.current = true;
-                                                setSearchMode(key);
-                                                setShowRecommendations(false);
-                                                setMeaningResults([]);
-                                                setSelectedIndex(-1);
-                                            }}
-                                            itemClasses={{ base: "min-h-11" }}
+                            <div className="flex shrink-0 items-center gap-0.5">
+                                <CustomDropdown placement="bottom-end">
+                                    <DropdownTrigger>
+                                        <button
+                                            type="button"
+                                            aria-label={t("hero.searchModeTooltip", { mode: t(searchMode === "word" ? "hero.searchByWord" : "hero.searchByMeaning") })}
+                                            title={t("hero.searchMode")}
+                                            className="inline-flex h-11 min-w-0 shrink-0 items-center justify-center gap-1 rounded-sm px-2 text-primary-text transition-colors hover:bg-muted/60 sm:gap-1.5 sm:px-3"
                                         >
-                                            <DropdownItem key="word" startContent={<TypeIcon aria-hidden="true" className="h-4 w-4" />}>
-                                                {t("hero.searchByWord")}
-                                            </DropdownItem>
-                                            <DropdownItem key="meaning" startContent={<BookOpenIcon aria-hidden="true" className="h-4 w-4" />} description={!isOnline ? t("hero.meaningSearchOffline") : undefined}>
-                                                {t("hero.searchByMeaning")}
-                                            </DropdownItem>
-                                        </DropdownMenu>
-                                    </CustomDropdown>
-                                    <span aria-hidden="true" className="mx-0.5 h-5 w-px shrink-0 bg-border" />
-                                    <Popover placement="bottom" offset={8} classNames={{ content: "rounded-md bg-background" }}>
-                                        <PopoverTrigger>
-                                            <Button
-                                                type="button"
-                                                aria-label={t("hero.patternSearchTooltip")}
-                                                className="h-11 w-11 min-w-11 text-muted-foreground hover:text-foreground"
-                                                isIconOnly
-                                                variant="light"
-                                                radius="sm"
-                                            >
-                                                <PuzzleIcon aria-hidden="true" className="h-5 w-5" />
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent>
-                                            <div className="max-w-[250px] px-1 py-2">
-                                                <div className="text-small">{t("hero.patternSearchTooltip")}</div>
-                                            </div>
-                                        </PopoverContent>
-                                    </Popover>
-                                    <Popover placement="bottom-end" offset={8} classNames={{ content: "rounded-md bg-background" }}>
-                                        <PopoverTrigger>
-                                            <Button type="button" className="h-11 w-11 min-w-11 text-muted-foreground hover:text-foreground" isIconOnly variant="light" radius="sm" aria-label={t("hero.turkishLetters")}>
-                                                <KeyboardIcon aria-hidden="true" className="h-5 w-5" />
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="grid grid-cols-3 gap-1">
-                                            <TurkishKeyboard className="bg-background/50 border border-border" onCharClick={(char) => setWordInput((prev) => prev + char)} />
-                                        </PopoverContent>
-                                    </Popover>
-                                </div>
-                            </TooltipProvider>
+                                            {searchMode === "word" ? <TypeIcon aria-hidden="true" className="h-4 w-4" /> : <BookOpenIcon aria-hidden="true" className="h-4 w-4" />}
+                                            <span className="hidden text-sm font-medium sm:inline">{t(searchMode === "word" ? "hero.searchByWord" : "hero.searchByMeaning")}</span>
+                                            <ChevronDownIcon aria-hidden="true" className="h-3.5 w-3.5" />
+                                        </button>
+                                    </DropdownTrigger>
+                                    <DropdownMenu
+                                        aria-label={t("hero.searchMode")}
+                                        selectionMode="single"
+                                        disallowEmptySelection
+                                        selectedKeys={new Set([searchMode])}
+                                        disabledKeys={isOnline ? [] : ["meaning"]}
+                                        onAction={(key) => {
+                                            if (key !== "word" && key !== "meaning") return;
+                                            if (key === "meaning" && !isOnline) return;
+                                            isSelecting.current = true;
+                                            setSearchMode(key);
+                                            setShowRecommendations(false);
+                                            setMeaningResults([]);
+                                            setSelectedIndex(-1);
+                                        }}
+                                        itemClasses={{ base: "min-h-11" }}
+                                    >
+                                        <DropdownItem key="word" startContent={<TypeIcon aria-hidden="true" className="h-4 w-4" />}>
+                                            {t("hero.searchByWord")}
+                                        </DropdownItem>
+                                        <DropdownItem key="meaning" startContent={<BookOpenIcon aria-hidden="true" className="h-4 w-4" />} description={!isOnline ? t("hero.meaningSearchOffline") : undefined}>
+                                            {t("hero.searchByMeaning")}
+                                        </DropdownItem>
+                                    </DropdownMenu>
+                                </CustomDropdown>
+                                <span aria-hidden="true" className="mx-0.5 h-5 w-px shrink-0 bg-border" />
+                                <Popover placement="bottom" offset={8} classNames={{ content: "rounded-md bg-background" }}>
+                                    <PopoverTrigger>
+                                        <Button
+                                            type="button"
+                                            aria-label={t("hero.patternSearchTooltip")}
+                                            className="h-11 w-11 min-w-11 text-muted-foreground hover:text-foreground"
+                                            isIconOnly
+                                            variant="light"
+                                            radius="sm"
+                                        >
+                                            <PuzzleIcon aria-hidden="true" className="h-5 w-5" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent>
+                                        <div className="max-w-[250px] px-1 py-2">
+                                            <div className="text-small">{t("hero.patternSearchTooltip")}</div>
+                                        </div>
+                                    </PopoverContent>
+                                </Popover>
+                                <Popover placement="bottom-end" offset={8} classNames={{ content: "rounded-md bg-background" }}>
+                                    <PopoverTrigger>
+                                        <Button type="button" className="h-11 w-11 min-w-11 text-muted-foreground hover:text-foreground" isIconOnly variant="light" radius="sm" aria-label={t("hero.turkishLetters")}>
+                                            <KeyboardIcon aria-hidden="true" className="h-5 w-5" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="grid grid-cols-3 gap-1">
+                                        <TurkishKeyboard className="bg-background/50 border border-border" onCharClick={(char) => setWordInput((prev) => prev + char)} />
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
                         }
                         classNames={{
                             inputWrapper: cn(
@@ -391,16 +384,9 @@ export default function SearchContainer({
                             ]
                         }}
                         startContent={
-                            <TooltipProvider delayDuration={300}>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <button type="submit" className="grid h-11 w-11 shrink-0 place-items-center hover:bg-muted/60 rounded-md transition-colors sm:mr-1" aria-label={t("hero.searchAction")}>
-                                            <SearchIcon className="w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                        </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="bottom" sideOffset={8} collisionPadding={8} className="rounded-md bg-zinc-800 text-white">{t("hero.searchAction")}</TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
+                            <button type="submit" className="grid h-11 w-11 shrink-0 place-items-center hover:bg-muted/60 rounded-md transition-colors sm:mr-1" title={t("hero.searchAction")} aria-label={t("hero.searchAction")}>
+                                <SearchIcon className="w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            </button>
                         }
                         aria-required
                         autoFocus={autoFocus}

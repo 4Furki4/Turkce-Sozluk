@@ -5,7 +5,7 @@ import { Chip } from "@heroui/chip";
 import { WordSearchResult } from "@/types";
 import { PronunciationButton } from "./pronunciation-button";
 import SaveWord from "./save-word";
-import { Button, Popover, PopoverTrigger, PopoverContent, Tooltip, Tabs, Tab } from "@heroui/react";
+import { Button, Popover, PopoverTrigger, PopoverContent, Tabs, Tab } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/src/i18n/routing";
 import { useRouter } from "@/src/i18n/routing";
@@ -93,11 +93,9 @@ export default function WordCard({ word_data, locale, session, isWordFetching, i
           }}>
             <Camera className="w-5 h-5 sm:w-6 sm:h-6" />
           </Button>
-          <Tooltip content={t("CopyLink")}>
-          <Button disableRipple isIconOnly aria-label={t("CopyLink")} className="h-11 min-w-11 bg-transparent" onPress={() => handleSharePress()}>
+          <Button disableRipple isIconOnly title={t("CopyLink")} aria-label={t("CopyLink")} className="h-11 min-w-11 bg-transparent" onPress={() => handleSharePress()}>
             <LinkIcon className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden />
           </Button>
-          </Tooltip>
         </div>
         <div className="dictionary-headword-container w-full flex items-center justify-between">
           <div className="w-full flex items-center gap-2">
