@@ -27,17 +27,7 @@ export type SeoWordSummary = {
 
 export type SeoSitemapWord = {
   name: string;
-  lastModified: string | null;
 };
-
-export function getSeoWordLastModified(word: Pick<SeoWordSummary, "lastModified">): string {
-  if (!word.lastModified) {
-    return new Date().toISOString();
-  }
-
-  const parsed = new Date(word.lastModified);
-  return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
-}
 
 function normalizeRows(rows: SeoWordSummary[]): SeoWordSummary[] {
   return rows.map((row) => ({
@@ -94,17 +84,9 @@ export const getIndexableWordsForSitemapPage = unstable_cache(
             AND LENGTH(TRIM(m.meaning)) > 0
             AND LOWER(TRIM(m.meaning)) NOT LIKE ${NAVIGATION_MEANING_LIKE_PATTERN}
         )
-      ),
-      sitemap_words AS (
-        SELECT
-          indexable_names.name,
-          MAX(COALESCE(w.updated_at, w.created_at))::text AS "lastModified"
-        FROM indexable_names
-        INNER JOIN words w ON w.name = indexable_names.name
-        GROUP BY indexable_names.name
       )
-      SELECT name, "lastModified"
-      FROM sitemap_words
+      SELECT name
+      FROM indexable_names
       ORDER BY LOWER(name), name
       OFFSET ${offset}
       LIMIT ${safePageSize};

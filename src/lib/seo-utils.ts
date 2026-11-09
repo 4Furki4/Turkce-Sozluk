@@ -9,19 +9,14 @@ export const INDEXABLE_STATIC_ROUTE_KEYS = [
     "/",
     "/search",
     "/word-list",
-    "/contribute-word",
     "/announcements",
     "/feedback",
     "/terms-of-service",
     "/privacy-policy",
-    "/pronunciation-voting",
     "/sik-yapilan-yanlislar",
     "/galati-meshur",
     "/games",
-    "/flashcard-game",
-    "/word-matching",
     "/word-builder",
-    "/speed-round",
     "/leaderboards",
     "/foreign-term-suggestions",
 ] as const satisfies readonly RouteKey[];
@@ -209,6 +204,8 @@ const EXTRA_TURKISH_DASHBOARD_REDIRECTS: ExtraRedirectMap = {
     ],
 };
 
+const LEGACY_TURKISH_WORD_BUILDER_PATH = "/fiil-cekim-olusturucu";
+
 function getRedirectCandidates(routeKey: RouteKey): RedirectCandidate[] {
     const trTemplate = getExternalPathTemplate(routeKey, "tr");
     const enTemplate = getExternalPathTemplate(routeKey, "en");
@@ -221,6 +218,11 @@ function getRedirectCandidates(routeKey: RouteKey): RedirectCandidate[] {
         { template: enTemplate, target: canonicalTrTemplate },
         { template: prefixLocalePath("tr", enTemplate), target: canonicalTrTemplate },
         { template: prefixLocalePath("en", trTemplate), target: canonicalEnTemplate },
+        ...(routeKey === "/word-builder" ? [
+            { template: LEGACY_TURKISH_WORD_BUILDER_PATH, target: canonicalTrTemplate },
+            { template: prefixLocalePath("tr", LEGACY_TURKISH_WORD_BUILDER_PATH), target: canonicalTrTemplate },
+            { template: prefixLocalePath("en", LEGACY_TURKISH_WORD_BUILDER_PATH), target: canonicalEnTemplate },
+        ] : []),
         ...extraTurkishTemplates.map((template) => ({
             template,
             target: canonicalTrTemplate,

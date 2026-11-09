@@ -1,4 +1,4 @@
-import { getBaseUrl } from '@/src/lib/seo-utils';
+import { escapeXml, getBaseUrl } from '@/src/lib/seo-utils';
 import {
   getIndexableWordCount,
   WORD_SITEMAP_PAGE_SIZE,
@@ -8,7 +8,6 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const baseUrl = getBaseUrl();
-  const lastmod = new Date().toISOString();
 
   // Fetch total count to calculate archive chunks. If the database is
   // unavailable, still return the crawl-priority sitemaps instead of failing
@@ -19,21 +18,17 @@ export async function GET() {
   });
   const totalPages = Math.ceil(totalWords / WORD_SITEMAP_PAGE_SIZE);
 
+  const sitemapPaths = [
+    "/sitemap-static.xml",
+    "/sitemap-word-hubs.xml",
+    "/sitemap-priority-words.xml",
+    ...Array.from({ length: totalPages }, (_, index) => `/sitemap-words/sitemap/${index + 1}.xml`),
+  ];
+
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
   xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-
-  // 1. Point to the static sitemap
-  xml += `<sitemap><loc>${baseUrl}/sitemap-static.xml</loc><lastmod>${lastmod}</lastmod></sitemap>\n`;
-
-  // 2. Point to crawl-priority dictionary discovery sitemaps before the full archive
-  xml += `<sitemap><loc>${baseUrl}/sitemap-word-hubs.xml</loc><lastmod>${lastmod}</lastmod></sitemap>\n`;
-  xml += `<sitemap><loc>${baseUrl}/sitemap-priority-words.xml</loc><lastmod>${lastmod}</lastmod></sitemap>\n`;
-
-  // 3. Point to the sitemap-words chunks directly
-  for (let i = 1; i <= totalPages; i++) {
-    // User preferred format: /sitemap-words/sitemap/1.xml
-    // CRITICAL: No whitespace between tags
-    xml += `<sitemap><loc>${baseUrl}/sitemap-words/sitemap/${i}.xml</loc><lastmod>${lastmod}</lastmod></sitemap>\n`;
+  for (const path of sitemapPaths) {
+    xml += `<sitemap><loc>${escapeXml(`${baseUrl}${path}`)}</loc></sitemap>\n`;
   }
 
   xml += '</sitemapindex>';

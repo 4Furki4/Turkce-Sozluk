@@ -1,3 +1,5 @@
+import { pathnames } from "@/src/i18n/pathnames";
+
 export const routing = {
   pathnames: {
     "/": "/",
@@ -81,10 +83,7 @@ export const routing = {
       en: "/word-matching",
       tr: "/kelime-eslestirme",
     },
-    "/word-builder": {
-      en: "/word-builder",
-      tr: "/fiil-cekim-olusturucu",
-    },
+    "/word-builder": pathnames["/word-builder"],
     "/speed-round": {
       en: "/speed-round",
       tr: "/hizli-tur",

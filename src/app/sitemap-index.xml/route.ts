@@ -1,3 +1,3 @@
-export async function GET(request: Request) {
-    return Response.redirect(new URL("/sitemap.xml", request.url), 308);
+export function GET() {
+    return new Response(null, { status: 308, headers: { Location: "/sitemap.xml" } });
 }

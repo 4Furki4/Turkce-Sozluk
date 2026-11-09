@@ -6,12 +6,9 @@ jest.mock("next/cache", () => ({
   unstable_cache: (fn: (...args: unknown[]) => unknown) => fn,
 }));
 
-const getIndexableWordsForSitemapPageMock = jest.fn(async () => [
-    {
-      name: "boncukluk",
-      lastModified: "2026-03-29T00:00:00.000Z",
-    },
-  ]);
+const getIndexableWordsForSitemapPageMock = jest.fn(async (_page: number) => [
+  { name: "boncukluk" },
+]);
 
 jest.mock("@/src/lib/seo-word-index", () => ({
   getIndexableWordsForSitemapPage: (page: number) =>
@@ -28,9 +25,10 @@ describe("sitemap-words route", () => {
     const xml = await response.text();
 
     expect(response.headers.get("Content-Type")).toContain("application/xml");
+    expect(response.headers.get("Cache-Control")).toBe("public, max-age=86400");
     expect(xml).toContain("<loc>https://turkce-sozluk.com/tr/arama/boncukluk</loc>");
     expect(xml).not.toContain("/en/search/");
-    expect(xml).toContain("<lastmod>2026-03-29T00:00:00.000Z</lastmod>");
+    expect(xml).not.toContain("<lastmod>");
     expect(getIndexableWordsForSitemapPageMock).toHaveBeenCalledWith(1);
   });
 });

@@ -32,6 +32,7 @@ describe("sitemap.xml route", () => {
     expect(xml).toContain("<loc>https://turkce-sozluk.com/sitemap-words/sitemap/3.xml</loc>");
     expect(xml).not.toContain("<loc>https://turkce-sozluk.com/sitemap-words/sitemap/4.xml</loc>");
     expect(xml).not.toContain("sitemap-index.xml");
+    expect(xml).not.toContain("<lastmod>");
     expect(xml.indexOf("sitemap-static.xml")).toBeLessThan(xml.indexOf("sitemap-word-hubs.xml"));
     expect(xml.indexOf("sitemap-word-hubs.xml")).toBeLessThan(xml.indexOf("sitemap-priority-words.xml"));
     expect(xml.indexOf("sitemap-priority-words.xml")).toBeLessThan(xml.indexOf("sitemap-words/sitemap/1.xml"));

@@ -1,6 +1,5 @@
 import { getBaseUrl } from "@/src/lib/seo-utils";
 
-const WORD_SITEMAP_PAGE_COUNT = 20;
 const CONTENT_SIGNAL = "Content-Signal: ai-train=no, search=yes, ai-input=no";
 
 const DISALLOWED_PATHS = [
@@ -21,19 +20,6 @@ const DISALLOWED_PATHS = [
 ] as const;
 
 export function createRobotsTxt(): string {
-  const baseUrl = getBaseUrl();
-  const wordSitemaps = Array.from(
-    { length: WORD_SITEMAP_PAGE_COUNT },
-    (_, index) => `${baseUrl}/sitemap-words/sitemap/${index + 1}.xml`,
-  );
-  const sitemaps = [
-    `${baseUrl}/sitemap.xml`,
-    `${baseUrl}/sitemap-static.xml`,
-    `${baseUrl}/sitemap-word-hubs.xml`,
-    `${baseUrl}/sitemap-priority-words.xml`,
-    ...wordSitemaps,
-  ];
-
   return [
     "User-Agent: *",
     "Allow: /",
@@ -43,7 +29,7 @@ export function createRobotsTxt(): string {
     "User-Agent: GPTBot",
     "Disallow: /",
     "",
-    ...sitemaps.map((sitemap) => `Sitemap: ${sitemap}`),
+    `Sitemap: ${getBaseUrl()}/sitemap.xml`,
     "",
   ].join("\n");
 }

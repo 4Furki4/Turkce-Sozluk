@@ -37,6 +37,7 @@ describe("seo-utils", () => {
   it("builds Turkish canonical paths for static and word pages", () => {
     expect(getStaticRouteCanonicalPath("/", "tr")).toBe("/tr");
     expect(getStaticRouteCanonicalPath("/word-list", "tr")).toBe("/tr/kelime-listesi");
+    expect(getStaticRouteCanonicalPath("/word-builder", "tr")).toBe("/tr/kelime-insa");
     expect(getStaticRouteCanonicalPath("/dashboard/announcements", "tr")).toBe("/tr/panel/duyurular");
     expect(getWordCanonicalPath("boncukluk", "tr")).toBe("/tr/arama/boncukluk");
     expect(getWordsHubCanonicalPath("tr")).toBe("/tr/kelimeler");

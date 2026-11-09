@@ -1,7 +1,6 @@
 import { escapeXml, getWordCanonicalUrl } from "@/src/lib/seo-utils";
 import {
   getPriorityWords,
-  getSeoWordLastModified,
   PRIORITY_WORD_LIMIT,
 } from "@/src/lib/seo-word-index";
 
@@ -18,7 +17,7 @@ export async function GET() {
 
   for (const word of rows) {
     const url = getWordCanonicalUrl(word.name, "tr");
-    xml += `<url><loc>${escapeXml(url)}</loc><lastmod>${getSeoWordLastModified(word)}</lastmod></url>\n`;
+    xml += `<url><loc>${escapeXml(url)}</loc></url>\n`;
   }
 
   xml += "</urlset>";
