@@ -5,8 +5,11 @@ import { auth } from "@/src/lib/auth"; // Updated import
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Params } from "next/dist/server/request/params";
 import { headers } from "next/headers"; // Added headers
+import type { Metadata } from "next";
 
-// ...
+export const metadata: Metadata = {
+  robots: { index: false, follow: true },
+};
 
 export default async function page({
   params

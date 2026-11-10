@@ -3,10 +3,10 @@
 import { GET } from "@/src/app/sitemap-index.xml/route";
 
 describe("legacy sitemap-index route", () => {
-  it("permanently redirects to /sitemap.xml", async () => {
-    const response = await GET(new Request("https://turkce-sozluk.com/sitemap-index.xml"));
+  it("permanently redirects to /sitemap.xml on the public request origin", () => {
+    const response = GET();
 
     expect(response.status).toBe(308);
-    expect(response.headers.get("location")).toBe("https://turkce-sozluk.com/sitemap.xml");
+    expect(response.headers.get("location")).toBe("/sitemap.xml");
   });
 });

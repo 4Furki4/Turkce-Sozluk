@@ -24,12 +24,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
-    for (const { name, lastModified: rawLastModified } of rows) {
-        const lastModified = rawLastModified
-            ? new Date(rawLastModified).toISOString()
-            : new Date().toISOString();
+    for (const { name } of rows) {
         const url = getWordCanonicalUrl(name, "tr");
-        xml += `<url><loc>${escapeXml(url)}</loc><lastmod>${lastModified}</lastmod></url>\n`;
+        xml += `<url><loc>${escapeXml(url)}</loc></url>\n`;
     }
 
     xml += '</urlset>';

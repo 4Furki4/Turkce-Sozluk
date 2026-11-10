@@ -8,7 +8,6 @@ import { TURKISH_ALPHABET } from "@/src/lib/turkish-alphabet";
 export const dynamic = "force-static";
 
 export async function GET() {
-  const lastModified = new Date().toISOString();
   const urls = [
     getWordsHubCanonicalUrl("tr"),
     ...TURKISH_ALPHABET.map((letter) => getWordsLetterCanonicalUrl(letter, "tr")),
@@ -18,7 +17,7 @@ export async function GET() {
   xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
   for (const url of urls) {
-    xml += `<url><loc>${escapeXml(url)}</loc><lastmod>${lastModified}</lastmod></url>\n`;
+    xml += `<url><loc>${escapeXml(url)}</loc></url>\n`;
   }
 
   xml += "</urlset>";

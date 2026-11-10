@@ -240,7 +240,7 @@ export const pathnames = {
   },
   "/word-builder": {
     en: "/word-builder",
-    tr: "/fiil-cekim-olusturucu",
+    tr: "/kelime-insa",
   },
   "/speed-round": {
     en: "/speed-round",

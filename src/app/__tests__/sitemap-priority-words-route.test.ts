@@ -27,7 +27,6 @@ jest.mock("@/src/lib/seo-word-index", () => ({
       relatedPhraseCount: 0,
     },
   ]),
-  getSeoWordLastModified: (word: { lastModified: string }) => word.lastModified,
   PRIORITY_WORD_LIMIT: 5000,
 }));
 
@@ -40,7 +39,7 @@ describe("sitemap-priority-words.xml route", () => {
 
     expect(response.headers.get("Content-Type")).toContain("application/xml");
     expect(xml).toContain("<loc>https://turkce-sozluk.com/tr/arama/%C3%A7%C3%B6k%C3%BCk</loc>");
-    expect(xml).toContain("<lastmod>2026-07-01T00:00:00.000Z</lastmod>");
+    expect(xml).not.toContain("<lastmod>");
     expect(xml).toContain(
       "<loc>https://turkce-sozluk.com/tr/arama/%22a%22%20%26%20&apos;b&apos;</loc>",
     );

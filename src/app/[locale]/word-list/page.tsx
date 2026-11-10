@@ -1,11 +1,13 @@
 import WordList from "@/src/_pages/word-list/word-list";
 import { NoScriptNotice } from "@/src/components/progressive-enhancement/no-script-notice";
 import { Link } from "@/src/i18n/routing";
+import { getStaticRouteCanonicalUrl } from "@/src/lib/seo-utils";
 import { getServerQueryHelpers, HydrateClient } from "@/src/trpc/server";
 import { readWithRateLimit } from "@/src/server/rate-limited-read";
 import { RateLimitNotification } from "@/src/components/customs/rate-limit-toast";
 import { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { cache } from "react";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -15,6 +17,10 @@ type Props = {
     }>;
     searchParams: Promise<SearchParams>;
 };
+
+const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_SORT = "alphabetical";
+const DEFAULT_ORDER = "asc";
 
 const toStringParam = (value: string | string[] | undefined, fallback = "") =>
     Array.isArray(value) ? value[0] ?? fallback : value ?? fallback;
@@ -30,6 +36,50 @@ const toPositiveNumber = (value: string | string[] | undefined, fallback: number
     return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
 };
 
+const getWordListFilters = (params: SearchParams) => ({
+    search: toStringParam(params.search),
+    partOfSpeechId: toArrayParam(params.pos),
+    languageId: toArrayParam(params.lang),
+    attributeId: toArrayParam(params.attr),
+    startsWith: toStringParam(params.letter) || undefined,
+});
+
+type WordListFilters = ReturnType<typeof getWordListFilters>;
+
+const hasWordListFilters = (params: SearchParams) =>
+    [params.search, params.pos, params.lang, params.attr, params.letter].some((value) => toStringParam(value) !== "");
+
+const readWordListCount = async (filters: WordListFilters) => {
+    const queries = await getServerQueryHelpers();
+    return readWithRateLimit(() => queries.word.getWordCount.fetch(filters));
+};
+
+// Share the count between metadata and the list even when the read is rate-limited.
+const readUnfilteredWordListCount = cache(() => readWordListCount(getWordListFilters({})));
+
+const getCanonicalPage = async (params: SearchParams) => {
+    const pageParam = toStringParam(params.page);
+    const page = Number(pageParam);
+    const pageSize = toStringParam(params.per_page);
+
+    if (
+        !/^\d+$/.test(pageParam) ||
+        !Number.isSafeInteger(page) ||
+        page < 2 ||
+        (pageSize && Number(pageSize) !== DEFAULT_PAGE_SIZE) ||
+        toStringParam(params.sort, DEFAULT_SORT) !== DEFAULT_SORT ||
+        toStringParam(params.order, DEFAULT_ORDER) !== DEFAULT_ORDER ||
+        hasWordListFilters(params)
+    ) {
+        return;
+    }
+
+    const { data: count } = await readUnfilteredWordListCount();
+    if (count !== undefined && page <= Math.ceil(count / DEFAULT_PAGE_SIZE)) {
+        return page;
+    }
+};
+
 const getWordListHref = (locale: string, nextParams: Record<string, string | number | undefined>) => {
     const params = new URLSearchParams();
 
@@ -42,12 +92,18 @@ const getWordListHref = (locale: string, nextParams: Record<string, string | num
     return `/${locale === "en" ? "en/word-list" : "tr/kelime-listesi"}${params.toString() ? `?${params.toString()}` : ""}`;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
     const { locale } = await params;
     const t = await getTranslations({ locale, namespace: "WordList" });
+    const canonicalUrl = getStaticRouteCanonicalUrl("/word-list", locale === "en" ? "en" : "tr");
+    const canonicalPage = locale === "tr" ? await getCanonicalPage(await searchParams) : undefined;
+
     return {
         title: t("title"),
         description: t("description"),
+        alternates: {
+            canonical: canonicalPage === undefined ? canonicalUrl : `${canonicalUrl}?page=${canonicalPage}`,
+        },
         openGraph: {
             title: t("title"),
             description: t("description"),
@@ -62,38 +118,24 @@ export default async function WordListPage({ params, searchParams }: Props) {
     const t = await getTranslations({ locale, namespace: "WordList" });
     const search_params = await searchParams;
     const page = toPositiveNumber(search_params.page, 1);
-    const perPage = toPositiveNumber(search_params.per_page, 10);
-    const search = toStringParam(search_params.search);
-    const selectedPos = toArrayParam(search_params.pos);
-    const selectedLang = toArrayParam(search_params.lang);
-    const selectedAttr = toArrayParam(search_params.attr);
-    const sortBy = (toStringParam(search_params.sort, "alphabetical") as "alphabetical" | "date" | "length");
-    const sortOrder = (toStringParam(search_params.order, "asc") as "asc" | "desc");
-    const selectedLetter = toStringParam(search_params.letter) || undefined;
+    const perPage = toPositiveNumber(search_params.per_page, DEFAULT_PAGE_SIZE);
+    const countInput = getWordListFilters(search_params);
+    const { search, startsWith: selectedLetter } = countInput;
+    const sortBy = (toStringParam(search_params.sort, DEFAULT_SORT) as "alphabetical" | "date" | "length");
+    const sortOrder = (toStringParam(search_params.order, DEFAULT_ORDER) as "asc" | "desc");
 
     const queryInput = {
         take: perPage,
         skip: (page - 1) * perPage,
-        search,
-        partOfSpeechId: selectedPos,
-        languageId: selectedLang,
-        attributeId: selectedAttr,
+        ...countInput,
         sortBy,
         sortOrder,
-        startsWith: selectedLetter,
-    };
-    const countInput = {
-        search,
-        partOfSpeechId: selectedPos,
-        languageId: selectedLang,
-        attributeId: selectedAttr,
-        startsWith: selectedLetter,
     };
 
     const queries = await getServerQueryHelpers();
     const [wordsResult, countResult] = await Promise.all([
         readWithRateLimit(() => queries.word.getWords.fetch(queryInput)),
-        readWithRateLimit(() => queries.word.getWordCount.fetch(countInput)),
+        hasWordListFilters(search_params) ? readWordListCount(countInput) : readUnfilteredWordListCount(),
     ]);
     const rateLimited = wordsResult.rateLimited || countResult.rateLimited;
     const words = wordsResult.data;

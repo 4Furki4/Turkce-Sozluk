@@ -57,6 +57,20 @@ describe("proxy SEO normalization", () => {
     expect(response.headers.get("location")).toBe("https://turkce-sozluk.com/en/search/boncukluk");
   });
 
+  it.each([
+    ["/word-builder", "/tr/kelime-insa"],
+    ["/tr/word-builder", "/tr/kelime-insa"],
+    ["/fiil-cekim-olusturucu", "/tr/kelime-insa"],
+    ["/tr/fiil-cekim-olusturucu", "/tr/kelime-insa"],
+    ["/en/fiil-cekim-olusturucu", "/en/word-builder"],
+  ])("permanently redirects word builder alias %s while preserving its query", (alias, canonical) => {
+    const response = proxy(new NextRequest(`https://turkce-sozluk.com${alias}?utm_source=legacy`));
+    expect(response.status).toBe(308);
+    expect(response.headers.get("location")).toBe(
+      `https://turkce-sozluk.com${canonical}?utm_source=legacy`,
+    );
+  });
+
   it("adds noindex headers to English pages", () => {
     const response = proxy(new NextRequest("https://turkce-sozluk.com/en/word-list"));
     expect(response.status).toBe(200);

@@ -14,5 +14,6 @@ describe("sitemap-word-hubs.xml route", () => {
     expect(xml).toContain("<loc>https://turkce-sozluk.com/tr/kelimeler/a</loc>");
     expect(xml).toContain("<loc>https://turkce-sozluk.com/tr/kelimeler/%C3%A7</loc>");
     expect(xml).not.toContain("/en/words");
+    expect(xml).not.toContain("<lastmod>");
   });
 });

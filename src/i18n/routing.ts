@@ -1,7 +1,7 @@
 import { taskPathnames } from "./task-pathnames";
 import { defineRouting } from 'next-intl/routing';
 import { createNavigation } from 'next-intl/navigation';
-import { locales } from './pathnames';
+import { locales, pathnames } from './pathnames';
 
 export const routing = defineRouting({
   locales: [...locales],
@@ -39,10 +39,7 @@ export const routing = defineRouting({
       "en": "/words/[letter]",
       "tr": "/kelimeler/[letter]",
     },
-    "/word-builder": {
-      "en": "/word-builder",
-      "tr": "/kelime-insa",
-    },
+    "/word-builder": pathnames["/word-builder"],
     "/saved-words": {
       "en": "/saved-words",
       "tr": "/kaydedilen-kelimeler",
