@@ -21,7 +21,7 @@ test("announcements published after the build open in both languages", async ({ 
     await sql.begin(async tx => {
       const [announcement] = await tx<{ id: number }[]>`
         INSERT INTO announcements (slug, status, published_at)
-        VALUES (${slug}, 'published', now())
+        VALUES (${slug}, 'published', now() AT TIME ZONE 'UTC')
         RETURNING id
       `;
       await tx`
