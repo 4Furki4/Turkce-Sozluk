@@ -9,6 +9,8 @@ import type { WordSearchResult } from '@/types';
 import WordDetailShell from './word-detail-shell';
 import { NoScriptNotice } from '@/src/components/progressive-enhancement/no-script-notice';
 import WordPageFallback from './word-page-fallback';
+import WordUsageNote from './word-usage-note';
+import { getWordEditorial } from '@/src/lib/word-editorial';
 
 const isDynamicServerUsageError = (error: unknown) =>
     typeof error === "object" &&
@@ -82,6 +84,7 @@ export default async function SearchResultPage(
         scheduleSearchLog({ wordId: wordData.word_id, userId: session?.user?.id ?? null });
     }
     const jsonLd = wordData ? buildWordJsonLd(wordData, locale) : null;
+    const editorial = wordData ? getWordEditorial(wordData.word_name, locale) : undefined;
     const resolvedLocale = locale === "en" ? "en" : "tr";
 
     return (
@@ -93,6 +96,9 @@ export default async function SearchResultPage(
                 />
             ) : null}
 
+            {wordData && editorial ? (
+                <WordUsageNote word={wordData.word_name} editorial={editorial} />
+            ) : null}
             <WordPageFallback
                 locale={resolvedLocale}
                 wordName={decodedWordName}
