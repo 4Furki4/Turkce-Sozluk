@@ -104,6 +104,10 @@ export function replaceTaskLocation(location: string, replacement: string) {
   if (currentLocation !== location) previousLocation = null;
   currentLocation = replacement;
 }
+export function resetTaskLocation(location: string) {
+  currentLocation = location;
+  previousLocation = null;
+}
 export function canReturnThroughHistory(location: string, target: string) {
   return currentLocation === location && previousLocation === target;
 }

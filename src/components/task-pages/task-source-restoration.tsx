@@ -1,8 +1,14 @@
 "use client";
 import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { recordTaskLocation } from "@/src/lib/task-navigation";
+import { recordTaskLocation, resetTaskLocation } from "@/src/lib/task-navigation";
 import { authClient } from "@/src/lib/auth-client";
+
+function browserLocation() {
+  const { pathname, search, hash } = window.location;
+  return `${pathname}${search}${hash}`;
+}
+
 export function TaskSourceRestoration() {
   const path = usePathname();
   const search = useSearchParams();
@@ -23,22 +29,25 @@ export function TaskSourceRestoration() {
     }
   }, [session.data?.user.id, session.isPending]);
   useEffect(() => {
-    const source = `${path}${search.size ? `?${search}` : ""}${window.location.hash}`;
-    recordTaskLocation(source);
-    const trackHash = () =>
-      recordTaskLocation(
-        window.location.pathname +
-          window.location.search +
-          window.location.hash,
-      );
+    const trackHash = () => recordTaskLocation(browserLocation());
+    // The last observed URL can be ahead of this entry after browser Back.
+    const trackTraversal = () => resetTaskLocation(browserLocation());
     window.addEventListener("hashchange", trackHash);
+    window.addEventListener("popstate", trackTraversal);
+    return () => {
+      window.removeEventListener("hashchange", trackHash);
+      window.removeEventListener("popstate", trackTraversal);
+    };
+  }, []);
+  useEffect(() => {
+    const source = `${path}${search.size ? `?${search}` : ""}${window.location.hash}`;
+    recordTaskLocation(browserLocation());
     let saved: { scroll: number; id: string } | null = null;
     try {
       const raw = sessionStorage.getItem(`task-source:${source}`);
       if (raw) saved = JSON.parse(raw);
     } catch {}
-    if (!saved)
-      return () => window.removeEventListener("hashchange", trackHash);
+    if (!saved) return;
     let cancelled = false;
     let attempt = 0;
     let timer: ReturnType<typeof setTimeout>;
@@ -57,7 +66,6 @@ export function TaskSourceRestoration() {
     return () => {
       cancelled = true;
       clearTimeout(timer);
-      window.removeEventListener("hashchange", trackHash);
     };
   }, [path, search]);
   return null;
