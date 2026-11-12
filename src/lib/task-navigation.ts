@@ -99,6 +99,15 @@ export function recordTaskLocation(location: string) {
     currentLocation = location;
   }
 }
+export function replaceTaskLocation(location: string, replacement: string) {
+  // Preserve the preceding entry only when the replaced URL was observed.
+  if (currentLocation !== location) previousLocation = null;
+  currentLocation = replacement;
+}
+export function resetTaskLocation(location: string) {
+  currentLocation = location;
+  previousLocation = null;
+}
 export function canReturnThroughHistory(location: string, target: string) {
   return currentLocation === location && previousLocation === target;
 }

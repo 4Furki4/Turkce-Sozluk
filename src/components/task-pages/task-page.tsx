@@ -19,6 +19,7 @@ import { useProgressRouter } from "@/src/hooks/use-progress-router";
 import {
   canReturnThroughHistory,
   isTaskChooserPath,
+  replaceTaskLocation,
   resolveTaskReturn,
 } from "@/src/lib/task-navigation";
 import { authClient } from "@/src/lib/auth-client";
@@ -27,14 +28,14 @@ import { api } from "@/src/trpc/react";
 interface TaskActions {
   complete: () => void;
   cancel: () => void;
-  navigateTo: (target: string) => void;
+  replaceSearchParams: (query: URLSearchParams) => void;
   setDirty: (dirty: boolean) => void;
   registerClear: (clear: () => void) => () => void;
 }
 const Context = createContext<TaskActions>({
   complete() {},
   cancel() {},
-  navigateTo() {},
+  replaceSearchParams() {},
   setDirty() {},
   registerClear: () => () => {},
 });
@@ -76,7 +77,9 @@ export function TaskPage({
   const utils = api.useUtils();
   const session = authClient.useSession();
   const [dirty, setDirty] = useState(false);
-  const [pendingTarget, setPendingTarget] = useState<string | null>(null);
+  const [pendingNavigation, setPendingNavigation] = useState<{
+    run: () => void;
+  } | null>(null);
   const [offline, setOffline] = useState(false);
   const [generation, setGeneration] = useState(0);
   const [finishing, setFinishing] = useState(false);
@@ -137,19 +140,37 @@ export function TaskPage({
     },
     [router],
   );
-  const leave = useCallback(
-    (target: string) => {
-      if (dirty) setPendingTarget(target);
-      else navigate(target);
+  const requestNavigation = useCallback(
+    (run: () => void) => {
+      if (dirty) setPendingNavigation({ run });
+      else run();
     },
-    [dirty, navigate],
+    [dirty],
+  );
+  const leave = useCallback(
+    (target: string) => requestNavigation(() => navigate(target)),
+    [navigate, requestNavigation],
+  );
+  const replaceSearchParams = useCallback(
+    (query: URLSearchParams) => {
+      requestNavigation(() => {
+        const { pathname, search, hash } = window.location;
+        const current = `${pathname}${search}${hash}`;
+        const target = `${pathname}${query.size ? `?${query}` : ""}${hash}`;
+        if (current === target) return;
+        // Next syncs useSearchParams without navigating away from the task.
+        window.history.replaceState(null, "", target);
+        replaceTaskLocation(current, target);
+      });
+    },
+    [requestNavigation],
   );
   useEffect(() => {
-    if (pendingTarget) {
+    if (pendingNavigation) {
       leavePanel.current?.scrollIntoView({ block: "center" });
       leavePanel.current?.focus();
     }
-  }, [pendingTarget]);
+  }, [pendingNavigation]);
   useEffect(() => {
     if (!dirty) return;
     const guard = (event: MouseEvent) => {
@@ -178,11 +199,11 @@ export function TaskPage({
         return;
       event.preventDefault();
       event.stopPropagation();
-      setPendingTarget(target.pathname + target.search + target.hash);
+      leave(target.pathname + target.search + target.hash);
     };
     document.addEventListener("click", guard, true);
     return () => document.removeEventListener("click", guard, true);
-  }, [dirty]);
+  }, [dirty, leave]);
   const complete = useCallback(async () => {
     clears.current.forEach((clear) => clear());
     setDirty(false);
@@ -222,7 +243,7 @@ export function TaskPage({
       value={{
         complete,
         cancel: () => leave(returnTo),
-        navigateTo: leave,
+        replaceSearchParams,
         setDirty,
         registerClear,
       }}
@@ -312,7 +333,7 @@ export function TaskPage({
             )}
           </div>
         </header>
-        {pendingTarget && (
+        {pendingNavigation && (
           <div
             ref={leavePanel}
             tabIndex={-1}
@@ -321,7 +342,7 @@ export function TaskPage({
           >
             <p>{t("leave")}</p>
             <div className="flex flex-wrap gap-2">
-              <Button onPress={() => setPendingTarget(null)}>
+              <Button onPress={() => setPendingNavigation(null)}>
                 {t("keepEditing")}
               </Button>
               <Button
@@ -330,7 +351,8 @@ export function TaskPage({
                   clears.current.forEach((clear) => clear());
                   setDirty(false);
                   setGeneration((value) => value + 1);
-                  navigate(pendingTarget);
+                  setPendingNavigation(null);
+                  pendingNavigation.run();
                 }}
               >
                 {t("discard")}
