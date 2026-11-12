@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { getWordCanonicalUrl } from "@/src/lib/seo-utils";
+import { getWordEditorial } from "@/src/lib/word-editorial";
 import {
     classifyWordIndexability,
     getPointerTargetNames,
@@ -55,19 +56,20 @@ function buildWordTitleSignal(wordData: WordEntryData, isEnglish: boolean) {
 }
 
 export function buildWordJsonLd(wordData: WordEntryData, locale: string) {
-    if (classifyWordIndexability(wordData) !== "indexable") {
+    const editorial = getWordEditorial(wordData.word_name, locale);
+    if (!editorial && classifyWordIndexability(wordData) !== "indexable") {
         return null;
     }
 
     const relatedWords = wordData.relatedWords?.map((word) => word.related_word_name) ?? [];
-    const firstMeaning = getSubstantiveMeanings(wordData.meanings)[0]?.meaning ?? "";
+    const definition = editorial?.answer ?? getSubstantiveMeanings(wordData.meanings)[0]?.meaning ?? "";
     const canonicalLocale = locale === "en" ? "en" : "tr";
 
     return {
         "@context": "https://schema.org",
         "@type": "DefinedTerm",
         name: wordData.word_name,
-        description: firstMeaning,
+        description: definition,
         inLanguage: canonicalLocale,
         url: getWordCanonicalUrl(wordData.word_name, canonicalLocale),
         isPartOf: {
@@ -117,14 +119,15 @@ export function buildWordMetadata(
     const isEnglish = locale === "en";
     const seoLocale = isEnglish ? "en" : "tr";
     const canonicalWordName = wordData.word_name;
+    const editorial = getWordEditorial(canonicalWordName, locale);
     const indexability = classifyWordIndexability(wordData);
     const canonicalUrl = getWordCanonicalUrl(canonicalWordName, seoLocale);
 
-    if (indexability === "empty") {
+    if (!editorial && indexability === "empty") {
         return buildWordNotFoundMetadata(canonicalWordName, locale);
     }
 
-    if (indexability === "pointer") {
+    if (!editorial && indexability === "pointer") {
         const pointerTargets = getPointerTargetNames(wordData).slice(0, 5);
         const targetList = pointerTargets.join(", ");
         const title = isEnglish
@@ -170,13 +173,15 @@ export function buildWordMetadata(
     const firstMeaning = getSubstantiveMeanings(wordData.meanings)[0]?.meaning ?? "";
 
     const titleSignal = buildWordTitleSignal(wordData, isEnglish);
-    const title = isEnglish
+    const defaultTitle = isEnglish
         ? `What does ${canonicalWordName} mean? | ${titleSignal} | Turkish Dictionary`
         : `${canonicalWordName} ne demek? | ${titleSignal} | Türkçe Sözlük`;
+    const title = editorial ? `${editorial.title} | Türkçe Sözlük` : defaultTitle;
 
-    const description = isEnglish
+    const defaultDescription = isEnglish
         ? `Official definition, pronunciation, and example sentences for the Turkish word "${canonicalWordName}": ${firstMeaning}. Learn more with our community-driven dictionary.`
         : `"${canonicalWordName}" kelimesinin resmi tanımı, okunuşu ve örnek cümleleri: ${firstMeaning}. Toplulukla gelişen sözlüğümüzle daha fazlasını öğrenin.`;
+    const description = editorial?.description ?? defaultDescription;
 
     const baseKeywords = isEnglish
         ? ["turkish dictionary", `meaning of ${canonicalWordName}`, "turkish words"]

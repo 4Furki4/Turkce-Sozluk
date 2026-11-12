@@ -1,7 +1,9 @@
 import { db } from "@/db";
+import { words } from "@/db/schema/words";
 import type { TurkishAlphabetLetter } from "@/src/lib/turkish-alphabet";
+import { editorialWordNames } from "@/src/lib/word-editorial";
 import { NAVIGATION_MEANING_LIKE_PATTERN } from "@/src/lib/word-indexability";
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
 
 export {
@@ -195,6 +197,16 @@ export const getPriorityWords = unstable_cache(
     return normalizeRows(rows);
   },
   ["seo-priority-words"],
+  { revalidate: 86400 },
+);
+
+export const getEditorialWords = unstable_cache(
+  async (): Promise<SeoSitemapWord[]> => {
+    return db.selectDistinct({ name: words.name }).from(words)
+      .where(inArray(words.name, editorialWordNames))
+      .orderBy(words.name);
+  },
+  ["seo-editorial-words", ...editorialWordNames],
   { revalidate: 86400 },
 );
 

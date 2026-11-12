@@ -3,6 +3,7 @@
 jest.mock("@/src/i18n/routing", () => require("@/src/test-support/mock-routing"));
 
 jest.mock("@/src/lib/seo-word-index", () => ({
+  getEditorialWords: jest.fn(async () => [{ name: "mütevazı" }, { name: "çökük" }]),
   getPriorityWords: jest.fn(async () => [
     {
       id: 1,
@@ -39,6 +40,8 @@ describe("sitemap-priority-words.xml route", () => {
 
     expect(response.headers.get("Content-Type")).toContain("application/xml");
     expect(xml).toContain("<loc>https://turkce-sozluk.com/tr/arama/%C3%A7%C3%B6k%C3%BCk</loc>");
+    expect(xml).toContain("<loc>https://turkce-sozluk.com/tr/arama/m%C3%BCtevaz%C4%B1</loc>");
+    expect(xml.match(/%C3%A7%C3%B6k%C3%BCk/g)).toHaveLength(1);
     expect(xml).not.toContain("<lastmod>");
     expect(xml).toContain(
       "<loc>https://turkce-sozluk.com/tr/arama/%22a%22%20%26%20&apos;b&apos;</loc>",

@@ -123,6 +123,37 @@ describe("word SEO metadata", () => {
         });
     });
 
+    it("makes a curated cross-reference indexable with its own title and definition", () => {
+        const crossReference = {
+            ...wordData,
+            word_name: "mütevazı",
+            meanings: [{ ...wordData.meanings[0], meaning: "Bakınız: alçak gönüllü" }],
+        };
+        const metadata = buildWordMetadata("MÜTEVAZI", "tr", crossReference);
+
+        expect(metadata.title).toEqual({ absolute: "Mütevazı ne demek? Mütevazi ile farkı | Türkçe Sözlük" });
+        expect(metadata.description).toContain("gösterişsiz");
+        expect(metadata.robots).toMatchObject({ index: true, follow: true });
+        expect(metadata.alternates?.canonical).toBe("https://turkce-sozluk.com/tr/arama/m%C3%BCtevaz%C4%B1");
+        expect(buildWordJsonLd(crossReference, "tr")).toMatchObject({
+            name: "mütevazı",
+            description: expect.stringContaining("alçak gönüllü"),
+        });
+        expect(buildWordMetadata("mütevazı", "en", crossReference).robots).toMatchObject({ index: false });
+        expect(buildWordJsonLd(crossReference, "en")).toBeNull();
+        expect(buildWordMetadata("mütevazı", "tr", undefined).robots).toMatchObject({ index: false });
+
+        const parallel = {
+            ...wordData,
+            word_name: "mütevazi",
+            meanings: [{ ...wordData.meanings[0], meaning: "Birbirine paralel olan" }],
+        };
+        expect(buildWordMetadata("mütevazi", "tr", parallel)).toMatchObject({
+            title: { absolute: "Mütevazi ne demek? Paralel anlamı | Türkçe Sözlük" },
+            alternates: { canonical: "https://turkce-sozluk.com/tr/arama/m%C3%BCtevazi" },
+        });
+    });
+
     it("noindexes empty and English entries", () => {
         const emptyWordData: WordSearchResult["word_data"] = {
             ...wordData,
