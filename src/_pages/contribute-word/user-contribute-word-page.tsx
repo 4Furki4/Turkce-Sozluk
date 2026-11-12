@@ -11,7 +11,7 @@ import {
   TaskPage,
   useTaskActions,
 } from "@/src/components/task-pages/task-page";
-import { useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { CustomTabs } from "@/src/components/customs/heroui/custom-tabs";
 
 export interface UserContributeWordPageProps {
@@ -53,9 +53,7 @@ function ContributionTabs({
   prefillWord,
   mode,
 }: UserContributeWordPageProps & { mode: string }) {
-  const search = useSearchParams();
-  const pathname = usePathname();
-  const { navigateTo } = useTaskActions();
+  const { replaceSearchParams } = useTaskActions();
   const t = useTranslations("ContributeWord");
   const [isSubmitting, setIsSubmitting] = useState(false);
   return (
@@ -64,9 +62,9 @@ function ContributionTabs({
         aria-label={t("contributionTabs")}
         selectedKey={mode}
         onSelectionChange={(key) => {
-          const query = new URLSearchParams(search);
+          const query = new URLSearchParams(window.location.search);
           query.set("mode", String(key));
-          navigateTo(`${pathname}?${query}`);
+          replaceSearchParams(query);
         }}
         color="primary"
         variant="bordered"

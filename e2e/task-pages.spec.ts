@@ -419,6 +419,47 @@ for (const locale of ["en", "tr"] as const) {
     ).toBeVisible();
   });
 
+  test(`${locale}: repeated contribution mode switches keep browser history intact`, async ({ page }) => {
+    const word = "katkitaslagidenemesi";
+    const source = `/${locale}/${locale === "en" ? "search" : "arama"}/${word}`;
+    await page.goto(source);
+    await page.getByRole("button", { name: messages.WordNotFound.addDetailedEntry, exact: true }).click();
+    const contributionUrl = new URL(`${contribution}?${new URLSearchParams({ word })}`, page.url());
+    await expect(page).toHaveURL(contributionUrl.href);
+
+    const tabs = {
+      detailed: page.getByRole("tab", { name: messages.ContributeWord.detailedTab, exact: true }),
+      simple: page.getByRole("tab", { name: messages.ContributeWord.simpleTab, exact: true }),
+    };
+    await expect(tabs.detailed).toHaveAttribute("aria-selected", "true");
+    for (const mode of ["simple", "detailed", "simple"] as const) {
+      await tabs[mode].click();
+      contributionUrl.searchParams.set("mode", mode);
+      await expect(page).toHaveURL(contributionUrl.href);
+      await expect(tabs[mode]).toHaveAttribute("aria-selected", "true");
+    }
+
+    await page.goBack();
+    await expect(page).toHaveURL(source);
+    await page.goForward();
+    await expect(page).toHaveURL(contributionUrl.href);
+    await expect(tabs.simple).toHaveAttribute("aria-selected", "true");
+
+    await page.goBack();
+    const requestWord = page.getByRole("link", { name: messages.WordNotFound.requestWord, exact: true });
+    const requestUrl = new URL((await requestWord.getAttribute("href"))!, page.url());
+    expect(requestUrl.searchParams.get("returnTo")).toBe(source);
+    await requestWord.click();
+    await expect(page).toHaveURL(requestUrl.href);
+    await tabs.detailed.click();
+    requestUrl.searchParams.set("mode", "detailed");
+    await expect(page).toHaveURL(requestUrl.href);
+    await page.locator("[data-task-back]").click();
+    await expect(page).toHaveURL(source);
+    await page.goForward();
+    await expect(page).toHaveURL(requestUrl.href);
+  });
+
   test(`${locale}: changing contribution mode guards unsaved work`, async ({
     page,
   }) => {
