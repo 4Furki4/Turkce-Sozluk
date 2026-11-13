@@ -7,7 +7,8 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { CreateWordRequestSchema, MeaningSchema as ApiMeaningSchema, RelatedWordSchema as ApiRelatedWordSchema, RelatedPhraseSchema as ApiRelatedPhraseSchema } from "@/src/server/api/schemas/requests";
-import { Button, CardBody, CardHeader } from "@heroui/react";
+import { Button } from "@heroui/react";
+import { ChevronRight, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
@@ -15,7 +16,6 @@ import { uploadFiles } from "@/src/utils/uploadthing";
 import type { Session } from "@/src/lib/auth";
 
 import { api } from "@/src/trpc/react";
-import CustomCard from "@/src/components/customs/heroui/custom-card";
 import WordBasicInfoSection from "./word-basic-info-section";
 import WordLanguageAndAttributesSection, { type Language, type WordAttribute } from "./word-language-and-attributes-section";
 import MeaningFormSection from "./meaning-form-section";
@@ -128,6 +128,7 @@ export default function DetailedContributionForm({
 
     // Define client-side Zod schemas within the component to access tForms
     const ClientMeaningSchema = ApiMeaningSchema.extend({
+        meaning: z.string().trim().min(1, tForms("Meanings.Required")),
         partOfSpeechId: z.string().optional(), // Form uses string for ID
         attributes: z.array(z.string()).optional(), // Form uses string for ID
         example: z.object({
@@ -150,7 +151,7 @@ export default function DetailedContributionForm({
     const ClientCreateWordRequestSchema = CreateWordRequestSchema.extend({
         languageCode: z.string().optional(), // Form uses languageCode
         attributes: z.array(z.string()).optional(), // Form uses string for ID
-        name: z.string().min(1, tForms("Word.Required")).min(2, tForms("Word.MinLength2")),
+        name: z.string().trim().min(1, tForms("Word.Required")).min(2, tForms("Word.MinLength2")),
         meanings: z.array(ClientMeaningSchema).min(1, tForms("Meanings.MinLength1")),
         relatedWords: z.array(ClientRelatedWordSchema).optional(),
         relatedPhrases: z.array(ClientRelatedPhraseSchema).optional(),
@@ -234,6 +235,16 @@ export default function DetailedContributionForm({
             return newUrls;
         });
     }, [detailedForm]);
+
+    function handleRemoveMeaning(meaningIndex: number) {
+        const previewUrl = imagePreviewUrls[meaningIndex];
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+
+        setImagePreviewUrls((urls) =>
+            urls.slice(0, meaningIndex).concat(urls.slice(meaningIndex + 1)),
+        );
+        removeMeaning(meaningIndex);
+    }
 
     // Related items handlers
     const handleAddRelatedWord = useCallback((item: RelatedItem) => {
@@ -351,109 +362,107 @@ export default function DetailedContributionForm({
 
     return (
         <>
-            <CustomCard className="max-md:p-0">
-                <CardHeader>
-                    <h2 className="text-lg font-bold">{t("detailedTab")}</h2>
-                </CardHeader>
-                <CardBody>
-                    <div className="mb-4">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {t("detailedTabDescription")}
-                        </p>
-                    </div>
+            <form onSubmit={detailedForm.handleSubmit(onSubmitDetailed)} className="space-y-6">
+                <FormDraft identity={"word-detailed:new:" + (prefillWord ?? "")} control={detailedForm.control} reset={detailedForm.reset} baseline={detailedForm.formState.defaultValues as z.infer<typeof ClientCreateWordRequestSchema>} />
+                {relatedDraft.notice}
+                {/* Word Basic Info */}
+                <WordBasicInfoSection
+                    section="name"
+                    control={detailedForm.control}
+                    errors={detailedForm.formState.errors}
+                />
 
-                    <form onSubmit={detailedForm.handleSubmit(onSubmitDetailed)} className="space-y-6">
-                        <FormDraft identity={"word-detailed:new:" + (prefillWord ?? "")} control={detailedForm.control} reset={detailedForm.reset} baseline={detailedForm.formState.defaultValues as z.infer<typeof ClientCreateWordRequestSchema>} />
-                        {relatedDraft.notice}
-                        <TaskCancel />
-                        {/* Word Basic Info */}
-                        <WordBasicInfoSection
-                            section="name"
+                {/* Meanings Section */}
+                <section aria-labelledby="contribution-meanings" className="space-y-4">
+                    <h3 id="contribution-meanings" className="text-lg font-semibold">{t("meanings")}</h3>
+                    <div className="space-y-4 divide-y divide-divider [&>*:not(:last-child)]:pb-4">
+                        {meaningFields.map((field, meaningIndex) => (
+                            <MeaningFormSection
+                                key={field.id}
+                                meaningIndex={meaningIndex}
+                                control={detailedForm.control}
+                                errors={detailedForm.formState.errors}
+                                partsOfSpeech={partsOfSpeech?.map(pos => ({
+                                    id: pos.id,
+                                    name: (pos as any).partOfSpeech || (pos as any).name
+                                })) as PartOfSpeech[]}
+                                partsOfSpeechIsLoading={partsOfSpeechIsLoading}
+                                meaningAttributesWithRequested={meaningAttributesWithRequested as MeaningAttribute[]}
+                                meaningAttributesWithRequestedIsLoading={meaningAttributesWithRequestedIsLoading}
+                                authorsWithRequested={authorsWithRequested as Author[]}
+                                authorsWithRequestedIsLoading={authorsWithRequestedIsLoading}
+                                requestedAuthors={requestedAuthors}
+                                imagePreviewUrl={imagePreviewUrls[meaningIndex]}
+                                onOpenMeaningAttributeModal={() => setIsMeaningAttributeModalOpen(true)}
+                                onOpenAuthorModal={() => setIsAuthorModalOpen(true)}
+                                onImageSelect={handleImageSelect}
+                                onRemoveImage={removeImage}
+                                onRemoveMeaning={handleRemoveMeaning}
+                            />
+                        ))}
+                    </div>
+                    <Button
+                        type="button"
+                        variant="bordered"
+                        className="min-h-11 max-w-full whitespace-normal"
+                        startContent={<Plus className="h-4 w-4 shrink-0" aria-hidden />}
+                        onPress={() => appendMeaning({
+                            partOfSpeechId: "",
+                            meaning: "",
+                            attributes: [],
+                            example: { sentence: "", author: "" },
+                            image: undefined,
+                        }, { focusName: `meanings.${meaningFields.length}.meaning` })}
+                    >
+                        {t("addMeaning")}
+                    </Button>
+                </section>
+                <details className="group/word-details rounded-lg border border-divider bg-background/40 px-4" open={hasOptionalWordErrors || undefined}>
+                    <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 rounded-sm py-3 font-medium focus-visible:outline-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden">
+                        <ChevronRight className="h-4 w-4 shrink-0 group-open/word-details:rotate-90" aria-hidden />
+                        {t("wordDetails")}
+                    </summary>
+                    <div className="space-y-6 border-t border-divider py-4">
+                        <p className="max-w-prose text-sm text-muted-foreground">{t("wordDetailsHelp")}</p>
+                        <WordBasicInfoSection section="metadata" control={detailedForm.control} errors={detailedForm.formState.errors} />
+                        {/* Language and Attributes */}
+                        <WordLanguageAndAttributesSection
                             control={detailedForm.control}
                             errors={detailedForm.formState.errors}
+                            languages={languages as Language[]}
+                            languagesIsLoading={languagesIsLoading}
+                            wordAttributesWithRequested={wordAttributesWithRequested as WordAttribute[]}
+                            wordAttributesWithRequestedIsLoading={wordAttributesWithRequestedIsLoading}
+                            requestedAttributes={requestedAttributes}
+                            locale={locale}
+                            onOpenAttributeModal={() => setIsAttributeModalOpen(true)}
                         />
 
-                        {/* Meanings Section */}
-                        <div className="space-y-4">
-                            <h3 className="text-lg font-semibold">{t("meanings")}</h3>
-                            {meaningFields.map((field, meaningIndex) => (
-                                <MeaningFormSection
-                                    key={field.id}
-                                    meaningIndex={meaningIndex}
-                                    control={detailedForm.control}
-                                    errors={detailedForm.formState.errors}
-                                    partsOfSpeech={partsOfSpeech?.map(pos => ({
-                                        id: pos.id,
-                                        name: (pos as any).partOfSpeech || (pos as any).name
-                                    })) as PartOfSpeech[]}
-                                    partsOfSpeechIsLoading={partsOfSpeechIsLoading}
-                                    meaningAttributesWithRequested={meaningAttributesWithRequested as MeaningAttribute[]}
-                                    meaningAttributesWithRequestedIsLoading={meaningAttributesWithRequestedIsLoading}
-                                    authorsWithRequested={authorsWithRequested as Author[]}
-                                    authorsWithRequestedIsLoading={authorsWithRequestedIsLoading}
-                                    requestedMeaningAttributes={requestedMeaningAttributes}
-                                    requestedAuthors={requestedAuthors}
-                                    imagePreviewUrl={imagePreviewUrls[meaningIndex]}
-                                    onOpenMeaningAttributeModal={() => setIsMeaningAttributeModalOpen(true)}
-                                    onOpenAuthorModal={() => setIsAuthorModalOpen(true)}
-                                    onImageSelect={handleImageSelect}
-                                    onRemoveImage={removeImage}
-                                    onAddMeaning={() => appendMeaning({
-                                        partOfSpeechId: "",
-                                        meaning: "",
-                                        attributes: [],
-                                        example: { sentence: "", author: "" },
-                                        image: undefined,
-                                    })}
-                                    onRemoveMeaning={removeMeaning}
-                                    isLastMeaning={meaningIndex === meaningFields.length - 1}
-                                    isFirstMeaning={meaningIndex === 0}
-                                    totalMeanings={meaningFields.length}
-                                />
-                            ))}
-                        </div>
-                        <details className="rounded-md border border-border bg-background/40 p-4" open={hasOptionalWordErrors || undefined}>
-                            <summary className="min-h-11 cursor-pointer py-2.5 font-medium text-primary">{t("wordDetails")}</summary>
-                            <div className="mt-4 space-y-6">
-                                <p className="max-w-prose text-sm text-muted-foreground">{t("wordDetailsHelp")}</p>
-                                <WordBasicInfoSection section="metadata" control={detailedForm.control} errors={detailedForm.formState.errors} />
-                                {/* Language and Attributes */}
-                                <WordLanguageAndAttributesSection
-                                    control={detailedForm.control}
-                                    errors={detailedForm.formState.errors}
-                                    languages={languages as Language[]}
-                                    languagesIsLoading={languagesIsLoading}
-                                    wordAttributesWithRequested={wordAttributesWithRequested as WordAttribute[]}
-                                    wordAttributesWithRequestedIsLoading={wordAttributesWithRequestedIsLoading}
-                                    requestedAttributes={requestedAttributes}
-                                    locale={locale}
-                                    onOpenAttributeModal={() => setIsAttributeModalOpen(true)}
-                                />
-
-                                {/* Related Words and Phrases */}
-                                <RelatedItemsSection
-                                    relatedWords={relatedWords}
-                                    relatedPhrases={relatedPhrases}
-                                    onAddRelatedWord={handleAddRelatedWord}
-                                    onRemoveRelatedWord={handleRemoveRelatedWord}
-                                    onAddRelatedPhrase={handleAddRelatedPhrase}
-                                    onRemoveRelatedPhrase={handleRemoveRelatedPhrase}
-                                />
-                            </div>
-                        </details>
-                        <Button
-                            type="submit"
-                            color="primary"
-                            size="lg"
-                            className="w-full"
-                            isLoading={isSubmitting}
-                            isDisabled={isSubmitting}
-                        >
-                            {tForms("Submit")}
-                        </Button>
-                    </form>
-                </CardBody>
-            </CustomCard>
+                        {/* Related Words and Phrases */}
+                        <RelatedItemsSection
+                            relatedWords={relatedWords}
+                            relatedPhrases={relatedPhrases}
+                            onAddRelatedWord={handleAddRelatedWord}
+                            onRemoveRelatedWord={handleRemoveRelatedWord}
+                            onAddRelatedPhrase={handleAddRelatedPhrase}
+                            onRemoveRelatedPhrase={handleRemoveRelatedPhrase}
+                        />
+                    </div>
+                </details>
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                    <TaskCancel />
+                    <Button
+                        type="submit"
+                        color="primary"
+                        size="md"
+                        className="h-auto min-h-11 min-w-fit max-w-full flex-1 whitespace-normal py-2 sm:min-w-32 sm:flex-none"
+                        isLoading={isSubmitting}
+                        isDisabled={isSubmitting}
+                    >
+                        {t("submitForReview")}
+                    </Button>
+                </div>
+            </form>
 
             {/* Request Modals */}
             <NewWordAttributeRequestModal

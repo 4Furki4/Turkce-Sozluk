@@ -19,12 +19,15 @@ export default function ImageUploadSection({
   onRemoveImage,
 }: ImageUploadSectionProps) {
   const t = useTranslations("ContributeWord");
+  const uploadInput = React.useRef<HTMLInputElement>(null);
+  const draftNoteId = React.useId();
 
   return (
     <div className="space-y-3">
       <h5 className="font-medium text-sm">{t("image")}</h5>
 
       <input
+        ref={uploadInput}
         type="file"
         accept="image/*"
         onChange={(e) => {
@@ -34,20 +37,20 @@ export default function ImageUploadSection({
           }
         }}
         className="hidden"
-        id={`image-upload-${meaningIndex}`}
       />
       
       <Button
         type="button"
         variant="bordered"
         size="sm"
-        onPress={() => {
-          document.getElementById(`image-upload-${meaningIndex}`)?.click();
-        }}
+        className="min-h-11"
+        aria-describedby={draftNoteId}
+        onPress={() => uploadInput.current?.click()}
       >
-        <Upload className="h-4 w-4 mr-2" />
+        <Upload className="h-4 w-4" aria-hidden />
         {t("uploadImage")}
       </Button>
+      <p id={draftNoteId} className="text-sm text-muted-foreground">{t("imageDraftNote")}</p>
 
       {imagePreviewUrl && (
         <div className="flex flex-col gap-2">

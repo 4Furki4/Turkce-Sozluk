@@ -6,19 +6,18 @@ import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Button, CardBody, CardHeader } from "@heroui/react";
+import { Button } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 import { api } from "@/src/trpc/react";
-import CustomCard from "@/src/components/customs/heroui/custom-card";
 import { CustomInput } from "@/src/components/customs/heroui/custom-input";
 import type { Session } from "@/src/lib/auth";
 
 // Schema for simple form
 const getSimpleFormSchema = (minLengthIntl: string) => z.object({
-  name: z.string().min(2, minLengthIntl),
+  name: z.string().trim().min(2, minLengthIntl),
 });
 
 type SimpleFormData = z.infer<ReturnType<typeof getSimpleFormSchema>>;
@@ -88,47 +87,40 @@ export default function SimpleContributionForm({
   };
 
   return (
-    <CustomCard className="max-md:p-0">
-      <CardHeader>
-        <h2 className="text-lg font-bold">{t("simpleTab")}</h2>
-      </CardHeader>
-      <CardBody>
-        <div className="mb-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {t("simpleTabDescription")}
-          </p>
-        </div>
-
-        <form onSubmit={simpleForm.handleSubmit(onSubmitSimple)} className="space-y-6">
-          <FormDraft identity={"word-simple:new:" + (prefillWord ?? "")} control={simpleForm.control} reset={simpleForm.reset} baseline={{ name: prefillWord || "" }} />
-          <TaskCancel />
-          <Controller
-            name="name"
-            control={simpleForm.control}
-            render={({ field, fieldState: { error } }) => (
-              <CustomInput
-                {...field}
-                label={t("wordName")}
-                placeholder={t("wordNamePlaceholder")}
-                isRequired
-                isInvalid={!!error}
-                errorMessage={error?.message}
-              />
-            )}
+    <form onSubmit={simpleForm.handleSubmit(onSubmitSimple)} className="space-y-4">
+      <FormDraft identity={"word-simple:new:" + (prefillWord ?? "")} control={simpleForm.control} reset={simpleForm.reset} baseline={{ name: prefillWord || "" }} />
+      <Controller
+        name="name"
+        control={simpleForm.control}
+        render={({ field, fieldState: { error } }) => (
+          <CustomInput
+            {...field}
+            label={t("wordName")}
+            placeholder={t("wordNamePlaceholder")}
+            color="default"
+            classNames={{
+              inputWrapper: "border-foreground/35 shadow-none group-data-[hover=true]:border-foreground/55 group-data-[focus=true]:border-primary group-data-[invalid=true]:border-danger",
+            }}
+            isRequired
+            isInvalid={!!error}
+            errorMessage={error?.message}
           />
+        )}
+      />
 
-          <Button
-            type="submit"
-            color="primary"
-            size="lg"
-            className="w-full"
-            isLoading={isSubmitting}
-            isDisabled={isSubmitting}
-          >
-            {tForms("Submit")}
-          </Button>
-        </form>
-      </CardBody>
-    </CustomCard>
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <TaskCancel />
+        <Button
+          type="submit"
+          color="primary"
+          size="md"
+          className="h-auto min-h-11 min-w-fit max-w-full flex-1 whitespace-normal py-2 sm:min-w-32 sm:flex-none"
+          isLoading={isSubmitting}
+          isDisabled={isSubmitting}
+        >
+          {t("submitForReview")}
+        </Button>
+      </div>
+    </form>
   );
 }

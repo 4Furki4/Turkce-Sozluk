@@ -72,7 +72,7 @@ export default function RelatedItemsSection({
           key="related-words"
           aria-label={t("relatedWords")}
           title={
-            <div className="flex items-center justify-between w-full px-2">
+            <div className="flex min-w-0 w-full flex-wrap items-center justify-between gap-x-2">
               <span className="text-base font-medium">{t("relatedWords")}</span>
               <span className="text-sm text-gray-500">
                 {relatedWords.length > 0 ? `(${relatedWords.length})` : ""}
@@ -101,7 +101,7 @@ export default function RelatedItemsSection({
               </div>
             )}
             <Button
-              className="w-full md:w-auto"
+              className="h-auto min-h-11 w-full whitespace-normal py-2 md:w-auto"
               color="primary"
               variant="flat"
               startContent={<Plus className="h-4 w-4" />}
@@ -118,7 +118,7 @@ export default function RelatedItemsSection({
           key="related-phrases"
           aria-label={t("relatedPhrases")}
           title={
-            <div className="flex items-center justify-between w-full px-2">
+            <div className="flex min-w-0 w-full flex-wrap items-center justify-between gap-x-2">
               <span className="text-base font-medium">{t("relatedPhrases")}</span>
               <span className="text-sm text-gray-500">
                 {relatedPhrases.length > 0 ? `(${relatedPhrases.length})` : ""}
@@ -150,7 +150,7 @@ export default function RelatedItemsSection({
               color="primary"
               variant="flat"
               startContent={<Plus className="h-4 w-4" />}
-              className="w-full md:w-auto"
+              className="h-auto min-h-11 w-full whitespace-normal py-2 md:w-auto"
               onPress={() => setIsPhraseModalOpen(true)}
             >
               {t("addRelatedPhrase")}

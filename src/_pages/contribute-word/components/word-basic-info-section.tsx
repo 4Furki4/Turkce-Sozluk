@@ -26,6 +26,10 @@ export default function WordBasicInfoSection({ control, errors, section = "all" 
             {...field}
             label={t("wordName")}
             placeholder={t("wordNamePlaceholder")}
+            color="default"
+            classNames={{
+              inputWrapper: "border-foreground/35 shadow-none group-data-[hover=true]:border-foreground/55 group-data-[focus=true]:border-primary group-data-[invalid=true]:border-danger",
+            }}
             isRequired
             isInvalid={!!error}
             errorMessage={error?.message}

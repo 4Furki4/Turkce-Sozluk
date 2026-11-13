@@ -112,7 +112,7 @@ export default function WordPageFallback({
                                 {isEnglish ? "Back to search" : "Aramaya dön"}
                             </Link>
                             <Link
-                                href={{ pathname: "/contribute-word", query: { word: wordName } }}
+                                href={{ pathname: "/contribute-word", query: { mode: "detailed", word: wordName } }}
                                 className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground"
                             >
                                 {isEnglish ? "Add detailed entry" : "Ayrıntılı madde ekle"}

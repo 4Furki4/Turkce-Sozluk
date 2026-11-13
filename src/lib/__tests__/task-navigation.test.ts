@@ -105,6 +105,20 @@ describe("task navigation boundaries", () => {
     ).toBe(true);
     expect(canReturnThroughHistory("/other", "/en/words?page=2")).toBe(false);
   });
+
+  it("tracks non-task query updates without rewriting browser history", () => {
+    const savedUrl = window.location.href;
+    window.history.replaceState(null, "", "/en/dashboard/word-list?search=kitap");
+    const write = jest.spyOn(window.history, "replaceState");
+    try {
+      recordTaskLocation("/en/dashboard/word-list?search=kita");
+      recordTaskLocation("/en/dashboard/word-list?search=kitap");
+      expect(write).not.toHaveBeenCalled();
+    } finally {
+      write.mockRestore();
+      window.history.replaceState(null, "", savedUrl);
+    }
+  });
 });
 
 describe("recoverable text drafts", () => {

@@ -419,36 +419,115 @@ for (const locale of ["en", "tr"] as const) {
     ).toBeVisible();
   });
 
-  test(`${locale}: changing contribution mode guards unsaved work`, async ({
+  test(`${locale}: choosing and changing a contribution type guards unsaved work`, async ({
     page,
   }) => {
     await page.goto(`${contribution}?word=deneme`);
-    await page.locator('main input[name="name"]').fill("Taslak denemesi");
-    await page
-      .getByRole("tab", {
-        name: messages.ContributeWord.simpleTab,
-        exact: true,
-      })
-      .click();
+    const chooserHeading = page.getByRole("heading", { name: messages.ContributeWord.chooseTitle });
+    const wordInput = page.locator('main input[name="name"]');
+    const changeType = page.getByRole("button", { name: messages.ContributeWord.changeType });
+    const detailedChoice = page.getByRole("button", { name: messages.ContributeWord.detailedTitle });
+    await expect(chooserHeading).toBeVisible();
+    await expect(wordInput).toHaveCount(0);
+    await expect(detailedChoice).toBeEnabled();
+    await detailedChoice.press("Enter");
+    await expect(page.getByRole("heading", { name: messages.ContributeWord.detailedTitle })).toBeFocused();
+    await expect(wordInput).toHaveValue("deneme");
+    await wordInput.fill("Taslak denemesi");
+    await changeType.click();
     await expect(page.locator("main [role=alert]")).toContainText(
       messages.TaskPage.leave,
     );
     await page
       .getByRole("button", { name: messages.TaskPage.keepEditing, exact: true })
       .click();
-    await expect(page.locator('main input[name="name"]')).toHaveValue(
-      "Taslak denemesi",
-    );
-    await page
-      .getByRole("tab", {
-        name: messages.ContributeWord.simpleTab,
-        exact: true,
-      })
-      .click();
+    await expect(wordInput).toHaveValue("Taslak denemesi");
+    await changeType.click();
     await page
       .getByRole("button", { name: messages.TaskPage.discard, exact: true })
       .click();
+    await expect(chooserHeading).toBeFocused();
+    await page.getByRole("button", { name: messages.ContributeWord.simpleTitle }).click();
     await expect(page).toHaveURL(/mode=simple/);
+    await expect(wordInput).toHaveValue("deneme");
+    await expect(page.locator("main textarea")).toHaveCount(0);
+  });
+
+  test(`${locale}: a server-rendered contribution waits for the client session before enabling edits`, async ({ page }) => {
+    let resumeSession!: () => void;
+    const sessionGate = new Promise<void>((resolve) => { resumeSession = resolve; });
+    await page.route("**/api/auth/get-session*", async (route) => {
+      await sessionGate;
+      await route.continue();
+    });
+    try {
+      await Promise.all([
+        page.waitForRequest("**/api/auth/get-session*"),
+        page.goto(`${contribution}?mode=simple&word=deneme`),
+      ]);
+      const wordInput = page.locator('main input[name="name"]');
+      await expect(wordInput).toHaveValue("deneme");
+      await expect(wordInput).toBeDisabled();
+      resumeSession();
+      await expect(wordInput).toBeEnabled();
+    } finally {
+      resumeSession();
+    }
+  });
+
+  test(`${locale}: contribution type changes preserve the source and the latest form in browser history`, async ({ page }) => {
+    if (locale === "tr") {
+      await page.addInitScript(() => Object.defineProperty(window, "navigation", { configurable: true, value: undefined }));
+    }
+    const word = "katkitaslagidenemesi";
+    const source = `/${locale}/${locale === "en" ? "search" : "arama"}/${word}?ref=some%20value`;
+    await page.goto(source);
+    await page.getByRole("button", { name: messages.WordNotFound.addDetailedEntry, exact: true }).click();
+    await expect(page).toHaveURL(/mode=detailed/);
+    await expect(page.getByRole("heading", { name: messages.ContributeWord.detailedTitle })).toBeVisible();
+    await expect(page.locator('main input[name="name"]')).toHaveValue(word);
+    await page.goBack();
+    await expect(page).toHaveURL(source);
+
+    const request = page.getByRole("link", { name: messages.WordNotFound.requestWord, exact: true });
+    await request.click();
+    await expect(page).toHaveURL(/mode=simple/);
+    const requestUrl = new URL(page.url());
+    expect(requestUrl.searchParams.get("returnTo")).toBe(source.replace("%20", "+"));
+    await expect(page.getByRole("heading", { name: messages.ContributeWord.simpleTitle })).toBeVisible();
+    const changeType = page.getByRole("button", { name: messages.ContributeWord.changeType });
+    for (const mode of ["detailed", "simple", "detailed"] as const) {
+      await changeType.click();
+      await page.getByRole("button", { name: messages.ContributeWord[`${mode}Title`] }).click();
+      requestUrl.searchParams.delete("mode");
+      requestUrl.searchParams.set("mode", mode);
+      await expect(page).toHaveURL(requestUrl.href);
+    }
+
+    await page.goBack();
+    await expect(page).toHaveURL(source);
+    await page.goForward();
+    await expect(page).toHaveURL(requestUrl.href);
+    await page.locator("[data-task-back]").click();
+    await expect(page).toHaveURL(source);
+    await page.goForward();
+    await expect(page).toHaveURL(requestUrl.href);
+    await expect(page.getByRole("heading", { name: messages.ContributeWord.detailedTitle })).toBeVisible();
+  });
+
+  test(`${locale}: a contribution opened directly can return to search after browser Back`, async ({ page }) => {
+    const task = `${contribution}?mode=simple&word=deneme`;
+    const source = `/${locale}/${locale === "en" ? "search" : "arama"}`;
+    await page.goto(task);
+    await page.getByRole("navigation", { name: messages.TaskPage.breadcrumbs })
+      .getByRole("link", { name: messages.TaskPage.search, exact: true }).click();
+    await expect(page).toHaveURL(source);
+    await page.goBack();
+    await expect(page).toHaveURL(task);
+    await page.getByRole("button", { name: messages.ContributeWord.changeType }).click();
+    await page.getByRole("button", { name: messages.ContributeWord.detailedTitle }).click();
+    await page.locator("[data-task-back]").click();
+    await expect(page).toHaveURL(source);
   });
 
   test(`${locale}: microphone denial is inline and the task can be left`, async ({
