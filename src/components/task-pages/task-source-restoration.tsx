@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { recordTaskLocation, resetTaskLocation } from "@/src/lib/task-navigation";
+import { recordTaskLocation, restoreTaskLocation } from "@/src/lib/task-navigation";
 import { authClient } from "@/src/lib/auth-client";
 
 function browserLocation() {
@@ -30,7 +30,7 @@ export function TaskSourceRestoration() {
   }, [session.data?.user.id, session.isPending]);
   useEffect(() => {
     const onHashChange = () => recordTaskLocation(browserLocation());
-    const onPopState = () => resetTaskLocation(browserLocation());
+    const onPopState = (event: PopStateEvent) => restoreTaskLocation(browserLocation(), event.state);
     window.addEventListener("hashchange", onHashChange);
     window.addEventListener("popstate", onPopState);
     return () => {

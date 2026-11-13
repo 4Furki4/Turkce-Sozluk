@@ -452,8 +452,11 @@ for (const locale of ["en", "tr"] as const) {
   });
 
   test(`${locale}: contribution type changes preserve the source and the latest form in browser history`, async ({ page }) => {
+    if (locale === "tr") {
+      await page.addInitScript(() => Object.defineProperty(window, "navigation", { configurable: true, value: undefined }));
+    }
     const word = "katkitaslagidenemesi";
-    const source = `/${locale}/${locale === "en" ? "search" : "arama"}/${word}`;
+    const source = `/${locale}/${locale === "en" ? "search" : "arama"}/${word}?ref=some%20value`;
     await page.goto(source);
     await page.getByRole("button", { name: messages.WordNotFound.addDetailedEntry, exact: true }).click();
     await expect(page).toHaveURL(/mode=detailed/);
@@ -466,12 +469,13 @@ for (const locale of ["en", "tr"] as const) {
     await request.click();
     await expect(page).toHaveURL(/mode=simple/);
     const requestUrl = new URL(page.url());
-    expect(requestUrl.searchParams.get("returnTo")).toBe(source);
+    expect(requestUrl.searchParams.get("returnTo")).toBe(source.replace("%20", "+"));
     await expect(page.getByRole("heading", { name: messages.ContributeWord.simpleTitle })).toBeVisible();
     const changeType = page.getByRole("button", { name: messages.ContributeWord.changeType });
     for (const mode of ["detailed", "simple", "detailed"] as const) {
       await changeType.click();
       await page.getByRole("button", { name: messages.ContributeWord[`${mode}Title`] }).click();
+      requestUrl.searchParams.delete("mode");
       requestUrl.searchParams.set("mode", mode);
       await expect(page).toHaveURL(requestUrl.href);
     }

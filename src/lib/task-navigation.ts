@@ -93,20 +93,55 @@ export function withTaskReturn(task: string, source: string): string {
 // new tab cannot establish what the preceding browser history entry contains.
 let currentLocation: string | null = null;
 let previousLocation: string | null = null;
+const taskHistoryStateKey = "dictionaryTaskHistory";
+let taskHistoryDocument: string | undefined;
+
+function readPreviousTaskLocation(state: unknown, location: string): string | null {
+  if (!taskHistoryDocument || typeof state !== "object" || !state) return null;
+  const marker = (state as Record<string, unknown>)[taskHistoryStateKey];
+  if (typeof marker !== "object" || !marker) return null;
+  const entry = marker as { document?: unknown; location?: unknown; previous?: unknown };
+  return entry.document === taskHistoryDocument &&
+    entry.location === location &&
+    typeof entry.previous === "string"
+    ? entry.previous
+    : null;
+}
+
+function taskHistoryState(location: string) {
+  return {
+    document: taskHistoryDocument ??= window.crypto.getRandomValues(new Uint32Array(4)).join("-"),
+    location,
+    previous: previousLocation,
+  };
+}
+
 export function recordTaskLocation(location: string) {
   if (location !== currentLocation) {
     previousLocation = currentLocation;
     currentLocation = location;
+    if (previousLocation && typeof window !== "undefined") {
+      window.history.replaceState(
+        { ...window.history.state, [taskHistoryStateKey]: taskHistoryState(location) },
+        "",
+      );
+    }
   }
 }
 export function replaceTaskLocation(location: string, replacement: string) {
   // Preserve the preceding entry only when the replaced URL was observed.
   if (currentLocation !== location) previousLocation = null;
   currentLocation = replacement;
+  // Omit Next's internal keys so its patched replaceState updates useSearchParams.
+  window.history.replaceState(
+    { [taskHistoryStateKey]: taskHistoryState(replacement) },
+    "",
+    replacement,
+  );
 }
-export function resetTaskLocation(location: string) {
+export function restoreTaskLocation(location: string, state: unknown) {
   currentLocation = location;
-  previousLocation = null;
+  previousLocation = readPreviousTaskLocation(state, location);
 }
 
 type BrowserHistoryEntries = {
@@ -114,15 +149,27 @@ type BrowserHistoryEntries = {
   entries(): NavigationHistoryEntry[];
 };
 
+function normalizedHistoryUrl(value: string, origin: string) {
+  const url = new URL(value, origin);
+  const query = url.searchParams.toString();
+  url.search = query;
+  return url.href;
+}
+
 export function canReturnThroughHistory(location: string, target: string) {
   if (typeof window !== "undefined") {
     const navigation = (window as Window & { navigation?: BrowserHistoryEntries }).navigation;
     if (navigation?.currentEntry) {
       const previous = navigation.entries()[navigation.currentEntry.index - 1];
-      return Boolean(previous?.sameDocument && previous.url === new URL(target, window.location.origin).href);
+      return Boolean(
+        previous?.sameDocument && previous.url &&
+        normalizedHistoryUrl(previous.url, window.location.origin) ===
+          normalizedHistoryUrl(target, window.location.origin),
+      );
     }
   }
-  return currentLocation === location && previousLocation === target;
+  return currentLocation === location && previousLocation !== null &&
+    normalizedHistoryUrl(previousLocation, "https://task.invalid") === normalizedHistoryUrl(target, "https://task.invalid");
 }
 
 export const TASK_DRAFT_VERSION = 1;

@@ -172,8 +172,6 @@ export function TaskPage({
         const current = `${pathname}${search}${hash}`;
         const target = `${pathname}${query.size ? `?${query}` : ""}${hash}`;
         if (current === target) return;
-        // Next syncs useSearchParams without navigating away from the task.
-        window.history.replaceState(null, "", target);
         replaceTaskLocation(current, target);
       });
     },
