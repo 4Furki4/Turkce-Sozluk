@@ -426,9 +426,11 @@ for (const locale of ["en", "tr"] as const) {
     const chooserHeading = page.getByRole("heading", { name: messages.ContributeWord.chooseTitle });
     const wordInput = page.locator('main input[name="name"]');
     const changeType = page.getByRole("button", { name: messages.ContributeWord.changeType });
+    const detailedChoice = page.getByRole("button", { name: messages.ContributeWord.detailedTitle });
     await expect(chooserHeading).toBeVisible();
     await expect(wordInput).toHaveCount(0);
-    await page.getByRole("button", { name: messages.ContributeWord.detailedTitle }).press("Enter");
+    await expect(detailedChoice).toBeEnabled();
+    await detailedChoice.press("Enter");
     await expect(page.getByRole("heading", { name: messages.ContributeWord.detailedTitle })).toBeFocused();
     await expect(wordInput).toHaveValue("deneme");
     await wordInput.fill("Taslak denemesi");
