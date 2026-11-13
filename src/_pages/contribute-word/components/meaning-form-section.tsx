@@ -5,8 +5,11 @@ import { Controller, Control, FieldErrors } from "react-hook-form";
 import { Button, SelectItem, Tooltip } from "@heroui/react";
 import { useTranslations } from "next-intl";
 import { ChevronRight, Plus, Trash2, FileClock } from "lucide-react";
+import { useSnapshot } from "valtio";
 
 import { CustomTextarea } from "@/src/components/customs/heroui/custom-textarea";
+import { preferencesState } from "@/src/store/preferences";
+import { cn } from "@/lib/utils";
 import MeaningExampleSection from "./meaning-example-section";
 import ImageUploadSection from "./image-upload-section";
 import { CustomSelect } from "@/src/components/customs/heroui/custom-flexable-select";
@@ -65,6 +68,7 @@ export default function MeaningFormSection({
 }: MeaningFormSectionProps) {
   const t = useTranslations("ContributeWord");
   const tRequests = useTranslations("Requests");
+  const { isBlurEnabled } = useSnapshot(preferencesState);
 
   // Sort parts of speech alphabetically
   const sortedPartsOfSpeech = partsOfSpeech
@@ -115,7 +119,10 @@ export default function MeaningFormSection({
             {...field}
             color="default"
             classNames={{
-              inputWrapper: "rounded-md border-2 border-foreground/35 shadow-none group-data-[hover=true]:border-foreground/55 group-data-[focus=true]:border-primary group-data-[focus=true]:data-[hover=true]:border-primary group-data-[invalid=true]:border-danger",
+              inputWrapper: cn(
+                "rounded-md border-2 border-foreground/35 shadow-none group-data-[hover=true]:border-foreground/55 group-data-[focus=true]:border-primary group-data-[focus=true]:data-[hover=true]:border-primary group-data-[invalid=true]:border-danger",
+                isBlurEnabled && "backdrop-blur-xs",
+              ),
             }}
             label={t("meaningText")}
             placeholder={t("meaningTextPlaceholder")}

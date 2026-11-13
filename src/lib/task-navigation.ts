@@ -116,38 +116,54 @@ function taskHistoryState(location: string) {
   };
 }
 
+type BrowserHistoryEntries = {
+  currentEntry: NavigationHistoryEntry | null;
+  entries(): NavigationHistoryEntry[];
+};
+
+function browserNavigation() {
+  if (typeof window === "undefined") return undefined;
+  return (window as Window & { navigation?: BrowserHistoryEntries }).navigation;
+}
+
 export function recordTaskLocation(location: string) {
   if (location !== currentLocation) {
     previousLocation = currentLocation;
     currentLocation = location;
-    if (previousLocation && typeof window !== "undefined") {
-      window.history.replaceState(
-        { ...window.history.state, [taskHistoryStateKey]: taskHistoryState(location) },
-        "",
-      );
+    if (
+      previousLocation &&
+      typeof window !== "undefined" &&
+      !browserNavigation()?.currentEntry &&
+      isTaskPath(window.location.pathname)
+    ) {
+      try {
+        window.history.replaceState(
+          { ...window.history.state, [taskHistoryStateKey]: taskHistoryState(location) },
+          "",
+        );
+      } catch {
+        // The entry can still return to its source using ordinary navigation.
+      }
     }
   }
 }
 export function replaceTaskLocation(location: string, replacement: string) {
   // Preserve the preceding entry only when the replaced URL was observed.
   if (currentLocation !== location) previousLocation = null;
-  currentLocation = replacement;
   // Omit Next's internal keys so its patched replaceState updates useSearchParams.
   window.history.replaceState(
-    { [taskHistoryStateKey]: taskHistoryState(replacement) },
+    browserNavigation()?.currentEntry ? null : {
+      [taskHistoryStateKey]: taskHistoryState(replacement),
+    },
     "",
     replacement,
   );
+  currentLocation = replacement;
 }
 export function restoreTaskLocation(location: string, state: unknown) {
   currentLocation = location;
   previousLocation = readPreviousTaskLocation(state, location);
 }
-
-type BrowserHistoryEntries = {
-  currentEntry: NavigationHistoryEntry | null;
-  entries(): NavigationHistoryEntry[];
-};
 
 function normalizedHistoryUrl(value: string, origin: string) {
   const url = new URL(value, origin);
@@ -157,16 +173,14 @@ function normalizedHistoryUrl(value: string, origin: string) {
 }
 
 export function canReturnThroughHistory(location: string, target: string) {
-  if (typeof window !== "undefined") {
-    const navigation = (window as Window & { navigation?: BrowserHistoryEntries }).navigation;
-    if (navigation?.currentEntry) {
-      const previous = navigation.entries()[navigation.currentEntry.index - 1];
-      return Boolean(
-        previous?.sameDocument && previous.url &&
-        normalizedHistoryUrl(previous.url, window.location.origin) ===
-          normalizedHistoryUrl(target, window.location.origin),
-      );
-    }
+  const navigation = browserNavigation();
+  if (navigation?.currentEntry) {
+    const previous = navigation.entries()[navigation.currentEntry.index - 1];
+    return Boolean(
+      previous?.sameDocument && previous.url &&
+      normalizedHistoryUrl(previous.url, window.location.origin) ===
+        normalizedHistoryUrl(target, window.location.origin),
+    );
   }
   return currentLocation === location && previousLocation !== null &&
     normalizedHistoryUrl(previousLocation, "https://task.invalid") === normalizedHistoryUrl(target, "https://task.invalid");
