@@ -453,6 +453,28 @@ for (const locale of ["en", "tr"] as const) {
     await expect(page.locator("main textarea")).toHaveCount(0);
   });
 
+  test(`${locale}: a server-rendered contribution waits for the client session before enabling edits`, async ({ page }) => {
+    let resumeSession!: () => void;
+    const sessionGate = new Promise<void>((resolve) => { resumeSession = resolve; });
+    await page.route("**/api/auth/get-session*", async (route) => {
+      await sessionGate;
+      await route.continue();
+    });
+    try {
+      await Promise.all([
+        page.waitForRequest("**/api/auth/get-session*"),
+        page.goto(`${contribution}?mode=simple&word=deneme`),
+      ]);
+      const wordInput = page.locator('main input[name="name"]');
+      await expect(wordInput).toHaveValue("deneme");
+      await expect(wordInput).toBeDisabled();
+      resumeSession();
+      await expect(wordInput).toBeEnabled();
+    } finally {
+      resumeSession();
+    }
+  });
+
   test(`${locale}: contribution type changes preserve the source and the latest form in browser history`, async ({ page }) => {
     if (locale === "tr") {
       await page.addInitScript(() => Object.defineProperty(window, "navigation", { configurable: true, value: undefined }));

@@ -87,7 +87,8 @@ export function TaskPage({
   const hasHydrated = useHasHydrated();
   // A server-gated task can render while Better Auth starts its client session.
   const useInitialUser = initialUser && (!hasHydrated || session.isPending);
-  const awaitingHydration = Boolean(initialUser) && !hasHydrated;
+  // Drafts use the authenticated client account even when the server rendered the form.
+  const awaitingClientSession = Boolean(initialUser) && (!hasHydrated || session.isPending);
   const user = useInitialUser ? initialUser : session.data?.user;
   const waitingForSession = session.isPending && !useInitialUser;
   const [dirty, setDirty] = useState(false);
@@ -375,10 +376,10 @@ export function TaskPage({
         {media && <p className="text-sm text-default-600">{t("media")}</p>}
         <div
           key={`${user?.id ?? "guest"}:${generation}`}
-          aria-busy={finishing}
+          aria-busy={finishing || awaitingClientSession}
           className="min-w-0 space-y-4 rounded-xl border border-divider bg-background/40 p-3 shadow-sm sm:p-6 lg:p-8"
         >
-          <fieldset disabled={finishing || awaitingHydration} className="min-w-0 space-y-4">
+          <fieldset disabled={finishing || awaitingClientSession} className="min-w-0 space-y-4">
             {capability !== "public" && waitingForSession ? (
               <Spinner label={t("loading")} />
             ) : denied ? (
