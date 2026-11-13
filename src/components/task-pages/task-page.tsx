@@ -14,11 +14,14 @@ import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import { Button, Spinner } from "@heroui/react";
+import { cn } from "@/lib/utils";
 import { getPathname } from "@/src/i18n/routing";
+import { useHasHydrated } from "@/src/hooks/use-has-hydrated";
 import { useProgressRouter } from "@/src/hooks/use-progress-router";
 import {
   canReturnThroughHistory,
   isTaskChooserPath,
+  replaceTaskLocation,
   resolveTaskReturn,
 } from "@/src/lib/task-navigation";
 import { authClient } from "@/src/lib/auth-client";
@@ -27,14 +30,14 @@ import { api } from "@/src/trpc/react";
 interface TaskActions {
   complete: () => void;
   cancel: () => void;
-  navigateTo: (target: string) => void;
+  replaceSearchParams: (query: URLSearchParams) => void;
   setDirty: (dirty: boolean) => void;
   registerClear: (clear: () => void) => () => void;
 }
 const Context = createContext<TaskActions>({
   complete() {},
   cancel() {},
-  navigateTo() {},
+  replaceSearchParams() {},
   setDirty() {},
   registerClear: () => () => {},
 });
@@ -55,6 +58,9 @@ export function TaskPage({
   description,
   capability = "signed-in",
   media = false,
+  initialUser,
+  className,
+  hideTitle = false,
 }: {
   title: string;
   parent: TaskHref;
@@ -65,6 +71,9 @@ export function TaskPage({
   description?: string;
   capability?: "public" | "signed-in" | "admin";
   media?: boolean;
+  initialUser?: { id: string; role?: string | null };
+  className?: string;
+  hideTitle?: boolean;
 }) {
   const t = useTranslations("TaskPage");
   const locale = useLocale() as "en" | "tr";
@@ -75,8 +84,16 @@ export function TaskPage({
   const router = useProgressRouter();
   const utils = api.useUtils();
   const session = authClient.useSession();
+  const hasHydrated = useHasHydrated();
+  // A server-gated task can render while Better Auth starts its client session.
+  const useInitialUser = initialUser && (!hasHydrated || session.isPending);
+  const awaitingHydration = Boolean(initialUser) && !hasHydrated;
+  const user = useInitialUser ? initialUser : session.data?.user;
+  const waitingForSession = session.isPending && !useInitialUser;
   const [dirty, setDirty] = useState(false);
-  const [pendingTarget, setPendingTarget] = useState<string | null>(null);
+  const [pendingNavigation, setPendingNavigation] = useState<{
+    run: () => void;
+  } | null>(null);
   const [offline, setOffline] = useState(false);
   const [generation, setGeneration] = useState(0);
   const [finishing, setFinishing] = useState(false);
@@ -137,19 +154,37 @@ export function TaskPage({
     },
     [router],
   );
-  const leave = useCallback(
-    (target: string) => {
-      if (dirty) setPendingTarget(target);
-      else navigate(target);
+  const requestNavigation = useCallback(
+    (run: () => void) => {
+      if (dirty) setPendingNavigation({ run });
+      else run();
     },
-    [dirty, navigate],
+    [dirty],
+  );
+  const leave = useCallback(
+    (target: string) => requestNavigation(() => navigate(target)),
+    [navigate, requestNavigation],
+  );
+  const replaceSearchParams = useCallback(
+    (query: URLSearchParams) => {
+      requestNavigation(() => {
+        const { pathname, search, hash } = window.location;
+        const current = `${pathname}${search}${hash}`;
+        const target = `${pathname}${query.size ? `?${query}` : ""}${hash}`;
+        if (current === target) return;
+        // Next syncs useSearchParams without navigating away from the task.
+        window.history.replaceState(null, "", target);
+        replaceTaskLocation(current, target);
+      });
+    },
+    [requestNavigation],
   );
   useEffect(() => {
-    if (pendingTarget) {
+    if (pendingNavigation) {
       leavePanel.current?.scrollIntoView({ block: "center" });
       leavePanel.current?.focus();
     }
-  }, [pendingTarget]);
+  }, [pendingNavigation]);
   useEffect(() => {
     if (!dirty) return;
     const guard = (event: MouseEvent) => {
@@ -178,11 +213,11 @@ export function TaskPage({
         return;
       event.preventDefault();
       event.stopPropagation();
-      setPendingTarget(target.pathname + target.search + target.hash);
+      leave(target.pathname + target.search + target.hash);
     };
     document.addEventListener("click", guard, true);
     return () => document.removeEventListener("click", guard, true);
-  }, [dirty]);
+  }, [dirty, leave]);
   const complete = useCallback(async () => {
     clears.current.forEach((clear) => clear());
     setDirty(false);
@@ -214,21 +249,20 @@ export function TaskPage({
   });
   const denied =
     capability !== "public" &&
-    !session.isPending &&
-    (!session.data ||
-      (capability === "admin" && session.data.user.role !== "admin"));
+    !waitingForSession &&
+    (!user || (capability === "admin" && user.role !== "admin"));
   return (
     <Context.Provider
       value={{
         complete,
         cancel: () => leave(returnTo),
-        navigateTo: leave,
+        replaceSearchParams,
         setDirty,
         registerClear,
       }}
     >
       <section
-        className="mx-auto w-full max-w-5xl space-y-6 px-3 py-5 sm:space-y-8 sm:px-6 sm:py-8"
+        className={cn("mx-auto w-full max-w-5xl space-y-6 px-3 py-5 sm:space-y-8 sm:px-6 sm:py-8", className)}
         onChangeCapture={() => { if (!isTaskChooserPath(pathname)) setDirty(true); }}
       >
         <header className="min-w-0 space-y-5 sm:space-y-6">
@@ -302,7 +336,7 @@ export function TaskPage({
             </nav>
           </div>
           <div className="space-y-3">
-            <h1 className="max-w-3xl text-2xl font-bold leading-tight text-foreground [overflow-wrap:anywhere] sm:text-3xl">
+            <h1 className={hideTitle ? "sr-only" : "max-w-3xl text-2xl font-bold leading-tight text-foreground [overflow-wrap:anywhere] sm:text-3xl"}>
               {title}
             </h1>
             {description && (
@@ -312,7 +346,7 @@ export function TaskPage({
             )}
           </div>
         </header>
-        {pendingTarget && (
+        {pendingNavigation && (
           <div
             ref={leavePanel}
             tabIndex={-1}
@@ -321,7 +355,7 @@ export function TaskPage({
           >
             <p>{t("leave")}</p>
             <div className="flex flex-wrap gap-2">
-              <Button onPress={() => setPendingTarget(null)}>
+              <Button onPress={() => setPendingNavigation(null)}>
                 {t("keepEditing")}
               </Button>
               <Button
@@ -330,7 +364,8 @@ export function TaskPage({
                   clears.current.forEach((clear) => clear());
                   setDirty(false);
                   setGeneration((value) => value + 1);
-                  navigate(pendingTarget);
+                  setPendingNavigation(null);
+                  pendingNavigation.run();
                 }}
               >
                 {t("discard")}
@@ -341,17 +376,17 @@ export function TaskPage({
         {offline && <p role="status">{t("offline")}</p>}
         {media && <p className="text-sm text-default-600">{t("media")}</p>}
         <div
-          key={`${session.data?.user.id ?? "guest"}:${generation}`}
+          key={`${user?.id ?? "guest"}:${generation}`}
           aria-busy={finishing}
           className="min-w-0 space-y-4 rounded-xl border border-divider bg-background/40 p-3 shadow-sm sm:p-6 lg:p-8"
         >
-          <fieldset disabled={finishing} className="min-w-0 space-y-4">
-            {capability !== "public" && session.isPending ? (
+          <fieldset disabled={finishing || awaitingHydration} className="min-w-0 space-y-4">
+            {capability !== "public" && waitingForSession ? (
               <Spinner label={t("loading")} />
             ) : denied ? (
               <div role="alert" className="space-y-3">
-                <p>{session.data ? t("forbidden") : t("signInRequired")}</p>
-                {!session.data && (
+                <p>{user ? t("forbidden") : t("signInRequired")}</p>
+                {!user && (
                   <NextLink className="text-primary underline" href={signin}>
                     {t("signIn")}
                   </NextLink>

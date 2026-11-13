@@ -4,7 +4,7 @@ import React from "react";
 import { Controller, Control, FieldErrors } from "react-hook-form";
 import { Button, SelectItem, Tooltip } from "@heroui/react";
 import { useTranslations } from "next-intl";
-import { Plus, Trash2, FileClock } from "lucide-react";
+import { ChevronRight, Plus, Trash2, FileClock } from "lucide-react";
 
 import { CustomTextarea } from "@/src/components/customs/heroui/custom-textarea";
 import MeaningExampleSection from "./meaning-example-section";
@@ -36,18 +36,13 @@ export interface MeaningFormSectionProps {
   meaningAttributesWithRequestedIsLoading: boolean;
   authorsWithRequested?: Author[];
   authorsWithRequestedIsLoading: boolean;
-  requestedMeaningAttributes: string[];
   requestedAuthors: string[];
   imagePreviewUrl?: string;
   onOpenMeaningAttributeModal: () => void;
   onOpenAuthorModal: () => void;
   onImageSelect: (file: File, meaningIndex: number) => void;
   onRemoveImage: (meaningIndex: number) => void;
-  onAddMeaning: () => void;
   onRemoveMeaning: (index: number) => void;
-  isLastMeaning: boolean;
-  isFirstMeaning: boolean;
-  totalMeanings: number;
 }
 
 export default function MeaningFormSection({
@@ -60,18 +55,13 @@ export default function MeaningFormSection({
   meaningAttributesWithRequestedIsLoading,
   authorsWithRequested,
   authorsWithRequestedIsLoading,
-  requestedMeaningAttributes,
   requestedAuthors,
   imagePreviewUrl,
   onOpenMeaningAttributeModal,
   onOpenAuthorModal,
   onImageSelect,
   onRemoveImage,
-  onAddMeaning,
   onRemoveMeaning,
-  isLastMeaning,
-  isFirstMeaning,
-  totalMeanings,
 }: MeaningFormSectionProps) {
   const t = useTranslations("ContributeWord");
   const tRequests = useTranslations("Requests");
@@ -98,10 +88,10 @@ export default function MeaningFormSection({
   const hasOptionalErrors = Boolean(meaningErrors?.partOfSpeechId || meaningErrors?.attributes || meaningErrors?.example || meaningErrors?.image);
 
   return (
-    <div key={meaningIndex} className="p-4 border rounded-md space-y-4">
-      <div className="flex justify-between items-center">
+    <div className="min-w-0 space-y-3">
+      <div className="flex items-center justify-between gap-3">
         <h4 className="font-medium">{t("meaning")} {meaningIndex + 1}</h4>
-        {!isFirstMeaning && (
+        {meaningIndex > 0 && (
           <Button
             type="button"
             color="danger"
@@ -111,7 +101,7 @@ export default function MeaningFormSection({
             className="h-11 min-w-11"
             onPress={() => onRemoveMeaning(meaningIndex)}
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-4 w-4" aria-hidden />
           </Button>
         )}
       </div>
@@ -123,6 +113,10 @@ export default function MeaningFormSection({
         render={({ field, fieldState: { error } }) => (
           <CustomTextarea
             {...field}
+            color="default"
+            classNames={{
+              inputWrapper: "rounded-md border-2 border-foreground/35 shadow-none group-data-[hover=true]:border-foreground/55 group-data-[focus=true]:border-primary group-data-[focus=true]:data-[hover=true]:border-primary group-data-[invalid=true]:border-danger",
+            }}
             label={t("meaningText")}
             placeholder={t("meaningTextPlaceholder")}
             isRequired
@@ -131,9 +125,12 @@ export default function MeaningFormSection({
           />
         )}
       />
-      <details className="border-t border-border pt-2" open={hasOptionalErrors || undefined}>
-        <summary className="min-h-11 cursor-pointer py-2.5 font-medium text-primary">{t("meaningDetails")}</summary>
-        <div className="mt-4 space-y-4">
+      <details className="group/meaning-details" open={hasOptionalErrors || undefined}>
+        <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-sm py-2 text-sm font-medium text-foreground/75 hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden">
+          <ChevronRight className="h-4 w-4 shrink-0 group-open/meaning-details:rotate-90" aria-hidden />
+          {t("meaningDetails")}
+        </summary>
+        <div className="mt-2 space-y-5 border-t border-divider pt-4">
           <p className="text-sm text-muted-foreground">{t("meaningDetailsHelp")}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Part of Speech */}
@@ -170,7 +167,7 @@ export default function MeaningFormSection({
             />
 
             {/* Meaning Attributes */}
-            <div className="flex items-end gap-2">
+            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-2">
               <Controller
                 name={`meanings.${meaningIndex}.attributes`}
                 control={control}
@@ -188,7 +185,7 @@ export default function MeaningFormSection({
                     isInvalid={!!error}
                     errorMessage={error?.message}
                     classNames={{
-                      base: "w-full max-w-none sm:max-w-none",
+                      base: "min-w-0 w-full max-w-none sm:max-w-none",
                       trigger: "h-12 min-h-12",
                       mainWrapper: "h-12"
                     }}
@@ -237,20 +234,6 @@ export default function MeaningFormSection({
 
         </div>
       </details>
-
-      {/* Add/Remove Meaning Buttons */}
-      {isLastMeaning && (
-        <>
-          <Button
-            type="button"
-            variant="ghost"
-            onPress={onAddMeaning}
-            startContent={<Plus className="h-4 w-4" />}
-          >
-            {t("addMeaning")}
-          </Button>
-        </>
-      )}
     </div>
   );
 }

@@ -99,7 +99,29 @@ export function recordTaskLocation(location: string) {
     currentLocation = location;
   }
 }
+export function replaceTaskLocation(location: string, replacement: string) {
+  // Preserve the preceding entry only when the replaced URL was observed.
+  if (currentLocation !== location) previousLocation = null;
+  currentLocation = replacement;
+}
+export function resetTaskLocation(location: string) {
+  currentLocation = location;
+  previousLocation = null;
+}
+
+type BrowserHistoryEntries = {
+  currentEntry: NavigationHistoryEntry | null;
+  entries(): NavigationHistoryEntry[];
+};
+
 export function canReturnThroughHistory(location: string, target: string) {
+  if (typeof window !== "undefined") {
+    const navigation = (window as Window & { navigation?: BrowserHistoryEntries }).navigation;
+    if (navigation?.currentEntry) {
+      const previous = navigation.entries()[navigation.currentEntry.index - 1];
+      return Boolean(previous?.sameDocument && previous.url === new URL(target, window.location.origin).href);
+    }
+  }
   return currentLocation === location && previousLocation === target;
 }
 

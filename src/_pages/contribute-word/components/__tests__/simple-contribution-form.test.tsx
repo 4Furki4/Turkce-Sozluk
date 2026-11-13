@@ -38,7 +38,7 @@ jest.mock("@/src/components/customs/heroui/custom-card", () => ({
   __esModule: true, default: ({ children }: any) => <div>{children}</div>,
 }));
 jest.mock("@/src/components/customs/heroui/custom-input", () => ({
-  CustomInput: React.forwardRef<HTMLInputElement, any>(function Input({ label, isRequired, isInvalid, errorMessage, ...props }, ref) {
+  CustomInput: React.forwardRef<HTMLInputElement, any>(function Input({ label, isRequired, isInvalid, errorMessage, classNames, color, ...props }, ref) {
     return <label>{label}<input ref={ref} {...props} /></label>;
   }),
 }));
@@ -48,7 +48,7 @@ beforeEach(() => jest.clearAllMocks());
 function renderForm() {
   render(<SimpleContributionForm session={null} locale="en" isSubmitting={false} setIsSubmitting={mockSetSubmitting} />);
   fireEvent.change(screen.getByLabelText("wordName"), { target: { value: "defter" } });
-  fireEvent.click(screen.getByRole("button", { name: "Submit" }));
+  fireEvent.click(screen.getByRole("button", { name: "submitForReview" }));
 }
 
 it("confirms a successful request once and resets the input", async () => {

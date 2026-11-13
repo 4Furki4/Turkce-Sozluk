@@ -59,7 +59,7 @@ export default function MeaningExampleSection({
         )}
       />
 
-      <div className="flex items-end gap-2">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-2">
         <Controller
           name={`meanings.${meaningIndex}.example.author`}
           control={control}
@@ -73,7 +73,7 @@ export default function MeaningExampleSection({
               labelPlacement="outside"
               inputProps={{ classNames: { inputWrapper: "h-12 min-h-12", label: "pb-0" } }}
               classNames={{
-                base: "w-full max-w-none sm:max-w-none",
+                base: "min-w-0 w-full max-w-none sm:max-w-none",
               }}
               label={t("exampleAuthor")}
               placeholder={t("exampleAuthorPlaceholder")}

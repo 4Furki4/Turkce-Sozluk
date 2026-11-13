@@ -75,9 +75,7 @@ export default function WordNotFoundCard({ session, searchedWord }: WordNotFound
             <NextIntlLink
               href={{
                 pathname: "/contribute-word",
-                query: {
-                  word: wordName
-                }
+                query: { mode: "detailed", word: wordName },
               }}
             >
               <Button

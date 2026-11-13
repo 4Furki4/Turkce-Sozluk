@@ -99,7 +99,7 @@ export default function WordLanguageAndAttributesSection({
       />
 
       {/* Word Attributes */}
-      <div className="flex items-end gap-2">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-2">
         <Controller
           name="attributes"
           control={control}
@@ -117,7 +117,7 @@ export default function WordLanguageAndAttributesSection({
               isInvalid={!!error}
               errorMessage={error?.message}
               classNames={{
-                base: "w-full max-w-none sm:max-w-none",
+                base: "min-w-0 w-full max-w-none sm:max-w-none",
                 trigger: "h-12 min-h-12",
                 mainWrapper: "h-12",
               }}
