@@ -1,4 +1,5 @@
 import { InsertWord } from "./db/schema/words";
+import type { WordEtymology } from "./src/lib/word-etymology";
 
 type LoginInputs = {
   usernameOrEmail: string;
@@ -115,6 +116,7 @@ type WordSearchResult = {
     }[];
     relatedWords?: { related_word_id: number; related_word_name: string; relation_type?: string }[];
     relatedPhrases?: { related_phrase_id: number; related_phrase: string }[];
+    etymology?: WordEtymology[];
   }
 }
 type SavedWordsResult = {
@@ -139,6 +141,7 @@ type DashboardWordList = {
   meaning: string | null;
   related_word_name: string | null;
   relation_type: string | null;
+  hasEtymology?: boolean;
 }
 
 type EditMeaningForm = {

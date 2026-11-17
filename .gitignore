@@ -42,6 +42,11 @@ next-env.d.ts
 # local database backups
 /backups/postgres/
 
+# Local OCR scans and review artifacts (source-book content)
+/data/etymology/ocr-local/
+__pycache__/
+*.pyc
+
 # windsurf rules
 .windsurfrules
 .cursor

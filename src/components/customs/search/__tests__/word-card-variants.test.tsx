@@ -59,6 +59,10 @@ jest.mock("next-intl", () => ({
         loading: "Loading pronunciations...",
         noPronunciations: "No pronunciations available yet.",
       },
+      "WordCard.Etymology": {
+        title: "Etymology",
+        jump: "Explore etymology",
+      },
     };
 
     return (key: string, values?: Record<string, string | number>) => {
@@ -313,6 +317,47 @@ describe("SearchWordCardVariantGroup", () => {
 
     expect(screen.getByRole("radio", { name: "Reading" })).toHaveAttribute("aria-checked", "true");
     expect(screen.getByRole("radio", { name: "Compact" })).toHaveAttribute("aria-checked", "false");
+  });
+
+  it.each(["reader", "magazine"] as const)("shows the etymology shortcut only below the viewport in the %s layout", async (layout) => {
+    preferencesState.searchWordCardVariant = layout;
+    let headingTop = window.innerHeight + 10;
+    const getRect = HTMLElement.prototype.getBoundingClientRect;
+    const measure = jest.spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockImplementation(function (this: HTMLElement) {
+        const rect = getRect.call(this);
+        return this.id === "koken-1-title" ? { ...rect, top: headingTop } : rect;
+      });
+    const word = {
+      ...sampleWord.word_data,
+      meanings: Array.from({ length: 3 }, (_, index) => ({
+        ...sampleWord.word_data.meanings[0],
+        meaning_id: index + 11,
+      })),
+      etymology: [{
+        entryKey: "p1-l1", meaningId: null, senseLabel: null, author: "Hasan Eren",
+        firstPage: 1, lastPage: 1, summary: "Source summary", details: [],
+      }],
+    };
+
+    try {
+      const { rerender } = render(<SearchWordCardVariantGroup data={[{ word_data: word }]} locale="en" session={null} />);
+      expect(screen.getByRole("link", { name: "Explore etymology" })).toHaveAttribute("href", "#koken-1");
+
+      headingTop = window.innerHeight - 10;
+      fireEvent.scroll(window);
+      await waitFor(() => expect(screen.queryByRole("link", { name: "Explore etymology" })).not.toBeInTheDocument());
+      expect(screen.getByRole("heading", { name: "Etymology" })).toBeInTheDocument();
+
+      headingTop = window.innerHeight + 10;
+      fireEvent.resize(window);
+      expect(await screen.findByRole("link", { name: "Explore etymology" })).toBeInTheDocument();
+
+      rerender(<SearchWordCardVariantGroup data={[{ word_data: { ...word, meanings: word.meanings.slice(0, 2) } }]} locale="en" session={null} />);
+      expect(screen.queryByRole("link", { name: "Explore etymology" })).not.toBeInTheDocument();
+    } finally {
+      measure.mockRestore();
+    }
   });
 
   it("keeps reader utility actions visible without the mobile-hidden class", () => {

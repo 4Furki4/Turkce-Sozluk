@@ -1,0 +1,62 @@
+{
+  "source": {
+    "title": "Türk Dilinin Etimolojik Sözlüğü",
+    "author": "Hasan Eren",
+    "edition": "2",
+    "publicationYear": 1999,
+    "documentSha256": "39b636341602c2572035a93366957c078d154f6787d5e60c153caeefb80a2f8e"
+  },
+  "abbreviations": [
+    { "code": "Fr", "kind": "language", "expansion": "Fransızca" }
+  ],
+  "entries": [
+    {
+      "sourceEntryKey": "p0001-left-02-abajur",
+      "headword": "abajur",
+      "gloss": "ışığı bir yere toplamak için kullanılan lâmba siperi",
+      "kind": "article",
+      "printedPageStart": 1,
+      "pdfPageStart": 31,
+      "sourceLocator": "left column, second entry",
+      "correctedText": "abajur ‘ışığı bir yere toplamak için kullanılan lâmba siperi’ < Fr abat-jour. - Fransızca abat-jour Türkçeye pancur (< panjur) olarak da geçmiştir. Bk. pancur. Tietze: AO 13: 31-32.",
+      "claims": [
+        {
+          "kind": "origin",
+          "stance": "asserted",
+          "summary": "Eren, abajur sözcüğünü Fransızca abat-jour biçimine bağlar.",
+          "sourceForm": "abat-jour",
+          "sourceLanguageLabel": "Fr",
+          "targetForm": "abajur",
+          "targetLanguageLabel": "Türkçe",
+          "referenceText": "Tietze: AO 13: 31-32"
+        },
+        {
+          "kind": "commentary",
+          "stance": "asserted",
+          "summary": "Fransızca biçimin Türkçeye pancur/panjur olarak da geçtiğini belirtir ve pancur maddesine gönderir.",
+          "sourceForm": "abat-jour",
+          "sourceLanguageLabel": "Fr",
+          "targetForm": "pancur",
+          "targetLanguageLabel": "Türkçe"
+        }
+      ]
+    },
+    {
+      "sourceEntryKey": "p0001-left-04-abazan",
+      "headword": "abazan",
+      "kind": "cross_reference",
+      "printedPageStart": 1,
+      "pdfPageStart": 31,
+      "sourceLocator": "left column, fourth entry",
+      "correctedText": "abazan bk. habazan.",
+      "claims": [
+        {
+          "kind": "cross_reference",
+          "stance": "asserted",
+          "summary": "Habazan maddesine gönderir.",
+          "targetForm": "habazan"
+        }
+      ]
+    }
+  ]
+}

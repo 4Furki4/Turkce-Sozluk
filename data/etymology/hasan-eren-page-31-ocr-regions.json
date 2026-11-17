@@ -1,0 +1,17 @@
+{
+  "source": "Hasan Eren, Türk Dilinin Etimolojik Sözlüğü (2nd edition, 1999)",
+  "documentSha256": "39b636341602c2572035a93366957c078d154f6787d5e60c153caeefb80a2f8e",
+  "pdfPage": 31,
+  "printedPage": 1,
+  "imageSha256": "bffc6579c5d9de85b8d93ad0d48e9ce44a272326d43b7484bc15f37e9dcd7d9f",
+  "baseJsonSha256": "c006a7b8c92b7ca56b4e66cf337304af2176c659338c015527463a002900409f",
+  "columnSplitX": 1135,
+  "regions": [
+    { "id": "ablatya-source-form", "baseLineIndex": 34, "crop": [380, 1437, 1115, 1500], "qwenCrop": [463, 1443, 621, 1495], "script": "Greek", "lang": "el", "ocrVersion": "PP-OCRv5" },
+    { "id": "ablatya-rumca-form", "baseLineIndex": 36, "crop": [380, 1496, 1115, 1555], "qwenCrop": [514, 1502, 649, 1552], "script": "Greek", "lang": "el", "ocrVersion": "PP-OCRv5" },
+    { "id": "ablatya-adjective", "baseLineIndex": 38, "crop": [380, 1550, 1115, 1610], "qwenCrop": [510, 1555, 634, 1609], "script": "Greek", "lang": "el", "ocrVersion": "PP-OCRv5" },
+    { "id": "abli-source-form", "baseLineIndex": 48, "crop": [380, 1852, 810, 1915], "qwenCrop": [463, 1859, 563, 1913], "script": "Greek", "lang": "el", "ocrVersion": "PP-OCRv5" },
+    { "id": "abluka-rumca-form", "baseLineIndex": 63, "crop": [380, 2269, 625, 2330], "qwenCrop": [403, 2280, 554, 2325], "script": "Greek", "lang": "el", "ocrVersion": "PP-OCRv5" },
+    { "id": "abril-rumca-form", "baseLineIndex": 59, "crop": [1185, 2156, 1915, 2216], "qwenCrop": [1333, 2162, 1500, 2215], "script": "Greek", "lang": "el", "ocrVersion": "PP-OCRv5" }
+  ]
+}

@@ -2,6 +2,8 @@
 
 import { Avatar, Button, Chip, Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
 import {
+  ArrowDown,
+  ArrowUpRight,
   BookOpen,
   Blocks,
   Camera,
@@ -34,6 +36,7 @@ import {
 } from "@/src/store/preferences";
 import { getOfflineSearchHref } from "@/src/lib/search-route";
 import { getHeadwordProps } from "@/src/lib/headword-presentation";
+import { wordEtymologyAnchor } from "@/src/lib/word-etymology";
 import { copyPageUrl } from "@/src/utils/clipboard";
 import { captureElementScreenshot } from "@/src/utils/screenshot";
 
@@ -359,6 +362,7 @@ function ReaderWordCard({
             onCorrect={onPronunciationRequestOpen}
           />
           <WordMetadata word_data={word_data} locale={locale} />
+          <WordEtymologyLink word_data={word_data} />
         </div>
       </header>
 
@@ -367,6 +371,7 @@ function ReaderWordCard({
         <ReaderMeanings word_data={word_data} locale={locale} />
       </section>
 
+      <WordEtymologySection word_data={word_data} className="border-t border-border/70 px-5 py-6 sm:px-8" />
       <ConnectionsSection word_data={word_data} />
       <WordGraphSection word_data={word_data} />
       <PronunciationSection word_data={word_data} session={session} />
@@ -480,6 +485,7 @@ function MagazineWordCard({
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <WordMetadata word_data={word_data} locale={locale} className="min-w-0" hideRoot />
               <DossierStats word_data={word_data} compact />
+              <WordEtymologyLink word_data={word_data} />
             </div>
           </div>
 
@@ -503,6 +509,7 @@ function MagazineWordCard({
           locale={locale}
           highlightedMeaningId={highlightedMeaningId}
         />
+        <WordEtymologySection word_data={word_data} className="rounded-lg border border-border/70 bg-background/40 p-4 sm:p-5" />
         <CompactConnections word_data={word_data} />
         <WordGraphSection word_data={word_data} compact />
       </main>
@@ -511,6 +518,101 @@ function MagazineWordCard({
         <RequestEditControl session={session} onEditOpen={onEditOpen} compact />
       </footer>
     </div>
+  );
+}
+
+function WordEtymologyLink({ word_data }: { word_data: WordEntryData }) {
+  const t = useTranslations("WordCard.Etymology");
+  const anchor = wordEtymologyAnchor(word_data.word_id);
+  const canShowLink = Boolean(word_data.etymology?.length) && word_data.meanings.length >= 3;
+  const [isBelowViewport, setIsBelowViewport] = useState(false);
+
+  useEffect(() => {
+    if (!canShowLink) return;
+
+    const heading = document.getElementById(`${anchor}-title`);
+    if (!heading) return;
+
+    const viewport = window.visualViewport;
+    const update = () => {
+      const viewportBottom = viewport ? viewport.offsetTop + viewport.height : window.innerHeight;
+      setIsBelowViewport(heading.getBoundingClientRect().top >= viewportBottom);
+    };
+
+    let frame = 0;
+    const scheduleUpdate = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        update();
+      });
+    };
+
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(scheduleUpdate);
+    const card = heading.closest("article");
+    if (card) observer?.observe(card);
+    observer?.observe(document.body);
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+    viewport?.addEventListener("scroll", scheduleUpdate);
+    viewport?.addEventListener("resize", scheduleUpdate);
+    update();
+
+    return () => {
+      cancelAnimationFrame(frame);
+      observer?.disconnect();
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      viewport?.removeEventListener("scroll", scheduleUpdate);
+      viewport?.removeEventListener("resize", scheduleUpdate);
+    };
+  }, [anchor, canShowLink]);
+
+  if (!canShowLink || !isBelowViewport) return null;
+
+  return (
+    <a href={`#${anchor}`} className="inline-flex min-h-8 w-fit items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
+      {t("jump")}
+      <ArrowDown size={15} aria-hidden="true" />
+    </a>
+  );
+}
+
+function WordEtymologySection({ word_data, className }: { word_data: WordEntryData; className: string }) {
+  const t = useTranslations("WordCard.Etymology");
+  if (!word_data.etymology?.length) return null;
+
+  const anchor = wordEtymologyAnchor(word_data.word_id);
+  return (
+    <section id={anchor} tabIndex={-1} aria-labelledby={`${anchor}-title`} className={cn("scroll-mt-28 space-y-3 focus-visible:outline-2 focus-visible:outline-primary", className)}>
+      <h2 id={`${anchor}-title`} className="text-lg font-semibold tracking-tight">{t("title")}</h2>
+      {word_data.etymology.map((entry) => (
+        <div key={`${entry.entryKey}-${entry.meaningId}`} className="max-w-[68ch] space-y-2.5">
+          {entry.senseLabel && <p lang="tr" className="text-sm font-semibold text-foreground/80">{entry.senseLabel}</p>}
+          <p lang="tr" className="leading-relaxed text-foreground">{entry.summary}</p>
+          {entry.details.length > 0 && (
+            <details className="text-sm leading-relaxed">
+              <summary className="w-fit cursor-pointer font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
+                {t("details")}
+              </summary>
+              {entry.details.map((detail) => <p key={detail} lang="tr" className="mt-2 text-foreground/80">{detail}</p>)}
+            </details>
+          )}
+          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm">
+            <p className="text-muted-foreground">
+              {entry.author && <>{entry.author}{" · "}</>}
+              {entry.lastPage && entry.lastPage > entry.firstPage
+                ? t("pages", { first: entry.firstPage, last: entry.lastPage })
+                : t("page", { page: entry.firstPage })}
+            </p>
+            <Link href={{ pathname: "/etimoloji", query: { entry: entry.entryKey }, hash: "madde" }} prefetch={false} className="inline-flex min-h-8 items-center gap-1.5 font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
+              {t("source")}
+              <ArrowUpRight size={15} aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      ))}
+    </section>
   );
 }
 

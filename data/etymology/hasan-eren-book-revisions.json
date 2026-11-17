@@ -1,0 +1,1274 @@
+{
+  "splitRows": [
+    {
+      "page": 247,
+      "line": 0,
+      "rightLine": 200,
+      "rightPrefix": "kizir ",
+      "leftEnd": 1101,
+      "rightStart": 1158
+    },
+    {
+      "page": 344,
+      "line": 0,
+      "rightLine": 200,
+      "rightPrefix": "rezene ",
+      "leftEnd": 1008,
+      "rightStart": 1064
+    }
+  ],
+  "forceStarts": [
+    "p247-l200",
+    "p299-l1",
+    "p344-l200",
+    "p115-l55",
+    "p276-l1",
+    "p321-l1",
+    "p340-l2",
+    "p340-l1",
+    "p380-l54",
+    "p383-l2",
+    "p426-l0",
+    "p420-l0",
+    "p436-l0",
+    "p218-l1",
+    "p340-l0"
+  ],
+  "ignoreStarts": [
+    "p278-l15",
+    "p299-l4"
+  ],
+  "summaries": {
+    "p13-l76": {
+      "headword": "anzarot",
+      "ocrHeadword": "anzarot",
+      "meaning": "Argoda rakı.",
+      "origin": "Eren, Dankoff’un Ermenice ve Arapça biçimlere dayanan iki köken önerisini aktarır.",
+      "evidence": [
+        "p13-l76",
+        "p14-l0",
+        "p14-l2",
+        "p14-l4"
+      ]
+    },
+    "p20-l23": {
+      "headword": "as¹",
+      "ocrHeadword": "as1",
+      "meaning": "Değerli postu için avlanan kakım.",
+      "origin": "Eski Türk dillerinde as ve az biçimleri görülür. Eren, ağızlardaki ars ve arıs biçimlerinde r sesinin sonradan ortaya çıktığını belirtir.",
+      "evidence": [
+        "p20-l23",
+        "p20-l37",
+        "p20-l41",
+        "p20-l54"
+      ]
+    },
+    "p41-l10": {
+      "headword": "bastık",
+      "ocrHeadword": "bastık",
+      "meaning": "Pestil.",
+      "origin": "Dankoff, kelimeyi Ermenice pasteł biçimine bağlar. Bu biçimin de bir Rumca alıntı olduğu düşünülür.",
+      "evidence": [
+        "p41-l10",
+        "p41-l14",
+        "p41-l16",
+        "p41-l18"
+      ]
+    },
+    "p55-l30": {
+      "headword": "biz¹",
+      "ocrHeadword": "biz¹",
+      "meaning": "Çelikten, sivri uçlu ve ahşap saplı bir alet.",
+      "origin": "Eren, Türk dillerindeki biçimleri ve kökene dair farklı görüşleri aktarır. Moğolca bir sözcükle bağlantısına ses bakımından itiraz edildiğini belirtir.",
+      "evidence": [
+        "p55-l30",
+        "p55-l34",
+        "p55-l42",
+        "p55-l48"
+      ]
+    },
+    "p58-l56": {
+      "headword": "borya",
+      "ocrHeadword": "borya",
+      "meaning": "Eskiden kullanılan hasır adı.",
+      "origin": "Farsça būriyā biçiminden gelir. Eren, ağızlardaki boyra biçiminin seslerin yer değiştirmesiyle oluştuğunu belirtir.",
+      "evidence": [
+        "p58-l56",
+        "p58-l64",
+        "p58-l67"
+      ]
+    },
+    "p64-l0": {
+      "headword": "burgaz",
+      "ocrHeadword": "burgaz",
+      "meaning": "Eski dilde kale.",
+      "origin": "Eren, sözcüğü Rumcada kule veya kale ifade eden bir biçime bağlar. Burgaz biçimi yer adlarında korunmuştur.",
+      "evidence": [
+        "p64-l0",
+        "p64-l2",
+        "p64-l4"
+      ]
+    },
+    "p71-l45": {
+      "headword": "cıvata",
+      "ocrHeadword": "cıvata",
+      "meaning": "Ucuna somun takılan iri başlı vida.",
+      "origin": "Eren, sözcüğü Venedik İtalyancasındaki giaveta biçimine bağlar.",
+      "evidence": [
+        "p71-l45",
+        "p71-l48"
+      ]
+    },
+    "p72-l0": {
+      "headword": "ciğer",
+      "ocrHeadword": "ciğer",
+      "meaning": "Akciğer ve karaciğer adlarında kullanılan söz.",
+      "origin": "Farsçada karaciğer anlamına gelen cigar sözünden gelir. Eren, Türkçede akciğere eskiden öyken dendiğini de belirtir.",
+      "evidence": [
+        "p72-l0",
+        "p72-l4",
+        "p72-l8",
+        "p72-l10"
+      ]
+    },
+    "p76-l27": {
+      "headword": "çağla",
+      "ocrHeadword": "çağla",
+      "meaning": "Olgunlaşmamış yemiş.",
+      "origin": "Farsça çagāla biçiminden gelir. Türkçedeki çağala biçiminin ortasındaki a düşerek çağla oluşmuştur.",
+      "evidence": [
+        "p76-l27",
+        "p76-l29",
+        "p76-l31"
+      ]
+    },
+    "p76-l43": {
+      "headword": "çakal",
+      "ocrHeadword": "çakal",
+      "meaning": "Kurttan küçük bir yaban hayvanı.",
+      "origin": "Eren, sözcüğü Farsça şagāl biçimine bağlar. Sözcüğün Türkçeden bazı Avrupa dillerine de geçtiğini belirtir.",
+      "evidence": [
+        "p76-l43",
+        "p76-l53",
+        "p76-l57",
+        "p76-l59"
+      ]
+    },
+    "p86-l53": {
+      "headword": "çeri",
+      "ocrHeadword": "çeri",
+      "meaning": "Eskiden asker anlamında kullanılan söz.",
+      "origin": "Eski Türkçede çerig, asker dizisi veya ordu anlamlarında kullanılmıştır. Eren, daha eski kökenle ilgili önerilerin yeniden incelenmesi gerektiğini belirtir.",
+      "evidence": [
+        "p86-l53",
+        "p86-l75",
+        "p87-l12",
+        "p87-l35"
+      ]
+    },
+    "p87-l40": {
+      "headword": "çeşme",
+      "ocrHeadword": "çeşme",
+      "meaning": "Bir oluktan su akıtan, yalaklı düzenek.",
+      "origin": "Eren, sözcüğü kaynak ve pınar anlamındaki Farsça çaşma biçimine bağlar.",
+      "evidence": [
+        "p87-l40",
+        "p87-l42",
+        "p87-l48"
+      ]
+    },
+    "p97-l9": {
+      "headword": "çokal, çukal",
+      "ocrHeadword": "çokal, çukal",
+      "meaning": "Eskiden savaşçının giydiği demir gömlek veya atın örtüsü.",
+      "origin": "Tryjarski, sözcüğü Orta Türkçedeki çoğ- fiiline bağlar. Eren, bu açıklamayı ses bakımından tartışmaya açık bulur.",
+      "evidence": [
+        "p97-l9",
+        "p97-l11",
+        "p97-l17",
+        "p97-l22"
+      ]
+    },
+    "p100-l57": {
+      "headword": "çördek",
+      "ocrHeadword": "çördek",
+      "meaning": "Gemide kullanılan küçük makara.",
+      "origin": "Eren, kökenin belirsiz olduğunu belirtir. Ticaret gemilerinde aynı parça için mandar adı daha yaygındır.",
+      "evidence": [
+        "p100-l57",
+        "p100-l59",
+        "p100-l61"
+      ]
+    },
+    "p104-l10": {
+      "headword": "damacana",
+      "ocrHeadword": "damacana",
+      "meaning": "Sıvı taşımaya yarayan dar ağızlı, şişkin gövdeli büyük şişe.",
+      "origin": "Eren, sözcüğü İtalyanca damigiana biçimine bağlar.",
+      "evidence": [
+        "p104-l10",
+        "p104-l12",
+        "p104-l18"
+      ]
+    },
+    "p106-l11": {
+      "headword": "daz",
+      "ocrHeadword": "daz",
+      "meaning": "Saçı dökülmüş baş, dazlak.",
+      "origin": "Orta Türkçede tāz biçimi kayıtlıdır. Eren, diğer dillerdeki karşılaştırmaları ve Macarca tar biçiminin eski bir Türk dilinden alındığını aktarır.",
+      "evidence": [
+        "p106-l11",
+        "p106-l21",
+        "p106-l25",
+        "p106-l35"
+      ]
+    },
+    "p120-l67": {
+      "headword": "doruk",
+      "ocrHeadword": "doruk",
+      "meaning": "Yüksek bir şeyin tepesi, zirve.",
+      "origin": "Eski kaynaklarda toruk biçimi görülür. Eren, sözcüğün daha eski kökünü belirleyemediğini belirtir.",
+      "evidence": [
+        "p120-l67",
+        "p120-l73",
+        "p120-l77"
+      ]
+    },
+    "p136-l0": {
+      "headword": "enik",
+      "ocrHeadword": "enik",
+      "meaning": "Köpek yavrusu.",
+      "origin": "Eski Türkçede enük, çeşitli hayvanların yavrusu için de kullanılmıştır. Eren, sözcüğü doğurmak anlamındaki yeni- fiiline bağlayan açıklamadaki ses ve anlam sorunlarını tartışır.",
+      "evidence": [
+        "p136-l0",
+        "p136-l15",
+        "p136-l27",
+        "p136-l37"
+      ]
+    },
+    "p150-l17": {
+      "headword": "gece",
+      "ocrHeadword": "gece",
+      "meaning": "Güneşin batmasıyla günün ağarması arasındaki süre.",
+      "origin": "Eren, eski kiçe biçimini geç vakti anlatan kiç veya kéç sözüne bağlar. Gece biçiminin bu eski söze -e takısının gelmesiyle oluştuğunu düşünür.",
+      "evidence": [
+        "p150-l17",
+        "p150-l30",
+        "p150-l36",
+        "p150-l59"
+      ]
+    },
+    "p151-l23": {
+      "headword": "geleci",
+      "ocrHeadword": "geleci",
+      "meaning": "Eski dilde söz. Bazı ağızlarda geleci etmek konuşmak veya dedikodu yapmak demektir.",
+      "origin": "Orta Türkçede keleçü biçimi görülür. Eren, Moğolca ve başka dillerle yapılan karşılaştırmaları ve Clauson’un bu bağlantıya itirazını aktarır.",
+      "evidence": [
+        "p151-l23",
+        "p151-l29",
+        "p151-l35",
+        "p151-l39"
+      ]
+    },
+    "p154-l59": {
+      "headword": "geriş",
+      "ocrHeadword": "geriş",
+      "meaning": "Dağın veya tepenin üst kısmı, sırt.",
+      "origin": "Orta Türkçede keriş biçimi kayıtlıdır. Eren, Clauson’un ger- ve eski ker- köküne dayanan açıklamasını benimser.",
+      "evidence": [
+        "p154-l59",
+        "p154-l68",
+        "p154-l74",
+        "p154-l76"
+      ]
+    },
+    "p156-l10": {
+      "headword": "gireği",
+      "ocrHeadword": "gireği",
+      "meaning": "Yerel ağızlarda pazar günü.",
+      "origin": "Eren, sözcüğü Rumca bir biçime bağlar. Ermenice aracılığıyla geçmiş olabileceği önerisinin de tartışıldığını belirtir.",
+      "evidence": [
+        "p156-l10",
+        "p156-l11",
+        "p156-l15",
+        "p156-l19"
+      ]
+    },
+    "p157-l63": {
+      "headword": "göce",
+      "ocrHeadword": "göce",
+      "meaning": "Kabuğu çıkarılıp kırılmış buğday veya bu tür bulgurla yapılan çorba.",
+      "origin": "Eren, sözcüğün Farsçadan alınmış göründüğünü belirtir. Rumca köken önerisine karşı çıkar.",
+      "evidence": [
+        "p157-l63",
+        "p157-l67",
+        "p158-l8",
+        "p158-l12"
+      ]
+    },
+    "p159-l44": {
+      "headword": "göğer¹",
+      "ocrHeadword": "göğer1",
+      "meaning": "Yerel ağızlarda arpacık soğanı.",
+      "origin": "Eren, ilk çalışmalarında sözcüğü gök ile ilişkilendirmiştir. Daha sonra aynı anlamdaki bir Rumca biçimle karşılaştırmıştır.",
+      "evidence": [
+        "p159-l44",
+        "p159-l50",
+        "p159-l54",
+        "p159-l56"
+      ]
+    },
+    "p164-l36": {
+      "headword": "gradin",
+      "ocrHeadword": "gradin",
+      "meaning": "Yelkenin çevresine dikilen halat.",
+      "origin": "Eren, denizcilik sözünü Venedik İtalyancasındaki gradín biçimine bağlar.",
+      "evidence": [
+        "p164-l36",
+        "p164-l40"
+      ]
+    },
+    "p171-l54": {
+      "headword": "halkın",
+      "ocrHeadword": "halkın",
+      "meaning": "Bazı ağızlarda küçük bakır kazan veya leğen.",
+      "origin": "Eren, Suriye Arapçasındaki benzer biçimi ve Rumca köken önerisini aktarır. Dankoff’a göre söz, Rumcadan Ermenice aracılığıyla geçmiş olabilir.",
+      "evidence": [
+        "p171-l54",
+        "p171-l58",
+        "p171-l62",
+        "p171-l66"
+      ]
+    },
+    "p177-l69": {
+      "headword": "herise",
+      "ocrHeadword": "herise",
+      "meaning": "Keşkek yemeği.",
+      "origin": "Eren, sözcüğün Arapça veya Farsça harīsa biçiminden alınmış göründüğünü belirtir.",
+      "evidence": [
+        "p177-l69",
+        "p177-l73"
+      ]
+    },
+    "p181-l25": {
+      "headword": "huğ",
+      "ocrHeadword": "huğ",
+      "meaning": "Bağ veya bahçede çubuk ya da kamıştan yapılan kulübe.",
+      "origin": "Eren, kökeni tartışmalı bulur. Orta Türkçedeki ūğ biçimini, Arapça açıklamasını ve Ermeniceye bağlayan görüşü karşılaştırır.",
+      "evidence": [
+        "p181-l25",
+        "p181-l29",
+        "p181-l40",
+        "p182-l40"
+      ]
+    },
+    "p225-l48": {
+      "headword": "keçi",
+      "ocrHeadword": "keçi",
+      "meaning": "Eti, sütü, derisi ve kılı için yetiştirilen evcil hayvan.",
+      "origin": "Orta Türkçede keçi Oğuzca bir biçim olarak geçer. Eren, eçkü ile ilişkisini ve sözcüğü keçi çağırma sesinden türeten görüşü tartışır.",
+      "evidence": [
+        "p225-l48",
+        "p225-l54",
+        "p225-l71",
+        "p226-l20"
+      ]
+    },
+    "p231-l54": {
+      "headword": "kepenk",
+      "ocrHeadword": "kepenk",
+      "meaning": "Dükkânın önünü kapatan tahta veya metal kanat.",
+      "origin": "Eren, kökenin tartışmalı olduğunu belirtir. Ermenice açıklamasının yanında Türkçe kapak ve ağızlardaki kepemek biçiminin etkisini ele alır.",
+      "evidence": [
+        "p231-l54",
+        "p231-l64",
+        "p232-l31",
+        "p232-l51"
+      ]
+    },
+    "p244-l23": {
+      "headword": "kimono",
+      "ocrHeadword": "kimono",
+      "meaning": "Japonlara özgü, önden çapraz kapanan geniş kollu giysi. Geniş kollu sabahlık için de kullanılır.",
+      "origin": "Sözcük Japoncada giysi anlamındaki kimono biçimine dayanır. Eren, Türkçeye Fransızca üzerinden geçtiğini düşünür.",
+      "evidence": [
+        "p244-l23",
+        "p244-l27",
+        "p244-l37",
+        "p244-l43"
+      ]
+    },
+    "p247-l69": {
+      "headword": "kitakse",
+      "ocrHeadword": "kitakse",
+      "meaning": "Kitakse etmek argoda bakmak veya gözetlemek demektir.",
+      "origin": "Eren, sözü Rumcada bakmaya çağıran bir biçime bağlar.",
+      "evidence": [
+        "p247-l69",
+        "p247-l74"
+      ]
+    },
+    "p247-l200": {
+      "headword": "kizir",
+      "ocrHeadword": "kizir",
+      "meaning": "Bazı köylerde muhtar yardımcısı, bekçi veya vergi toplayan görevli.",
+      "origin": "Eren, sözcüğü Farsça gizir biçimine bağlar. Türkçe ağızlarda gizir biçimi de yaygındır.",
+      "evidence": [
+        "p247-l200",
+        "p247-l2",
+        "p247-l6",
+        "p247-l10"
+      ]
+    },
+    "p248-l64": {
+      "headword": "koçaş",
+      "ocrHeadword": "koçaş",
+      "meaning": "Yerel ağızlarda arabacı.",
+      "origin": "Eren, sözcüğü Sırpça kočijaš biçimine bağlar. Sırpçadaki biçimin Macarca kocsis sözünden geldiğini düşünür.",
+      "evidence": [
+        "p248-l64",
+        "p248-l68",
+        "p248-l70"
+      ]
+    },
+    "p249-l9": {
+      "headword": "kokoroz",
+      "ocrHeadword": "kokoroz",
+      "meaning": "Eskiden mısır için kullanılan bir ad.",
+      "origin": "Eren, sözcüğün Balkan dillerinden Türkçeye geçtiğini düşünür. Balkan biçimlerinin daha eski kökeni belirsizdir.",
+      "evidence": [
+        "p249-l9",
+        "p249-l11",
+        "p249-l23"
+      ]
+    },
+    "p254-l53": {
+      "headword": "koyun",
+      "ocrHeadword": "koyun",
+      "meaning": "Eti, sütü, yapağısı ve derisi için yetiştirilen evcil hayvan.",
+      "origin": "Eski Türkçede kōn biçimi görülür. Eren, koyun biçiminin eski ada -(u)n küçültme ekinin gelmesiyle oluştuğunu düşünür.",
+      "evidence": [
+        "p254-l53",
+        "p254-l65",
+        "p254-l77",
+        "p254-l81"
+      ]
+    },
+    "p263-l73": {
+      "headword": "krema",
+      "ocrHeadword": "krema",
+      "meaning": "Sütün yüzünden toplanan yağlı tabaka.",
+      "origin": "Eren, sözcüğü İtalyanca crema biçimine bağlar.",
+      "evidence": [
+        "p263-l73",
+        "p263-l76"
+      ]
+    },
+    "p264-l30": {
+      "headword": "kukuleta",
+      "ocrHeadword": "kukuleta",
+      "meaning": "Yağmur, soğuk veya rüzgârdan korunmak için başa geçirilen başlık.",
+      "origin": "Eren, sözcüğü İtalyanca cocolletta biçimine bağlar. Türkçedeki kukulete biçimini de verir.",
+      "evidence": [
+        "p264-l30",
+        "p264-l34",
+        "p264-l36"
+      ]
+    },
+    "p269-l51": {
+      "headword": "kurt",
+      "ocrHeadword": "kurt",
+      "meaning": "Yumuşak gövdeli küçük hayvan veya yırtıcı bir memeli. Mecazen kurnaz kimse.",
+      "origin": "Eski Türkçede kurt, küçük omurgasız hayvan için kullanılır. Eren, Oğuz Türkçesinde yırtıcı hayvanın eski börü adının yerini de kurt sözünün aldığını belirtir.",
+      "evidence": [
+        "p269-l51",
+        "p269-l61",
+        "p269-l75",
+        "p269-l4"
+      ]
+    },
+    "p270-l32": {
+      "headword": "kurus",
+      "ocrHeadword": "kurus",
+      "meaning": "Tahta kurusu, insan kanıyla beslenen küçük böcek.",
+      "origin": "Tietze, tahta kurusu adındaki kurus biçimini Rumcaya bağlar.",
+      "evidence": [
+        "p270-l32",
+        "p270-l34",
+        "p270-l36",
+        "p270-l38"
+      ]
+    },
+    "p278-l66": {
+      "headword": "lâma¹",
+      "ocrHeadword": "lâma1",
+      "meaning": "Tibet ve Moğolistan’da Budist rahip.",
+      "origin": "Uluslararası yaygınlık kazanmış söz, Tibetçe blama biçimine dayanır. Eren, baştaki b sesinin Tibetçede okunmadığını belirtir.",
+      "evidence": [
+        "p278-l66",
+        "p278-l70",
+        "p278-l74",
+        "p278-l76"
+      ]
+    },
+    "p279-l10": {
+      "headword": "lâma²",
+      "ocrHeadword": "lâma²",
+      "meaning": "Yassı demir çubuk.",
+      "origin": "Eren, sözcüğü İtalyanca lama biçimine bağlar. Fransızcada lame biçimini de verir.",
+      "evidence": [
+        "p279-l10",
+        "p279-l12"
+      ]
+    },
+    "p284-l19": {
+      "headword": "loş",
+      "ocrHeadword": "loş",
+      "meaning": "Az ışık alan, yarı karanlık.",
+      "origin": "Eren, kelimenin kökenini belirleyemediğini belirtir.",
+      "evidence": [
+        "p284-l19",
+        "p284-l21"
+      ]
+    },
+    "p286-l0": {
+      "headword": "makara",
+      "ocrHeadword": "makara",
+      "meaning": "Üzerine iplik veya tel sarılan, kenarları çıkıntılı silindir.",
+      "origin": "Eren, sözcüğü Arapça bakra ve bakara biçimlerine bağlar. Türkçedeki bakara biçiminde b sesi m’ye dönüşmüştür.",
+      "evidence": [
+        "p286-l0",
+        "p286-l4",
+        "p286-l8",
+        "p286-l12"
+      ]
+    },
+    "p286-l24": {
+      "headword": "makarna",
+      "ocrHeadword": "makarna",
+      "meaning": "İrmik veya undan yapılan çeşitli biçimlerdeki hamur ve onunla hazırlanan yemek.",
+      "origin": "Eren, sözcüğü İtalyanca maccheroni biçimine bağlar.",
+      "evidence": [
+        "p286-l24",
+        "p286-l27",
+        "p286-l29"
+      ]
+    },
+    "p287-l44": {
+      "headword": "mantı¹",
+      "ocrHeadword": "mantı¹",
+      "meaning": "Kıyma doldurulup küçük bohçalar biçiminde kapatılan hamurla yapılan yemek.",
+      "origin": "Eren, sözcüğü Çin ve Kore dillerindeki benzer yemek adlarıyla ilişkilendirir. Türk ve Moğol dillerinde de benzer biçimler görülür.",
+      "evidence": [
+        "p287-l44",
+        "p287-l48",
+        "p287-l61",
+        "p287-l69"
+      ]
+    },
+    "p288-l0": {
+      "headword": "mantı²",
+      "ocrHeadword": "mantı²",
+      "meaning": "Gemide gabya serenini kaldırmaya yarayan halat ve makara.",
+      "origin": "Eren, denizcilik sözünü Venedik İtalyancasındaki mante biçimine bağlar. Akdeniz dillerinde benzer biçimler bulunur.",
+      "evidence": [
+        "p288-l0",
+        "p288-l2",
+        "p288-l4",
+        "p288-l6"
+      ]
+    },
+    "p288-l61": {
+      "headword": "maral",
+      "ocrHeadword": "maral",
+      "meaning": "Dişi geyik.",
+      "origin": "Eren, maral biçimini Moğolcaya bağlar. Türkçede meral biçimi de oluşmuştur.",
+      "evidence": [
+        "p288-l61",
+        "p288-l64",
+        "p288-l72"
+      ]
+    },
+    "p299-l1": {
+      "headword": "nadas",
+      "ocrHeadword": "nadas",
+      "meaning": "Bir tarlayı sürüp bir veya birkaç yıl dinlenmeye bırakma.",
+      "origin": "Eren, kelimeyi Rumcadaki bir tarım sözüne bağlar. Türkçedeki biçimin oluşumunu Karadeniz ağızlarındaki ses değişimleriyle açıklar.",
+      "evidence": [
+        "p299-l1",
+        "p299-l4",
+        "p299-l6",
+        "p299-l11"
+      ]
+    },
+    "p324-l44": {
+      "headword": "parakete",
+      "ocrHeadword": "parakete",
+      "meaning": "Geminin hızını ölçen araç veya çok sayıda iğne taşıyan uzun balık oltası.",
+      "origin": "Eren, sözcüğü İtalyanca barchetta biçimine bağlar. Paraketa biçimini de verir.",
+      "evidence": [
+        "p324-l44",
+        "p324-l47",
+        "p324-l51"
+      ]
+    },
+    "p325-l56": {
+      "headword": "parola",
+      "ocrHeadword": "parola",
+      "meaning": "Birbirini tanıması gereken askerlerin kullandığı söz.",
+      "origin": "Eren, sözcüğü İtalyanca parola biçimine bağlar. Türkçede 17. yüzyıldan itibaren yaygınlaştığını belirtir.",
+      "evidence": [
+        "p325-l56",
+        "p325-l60",
+        "p325-l64"
+      ]
+    },
+    "p336-l27": {
+      "headword": "piyastos",
+      "ocrHeadword": "piyastos",
+      "meaning": "Argoda piyastos olmak yakalanmak, piyastos etmek yakalamak demektir.",
+      "origin": "Eren, sözcüğü Rumcada yakalanmış anlamına gelen bir biçime bağlar.",
+      "evidence": [
+        "p336-l27",
+        "p336-l29",
+        "p336-l33"
+      ]
+    },
+    "p357-l41": {
+      "headword": "sarp",
+      "ocrHeadword": "sarp",
+      "meaning": "Dik, çıkılması veya geçilmesi güç.",
+      "origin": "Eski Türk dillerinde sarp biçimi güç anlamında da görülür. Eren, Orta Türkçe ile Eski Kıpçakçadaki kayıtları verir.",
+      "evidence": [
+        "p357-l41",
+        "p357-l49",
+        "p357-l51",
+        "p357-l55"
+      ]
+    },
+    "p367-l75": {
+      "headword": "siğle",
+      "ocrHeadword": "siğle",
+      "meaning": "Yerel ağızlarda kova.",
+      "origin": "Eren, sözcüğü Rumcaya bağlar. Ağızlarda siyle ve sikle biçimleri de görülür.",
+      "evidence": [
+        "p367-l75",
+        "p367-l77",
+        "p367-l79"
+      ]
+    },
+    "p368-l26": {
+      "headword": "silyon",
+      "ocrHeadword": "silyon",
+      "meaning": "Geminin pruva ve grandi direklerinde yakılan fener.",
+      "origin": "Eren, denizcilik sözünü Venedik İtalyancasındaki signál biçimine bağlar. Türkçedeki biçimi seslerin yer değiştirmesiyle açıklar.",
+      "evidence": [
+        "p368-l26",
+        "p368-l30",
+        "p368-l34"
+      ]
+    },
+    "p11-l29": {
+      "headword": "ambar",
+      "ocrHeadword": "ambar",
+      "meaning": "Tahıl koymaya yarayan büyük sandık veya eşya ve yük saklanan yer.",
+      "origin": "Eren, sözcüğü Farsça anbār biçimine bağlar. Farsça biçimin daha eskisini ve Türkçeden komşu dillere geçen örnekleri de verir.",
+      "evidence": [
+        "p11-l29",
+        "p11-l31",
+        "p11-l47",
+        "p11-l51"
+      ]
+    },
+    "p12-l16": {
+      "headword": "anafor",
+      "ocrHeadword": "anafor",
+      "meaning": "Su bir engele çarpıp geri döndüğünde oluşan ters akıntı. Argoda emeksiz veya yolsuz elde edilen şey.",
+      "origin": "Eren, sözcüğü ters akıntıyla ilgili bir Rumca biçime bağlar.",
+      "evidence": [
+        "p12-l16",
+        "p12-l20",
+        "p12-l24"
+      ]
+    },
+    "p12-l32": {
+      "headword": "anahtar",
+      "ocrHeadword": "anahtar",
+      "meaning": "Kilit açmaya yarayan araç.",
+      "origin": "Eren, sözcüğü Rumcaya bağlar. Anadolu ağızlarında açar, açkı, açacak gibi adların da kullanıldığını belirtir.",
+      "evidence": [
+        "p12-l32",
+        "p12-l34",
+        "p12-l36"
+      ]
+    },
+    "p14-l20": {
+      "headword": "apaz",
+      "ocrHeadword": "apaz",
+      "meaning": "Avuç ya da avuç dolusu.",
+      "origin": "Dankoff, kelimeyi Ermeniceden bir alıntı olarak açıklar. Anadolu ağızlarında hapaz biçimi de bulunur.",
+      "evidence": [
+        "p14-l20",
+        "p14-l22",
+        "p14-l24",
+        "p14-l26"
+      ]
+    },
+    "p13-l0": {
+      "headword": "angıç",
+      "ocrHeadword": "angıç",
+      "meaning": "Harmanda daha çok sap yüklemek için arabanın yanlarına takılan parmaklık.",
+      "origin": "Eski Kıpçakçada merdiven veya basamak anlamı da vardır. Eren, sözcüğün *ağın- biçimine -gıç ekinin gelmesiyle oluştuğunu düşünür.",
+      "evidence": [
+        "p13-l0",
+        "p13-l6",
+        "p13-l12",
+        "p13-l14"
+      ]
+    },
+    "p344-l200": {
+      "headword": "rezene",
+      "ocrHeadword": "rezene",
+      "meaning": "Hoş kokulu, sarı çiçekli, tohumları yemeklere ve içeceklere tat katan bir bitki.",
+      "origin": "Eren, sözcüğü Farsça rāziyāna biçimine bağlar.",
+      "evidence": [
+        "p344-l200",
+        "p344-l2",
+        "p344-l4",
+        "p344-l10"
+      ]
+    },
+    "p115-l55": {
+      "headword": "dişbudak",
+      "ocrHeadword": "dişbudak",
+      "meaning": "Kerestesi sert ve değerli bir orman ağacı.",
+      "origin": "Eren, adın Anadolu ve Balkanlarda kullanıldığını belirtir.",
+      "evidence": [
+        "p115-l55",
+        "p115-l57",
+        "p115-l59"
+      ]
+    },
+    "p276-l1": {
+      "headword": "küştere",
+      "ocrHeadword": "küştere",
+      "meaning": "Tahta rendesi.",
+      "origin": "Eren, sözcüğü Farsça kuştara biçimine bağlar. Türkçede küstere biçimi de kullanılır.",
+      "evidence": [
+        "p276-l1",
+        "p276-l5"
+      ]
+    },
+    "p321-l1": {
+      "headword": "pabuç",
+      "ocrHeadword": "pabuç",
+      "meaning": "Koncu olmayan ayakkabı.",
+      "origin": "Farsça pāpūş biçimi, ayak ve örtü anlamındaki iki parçadan oluşur. Eren, son sesin Türkçede ç’ye dönüştüğünü belirtir.",
+      "evidence": [
+        "p321-l1",
+        "p321-l4",
+        "p321-l6",
+        "p321-l8"
+      ]
+    },
+    "p340-l2": {
+      "headword": "pranga",
+      "ocrHeadword": "pranga",
+      "meaning": "Eskiden gemilerde kürek cezasına çarptırılanların ayaklarına takılan kalın zincir.",
+      "origin": "Eren, sözcüğü İtalyanca branca biçimine bağlar. Bazı Balkan dillerinde de benzer biçimler bulunur.",
+      "evidence": [
+        "p340-l2",
+        "p340-l4",
+        "p340-l6",
+        "p340-l8"
+      ]
+    },
+    "p340-l1": {
+      "headword": "puluç",
+      "ocrHeadword": "puluç",
+      "meaning": "Cinsel gücü olmayan erkek.",
+      "origin": "Eren, Eski Kıpçakçada buluç biçimini kaydeder. Sözcüğün kökünü belirleyemediğini belirtir.",
+      "evidence": [
+        "p340-l1",
+        "p340-l7",
+        "p340-l11"
+      ]
+    },
+    "p55-l62": {
+      "headword": "biz²",
+      "ocrHeadword": "biz²",
+      "meaning": "Türkiye sularında yaşayan bir mersin balığı türü.",
+      "origin": "Eren, sözcüğün kökenini belirleyemediğini belirtir. Bu balık için şip adı da kullanılır.",
+      "evidence": [
+        "p55-l62",
+        "p55-l64",
+        "p55-l66"
+      ]
+    },
+    "p67-l34": {
+      "headword": "cağ¹",
+      "ocrHeadword": "cağ1",
+      "meaning": "Kirli suları toplayan taş tekne veya çukur.",
+      "origin": "Eren, sözcüğü kuyu ve çukur anlamındaki Farsça çāh biçimine bağlar.",
+      "evidence": [
+        "p67-l34",
+        "p67-l36",
+        "p67-l42"
+      ]
+    },
+    "p98-l72": {
+      "headword": "çorpa",
+      "ocrHeadword": "çorpa",
+      "meaning": "Domuz yavrusu.",
+      "origin": "Eren, sözcüğün kökünü belirleyemediğini belirtir.",
+      "evidence": [
+        "p98-l72",
+        "p98-l74"
+      ]
+    },
+    "p143-l10": {
+      "headword": "façuna",
+      "ocrHeadword": "façuna",
+      "meaning": "Halatın aşınabilecek yerine tel veya sicimle yapılan sargı.",
+      "origin": "Eren, denizcilik sözünü İtalyanca *fascina biçimine bağlar.",
+      "evidence": [
+        "p143-l10",
+        "p143-l12",
+        "p143-l14"
+      ]
+    },
+    "p143-l36": {
+      "headword": "falya",
+      "ocrHeadword": "falya",
+      "meaning": "Eskiden topu ateşlemek için barutun konduğu delik.",
+      "origin": "Eren, sözcüğü Venedik İtalyancasındaki fala biçimine bağlar.",
+      "evidence": [
+        "p143-l36",
+        "p143-l38",
+        "p143-l40"
+      ]
+    },
+    "p153-l51": {
+      "headword": "genç",
+      "ocrHeadword": "genç",
+      "meaning": "Yaşı ilerlememiş olan.",
+      "origin": "Eski Türkçede kenç, Orta Türkçede çocuk anlamında kullanılmıştır. Eren, Moğolca kence biçimini eski bir Türkçe alıntı olarak değerlendirir.",
+      "evidence": [
+        "p153-l51",
+        "p153-l53",
+        "p153-l55",
+        "p153-l75"
+      ]
+    },
+    "p183-l30": {
+      "headword": "ıhlamur",
+      "ocrHeadword": "ıhlamur",
+      "meaning": "Kerestesi kullanılan bir ağaç ve çayı yapılan güzel kokulu çiçeği.",
+      "origin": "Eren, sözcüğü Rumcaya bağlar. Rumeli ağızlarında filamur biçimi de görülür.",
+      "evidence": [
+        "p183-l30",
+        "p183-l32",
+        "p183-l36",
+        "p183-l38"
+      ]
+    },
+    "p199-l2": {
+      "headword": "kabak",
+      "ocrHeadword": "kabak",
+      "meaning": "Bir bitki grubu ve bu bitkilerin yemek ya da tatlı yapılan ürünü.",
+      "origin": "Söz Eski Türkçeden beri kayıtlıdır. Clauson ve Doerfer, sözcüğün kap anlamındaki eski bir biçimden küçültme ekiyle türemiş olabileceğini belirtir.",
+      "evidence": [
+        "p199-l2",
+        "p199-l5",
+        "p199-l13",
+        "p199-l19"
+      ]
+    },
+    "p277-l2": {
+      "headword": "lâbada",
+      "ocrHeadword": "lâbada",
+      "meaning": "Sulak yerlerde yetişen, yaprağı sebze olarak kullanılan çok yıllık bitki.",
+      "origin": "Eren, Bulgarca lòboda ve Sırpça lobòda biçimlerini verir. Ağızlarda alabada ve ilibada gibi biçimler de bulunur.",
+      "evidence": [
+        "p277-l2",
+        "p277-l6",
+        "p277-l11",
+        "p277-l13"
+      ]
+    },
+    "p285-l2": {
+      "headword": "mac ~ macı, maç ~ maçi",
+      "ocrHeadword": "mac ~ macı, maç ~ maçi",
+      "meaning": "Yerel ağızlarda sabanı yürütmeye yarayan tutamak.",
+      "origin": "Eren, sözcüğü saban sapı anlamındaki Ermenice mač biçimine bağlar.",
+      "evidence": [
+        "p285-l2",
+        "p285-l6",
+        "p285-l9"
+      ]
+    },
+    "p285-l40": {
+      "headword": "maça",
+      "ocrHeadword": "maça",
+      "meaning": "Oyun kâğıtlarındaki mızrak ucuna benzer siyah işaret, pik.",
+      "origin": "Eren, sözcüğü bir Rumca biçime bağlar.",
+      "evidence": [
+        "p285-l40",
+        "p285-l42",
+        "p285-l44"
+      ]
+    },
+    "p285-l52": {
+      "headword": "maçuna",
+      "ocrHeadword": "maçuna",
+      "meaning": "Buharla çalışan yük kaldırma makası.",
+      "origin": "Eren, sözcüğün Rumca üzerinden İtalyanca mancina biçimine dayandığını belirtir.",
+      "evidence": [
+        "p285-l52",
+        "p285-l54",
+        "p285-l56"
+      ]
+    },
+    "p285-l67": {
+      "headword": "madımak",
+      "ocrHeadword": "madımak",
+      "meaning": "Kırlarda yetişen, ıspanağa benzer yapraklı çok yıllık bitki.",
+      "origin": "Eren, sözcüğü Ermenice matutak ve matuk biçimlerine bağlar.",
+      "evidence": [
+        "p285-l67",
+        "p285-l69",
+        "p285-l1"
+      ]
+    },
+    "p299-l26": {
+      "headword": "naftalin",
+      "ocrHeadword": "naftalin",
+      "meaning": "Kömür katranından elde edilen ve giysileri güveden korumaya yarayan madde.",
+      "origin": "Eren, uluslararası terimin naphta sözüne bir ek getirilerek yapıldığını ve Türkçeye Fransızcadan geçmiş göründüğünü belirtir.",
+      "evidence": [
+        "p299-l26",
+        "p299-l30",
+        "p299-l38",
+        "p299-l42"
+      ]
+    },
+    "p303-l2": {
+      "headword": "oba",
+      "ocrHeadword": "oba",
+      "meaning": "Çadır halkı veya göçebe ailesi. Büyük göçebe çadırı, küçük köy ya da konaklama yeri anlamları da var.",
+      "origin": "Orta Türkçede boy ve oymak anlamları geçer. Eren, kökeni belirsiz bulur ve çadır halkı anlamını daha eski sayar.",
+      "evidence": [
+        "p303-l2",
+        "p303-l5",
+        "p303-l17",
+        "p303-l25"
+      ]
+    },
+    "p321-l31": {
+      "headword": "paça",
+      "ocrHeadword": "paça",
+      "meaning": "Hayvanın kesilmiş ayağı, bununla yapılan yemek veya pantolonun bacak uçları.",
+      "origin": "Eren, sözcüğü Farsça pāça biçimine bağlar. Bu biçim ayak anlamındaki eski söze küçültme eki gelerek oluşmuştur.",
+      "evidence": [
+        "p321-l31",
+        "p321-l37",
+        "p321-l40",
+        "p321-l44"
+      ]
+    },
+    "p343-l42": {
+      "headword": "rahvan",
+      "ocrHeadword": "rahvan",
+      "meaning": "Binek hayvanının aynı yandaki iki bacağını birlikte hareket ettirdiği koşma biçimi.",
+      "origin": "Eren, sözcüğü Farsça rahwār biçimine bağlar. Son sesin Türkçede r’den n’ye dönüştüğünü belirtir.",
+      "evidence": [
+        "p343-l42",
+        "p343-l44",
+        "p343-l47",
+        "p343-l56"
+      ]
+    },
+    "p374-l23": {
+      "headword": "soma",
+      "ocrHeadword": "soma",
+      "meaning": "Anasonsuz rakı.",
+      "origin": "Eren, sözcüğün kökenini belirleyemediğini belirtir.",
+      "evidence": [
+        "p374-l23",
+        "p374-l25"
+      ]
+    },
+    "p380-l54": {
+      "headword": "sütliman",
+      "ocrHeadword": "sütliman",
+      "meaning": "Gürültüsüz ve durgun.",
+      "origin": "Sözün ikinci parçası Rumcadan gelen liman kelimesidir. Eren, ilk parçanın Türkçe süt ile mi yoksa bir Rumca biçimle mi açıklanacağı konusunda farklı olasılıkları tartışır.",
+      "evidence": [
+        "p380-l54",
+        "p380-l56",
+        "p380-l64",
+        "p380-l66"
+      ]
+    },
+    "p59-l76": {
+      "headword": "boyunduruk",
+      "ocrHeadword": "boyunduruk",
+      "meaning": "Çift süren veya arabaya koşulan hayvanların boynuna geçirilen ahşap düzenek.",
+      "origin": "Eren, sözcüğü boyun adına -duruk ekinin gelmesiyle açıklar. Orta Türkçede boyunduruk biçimi kayıtlıdır.",
+      "evidence": [
+        "p59-l76",
+        "p59-l81",
+        "p60-l15",
+        "p60-l19"
+      ]
+    },
+    "p80-l33": {
+      "headword": "çarık",
+      "ocrHeadword": "çarık",
+      "meaning": "Deriden yapılıp şeritle bağlanan ayakkabı. Kitapta tekerlek freni ve argoda cüzdan anlamları da geçer.",
+      "origin": "Orta Türkçede çaruk biçimi görülür. Eren, sözcüğü çar- köküne bağlamanın mümkün olduğunu ve kökün daha çok tanıkla doğrulanması gerektiğini belirtir.",
+      "evidence": [
+        "p80-l33",
+        "p80-l41",
+        "p80-l54",
+        "p80-l74"
+      ]
+    },
+    "p99-l53": {
+      "headword": "çöl",
+      "ocrHeadword": "çöl",
+      "meaning": "Kumluk, susuz ve ıssız ova.",
+      "origin": "Eren, Türk dilleriyle Moğolcadaki benzer biçimleri verir. Sözcüğün Moğolcadan geldiği görüşünü tartışmaya açık bulur.",
+      "evidence": [
+        "p99-l53",
+        "p99-l55",
+        "p99-l61",
+        "p99-l63"
+      ]
+    },
+    "p221-l74": {
+      "headword": "kayık",
+      "ocrHeadword": "kayık",
+      "meaning": "Kürek veya yelkenle yürüyen küçük tekne.",
+      "origin": "Eren, sözcüğü kay- fiiliyle -guk ekine bağlar. Orta Türkçede kayguk biçimi görülür.",
+      "evidence": [
+        "p221-l74",
+        "p221-l22",
+        "p221-l24",
+        "p221-l26"
+      ]
+    },
+    "p241-l26": {
+      "headword": "kızak",
+      "ocrHeadword": "kızak",
+      "meaning": "Kar veya buz üstünde kayan tekerleksiz taşıt. Geminin yapıldığı ya da onarıldığı ızgaraya da denir.",
+      "origin": "Eren, sözcüğün *kaz- kökünden gelmiş göründüğünü belirtir ve bu kökü kay- ile ilişkilendirir. Eski Kıpçakçada kızak biçimi kayıtlıdır.",
+      "evidence": [
+        "p241-l26",
+        "p241-l30",
+        "p241-l45",
+        "p241-l49"
+      ]
+    },
+    "p294-l68": {
+      "headword": "meyan",
+      "ocrHeadword": "meyan",
+      "meaning": "Tatlı kökü tıpta ve serinletici içeceklerde kullanılan, mor çiçekli bitki.",
+      "origin": "Eren, Türk dillerindeki biyan ve benzer biçimleri verir. Meyan biçiminde baştaki b sesinin m’ye dönüştüğünü belirtir.",
+      "evidence": [
+        "p294-l68",
+        "p294-l72",
+        "p294-l1",
+        "p294-l7"
+      ]
+    },
+    "p318-l20": {
+      "headword": "öveç",
+      "ocrHeadword": "öveç",
+      "meaning": "İki ya da üç yaşındaki erkek koyun.",
+      "origin": "Eren, sözcüğü eski ög biçimine -(e)ç küçültme ekinin gelmesiyle açıklar. Öğeç, öveçten önceki biçimdir.",
+      "evidence": [
+        "p318-l20",
+        "p318-l28",
+        "p318-l30"
+      ]
+    },
+    "p446-l18": {
+      "headword": "yayla",
+      "ocrHeadword": "yayla",
+      "meaning": "Yazın çıkılan yüksek ve serin yer veya yaz otlağı.",
+      "origin": "Eren, sözcüğü yazı geçirmek anlamındaki yayla- fiiline bağlar. Eski yaylağ ve yaylak biçimleri görülür. Farsçadaki benzer biçimler Türkçeden geçmiştir.",
+      "evidence": [
+        "p446-l18",
+        "p446-l38",
+        "p446-l48",
+        "p446-l54"
+      ]
+    },
+    "p383-l2": {
+      "headword": "şadırvan",
+      "ocrHeadword": "şadırvan",
+      "meaning": "Cami avlularında çevresindeki musluklardan ve ortasındaki fıskiyeden su akan havuz.",
+      "origin": "Eren, sözcüğü Farsça şādurvān ve ondan önce gelen şādurbān biçimine bağlar.",
+      "evidence": [
+        "p383-l2",
+        "p383-l5",
+        "p383-l8"
+      ]
+    },
+    "p394-l23": {
+      "headword": "tapa",
+      "ocrHeadword": "tapa",
+      "meaning": "Şişe gibi dar açıklıkları kapatmaya yarayan tıkaç.",
+      "origin": "Eren, sözcüğü İtalyanca tappo biçimine bağlar. Türkçedeki tipa biçimini de kaydeder.",
+      "evidence": [
+        "p394-l23",
+        "p394-l25",
+        "p394-l27",
+        "p394-l29"
+      ]
+    },
+    "p471-l62": {
+      "headword": "züğürt",
+      "ocrHeadword": "züğürt",
+      "meaning": "Parasız, yoksul kimse.",
+      "origin": "Eren, Słuszkiewicz’in Ermenice köken önerisini aktarır. Sözcük Bulgarcaya ve Arapçaya Türkçeden geçmiştir.",
+      "evidence": [
+        "p471-l62",
+        "p471-l63",
+        "p471-l72",
+        "p471-l74"
+      ]
+    },
+    "p426-l0": {
+      "headword": "uyluk",
+      "ocrHeadword": "uyluk",
+      "meaning": "Bacağın kalçadan dize kadar olan bölümü.",
+      "origin": "Eski Türkçede udluk biçimi görülür. Eren, sözcüğü sığır anlamındaki ud adına bağlayan görüşü tartışmaya açık bulur.",
+      "evidence": [
+        "p426-l0",
+        "p426-l2",
+        "p426-l8",
+        "p426-l14"
+      ]
+    },
+    "p420-l0": {
+      "headword": "tuturuk",
+      "ocrHeadword": "tuturuk",
+      "meaning": "Ateşi tutuşturmak için kullanılan çalı çırpı, çıra veya yonga.",
+      "origin": "Eren, sözcüğü tut- fiiline -turuk ekinin gelmesiyle açıklar. Ağızlarda tutturuk biçimi de görülür.",
+      "evidence": [
+        "p420-l0",
+        "p420-l2",
+        "p420-l4",
+        "p420-l6"
+      ]
+    },
+    "p436-l0": {
+      "headword": "vişne",
+      "ocrHeadword": "vişne",
+      "meaning": "Kiraza benzeyen bir ağaç ve onun kırmızı, ekşimsi meyvesi.",
+      "origin": "Eren, sözcüğün Slav dillerinden geldiğini ve Türkçeye Bulgarca üzerinden geçmiş göründüğünü belirtir.",
+      "evidence": [
+        "p436-l0",
+        "p436-l4",
+        "p436-l8",
+        "p436-l16"
+      ]
+    },
+    "p218-l1": {
+      "headword": "katmer",
+      "ocrHeadword": "katmer",
+      "meaning": "Bir şeyi oluşturan katlardan her biri. Yağ veya kaymak sürülüp katlanan yufka ekmeğine de denir.",
+      "origin": "Eren, sözcüğü kat adına -mar ekinin gelmesiyle açıklar. Ağızlardaki katmar biçimini ve ekteki a sesinin e’ye dönüşmesini ele alır.",
+      "evidence": [
+        "p218-l1",
+        "p218-l5",
+        "p218-l7",
+        "p218-l11"
+      ]
+    },
+    "p340-l0": {
+      "headword": "pölük",
+      "ocrHeadword": "pölük",
+      "meaning": "",
+      "origin": "Eren, okuru belik maddesine yönlendirir.",
+      "evidence": [
+        "p340-l0"
+      ]
+    }
+  },
+  "compounds": {
+    "p29-l7": "ayrık otu",
+    "p85-l1": "çengel sakızı",
+    "p227-l75": "kel aynak",
+    "p299-l20": "nato kafa",
+    "p351-l43": "sakar meke"
+  },
+  "titles": {
+    "p70-l73": {
+      "ocrHeadword": "cingar",
+      "headword": "cıngar"
+    },
+    "p71-l29": {
+      "ocrHeadword": "civadra",
+      "headword": "cıvadra"
+    },
+    "p111-l1": {
+      "ocrHeadword": "dilak",
+      "headword": "dılak"
+    },
+    "p173-l38": {
+      "ocrHeadword": "harim",
+      "headword": "harım"
+    },
+    "p177-l77": {
+      "ocrHeadword": "hiltar",
+      "headword": "hıltar"
+    },
+    "p183-l63": {
+      "ocrHeadword": "ilgar",
+      "headword": "ılgar"
+    },
+    "p183-l67": {
+      "ocrHeadword": "iltar",
+      "headword": "ıltar"
+    },
+    "p184-l36": {
+      "ocrHeadword": "ispatan",
+      "headword": "ıspatan"
+    },
+    "p185-l21": {
+      "ocrHeadword": "izgara",
+      "headword": "ızgara"
+    },
+    "p237-l30": {
+      "ocrHeadword": "kirgıy",
+      "headword": "kırgıy"
+    },
+    "p239-l33": {
+      "ocrHeadword": "kirmıt",
+      "headword": "kırmıt"
+    },
+    "p242-l26": {
+      "ocrHeadword": "kizan",
+      "headword": "kızan"
+    },
+    "p279-l48": {
+      "ocrHeadword": "Iâmba",
+      "headword": "lâmba"
+    },
+    "p332-l44": {
+      "ocrHeadword": "pirna",
+      "headword": "pırna"
+    },
+    "p366-l9": {
+      "ocrHeadword": "sirpa",
+      "headword": "sırpa"
+    },
+    "p367-l53": {
+      "ocrHeadword": "sitma",
+      "headword": "sıtma"
+    }
+  }
+}

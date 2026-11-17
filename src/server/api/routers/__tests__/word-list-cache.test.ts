@@ -1,5 +1,6 @@
 /** @jest-environment node */
 jest.mock("@/db", () => ({ db: { execute: jest.fn() } }));
+jest.mock("@/src/env.mjs", () => ({ env: { DATABASE_URL: "postgresql://localhost/dictionary_test" } }));
 jest.mock("@/src/lib/auth", () => ({ auth: { api: { getSession: jest.fn() } } }));
 jest.mock("@upstash/redis", () => ({ Redis: { fromEnv: () => ({}) } }));
 const mockLimit = jest.fn();

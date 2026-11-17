@@ -38,6 +38,11 @@ export const pathnames = {
     en: "/dashboard",
     tr: "/panel",
   },
+  "/etymology-preview": {
+    en: "/etymology-preview",
+    tr: "/etymology-preview",
+  },
+  "/etimoloji": "/etimoloji",
   "/dashboard/word-list": {
     en: "/dashboard/word-list",
     tr: "/panel/kelimeler",

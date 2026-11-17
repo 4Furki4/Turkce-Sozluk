@@ -576,7 +576,7 @@ export default function WordList() {
                     </div>
                 ) : rows.length ? (
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {wordsQuery.data?.map(word => <WordCard key={word.word_id} id={word.word_id.toString()} name={word.name} meanings={word.meaning ? [{ id: '1', meaning: word.meaning }] : []} relatedWord={word.related_word_name} relationType={word.relation_type} />)}
+                        {wordsQuery.data?.map(word => <WordCard key={word.word_id} id={word.word_id.toString()} name={word.name} meanings={word.meaning ? [{ id: '1', meaning: word.meaning }] : []} relatedWord={word.related_word_name} relationType={word.relation_type} hasEtymology={word.hasEtymology} />)}
                     </div>
                 ) : !wordsQuery.isError ? (
                     <div className="rounded-xl bg-background/40 px-4 py-10 text-center">

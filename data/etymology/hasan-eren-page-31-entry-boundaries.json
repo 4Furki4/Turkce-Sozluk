@@ -1,0 +1,18 @@
+{
+  "documentSha256": "39b636341602c2572035a93366957c078d154f6787d5e60c153caeefb80a2f8e",
+  "pdfPage": 31,
+  "printedPage": 1,
+  "entries": [
+    { "sourceEntryKey": "p0001-left-01-aba", "headword": "aba", "column": "left", "firstLineIndex": 1, "kind": "article" },
+    { "sourceEntryKey": "p0001-left-02-abajur", "headword": "abajur", "column": "left", "firstLineIndex": 12, "kind": "article" },
+    { "sourceEntryKey": "p0001-left-03-abaso", "headword": "abaşo", "column": "left", "firstLineIndex": 24, "kind": "article" },
+    { "sourceEntryKey": "p0001-left-04-abazan", "headword": "abazan", "column": "left", "firstLineIndex": 30, "kind": "cross_reference" },
+    { "sourceEntryKey": "p0001-left-05-ablatya", "headword": "ablatya", "column": "left", "firstLineIndex": 32, "kind": "article" },
+    { "sourceEntryKey": "p0001-left-06-abli", "headword": "abli", "column": "left", "firstLineIndex": 47, "kind": "article" },
+    { "sourceEntryKey": "p0001-left-07-abluka", "headword": "abluka", "column": "left", "firstLineIndex": 53, "kind": "article" },
+    { "sourceEntryKey": "p0001-right-01-abra", "headword": "abra", "column": "right", "firstLineIndex": 2, "kind": "article" },
+    { "sourceEntryKey": "p0001-right-02-abramak", "headword": "abramak", "column": "right", "firstLineIndex": 25, "kind": "article" },
+    { "sourceEntryKey": "p0001-right-03-abras", "headword": "abraş", "column": "right", "firstLineIndex": 49, "kind": "article" },
+    { "sourceEntryKey": "p0001-right-04-abril", "headword": "abril", "column": "right", "firstLineIndex": 55, "kind": "article" }
+  ]
+}

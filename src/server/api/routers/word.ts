@@ -28,6 +28,8 @@ import { readPublicDictionary } from "@/src/server/dictionary-cache";
 import { readWord } from "@/src/server/word-cache";
 import { findWordDataById } from "@/src/server/word-queries";
 import { scheduleSearchLog } from "@/src/server/search-logging";
+import { isEtymologyWordPilotEnabled } from "@/src/server/etymology/pilot-access";
+import { getPilotWordEtymology } from "@/src/server/etymology/word-etymology";
 
 export const wordRouter = createTRPCRouter({
   getTaskWord: protectedProcedure.input(z.object({ wordId: z.number().int().positive(), meaningId: z.number().int().positive().optional(), relationId: z.number().int().positive().optional(), relationKind: z.enum(["related-words", "related-phrases"]).optional() })).query(async ({ ctx: { db }, input }) => {
@@ -184,9 +186,13 @@ export const wordRouter = createTRPCRouter({
         ORDER BY ${order("page")};
       `;
 
-      return readPublicDictionary(db, `word-list:${JSON.stringify(purifiedInput)}`, async () =>
+      const wordList = await readPublicDictionary(db, `word-list:${JSON.stringify(purifiedInput)}`, async () =>
         await db.execute(query) as DashboardWordList[]
       );
+      if (!isEtymologyWordPilotEnabled()) return wordList;
+
+      const etymology = await getPilotWordEtymology(db, { wordIds: wordList.map(({ word_id }) => word_id) });
+      return wordList.map((word) => ({ ...word, hasEtymology: etymology.has(word.word_id) }));
     }),
 
   getFilterOptions: publicProcedure.query(async ({ ctx: { db } }) => {

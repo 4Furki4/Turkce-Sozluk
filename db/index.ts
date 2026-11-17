@@ -54,6 +54,18 @@ import { wordSources, wordSourcesRelations } from "./schema/word_sources";
 import { foreignTermSuggestions, foreignTermSuggestionsRelations } from "./schema/foreign_term_suggestions";
 import { foreignTermSuggestionVotes, foreignTermSuggestionVotesRelations } from "./schema/foreign_term_suggestion_votes";
 import { jwks, oauthAccessTokens, oauthApplications, oauthConsents } from "./schema/oauth";
+import {
+  etymologyAbbreviations,
+  etymologyAbbreviationsRelations,
+  etymologyClaims,
+  etymologyClaimsRelations,
+  etymologyEntries,
+  etymologyEntriesRelations,
+  etymologyMatches,
+  etymologyMatchesRelations,
+  etymologySources,
+  etymologySourcesRelations,
+} from "./schema/etymology";
 
 export const schema = {
   accounts,
@@ -134,6 +146,16 @@ export const schema = {
   oauthAccessToken: oauthAccessTokens,
   oauthApplication: oauthApplications,
   oauthConsent: oauthConsents,
+  etymologySources,
+  etymologySourcesRelations,
+  etymologyAbbreviations,
+  etymologyAbbreviationsRelations,
+  etymologyEntries,
+  etymologyEntriesRelations,
+  etymologyMatches,
+  etymologyMatchesRelations,
+  etymologyClaims,
+  etymologyClaimsRelations,
 };
 
 const globalForDb = globalThis as unknown as {

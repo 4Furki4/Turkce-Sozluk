@@ -11,6 +11,10 @@ import { NoScriptNotice } from '@/src/components/progressive-enhancement/no-scri
 import WordPageFallback from './word-page-fallback';
 import WordUsageNote from './word-usage-note';
 import { getWordEditorial } from '@/src/lib/word-editorial';
+import { db } from '@/db';
+import { findWordDataById } from '@/src/server/word-queries';
+import { isEtymologyWordPilotEnabled } from '@/src/server/etymology/pilot-access';
+import { getPilotWordEtymology } from '@/src/server/etymology/word-etymology';
 
 const isDynamicServerUsageError = (error: unknown) =>
     typeof error === "object" &&
@@ -83,6 +87,18 @@ export default async function SearchResultPage(
     if (wordData?.word_id) {
         scheduleSearchLog({ wordId: wordData.word_id, userId: session?.user?.id ?? null });
     }
+    let wordCards = results;
+    if (wordData && isEtymologyWordPilotEnabled()) {
+        const etymologies = await safeServerRead(
+            "etymology lookup", getPilotWordEtymology(db, { name: wordData.word_name }), new Map(),
+        );
+        const variants = await Promise.all(Array.from(etymologies, async ([id, etymology]) => {
+            if (id === wordData.word_id) return [];
+            const [variant] = await safeServerRead("word variant lookup", findWordDataById(db, id), []);
+            return variant ? [{ word_data: { ...variant.word_data, etymology } }] : [];
+        }));
+        wordCards = [{ word_data: { ...wordData, etymology: etymologies.get(wordData.word_id) } }, ...variants.flat()];
+    }
     const jsonLd = wordData ? buildWordJsonLd(wordData, locale) : null;
     const editorial = wordData ? getWordEditorial(wordData.word_name, locale) : undefined;
     const resolvedLocale = locale === "en" ? "en" : "tr";
@@ -108,7 +124,7 @@ export default async function SearchResultPage(
                 {wordData ? (
                     <HydrateClient>
                         <WordCardWrapper
-                            data={[{ word_data: wordData }]}
+                            data={wordCards}
                             locale={resolvedLocale}
                             session={session as any}
                             isOnline={true}
