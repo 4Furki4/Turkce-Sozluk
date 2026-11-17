@@ -102,10 +102,14 @@ if (write) {
       const [source] = existing ? [existing] : await tx.insert(etymologySources).values(fixture.source).returning({ id: etymologySources.id });
       const languageRows = await tx.select({ id: languages.id, name: languages.language_tr }).from(languages);
       const byLanguage = Map.groupBy(languageRows, ({ name }) => name);
-      await tx.insert(etymologyAbbreviations).values(abbreviations.map(([code, expansion]) => {
-        const matching = byLanguage.get(expansion);
-        return { sourceId: source.id, kind: "language" as const, code, expansion, languageId: matching?.length === 1 ? matching[0].id : null };
-      })).onConflictDoNothing();
+      const expansionByCode = new Map<string, string>(abbreviations);
+      const languageId = (label: unknown) => {
+        const matching = typeof label === "string" ? byLanguage.get(expansionByCode.get(label) ?? label) : undefined;
+        return matching?.length === 1 ? matching[0].id : null;
+      };
+      await tx.insert(etymologyAbbreviations).values(abbreviations.map(([code, expansion]) => ({
+        sourceId: source.id, kind: "language" as const, code, expansion, languageId: languageId(expansion),
+      }))).onConflictDoNothing();
 
       let entriesWritten = 0;
       for (let offset = 0; offset < catalog.length; offset += 180) {
@@ -134,7 +138,24 @@ if (write) {
       for (let offset = 0; offset < claims.length; offset += 240) {
         await tx.insert(etymologyClaims).values(claims.slice(offset, offset + 240));
       }
-      return { entriesWritten, insertedSummaries: claims.length };
+
+      let insertedPilotClaims = 0;
+      for (const [key, verified] of verifiedById) {
+        const entryId = entryByKey.get(key)!.id;
+        const saved = await tx.select({ kind: etymologyClaims.kind, summary: etymologyClaims.summary })
+          .from(etymologyClaims).where(eq(etymologyClaims.entryId, entryId));
+        const pending = verified.claims.filter((claim) => !saved.some((row) => row.kind === claim.kind && row.summary === claim.summary));
+        if (!pending.length) continue;
+        await tx.insert(etymologyClaims).values(pending.map((claim) => ({
+          ...claim, entryId,
+          kind: claim.kind as InsertEtymologyClaim["kind"],
+          stance: claim.stance as InsertEtymologyClaim["stance"],
+          sourceLanguageId: languageId("sourceLanguageLabel" in claim ? claim.sourceLanguageLabel : undefined),
+          targetLanguageId: languageId("targetLanguageLabel" in claim ? claim.targetLanguageLabel : undefined),
+        })));
+        insertedPilotClaims += pending.length;
+      }
+      return { entriesWritten, insertedSummaries: claims.length, insertedPilotClaims };
     });
     console.log(JSON.stringify(result));
   } finally {
