@@ -2,22 +2,22 @@ import { join } from "node:path";
 import { ArrowLeft, ArrowRight, BookOpenText, ScanLine } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/src/i18n/routing";
-import { readOptional, readScanPage } from "./scan-page";
+import { getScanSourceDirectory, readOptional, readScanPage } from "./scan-page";
 import { ScanWorkspace } from "./scan-workspace";
 import { ScanNotationPopover } from "./scan-notation-popover";
 import { groupBookScanEntries, groupScanEntries } from "./scan-entries";
-import { bookPageCount, getBookDirectory, pilotPageCount, readBookCatalog } from "./book-catalog";
+import { bookPageCount, pilotPageCount, readBookCatalog } from "./book-catalog";
 
-export async function ScanReview({ directory, page, path, locale, entryId }: {
+export async function ScanReview({ directory, page, path, locale, entryId, showReviewLink }: {
   directory: string;
   page: number;
   path: string;
   locale: string;
   entryId?: string;
+  showReviewLink: boolean;
 }) {
   const t = await getTranslations({ locale, namespace: "EtymologyScan" });
-  const bookDirectory = getBookDirectory(directory);
-  const sourceDirectory = (number: number) => number <= pilotPageCount ? directory : bookDirectory;
+  const sourceDirectory = (number: number) => getScanSourceDirectory(directory, number);
   const [catalog, scan] = await Promise.all([
     readBookCatalog(directory),
     readOptional(join(sourceDirectory(page), `page-${page + 30}`, "page-image.png")),
@@ -56,7 +56,7 @@ export async function ScanReview({ directory, page, path, locale, entryId }: {
           <p className="mt-1 text-sm text-foreground/65">{t("pageDescription", { page, pdf: page + 30 })}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <a href={path} className={navigation}><ArrowLeft size={16} aria-hidden="true" />{t("entries")}</a>
+          {showReviewLink && <a href={path} className={navigation}><ArrowLeft size={16} aria-hidden="true" />{t("entries")}</a>}
           <Link href={{ pathname: "/etimoloji", query: entryId ? { entry: entryId } : undefined }} className={navigation}>
             <BookOpenText size={16} aria-hidden="true" />{t("reader")}
           </Link>

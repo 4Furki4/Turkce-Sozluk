@@ -317,6 +317,15 @@ adds the four reviewed dictionary links and their structured claims. The
 development reader displays reviewed summaries on the deployed site and
 includes drafts when accessed from an app using the loopback tunnel.
 
+The Coolify development service reads the scan files from the Pi directory
+`/srv/turkish-dictionary/etymology-ocr`, mounted read-only. Store the
+`hasan-eren-pages-01-10` and `hasan-eren-book` directories there, preserving
+the page images, combined OCR files, and `reader-catalog.json`. Add these
+files over private SSH. Keep the scans outside Git and the container image.
+On the Access-protected development site, **Kitapta göster** appears when
+the entry's page image and OCR data are present. The OCR records list remains
+available from the local pilot or development tunnel.
+
 Development had already applied the identical etymology SQL under the pilot
 migration timestamp. For migration `0056_hasan_eren_etymology`, the existing
 ledger row was reconciled after verifying its SQL hash, the other ledger

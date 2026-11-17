@@ -218,6 +218,8 @@ describe("runtime configuration and health proof", () => {
     expect(Object.keys(compose.services)).toEqual(["app"]);
     expect(developmentCompose({ digest, nonce, publishPort: false }).services.app.ports).toBeUndefined();
     expect(app.environment.BETTER_AUTH_URL).toBe("https://development.turkce-sozluk.com");
+    expect(app.environment.ETYMOLOGY_OCR_DIR).toBe("/app/etymology-ocr/hasan-eren-pages-01-10");
+    expect(app.volumes).toContain("/srv/turkish-dictionary/etymology-ocr:/app/etymology-ocr:ro");
   });
 
   function probe({ body = { status: "ok", checks: { app: "ok", database: "ok" } }, env = {}, responseOk = true } = {}) {

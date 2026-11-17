@@ -29,19 +29,20 @@ type Props = {
 };
 
 export default async function EtymologyPreviewPage({ params, searchParams }: Props) {
-  if (!isEtymologyReviewEnabled()) notFound();
+  const reviewEnabled = isEtymologyReviewEnabled();
+  const query = await searchParams;
+  if (query.scan === undefined && !reviewEnabled) notFound();
   const scanDirectory = getEtymologyPilotScanDirectory();
 
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "EtymologyPreview" });
-  const query = await searchParams;
   const path = getPathname({ locale: locale === "en" ? "en" : "tr", href: "/etymology-preview" });
   if (query.scan !== undefined) {
     if (!scanDirectory || typeof query.scan !== "string" || !/^[1-9]\d{0,2}$/.test(query.scan)
       || Number(query.scan) > bookPageCount) notFound();
     const entryId = typeof query.entry === "string" && entryIdPattern.test(query.entry)
       ? query.entry : undefined;
-    return <ScanReview directory={scanDirectory} page={Number(query.scan)} path={path} locale={locale} entryId={entryId} />;
+    return <ScanReview directory={scanDirectory} page={Number(query.scan)} path={path} locale={locale} entryId={entryId} showReviewLink={reviewEnabled} />;
   }
   const q = typeof query.q === "string" ? query.q.trim().slice(0, 80) : "";
   const sourceId = typeof query.source === "string" && /^\d+$/.test(query.source)

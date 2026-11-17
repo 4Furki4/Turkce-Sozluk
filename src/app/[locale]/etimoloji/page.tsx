@@ -6,6 +6,7 @@ import { Link } from "@/src/i18n/routing";
 import { getEtymologyPilotScanDirectory } from "../etymology-preview/pilot-access";
 import { pilotReaderEntries } from "../etymology-preview/pilot-reader-entries";
 import { bookPageCount, pilotPageCount, readBookCatalog } from "../etymology-preview/book-catalog";
+import { hasScanPage } from "../etymology-preview/scan-page";
 import { isEtymologyReviewEnabled, isEtymologyWordPilotEnabled } from "@/src/server/etymology/pilot-access";
 import { readErenReaderEntries } from "@/src/server/etymology/reader-entries";
 import { EntryIndex } from "./entry-index";
@@ -45,6 +46,7 @@ export default async function EtymologyPage({ params, searchParams }: Props) {
   }
   const entry = (typeof entryId === "string" ? entries.get(entryId) : undefined)
     ?? entries.get("p3-l72") ?? pilotEntries[0];
+  const hasScan = scanDirectory ? await hasScanPage(scanDirectory, entry.firstPage) : false;
   const items = [...entries.values()].map(({ id, headword, firstPage, draft, crossReference }) => ({ id, headword, firstPage, draft, crossReference }));
   const related = (entry.related ?? []).flatMap((id) => {
     const item = entries.get(id);
@@ -102,7 +104,7 @@ export default async function EtymologyPage({ params, searchParams }: Props) {
               Hasan Eren, <cite lang="tr">Türk Dilinin Etimolojik Sözlüğü</cite> (1999)
               {" · "}{entry.lastPage ? t("pages", { first: entry.firstPage, last: entry.lastPage }) : t("page", { page: entry.firstPage })}
             </p>
-            {scanDirectory && (
+            {hasScan && (
               <Link href={{ pathname: "/etymology-preview", query: { scan: entry.firstPage, entry: entry.id }, hash: `entry-${entry.id}` }}
                 prefetch={false}
                 className="inline-flex min-h-10 items-center gap-2 font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
