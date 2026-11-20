@@ -11,6 +11,7 @@ import type { RouterOutputs } from "@/src/trpc/shared";
 import InstallAppControl from "./install-app-control";
 import { getHeadwordProps } from "@/src/lib/headword-presentation";
 import KineticHeadline from "./kinetic-headline";
+import HeroDotField from "./hero-dot-field";
 
 type PopularWords = RouterOutputs["word"]["getPopularWords"];
 type WordOfTheDay = RouterOutputs["word"]["getWordOfTheDay"];
@@ -173,7 +174,7 @@ export default async function Hero({
         }}
       />
 
-      <div className="absolute inset-0 -z-20 h-full w-full bg-[radial-gradient(#e5e7eb_2px,transparent_2px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)] pointer-events-none opacity-35" />
+      <HeroDotField />
 
       <div className="mx-auto max-w-7xl px-4 pb-12 pt-8 sm:pt-12 sm:pb-16 lg:px-8 w-full">
         <div className="home-composition mx-auto mb-10 space-y-6 text-center sm:mb-12 sm:space-y-8">
