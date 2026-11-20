@@ -70,7 +70,6 @@ bun run studio
 bun run studio:local
 
 # data/search/offline
-bun run seed:tdk
 bun run seed:daily
 bun run offline-data:generate
 bun run search:sync

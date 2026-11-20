@@ -33,7 +33,7 @@ async function main() {
         .limit(1);
 
     if (randomWord.length === 0) {
-        console.error("❌ No suitable words found in the database. Have you run 'bun run seed:tdk'?");
+        console.error("❌ No suitable words found in the database. Populate the database with dictionary words before running this command.");
         process.exit(1);
     }
 

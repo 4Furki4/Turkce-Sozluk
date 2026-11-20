@@ -73,7 +73,6 @@ bun run db:migrate:local
 bun run studio:local
 
 # Sözlük verisi ve arama
-bun run seed:tdk
 bun run seed:daily
 bun run offline-data:generate
 bun run search:sync

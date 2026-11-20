@@ -41,6 +41,7 @@ next-env.d.ts
 
 # local database backups
 /backups/postgres/
+/turkish_dictionary.dump
 
 # windsurf rules
 .windsurfrules
@@ -55,5 +56,7 @@ public/swe-worker*
 scripts/__pycache__/
 
 # Large local dictionary exports; regenerate with the Jev tooling
+/jev/output/first-1000.json
+/jev/output/first-1000.partial.json
 /jev/output/all-words.json
 /jev/output/all-words.ndjson
